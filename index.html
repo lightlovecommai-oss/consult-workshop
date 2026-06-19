@@ -657,6 +657,14 @@ async function initLiff(){
       dbg("④ 找不到比對學員，進入展示頁");
     } else {
       dbg("③ LIFF 未登入");
+      /* 不在 LINE 內開啟 → 引導用戶 */
+      document.getElementById("s-intro").innerHTML='<div class="wrap"><div class="card" style="text-align:center;padding:2.5rem 1.25rem;">'
+        +'<div style="font-size:40px;margin-bottom:1rem;">📱</div>'
+        +'<div style="font-size:16px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">請從 LINE 開啟</div>'
+        +'<div style="font-size:13px;color:#6b4c30;line-height:1.8;margin-bottom:1.25rem;">這個儀表板需要透過 LINE 登入<br>才能辨識你的學員身份</div>'
+        +'<a href="https://liff.line.me/'+LIFF_ID+'" style="display:block;background:#06C755;color:#fff;border-radius:24px;padding:14px;font-size:15px;font-weight:500;text-decoration:none;">用 LINE 開啟儀表板</a>'
+        +'</div></div>';
+      return;
     }
   }catch(e){
     dbg("錯誤: "+e.message);
