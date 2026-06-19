@@ -121,6 +121,7 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
   <div style="font-size:32px;margin-bottom:1rem;">🔄</div>
   <div style="font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">識別中…</div>
   <div style="font-size:13px;color:#a08060;">正在透過 LINE 確認你的身份</div>
+  <div id="dbg-msg" style="margin-top:1rem;font-size:11px;color:#b07040;word-break:break-all;line-height:1.6;"></div>
 </div></div></div>
 
 <!-- 對外展示頁 -->
@@ -611,8 +612,15 @@ document.getElementById("btn-back").addEventListener("click",function(){show("s-
 var LIFF_ID="2010316474-UovQ1zhe";
 var SHEET_API="https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
+function dbg(msg){
+  var el=document.getElementById("dbg-msg");
+  if(el) el.textContent=msg;
+  console.log("[DBG]",msg);
+}
+
 async function initLiff(){
   try{
+    dbg("① 抓取學員名單…");
     var sr=await fetch(SHEET_API+"?action=students");
     var sd=await sr.json();
     if(sd.status==="ok"&&sd.students){
@@ -621,6 +629,9 @@ async function initLiff(){
         st.tasks=initTasks(st);
         return st;
       });
+      dbg("② 名單載入 "+STUDENTS.length+" 人，第一筆 lineId: "+( STUDENTS[0]&&STUDENTS[0].lineId||"(空)"));
+    } else {
+      dbg("② 名單載入失敗: "+JSON.stringify(sd).slice(0,80));
     }
     var sc=document.createElement("script");
     sc.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
@@ -628,14 +639,21 @@ async function initLiff(){
     await liff.init({liffId:LIFF_ID});
     if(liff.isLoggedIn()){
       var p=await liff.getProfile();
+      dbg("③ LINE userId: "+p.userId);
       var matched=STUDENTS.find(function(s){return s.lineId===p.userId;});
       if(matched){
         current=matched;
         renderResult(current);
         return;
       }
+      dbg("④ 找不到比對學員，進入展示頁");
+    } else {
+      dbg("③ LIFF 未登入");
     }
-  }catch(e){console.log("LIFF skip:",e);}
+  }catch(e){
+    dbg("錯誤: "+e.message);
+    console.log("LIFF skip:",e);
+  }
   renderShowcase();
   show("s-notfound");
 }
