@@ -656,8 +656,13 @@ async function initLiff(){
       }
       dbg("④ 找不到比對學員，進入展示頁");
     } else {
-      dbg("③ LIFF 未登入");
-      /* 不在 LINE 內開啟 → 引導用戶 */
+      dbg("③ LIFF 未登入，嘗試自動登入…");
+      /* 在 LINE 內但未登入 → 自動呼叫 login，登入後會跳回本頁 */
+      if(liff.isInClient()){
+        liff.login();
+        return;
+      }
+      /* 不在 LINE 內（一般瀏覽器）→ 引導用戶 */
       document.getElementById("s-intro").innerHTML='<div class="wrap"><div class="card" style="text-align:center;padding:2.5rem 1.25rem;">'
         +'<div style="font-size:40px;margin-bottom:1rem;">📱</div>'
         +'<div style="font-size:16px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">請從 LINE 開啟</div>'
