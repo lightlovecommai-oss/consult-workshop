@@ -126,6 +126,7 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 
 <!-- 對外展示頁 -->
 <div id="s-notfound" class="screen"><div class="wrap">
+  <div id="dbg-box" style="background:#fff8f0;border:1px solid #f0c8b0;border-radius:12px;padding:12px;margin-bottom:1rem;font-size:11px;color:#8a5020;word-break:break-all;line-height:1.8;display:none;"></div>
   <div style="text-align:center;margin-bottom:1.25rem;padding-top:.5rem;">
     <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
     <div style="font-size:19px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
@@ -612,9 +613,13 @@ document.getElementById("btn-back").addEventListener("click",function(){show("s-
 var LIFF_ID="2010316474-UovQ1zhe";
 var SHEET_API="https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
+var dbgLog=[];
 function dbg(msg){
+  dbgLog.push(msg);
   var el=document.getElementById("dbg-msg");
-  if(el) el.textContent=msg;
+  if(el) el.textContent=dbgLog.join("\n");
+  var box=document.getElementById("dbg-box");
+  if(box){box.style.display="block";box.innerHTML=dbgLog.map(function(m){return "<div>"+m+"</div>";}).join("");}
   console.log("[DBG]",msg);
 }
 
@@ -629,7 +634,10 @@ async function initLiff(){
         st.tasks=initTasks(st);
         return st;
       });
-      dbg("② 名單載入 "+STUDENTS.length+" 人，第一筆 lineId: "+( STUDENTS[0]&&STUDENTS[0].lineId||"(空)"));
+      dbg("② 名單載入 "+STUDENTS.length+" 人");
+      if(sd.students[0]) dbg("② 第一筆原始 key: "+Object.keys(sd.students[0]).join(" | "));
+      if(sd.students[0]) dbg("② 第一筆原始值: "+JSON.stringify(sd.students[0]).slice(0,120));
+      dbg("② 解析後 lineId: "+(STUDENTS[0]&&STUDENTS[0].lineId||"(空)"));
     } else {
       dbg("② 名單載入失敗: "+JSON.stringify(sd).slice(0,80));
     }
