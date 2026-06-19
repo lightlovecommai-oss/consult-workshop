@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>變現型顧問實戰營・成長儀表板</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100vh;}
+.screen{display:none;}.screen.active{display:block;}
+.wrap{max-width:480px;margin:0 auto;padding:1rem;}
+.card{background:#fdf8f3;border-radius:20px;padding:1.25rem;border:0.5px solid #e8ddd2;margin-bottom:.75rem;}
+.hero{display:flex;align-items:flex-start;gap:10px;margin-bottom:1rem;}
+.bub{background:#fff;border:0.5px solid #e8ddd2;border-radius:0 14px 14px 14px;padding:10px 12px;font-size:13px;color:#4a3220;line-height:1.7;flex:1;}
+.bub strong{color:#e8734a;font-weight:500;}
+.hdiv{height:0.5px;background:#e8ddd2;margin:10px 0;}
+.btitle{font-size:12px;color:#a08060;margin-bottom:6px;}
+.blist{list-style:none;margin-bottom:1.25rem;}
+.blist li{font-size:13.5px;color:#4a3220;padding:4px 0 4px 1.3rem;position:relative;line-height:1.6;}
+.blist li::before{content:"✓";position:absolute;left:0;color:#e8734a;}
+.blist li strong{color:#2d1f0f;font-weight:500;}
+.ftitle{font-size:17px;font-weight:600;color:#2d1f0f;margin-bottom:4px;}
+.fsub{font-size:12px;color:#a08060;margin-bottom:1.25rem;line-height:1.6;}
+.field{margin-bottom:.9rem;}
+.field label{display:block;font-size:13px;color:#6b4c30;margin-bottom:5px;font-weight:500;}
+.field select{width:100%;background:#fff;border:1px solid #e8ddd2;border-radius:10px;padding:11px 13px;font-size:15px;color:#2d1f0f;outline:none;-webkit-appearance:none;}
+.field select:focus{border-color:#e8734a;}
+.selwrap{position:relative;}
+.selwrap::after{content:"▾";position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#a08060;pointer-events:none;}
+.inccard{background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:16px;padding:1.25rem;margin-bottom:1rem;color:#fff;}
+.inclevel{font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:4px;}
+.inctitle{font-size:20px;font-weight:600;margin-bottom:8px;}
+.incbeat{display:inline-block;background:rgba(232,115,74,0.3);border:0.5px solid #e8734a;border-radius:10px;padding:3px 10px;font-size:12px;color:#f0a882;margin-bottom:12px;}
+.incnxtlbl{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+.incnxt{font-size:14px;color:rgba(255,255,255,0.9);margin-bottom:12px;}
+.incwklbl{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+.incwk{font-size:14px;font-weight:500;color:#f0c882;}
+.chartbox{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:1rem;display:flex;justify-content:center;margin-bottom:1rem;}
+.strcard{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:1rem;margin-bottom:1rem;}
+.strlbl{font-size:11px;color:#a08060;margin-bottom:4px;}
+.strname{font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;}
+.strdesc{font-size:13px;color:#6b4c30;line-height:1.7;white-space:pre-line;}
+.dimgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.dimc{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px;}
+.dimn{font-size:11px;margin-bottom:3px;}
+.dimv{font-size:18px;font-weight:600;}
+.dimmx{font-size:10px;color:#c8b09a;font-weight:400;}
+.dimbar{height:3px;background:#ede4da;border-radius:2px;margin-top:6px;}
+.dimbf{height:3px;border-radius:2px;}
+.copybox{background:#fff;border-left:3px solid #e8734a;border-radius:0 12px 12px 0;padding:1rem;font-size:13px;color:#6b4c30;line-height:1.8;margin-bottom:1rem;}
+.copybox strong{color:#e8734a;font-weight:500;}
+.btnO{display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:24px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:8px;}
+.btnN{display:block;width:100%;background:#2d1f0f;color:#fff;border:none;border-radius:24px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;margin-top:1.25rem;opacity:.25;text-align:center;}
+.btnN.ready{opacity:1;}
+
+/* 新增：徽章牆 */
+.badgegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.badge{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px;text-align:center;}
+.badge.locked{opacity:.35;}
+.badge .bicon{font-size:26px;margin-bottom:4px;}
+.badge .bname{font-size:12px;font-weight:500;color:#2d1f0f;}
+.badge .bscore{font-size:11px;color:#a08060;margin-top:2px;}
+
+/* 新增：榮耀榜 */
+.lbrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:0.5px solid #e8ddd2;}
+.lbrow:last-child{border-bottom:none;}
+.lbrank{width:24px;text-align:center;font-size:13px;font-weight:600;color:#a08060;}
+.lbrow.top .lbrank{color:#e8734a;}
+.lbname{flex:1;font-size:13.5px;color:#2d1f0f;}
+.lbteam{font-size:11px;color:#a08060;}
+.lbscore{font-size:14px;font-weight:600;color:#e8734a;}
+
+/* 新增：任務打卡 */
+.taskcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.taskname{font-size:13.5px;color:#2d1f0f;}
+.taskpts{font-size:11px;color:#a08060;}
+.tasktoggle{flex-shrink:0;width:48px;height:28px;border-radius:14px;background:#e8ddd2;position:relative;cursor:pointer;border:none;transition:background .2s;}
+.tasktoggle::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;}
+.tasktoggle.on{background:#e8734a;}
+.tasktoggle.on::after{left:22px;}
+</style>
+</head>
+<body>
+
+<!-- 載入頁 -->
+<div id="s-intro" class="screen active"><div class="wrap"><div class="card" style="text-align:center;padding:2.5rem 1.25rem;">
+  <div style="font-size:32px;margin-bottom:1rem;">🔄</div>
+  <div style="font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">識別中…</div>
+  <div style="font-size:13px;color:#a08060;">正在透過 LINE 確認你的身份</div>
+</div></div></div>
+
+<!-- 對外展示頁 -->
+<div id="s-notfound" class="screen"><div class="wrap">
+  <div style="text-align:center;margin-bottom:1.25rem;padding-top:.5rem;">
+    <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
+    <div style="font-size:19px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
+    <div style="font-size:12px;color:#a08060;line-height:1.7;">每完成一個任務，能力就往前一步<br>這是他們正在走的路</div>
+  </div>
+  <div id="showcase-list"></div>
+  <div class="card" style="text-align:center;padding:1.5rem 1.25rem;margin-top:.25rem;">
+    <div style="font-size:14px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">想讓你的變現四力也成長起來？</div>
+    <div style="font-size:12px;color:#a08060;line-height:1.7;margin-bottom:1rem;">加入變現型顧問實戰營<br>每週任務累積四力，收入跟著成長</div>
+    <a href="https://lightlovecommai-oss.github.io/lightlovecomm-landing/" style="display:block;background:#e8734a;color:#fff;border-radius:24px;padding:14px;font-size:15px;font-weight:500;text-decoration:none;text-align:center;">了解課程，開始成長 →</a>
+  </div>
+</div></div>
+
+<!-- 個人儀表板 -->
+<div id="s-result" class="screen"><div class="wrap"><div class="card">
+  <div style="text-align:center;margin-bottom:1rem;">
+    <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問能力表</div>
+    <div style="font-size:20px;font-weight:600;color:#2d1f0f;margin-bottom:3px;" id="r-main"></div>
+    <div style="font-size:13px;color:#a08060;" id="r-sub"></div>
+  </div>
+  <div id="inc-card" class="inccard"></div>
+  <div class="chartbox"><canvas id="radar" width="260" height="260"></canvas></div>
+  <div class="strcard">
+    <div class="strlbl">你目前最強的維度</div>
+    <div class="strname" id="r-strong-name"></div>
+    <div class="strdesc" id="r-strong-desc"></div>
+  </div>
+  <div class="dimgrid" id="dim-grid"></div>
+
+  <div class="btitle">實戰任務打卡（點一下加分）</div>
+  <div id="task-list"></div>
+
+  <div class="btitle">實戰徽章</div>
+  <div class="badgegrid" id="badge-grid"></div>
+
+  <div class="btitle">全營榮耀排行榜</div>
+  <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
+
+  <div class="copybox">每一場出席、每一次分享、每一份作業、每一場PK，都會立刻反映在你的能力雷達圖上。<strong>持續累積，等級與徽章就會一個一個解鎖</strong>，這就是變現型顧問的養成路徑。</div>
+  <button class="btnN ready" id="btn-back">← 換個人查看</button>
+</div></div></div>
+
+<script>
+/* ===== 能力維度定義（沿用溝通變現能力測驗風格） ===== */
+var DIMS={
+  A:{name:"吸引力",desc:"別人主動想靠近你",color:"#e8734a",key:"social",max:9,inner:"批判心少・容易欣賞別人"},
+  T:{name:"信任力",desc:"別人願意跟你說秘密",color:"#5DCAA5",key:"team",max:6,inner:"真誠・心口合一"},
+  P:{name:"專業力",desc:"別人理解並買你的服務",color:"#378ADD",key:"homework",max:10,inner:"不斷精進・有上進心・當責"},
+  I:{name:"影響力",desc:"別人聽你的話採取行動",color:"#c8a84b",key:"attend",max:4,inner:"自己先願意配合・臣服"}
+};
+var DORD=["A","T","P","I"];
+
+var STRONG_DESC={
+  A:"你主動分享故事、欣賞別人，批判心自然在降低——這正是吸引力的根。別人感受到你的開放，才會主動想靠近你。\n\n💡 小做法：下次分享時，先真心讚美一個人的故事，再說自己的，磁場會更強。",
+  T:"在團隊賽裡你做到了說到做到，這就是信任力的核心——心口合一。別人願意跟你說真心話，是因為他們感受到你的真誠。\n\n💡 小做法：下次合作時主動說出自己的不確定，真誠比完美更能建立信任。",
+  P:"繳交逐字稿是一種當責，也是不斷精進的體現——這就是專業力的根。別人買的不只是你的知識，而是感受到你願意持續精進的態度。\n\n💡 小做法：把逐字稿錄成音檔反覆聽，找出一個可以更精準的詞，改掉它。",
+  I:"準時出席看起來簡單，但每一次都是在練習「先配合、先臣服」——影響力最深的根。你願意先配合，別人才會願意被你影響。\n\n💡 小做法：下次開場前，主動問一句「今天你最想帶走什麼？」，影響力從傾聽開始。"
+};
+
+/* 等級稱號（依總分，滿分29分對齊上次主持人營的積分表） */
+var LEVELS=[
+  {min:0,  title:"見習顧問",  beat:20, next:"累積到 10 分，解鎖「顧問」稱號"},
+  {min:10, title:"顧問",      beat:45, next:"累積到 18 分，解鎖「資深顧問」稱號"},
+  {min:18, title:"資深顧問",  beat:68, next:"累積到 24 分，解鎖「變現顧問」稱號"},
+  {min:24, title:"變現顧問",  beat:88, next:"累積到 29 分，解鎖「顧問大師」稱號"},
+  {min:29, title:"顧問大師",  beat:97, next:"你已站上頂端，現在聚焦長期合作與規模化"}
+];
+
+/* 徽章定義 */
+var BADGES=[
+  {key:"attend",  icon:"📅", name:"出席徽章",  desc:"準時出席"},
+  {key:"social",  icon:"📣", name:"分享徽章",  desc:"社群分享"},
+  {key:"homework",icon:"✍️", name:"作業徽章",  desc:"逐字稿繳交"},
+  {key:"team",    icon:"🏆", name:"團隊徽章",  desc:"團隊賽得分"}
+];
+
+/* 任務定義：每個任務對應一個分類與分數 */
+var TASK_DEFS=[
+  {key:"attend1",cat:"attend",  pts:2,name:"第1場準時出席"},
+  {key:"attend2",cat:"attend",  pts:2,name:"第2場準時出席"},
+  {key:"social1",cat:"social",  pts:3,name:"社群分享：自己故事"},
+  {key:"social2",cat:"social",  pts:3,name:"社群分享：導師故事"},
+  {key:"social3",cat:"social",  pts:3,name:"社群分享：培訓心得"},
+  {key:"hw1",    cat:"homework",pts:5,name:"作業：開場逐字稿"},
+  {key:"hw2",    cat:"homework",pts:5,name:"作業：收單逐字稿"},
+  {key:"team1",  cat:"team",    pts:6,name:"團隊賽得分"}
+];
+function catSum(s,cat){
+  var sum=0;
+  TASK_DEFS.forEach(function(t){if(t.cat===cat&&s.tasks[t.key]) sum+=t.pts;});
+  return sum;
+}
+/* 依分類總分初始化任務勾選狀態（從前幾項開始勾） */
+function initTasks(raw){
+  var tasks={};
+  ["attend","social","homework","team"].forEach(function(cat){
+    var remain=raw[cat];
+    TASK_DEFS.filter(function(t){return t.cat===cat;}).forEach(function(t){
+      if(remain>=t.pts){tasks[t.key]=true;remain-=t.pts;}else{tasks[t.key]=false;}
+    });
+  });
+  return tasks;
+}
+
+/* ===== 示範資料（依老師上次提供的積分表整理，欄位：出席/社群/作業/團隊賽） ===== */
+var STUDENTS=[
+  {name:"黛比",   team:"光頭組",   attend:4, social:9, homework:10, team:0},
+  {name:"Mika",   team:"光頭組",   attend:0, social:0, homework:0,  team:0},
+  {name:"ACE",    team:"光頭組",   attend:4, social:0, homework:10, team:0},
+  {name:"阿元",   team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
+  {name:"關靖",   team:"塔塔組",   attend:0, social:3, homework:0,  team:0},
+  {name:"Emma",   team:"塔塔組",   attend:0, social:0, homework:0,  team:0},
+  {name:"Nora",   team:"塔塔組",   attend:2, social:0, homework:0,  team:0},
+  {name:"Michael",team:"塔塔組",   attend:2, social:0, homework:0,  team:0},
+  {name:"Brenda", team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
+  {name:"向瑩",   team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
+  {name:"雅雯",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
+  {name:"孟佳",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
+  {name:"小沐",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
+  {name:"Angel",  team:"路隊長組", attend:4, social:0, homework:10, team:0},
+  {name:"Unaaa",  team:"達爾文組", attend:4, social:0, homework:10, team:0},
+  {name:"Mina",   team:"達爾文組", attend:0, social:0, homework:0,  team:0}
+];
+
+var current=null;
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function mk(tag,cls,txt){
+  var d=document.createElement(tag);
+  if(cls) d.className=cls;
+  if(txt!==undefined) d.textContent=txt;
+  return d;
+}
+function totalScore(s){return catSum(s,"attend")+catSum(s,"social")+catSum(s,"homework")+catSum(s,"team");}
+function levelFor(total){
+  var lv=LEVELS[0];
+  LEVELS.forEach(function(l){if(total>=l.min) lv=l;});
+  return lv;
+}
+function calcDims(s){
+  var sc={};
+  DORD.forEach(function(k){
+    var d=DIMS[k];
+    sc[k]=Math.round((catSum(s,d.key)/d.max)*100);
+  });
+  return sc;
+}
+
+function renderResult(s){
+  var scores=calcDims(s);
+  var sk=DORD.reduce(function(a,b){return scores[a]>scores[b]?a:b;});
+  var uk=DORD.filter(function(k){return k!==sk;}).reduce(function(a,b){return scores[a]>scores[b]?a:b;});
+  var wk=DORD.reduce(function(a,b){return scores[a]<scores[b]?a:b;});
+  var total=totalScore(s);
+  var lv=levelFor(total);
+
+  document.getElementById("r-main").textContent=s.name+"（"+s.team+"）";
+  document.getElementById("r-sub").textContent="主能力："+DIMS[sk].name+" ・ 副能力："+DIMS[uk].name;
+  document.getElementById("r-strong-name").textContent=DIMS[sk].name+"・"+DIMS[sk].desc;
+  document.getElementById("r-strong-desc").textContent=STRONG_DESC[sk];
+
+  var ic=document.getElementById("inc-card");
+  ic.innerHTML="";
+  ic.appendChild(mk("div","inclevel","你目前位於"));
+  ic.appendChild(mk("div","inctitle",lv.title));
+  ic.appendChild(mk("div","incbeat","目前總積分 "+total+" 分・擊敗 "+lv.beat+"% 學員"));
+  ic.appendChild(mk("div","incnxtlbl","下一階段目標"));
+  ic.appendChild(mk("div","incnxt","🎯 "+lv.next));
+  ic.appendChild(mk("div","incwklbl","最需要補強"));
+  ic.appendChild(mk("div","incwk","⚡ "+DIMS[wk].name+"・"+DIMS[wk].desc));
+  ic.appendChild(mk("div","incwklbl","冰山下要練的"));
+  ic.appendChild(mk("div","incwk","🌱 "+DIMS[wk].inner));
+
+  var grid=document.getElementById("dim-grid");
+  grid.innerHTML="";
+  DORD.forEach(function(k){
+    var d=DIMS[k];
+    var pct=Math.min(scores[k],100);
+    var c=mk("div","dimc");
+    var dn=mk("div","dimn",d.name); dn.style.color=d.color;
+    var dv=document.createElement("div"); dv.className="dimv"; dv.style.color=d.color;
+    dv.textContent=scores[k]+" "; dv.appendChild(mk("span","dimmx","/ 100"));
+    var db=mk("div","dimbar"); var dbf=mk("div","dimbf");
+    dbf.style.width=pct+"%"; dbf.style.background=d.color;
+    db.appendChild(dbf);
+    c.appendChild(dn); c.appendChild(dv); c.appendChild(db);
+    grid.appendChild(c);
+  });
+
+  var bg=document.getElementById("badge-grid");
+  bg.innerHTML="";
+  BADGES.forEach(function(b){
+    var earned=catSum(s,b.key)>0;
+    var c=mk("div","badge"+(earned?"":" locked"));
+    c.appendChild(mk("div","bicon",b.icon));
+    c.appendChild(mk("div","bname",b.name));
+    c.appendChild(mk("div","bscore",earned?(b.desc+" ✓"):"尚未解鎖"));
+    bg.appendChild(c);
+  });
+
+  renderTasks(s);
+  renderLeaderboard(s.name);
+  show("s-result");
+  setTimeout(function(){drawRadar(scores);},100);
+}
+
+function renderTasks(s){
+  var box=document.getElementById("task-list");
+  box.innerHTML="";
+  TASK_DEFS.forEach(function(t){
+    var on=!!s.tasks[t.key];
+    var row=mk("div","taskcard");
+    var left=mk("div");
+    left.appendChild(mk("div","taskname",t.name));
+    left.appendChild(mk("div","taskpts","+"+t.pts+" 分・"+DIMS[DORD.find(function(k){return DIMS[k].key===t.cat;})].name));
+    row.appendChild(left);
+    var btn=mk("button","tasktoggle"+(on?" on":""));
+    btn.onclick=function(){
+      s.tasks[t.key]=!s.tasks[t.key];
+      renderResult(s);
+    };
+    row.appendChild(btn);
+    box.appendChild(row);
+  });
+}
+
+function renderLeaderboard(currentName){
+  var sorted=STUDENTS.slice().sort(function(a,b){return totalScore(b)-totalScore(a);});
+  var box=document.getElementById("leaderboard");
+  box.innerHTML="";
+  sorted.slice(0,8).forEach(function(s,i){
+    var row=mk("div","lbrow"+(i<1?" top":""));
+    row.appendChild(mk("div","lbrank",String(i+1)));
+    var nameWrap=mk("div","lbname");
+    nameWrap.textContent=s.name+(s.name===currentName?"（你）":"");
+    var team=mk("div","lbteam",s.team);
+    nameWrap.appendChild(document.createElement("br"));
+    nameWrap.appendChild(team);
+    row.appendChild(nameWrap);
+    row.appendChild(mk("div","lbscore",totalScore(s)+" 分"));
+    box.appendChild(row);
+  });
+}
+
+function drawRadar(scores){
+  var cv=document.getElementById("radar");
+  var ctx=cv.getContext("2d");
+  var W=260,H=260,cx=130,cy=135,mr=95;
+  ctx.clearRect(0,0,W,H);
+  var vals=DORD.map(function(k){return scores[k]/100;});
+  var angles=DORD.map(function(_,i){return(Math.PI*2*i/4)-Math.PI/2;});
+  function pt(r,a){return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  [0.25,0.5,0.75,1.0].forEach(function(f){
+    ctx.beginPath();
+    angles.forEach(function(a,i){var p=pt(mr*f,a);i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]);});
+    ctx.closePath();
+    if(f===1){ctx.fillStyle="rgba(240,228,218,0.4)";ctx.fill();}
+    ctx.strokeStyle="rgba(168,128,96,0.15)";ctx.lineWidth=0.5;ctx.stroke();
+    ctx.font="10px sans-serif";ctx.fillStyle="rgba(160,128,96,0.5)";ctx.textAlign="right";
+    var lp=pt(mr*f,angles[3]);ctx.fillText(Math.round(f*100),lp[0]-4,lp[1]);
+  });
+  angles.forEach(function(a){var p=pt(mr,a);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p[0],p[1]);ctx.strokeStyle="rgba(168,128,96,0.12)";ctx.lineWidth=0.5;ctx.stroke();});
+  ctx.beginPath();
+  angles.forEach(function(a,i){var p=pt(mr*Math.min(vals[i],1),a);i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]);});
+  ctx.closePath();ctx.fillStyle="rgba(232,115,74,0.15)";ctx.fill();ctx.strokeStyle="#e8734a";ctx.lineWidth=2;ctx.stroke();
+  DORD.forEach(function(k,i){
+    var p=pt(mr*Math.min(vals[i],1),angles[i]);
+    ctx.beginPath();ctx.arc(p[0],p[1],5,0,Math.PI*2);
+    ctx.fillStyle=DIMS[k].color;ctx.fill();ctx.strokeStyle="#fff";ctx.lineWidth=1.5;ctx.stroke();
+  });
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  DORD.forEach(function(k,i){
+    var p=pt(mr+20,angles[i]);
+    ctx.font="500 12px sans-serif";ctx.fillStyle=DIMS[k].color;ctx.fillText(DIMS[k].name,p[0],p[1]);
+  });
+}
+
+var LIFF_ID="2010316474-UovQ1zhe";
+var SHEET_API="https://script.google.com/macros/s/AKfycbyqGWp8sAKRi9CNKDdQBFVb3imeqxqZNBLJ00I58qnscMMTbjP9_jHYnY8xJtzEMFI/exec";
+
+async function initLiff(){
+  try{
+    var s=document.createElement("script");
+    s.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
+    await new Promise(function(resolve,reject){s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
+    await liff.init({liffId:LIFF_ID});
+    if(liff.isLoggedIn()){
+      var p=await liff.getProfile();
+      var res=await fetch(SHEET_API+"?userId="+encodeURIComponent(p.userId));
+      var data=await res.json();
+      if(data.status==="ok"&&data.name){
+        var matched=STUDENTS.find(function(s){return s.name===data.name;});
+        if(matched){
+          current=matched;
+          if(!current.tasks) current.tasks=initTasks(current);
+          renderResult(current);
+          return;
+        }
+      }
+    }
+  }catch(e){console.log("LIFF skip:",e);}
+  renderShowcase();
+  show("s-notfound");
+}
+
+/* ===== 真實成長數據（徐哲彥・1.5年創業實錄）===== */
+var DEMO=[
+  {label:"2025/02", A:60, T:77, P:50, I:60, income:0},
+  {label:"2025/06", A:70, T:70, P:60, I:68, income:100},
+  {label:"2026/02", A:72, T:80, P:63, I:77, income:250},
+  {label:"現在",    A:73, T:87, P:67, I:83, income:300}
+];
+DEMO.forEach(function(d){d.v=(d.A+d.T+d.P)*d.I;});
+
+function renderShowcase(){
+  var box=document.getElementById("showcase-list");
+  box.innerHTML="";
+
+  /* Card 1：人物介紹 */
+  var c1=document.createElement("div");
+  c1.className="card";
+  c1.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">'
+    +'<div><div style="font-size:15px;font-weight:600;color:#2d1f0f;">徐哲彥</div>'
+    +'<div style="font-size:11px;color:#a08060;">講師・教練・1.5 年創業實錄</div></div>'
+    +'<div style="background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:10px;padding:3px 10px;font-size:11px;color:#e8734a;">信任力最強</div>'
+    +'</div>'
+    +'<div class="hdiv"></div>'
+    +'<div style="font-size:12px;color:#6b4c30;line-height:1.7;">從月收 0 到年收破 250 萬，四力每往前一步，收入就跟著動——這就是變現公式在真實生活裡的樣子。</div>';
+  box.appendChild(c1);
+
+  /* Card 2：雙曲線圖（SVG向量） */
+  var c2=document.createElement("div");
+  c2.className="card";
+
+  var W=300,H=170,pl=44,pr=16,pt=18,pb=38;
+  var pw=W-pl-pr, ph=H-pt-pb;
+  var n=DEMO.length;
+  var vMin=10000,vMax=20000,iMax=300;
+
+  function xP(i){return pl+i*(pw/(n-1));}
+  function yV(v){return pt+ph-(v-vMin)/(vMax-vMin)*ph;}
+  function yI(inc){return pt+ph-(inc/iMax)*ph;}
+
+  /* 格線 */
+  var gridLines="";
+  [0,0.25,0.5,0.75,1].forEach(function(f){
+    var y=pt+ph*(1-f);
+    gridLines+='<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(168,128,96,0.12)" stroke-width="0.5"/>';
+  });
+
+  /* Y軸標籤（左：變現值，右：收入） */
+  var axisLabels='<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#e8734a">20k</text>'
+    +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#e8734a">15k</text>'
+    +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#e8734a">10k</text>'
+    +'<text x="'+(W-pr+4)+'" y="'+(pt)+'" text-anchor="start" font-size="8" fill="#5DCAA5">300萬</text>'
+    +'<text x="'+(W-pr+4)+'" y="'+(pt+ph/2)+'" text-anchor="start" font-size="8" fill="#5DCAA5">150萬</text>'
+    +'<text x="'+(W-pr+4)+'" y="'+(pt+ph)+'" text-anchor="start" font-size="8" fill="#5DCAA5">0</text>';
+
+  /* 折線點 */
+  var vPts=DEMO.map(function(d,i){return xP(i)+","+yV(d.v);}).join(" ");
+  var iPts=DEMO.map(function(d,i){return xP(i)+","+yI(d.income);}).join(" ");
+
+  /* 區域填色 */
+  var vArea="M"+xP(0)+","+yV(DEMO[0].v)+" "+DEMO.map(function(d,i){return "L"+xP(i)+","+yV(d.v);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+  var iArea="M"+xP(0)+","+yI(DEMO[0].income)+" "+DEMO.map(function(d,i){return "L"+xP(i)+","+yI(d.income);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+
+  /* 點與標籤 */
+  var dots="";
+  DEMO.forEach(function(d,i){
+    var x=xP(i),yv=yV(d.v),yi=yI(d.income);
+    dots+='<circle cx="'+x+'" cy="'+yv+'" r="3.5" fill="#e8734a" stroke="#fff" stroke-width="1.5"/>';
+    dots+='<circle cx="'+x+'" cy="'+yi+'" r="3.5" fill="#5DCAA5" stroke="#fff" stroke-width="1.5"/>';
+    dots+='<text x="'+x+'" y="'+(H-pb+14)+'" text-anchor="middle" font-size="8.5" fill="#a08060">'+d.label+'</text>';
+    if(d.income>0){
+      dots+='<text x="'+x+'" y="'+(yi-7)+'" text-anchor="middle" font-size="8" fill="#5DCAA5">'+d.income+'萬</text>';
+    }
+  });
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" xmlns="http://www.w3.org/2000/svg">'
+    +'<defs>'
+    +'<linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8734a" stop-opacity="0.2"/><stop offset="100%" stop-color="#e8734a" stop-opacity="0"/></linearGradient>'
+    +'<linearGradient id="gI" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5DCAA5" stop-opacity="0.15"/><stop offset="100%" stop-color="#5DCAA5" stop-opacity="0"/></linearGradient>'
+    +'</defs>'
+    +gridLines+axisLabels
+    +'<path d="'+vArea+'" fill="url(#gV)"/>'
+    +'<path d="'+iArea+'" fill="url(#gI)"/>'
+    +'<polyline points="'+vPts+'" fill="none" stroke="#e8734a" stroke-width="2" stroke-linejoin="round"/>'
+    +'<polyline points="'+iPts+'" fill="none" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>'
+    +dots
+    +'</svg>';
+
+  var legend='<div style="display:flex;gap:14px;margin-bottom:8px;">'
+    +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>變現值</div>'
+    +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#5DCAA5;border-radius:1px;border-bottom:1px dashed #5DCAA5;"></div>年收入</div>'
+    +'</div>';
+
+  c2.innerHTML='<div style="font-size:12px;color:#a08060;margin-bottom:4px;">四力成長 × 收入驗證</div>'+legend+svg;
+  box.appendChild(c2);
+
+  /* Card 3：起點 vs 現在 */
+  var c3=document.createElement("div");
+  c3.className="card";
+  var start=DEMO[0],now=DEMO[DEMO.length-1];
+  var dimRows=DORD.map(function(k){
+    var d=DIMS[k],s=start[k],e=now[k],diff=e-s;
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      +'<div style="width:36px;font-size:11px;color:'+d.color+';">'+d.name+'</div>'
+      +'<div style="flex:1;height:4px;background:#ede4da;border-radius:2px;">'
+      +'<div style="height:4px;border-radius:2px;background:'+d.color+';width:'+e+'%;"></div></div>'
+      +'<div style="font-size:11px;color:#a08060;width:76px;text-align:right;">'+s+' → '+e
+      +' <span style="color:#5DCAA5;font-weight:500;">+'+diff+'</span></div>'
+      +'</div>';
+  }).join("");
+  c3.innerHTML='<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>'+dimRows
+    +'<div class="hdiv"></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;">'
+    +'<div style="color:#6b4c30;">變現值 <span style="color:#e8734a;font-weight:600;">18,841</span></div>'
+    +'<div style="color:#6b4c30;">年收入 <span style="color:#5DCAA5;font-weight:600;">250萬+</span></div>'
+    +'</div>';
+  box.appendChild(c3);
+}
+
+document.getElementById("btn-back").addEventListener("click",function(){
+  show("s-intro");
+});
+
+initLiff();
+</script>
+</body>
+</html>
