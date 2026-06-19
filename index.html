@@ -625,7 +625,7 @@ async function initLiff(){
     var sd=await sr.json();
     if(sd.status==="ok"&&sd.students){
       STUDENTS=sd.students.map(function(s){
-        var st={lineId:s.lineId, name:s.name, team:s.team, attend:s.attend, social:s.social, homework:s.homework, team_score:s.team_score};
+        var st={lineId:s["LINE userId"]||s.lineId, name:s["姓名"]||s.name, team:s["團隊"]||s.team, attend:+(s["出席"]||s.attend||0), social:+(s["社群分享"]||s.social||0), homework:+(s["作業"]||s.homework||0), team_score:+(s["團隊賽"]||s.team_score||0)};
         st.tasks=initTasks(st);
         return st;
       });
