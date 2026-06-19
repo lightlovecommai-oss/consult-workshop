@@ -195,25 +195,8 @@ function initTasks(raw){
   return tasks;
 }
 
-/* ===== 示範資料（依老師上次提供的積分表整理，欄位：出席/社群/作業/團隊賽） ===== */
-var STUDENTS=[
-  {name:"黛比",   team:"光頭組",   attend:4, social:9, homework:10, team:0},
-  {name:"Mika",   team:"光頭組",   attend:0, social:0, homework:0,  team:0},
-  {name:"ACE",    team:"光頭組",   attend:4, social:0, homework:10, team:0},
-  {name:"阿元",   team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
-  {name:"關靖",   team:"塔塔組",   attend:0, social:3, homework:0,  team:0},
-  {name:"Emma",   team:"塔塔組",   attend:0, social:0, homework:0,  team:0},
-  {name:"Nora",   team:"塔塔組",   attend:2, social:0, homework:0,  team:0},
-  {name:"Michael",team:"塔塔組",   attend:2, social:0, homework:0,  team:0},
-  {name:"Brenda", team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
-  {name:"向瑩",   team:"塔塔組",   attend:4, social:0, homework:5,  team:0},
-  {name:"雅雯",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
-  {name:"孟佳",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
-  {name:"小沐",   team:"雅雯組",   attend:4, social:9, homework:10, team:6},
-  {name:"Angel",  team:"路隊長組", attend:4, social:0, homework:10, team:0},
-  {name:"Unaaa",  team:"達爾文組", attend:4, social:0, homework:10, team:0},
-  {name:"Mina",   team:"達爾文組", attend:0, social:0, homework:0,  team:0}
-];
+/* 學員名單從 Google Sheet 動態抓取 */
+var STUDENTS=[];
 
 var current=null;
 
@@ -377,9 +360,19 @@ var SHEET_API="https://script.google.com/macros/s/AKfycbyqGWp8sAKRi9CNKDdQBFVb3i
 
 async function initLiff(){
   try{
-    var s=document.createElement("script");
-    s.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
-    await new Promise(function(resolve,reject){s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
+    /* 1. 先從 Sheet 抓學員名單 */
+    var sr=await fetch(SHEET_API+"?action=students");
+    var sd=await sr.json();
+    if(sd.status==="ok"&&sd.students){
+      STUDENTS=sd.students.map(function(s){
+        return {name:s.name, team:s.team, attend:s.attend, social:s.social, homework:s.homework, team:s.team_score};
+      });
+    }
+
+    /* 2. 載入 LIFF 取得身份 */
+    var sc=document.createElement("script");
+    sc.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
+    await new Promise(function(resolve,reject){sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc);});
     await liff.init({liffId:LIFF_ID});
     if(liff.isLoggedIn()){
       var p=await liff.getProfile();
