@@ -121,12 +121,11 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
   <div style="font-size:32px;margin-bottom:1rem;">🔄</div>
   <div style="font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">識別中…</div>
   <div style="font-size:13px;color:#a08060;">正在透過 LINE 確認你的身份</div>
-  <div id="dbg-msg" style="margin-top:1rem;font-size:11px;color:#b07040;word-break:break-all;line-height:1.6;"></div>
 </div></div></div>
 
 <!-- 對外展示頁 -->
 <div id="s-notfound" class="screen"><div class="wrap">
-  <div id="dbg-box" style="background:#fff8f0;border:1px solid #f0c8b0;border-radius:12px;padding:12px;margin-bottom:1rem;font-size:11px;color:#8a5020;word-break:break-all;line-height:1.8;display:none;"></div>
+
   <div style="text-align:center;margin-bottom:1.25rem;padding-top:.5rem;">
     <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
     <div style="font-size:19px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
@@ -610,76 +609,42 @@ function renderShowcase(){
 document.getElementById("btn-back").addEventListener("click",function(){show("s-intro");});
 
 /* ─── LIFF 初始化 ─── */
-var LIFF_ID="2010316474-UovQ1zhe";
 var SHEET_API="https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
-var dbgLog=[];
-function dbg(msg){
-  dbgLog.push(msg);
-  var el=document.getElementById("dbg-msg");
-  if(el) el.textContent=dbgLog.join("\n");
-  var box=document.getElementById("dbg-box");
-  if(box){box.style.display="block";box.innerHTML=dbgLog.map(function(m){return "<div>"+m+"</div>";}).join("");}
-  console.log("[DBG]",msg);
-}
-
-async function initLiff(){
+async function init(){
   try{
-    dbg("① 抓取學員名單…");
+    /* 1. 從 URL 參數取得 userId */
+    var params=new URLSearchParams(window.location.search);
+    var userId=params.get("id");
+
+    /* 2. 從 Sheet 抓學員名單 */
     var sr=await fetch(SHEET_API+"?action=students");
     var sd=await sr.json();
     if(sd.status==="ok"&&sd.students){
       STUDENTS=sd.students.map(function(s){
-        var st={lineId:s["LINE userId"]||s.lineId, name:s["姓名"]||s.name, team:s["團隊"]||s.team, attend:+(s["出席"]||s.attend||0), social:+(s["社群分享"]||s.social||0), homework:+(s["作業"]||s.homework||0), team_score:+(s["團隊賽"]||s.team_score||0)};
+        var st={lineId:s.lineId, name:s.name, team:s.team, attend:+(s.attend||0), social:+(s.social||0), homework:+(s.homework||0), team_score:+(s.team_score||0)};
         st.tasks=initTasks(st);
         return st;
       });
-      dbg("② 名單載入 "+STUDENTS.length+" 人");
-      if(sd.students[0]) dbg("② 第一筆原始 key: "+Object.keys(sd.students[0]).join(" | "));
-      if(sd.students[0]) dbg("② 第一筆原始值: "+JSON.stringify(sd.students[0]).slice(0,120));
-      dbg("② 解析後 lineId: "+(STUDENTS[0]&&STUDENTS[0].lineId||"(空)"));
-    } else {
-      dbg("② 名單載入失敗: "+JSON.stringify(sd).slice(0,80));
     }
-    var sc=document.createElement("script");
-    sc.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
-    await new Promise(function(resolve,reject){sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc);});
-    await liff.init({liffId:LIFF_ID});
-    if(liff.isLoggedIn()){
-      var p=await liff.getProfile();
-      dbg("③ LINE userId: "+p.userId);
-      var matched=STUDENTS.find(function(s){return s.lineId===p.userId;});
+
+    /* 3. 有 userId → 比對學員 */
+    if(userId){
+      var matched=STUDENTS.find(function(s){return s.lineId===userId;});
       if(matched){
         current=matched;
         renderResult(current);
         return;
       }
-      dbg("④ 找不到比對學員，進入展示頁");
-    } else {
-      dbg("③ LIFF 未登入，嘗試自動登入…");
-      /* 在 LINE 內但未登入 → 自動呼叫 login，登入後會跳回本頁 */
-      if(liff.isInClient()){
-        liff.login();
-        return;
-      }
-      /* 不在 LINE 內（一般瀏覽器）→ 引導用戶 */
-      document.getElementById("s-intro").innerHTML='<div class="wrap"><div class="card" style="text-align:center;padding:2.5rem 1.25rem;">'
-        +'<div style="font-size:40px;margin-bottom:1rem;">📱</div>'
-        +'<div style="font-size:16px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">請從 LINE 開啟</div>'
-        +'<div style="font-size:13px;color:#6b4c30;line-height:1.8;margin-bottom:1.25rem;">這個儀表板需要透過 LINE 登入<br>才能辨識你的學員身份</div>'
-        +'<a href="https://liff.line.me/'+LIFF_ID+'" style="display:block;background:#06C755;color:#fff;border-radius:24px;padding:14px;font-size:15px;font-weight:500;text-decoration:none;">用 LINE 開啟儀表板</a>'
-        +'</div></div>';
-      return;
     }
-  }catch(e){
-    dbg("錯誤: "+e.message);
-    console.log("LIFF skip:",e);
-  }
+  }catch(e){console.log("init error:",e);}
+
+  /* 找不到 → 展示頁 */
   renderShowcase();
   show("s-notfound");
 }
 
-initLiff();
+init();
 </script>
 </body>
 </html>
