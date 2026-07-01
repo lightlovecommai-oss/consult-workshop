@@ -79,6 +79,16 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 .date-pill{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:20px;padding:3px 10px;font-size:11px;color:#e8734a;}
 .need-review-badge{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:3px 10px;font-size:10px;color:#b07040;}
 
+/* ── 儀表板：任務滑動分頁 ── */
+.task-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.task-tab{flex:1;white-space:nowrap;background:#fff;border:0.5px solid #e8ddd2;border-radius:10px;padding:8px 4px;font-size:12px;color:#a08060;cursor:pointer;line-height:1.3;font-family:inherit;}
+.task-tab.active{background:#e8734a;color:#fff;border-color:#e8734a;font-weight:600;}
+.task-slider{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;align-items:flex-start;margin-bottom:14px;transition:height .2s;}
+.task-slider::-webkit-scrollbar{display:none;}
+.task-panel{flex:0 0 100%;scroll-snap-align:start;box-sizing:border-box;}
+.task-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;min-height:22px;}
+.task-panel-cap{font-size:11px;color:#a08060;}
+
 /* ── 儀表板：任務卡 ── */
 .tcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
 .tcard.done{opacity:.5;}

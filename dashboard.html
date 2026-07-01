@@ -81,41 +81,7 @@
     <!-- 潛力值 -->
     <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
 
-    <!-- 每日任務 -->
-    <div class="section-head">
-      <div class="section-icon">☀️</div>
-      <div class="section-title">每日任務</div>
-      <div class="date-pill" id="r-daily-cap"></div>
-    </div>
-    <div style="font-size:11px;color:#a08060;margin:-6px 0 8px;" id="r-daily-caption"></div>
-    <div id="daily-task-list" style="margin-bottom:14px;"></div>
-
-    <!-- 每週任務 -->
-    <div class="section-head">
-      <div class="section-icon">🗓️</div>
-      <div class="section-title">每週任務</div>
-      <div class="date-pill" id="r-weekly-cap"></div>
-    </div>
-    <div style="font-size:11px;color:#a08060;margin:-6px 0 8px;" id="r-weekly-caption"></div>
-    <div id="weekly-task-list" style="margin-bottom:14px;"></div>
-
-    <!-- 專案任務 -->
-    <div class="section-head">
-      <div class="section-icon">📅</div>
-      <div class="section-title">專案任務</div>
-      <div class="date-pill" id="r-date"></div>
-    </div>
-    <div id="task-list" style="margin-bottom:14px;"></div>
-
-    <!-- 特殊任務（需審核） -->
-    <div class="section-head">
-      <div class="section-icon">💎</div>
-      <div class="section-title">特殊任務</div>
-      <div class="need-review-badge">⏱ 需導師審核</div>
-    </div>
-    <div id="special-task-list" style="margin-bottom:14px;"></div>
-
-    <!-- 回報成交 -->
+    <!-- 回報成交（移到任務區最上方） -->
     <div class="section-head">
       <div class="section-icon">💰</div>
       <div class="section-title">回報成交</div>
@@ -132,6 +98,46 @@
     <!-- 潛力值 × 金額走勢圖 -->
     <div class="card" style="padding:1rem;margin-bottom:14px;" id="r-trend-card"></div>
 
+    <!-- 任務（滑動式分頁卡片，左右滑或點上方切換） -->
+    <div class="task-tabs" id="task-tabs">
+      <button class="task-tab active" type="button">☀️ 每日</button>
+      <button class="task-tab" type="button">🗓️ 每週</button>
+      <button class="task-tab" type="button">📅 專案</button>
+      <button class="task-tab" type="button">💎 特殊</button>
+    </div>
+    <div class="task-slider" id="task-slider">
+      <!-- 每日 -->
+      <div class="task-panel">
+        <div class="task-panel-head">
+          <div class="task-panel-cap" id="r-daily-caption"></div>
+          <div class="date-pill" id="r-daily-cap"></div>
+        </div>
+        <div id="daily-task-list"></div>
+      </div>
+      <!-- 每週 -->
+      <div class="task-panel">
+        <div class="task-panel-head">
+          <div class="task-panel-cap" id="r-weekly-caption"></div>
+          <div class="date-pill" id="r-weekly-cap"></div>
+        </div>
+        <div id="weekly-task-list"></div>
+      </div>
+      <!-- 專案 -->
+      <div class="task-panel">
+        <div class="task-panel-head" style="justify-content:flex-end;">
+          <div class="date-pill" id="r-date"></div>
+        </div>
+        <div id="task-list"></div>
+      </div>
+      <!-- 特殊（需審核） -->
+      <div class="task-panel">
+        <div class="task-panel-head" style="justify-content:flex-end;">
+          <div class="need-review-badge">⏱ 需導師審核</div>
+        </div>
+        <div id="special-task-list"></div>
+      </div>
+    </div>
+
     <!-- 徽章牆 -->
     <div class="btitle">實戰徽章</div>
     <div class="badgegrid" id="badge-grid"></div>
@@ -141,6 +147,33 @@
     <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
 
     <div class="copybox">每一場出席、每一次分享、每一份作業、每一場PK，都會立刻反映在你的能力雷達圖上。<strong>持續累積，等級與徽章就會一個一個解鎖</strong>，這就是變現型顧問的養成路徑。</div>
+
+    <!-- 計分規則說明（預設收合，放最底部不占版面） -->
+    <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+      <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（點開看你的分數怎麼算）</summary>
+      <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">能力分數怎麼算？</div>
+        <div style="margin-bottom:12px;">你的四維能力（吸引力・信任力・專業力・推進力）＝ <strong>你的投入 × 市場的驗證</strong>。<br>投入＝做每日／每週／專案任務累積；市場驗證＝你實際回報的成交（金額＋筆數）。</div>
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">為什麼我做了任務，分數還是不高？</div>
+        <div style="margin-bottom:12px;">因為能力要「市場買單」才算數。做功課讓你有潛力，但在還沒成交前，只先兌現一半（保底 50%）。這不是打擊你，是提醒你——<strong>把練習變成真的成交</strong>。</div>
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">怎麼把分數完全解鎖？</div>
+        <div style="margin-bottom:12px;">反覆成交。系統同時看「累計金額」和「簽單數」，<strong>兩個都要到位</strong>（避免靠一張大單灌水）。持續簽得下來，能力就一格一格解鎖到滿。</div>
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">變現潛力值怎麼算？</div>
+        <div style="margin-bottom:12px;">四力相乘（A×T×P×I）。因為是相乘，<strong>任何一維是 0，潛力就是 0</strong>——四力要均衡發展，不能偏科。</div>
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">任務規則</div>
+        <div style="margin-bottom:12px;">每日任務：固定池，每天最多算 3 項，隔天重置。<br>每週任務：每週最多算 2 項，下週重開。<br>專案任務：一次性。</div>
+
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">自評 vs 市場</div>
+        <div>測驗的自評分數只是你的「起點假設」，儀表板顯示的是「市場驗證後」的能力。兩者不同很正常——目標是讓市場驗證追上、甚至超過你當初的自評。</div>
+
+      </div>
+    </details>
+
     <button class="btnN ready" id="btn-back">← 換個人查看</button>
 
   </div>
@@ -297,6 +330,38 @@ function renderResult(s) {
 
   renderLeaderboard(s.name);
   setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
+  updateTaskSliderHeight();  // 任務清單重畫後，把滑動卡片高度貼合目前分頁
+}
+
+/* ── 任務滑動分頁：點上方分頁或左右滑都能切換，高度自動貼合當前分頁 ── */
+var taskActiveIdx = 0;
+function updateTaskSliderHeight() {
+  var slider = document.getElementById("task-slider");
+  if (!slider || !slider.children[taskActiveIdx]) return;
+  slider.style.height = slider.children[taskActiveIdx].offsetHeight + "px";
+}
+function setupTaskSlider() {
+  var slider = document.getElementById("task-slider");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".task-tab"));
+  function setActive(i) {
+    taskActiveIdx = i;
+    tabs.forEach(function(t, j) { t.classList.toggle("active", j === i); });
+    updateTaskSliderHeight();
+  }
+  tabs.forEach(function(tab, i) {
+    tab.addEventListener("click", function() {
+      slider.scrollTo({left: i * slider.clientWidth, behavior: "smooth"});
+      setActive(i);
+    });
+  });
+  var timer;
+  slider.addEventListener("scroll", function() {
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      var i = Math.round(slider.scrollLeft / slider.clientWidth);
+      if (i !== taskActiveIdx) setActive(i); else updateTaskSliderHeight();
+    }, 60);
+  });
 }
 
 function renderPoolTaskList(s, pool, doneKeys, containerId, onCheck) {
@@ -437,6 +502,7 @@ async function init() {
   window.location.href = "index.html";
 }
 
+setupTaskSlider();
 init();
 </script>
 </body>
