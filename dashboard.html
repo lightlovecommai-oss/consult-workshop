@@ -59,6 +59,9 @@
       <div class="dimgrid2" id="dim-grid2"></div>
     </div>
 
+    <!-- 自評起點 × 市場驗證（有測驗資料才顯示） -->
+    <div class="card" style="padding:1rem;margin-bottom:12px;display:none;" id="selfeval-card"></div>
+
     <!-- 變現流程甜蜜點 -->
     <div class="strcard">
       <div class="strlbl">你的變現流程甜蜜點</div>
@@ -205,6 +208,15 @@ function renderResult(s) {
   });
   document.getElementById("r-combo-title").textContent = combo.title;
   document.getElementById("r-combo-flow").textContent = combo.flow;
+
+  /* 自評起點 × 市場驗證（沒測驗資料就隱藏） */
+  var seCard = document.getElementById("selfeval-card");
+  if (s.selfEval) {
+    seCard.style.display = "";
+    seCard.innerHTML = renderSelfEvalCompare(s.selfEval, scores);
+  } else {
+    seCard.style.display = "none";
+  }
 
   document.getElementById("r-next").textContent = "🎯 " + lv.next;
   document.getElementById("r-weak").textContent = "⚡ " + DIMS[wk].name + "・" + DIMS[wk].inner;
@@ -409,9 +421,13 @@ async function init() {
     var matched = STUDENTS.find(function(s) { return s.lineId === userId; });
     if (matched) {
       current = matched;
-      var logs = await loadLogs(userId);   // 從 Sheet 讀回已存的打卡紀錄
+      var logsP = loadLogs(userId);        // 從 Sheet 讀回已存的打卡紀錄
+      var selfP = loadSelfEval(userId);    // 讀回測驗自評（對照用，可能是 null）
+      var logs = await logsP;
       current.dailyLog = logs.dailyLog;
       current.weeklyLog = logs.weeklyLog;
+      current.revenueLog = logs.revenueLog;
+      current.selfEval = await selfP;
       renderResult(current);
       return;
     }

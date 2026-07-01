@@ -154,6 +154,25 @@ function renderGrowthCard(startScores, nowScores, footerRight) {
   return '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>' + dimRows + '<div class="hdiv"></div>' + footer;
 }
 
+/* ── 自評起點 × 市場驗證：中性並列，不是「成長」框架（自評只是起點假設）。
+   selfScores＝測驗自評 ATPI；marketScores＝市場驗證後的能力（calcDims）。 */
+function renderSelfEvalCompare(selfScores, marketScores) {
+  var rows = DORD.map(function(k) {
+    var d = DIMS[k];
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      + '<div style="width:40px;font-size:11px;color:'+d.color+';">'+d.name+'</div>'
+      + '<div style="flex:1;height:4px;background:#ede4da;border-radius:2px;">'
+      +   '<div style="height:4px;border-radius:2px;background:'+d.color+';width:'+Math.min(100,marketScores[k])+'%;"></div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#a08060;width:104px;text-align:right;">自評 '+selfScores[k]
+      +   ' ｜ 市場 <strong style="color:'+d.color+';">'+marketScores[k]+'</strong></div>'
+      + '</div>';
+  }).join("");
+  return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">你怎麼看自己 × 市場怎麼看你</div>'
+    + '<div style="font-size:11px;color:#a08060;margin-bottom:10px;">自評是你的起點假設，市場驗證（成交）才會把能力一格一格解鎖出來</div>'
+    + rows;
+}
+
 /* ── 潛力值 × 金額 走勢圖（雙線共用同一座標軸）
       points: [{label, A, T, P, I, income}, ...]，至少要 2 筆才有線可畫
       incomeUnit：金額的單位文字，預設「萬」── */

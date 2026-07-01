@@ -10,6 +10,13 @@ var DIMS = {
 };
 /* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
+/* ── 計分校準常數（要調就改這裡，等真實數據累積後再校準）──
+   核心哲學：能力由「市場」驗證，不是做多少功課就算數。
+   每維能力 = 投入% × 驗證係數；驗證係數 = 保底 + (1-保底) ×（金額達成 × 簽單數達成）。 */
+var TARGET_AMOUNT = 3000000; // 目標累計成交金額（元）＝ 300 萬（驗證係數的金額分母）
+var TARGET_COUNT  = 5;       // 目標累計簽單數（防一張大單灌水，要反覆簽得下來）
+var VALID_FLOOR   = 0.5;     // 保底驗證係數：完全沒成交時，投入至少兌現一半
+
 /* ── 等級定義 ── */
 var LEVELS = [
   {min:0,  title:"見習顧問", beat:20, next:"累積到 10 分，解鎖「顧問」稱號"},
@@ -144,18 +151,30 @@ function levelFor(total) {
   return lv;
 }
 
-/* 注意：max 是「整個營期固定滿分」的舊校準值。每日/每週任務可無限期累積，
-   長期下來分數一定會超過這個滿分，這裡先用 Math.min 頂住避免爆表——
-   但「多久算 100%」需要之後依實際節奏重新校準，不是能自動決定的事。 */
+/* 市場驗證係數：0~1 之間。沒成交時＝保底值，隨累計金額與簽單數往 1.0 靠。
+   金額與簽單數兩個達成度「相乘」——一張大單（金額到但單數少）不會 full 兌現，
+   逼學員反覆簽得下來才算真本事，順帶擋掉靠一張運氣單灌水。 */
+function validationFactor(s) {
+  var amtAchieve = Math.min(1, revenueTotal(s) / TARGET_AMOUNT);
+  var cntAchieve = Math.min(1, s.revenueLog.length / TARGET_COUNT);
+  return VALID_FLOOR + (1 - VALID_FLOOR) * (amtAchieve * cntAchieve);
+}
+
+/* 每維「市場驗證能力」＝ 投入%（做功課累積，min 100 頂住）× 市場驗證係數。
+   所以做很多功課但沒變現，能力會卡在天花板下——這是刻意的設計，不是 bug。
+   （投入的 max 仍是舊的營期滿分，長期校準另議，見 CLAUDE.md 已知待處理。）*/
 function calcDims(s) {
+  var factor = validationFactor(s);
   var sc = {};
   DORD.forEach(function(k) {
-    sc[k] = Math.min(100, Math.round((catSum(s, DIMS[k].key) / DIMS[k].max) * 100));
+    var effortPct = Math.min(100, (catSum(s, DIMS[k].key) / DIMS[k].max) * 100);
+    sc[k] = Math.round(effortPct * factor);
   });
   return sc;
 }
 
-/* ── 回報成交（金額 + 當下的四維分數快照，用來畫「潛力值 × 金額」走勢圖）── */
+/* ── 回報成交（金額 + 當下的四維分數快照，用來畫「潛力值 × 金額」走勢圖）──
+   樂觀更新記憶體，同時寫進 Sheet「成交紀錄」分頁。 */
 function addRevenue(s, amount, note) {
   var scores = calcDims(s);
   s.revenueLog.push({
@@ -164,6 +183,7 @@ function addRevenue(s, amount, note) {
     note: note || "",
     A: scores.A, T: scores.T, P: scores.P, I: scores.I
   });
+  postRevenue(s.lineId, amount, note, scores);
 }
 function revenueTotal(s) {
   return s.revenueLog.reduce(function(sum, e) { return sum + e.amount; }, 0);
@@ -192,12 +212,20 @@ function postCheckin(lineId, task, taskType, dateStr) {
   });
 }
 
-/* ── 從 Sheet 讀回某學員的打卡紀錄，轉成前端用的 dailyLog／weeklyLog 形狀 ── */
+function postRevenue(lineId, amount, note, scores) {
+  return postToSheet({
+    action: "revenue",
+    lineId: lineId, amount: amount, date: todayStr(), note: note || "",
+    scoreA: scores.A, scoreT: scores.T, scoreP: scores.P, scoreI: scores.I
+  });
+}
+
+/* ── 從 Sheet 讀回某學員的打卡＋成交紀錄，轉成前端用的 dailyLog／weeklyLog／revenueLog 形狀 ── */
 async function loadLogs(userId) {
   try {
     var r = await fetch(SHEET_API + "?action=logs&userId=" + encodeURIComponent(userId));
     var d = await r.json();
-    if (d.status !== "ok") return {dailyLog: [], weeklyLog: []};
+    if (d.status !== "ok") return {dailyLog: [], weeklyLog: [], revenueLog: []};
     var dailyLog = [], weeklyLog = [];
     (d.checkins || []).forEach(function(c) {
       if (c.taskType === "weekly") {
@@ -206,10 +234,28 @@ async function loadLogs(userId) {
         dailyLog.push({taskId: c.taskKey, date: normDate(c.date)});
       }
     });
-    return {dailyLog: dailyLog, weeklyLog: weeklyLog};
+    var revenueLog = (d.revenue || []).map(function(e) {
+      return {date: normDate(e.date), amount: Number(e.amount)||0, note: e.note||"",
+              A: Number(e.A)||0, T: Number(e.T)||0, P: Number(e.P)||0, I: Number(e.I)||0};
+    });
+    return {dailyLog: dailyLog, weeklyLog: weeklyLog, revenueLog: revenueLog};
   } catch(e) {
     console.log("loadLogs error:", e);
-    return {dailyLog: [], weeklyLog: []};
+    return {dailyLog: [], weeklyLog: [], revenueLog: []};
+  }
+}
+
+/* ── 自評起點：從同一個試算表的測驗結果讀回該學員的自評 ATPI（只當對照顯示，不進計分）。
+   沒測過就回 null，畫面上那條對照線自動隱藏。 */
+async function loadSelfEval(userId) {
+  try {
+    var r = await fetch(SHEET_API + "?userId=" + encodeURIComponent(userId));
+    var d = await r.json();
+    if (d.status !== "ok") return null;
+    return { A: Number(d.scoreA)||0, T: Number(d.scoreT)||0, P: Number(d.scoreP)||0, I: Number(d.scoreI)||0 };
+  } catch(e) {
+    console.log("loadSelfEval error:", e);
+    return null;
   }
 }
 
