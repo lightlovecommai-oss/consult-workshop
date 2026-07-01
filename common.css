@@ -64,11 +64,13 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 .dimn2{font-size:10px;color:#a08060;margin-bottom:2px;}
 .dimv2{font-size:15px;font-weight:600;}
 
-/* ── 儀表板：最強維度 ── */
+/* ── 儀表板：變現流程甜蜜點 ── */
 .strcard{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:1rem;margin-bottom:12px;}
 .strlbl{font-size:11px;color:#a08060;margin-bottom:4px;}
 .strname{font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;}
 .strdesc{font-size:13px;color:#6b4c30;line-height:1.7;white-space:pre-line;}
+.combo-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.combo-badge{color:#fff;font-size:12px;font-weight:600;border-radius:20px;padding:3px 12px;}
 
 /* ── 儀表板：任務區塊 ── */
 .section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}

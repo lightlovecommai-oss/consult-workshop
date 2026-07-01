@@ -6,23 +6,9 @@ var DIMS = {
   A: {name:"吸引力", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   max:9,  inner:"批判心少・容易欣賞別人"},
   T: {name:"信任力", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     max:6,  inner:"真誠・心口合一"},
   P: {name:"專業力", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", max:10, inner:"不斷精進・有上進心・當責"},
-  I: {name:"影響力", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   max:4,  inner:"自己先願意配合・臣服"}
+  I: {name:"推進力", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   max:4,  inner:"自己先願意配合・臣服"}
 };
-var DORD = ["A","T","P","I"];
-
-/* ── 潛力值公式（改這裡就全部生效）── */
-function calcPotential(scores) {
-  var unlocked = Math.round(Math.pow(scores.A/100 * scores.T/100 * scores.P/100 * scores.I/100, 0.8) * 1000);
-  return { unlocked: unlocked, locked: 1000 - unlocked };
-}
-
-/* ── 最強維度描述 ── */
-var STRONG_DESC = {
-  A: "你主動分享故事、欣賞別人，批判心自然在降低——這正是吸引力的根。別人感受到你的開放，才會主動想靠近你。\n\n💡 小做法：下次分享時，先真心讚美一個人的故事，再說自己的，磁場會更強。",
-  T: "在團隊賽裡你做到了說到做到，這就是信任力的核心——心口合一。別人願意跟你說真心話，是因為他們感受到你的真誠。\n\n💡 小做法：下次合作時主動說出自己的不確定，真誠比完美更能建立信任。",
-  P: "繳交逐字稿是一種當責，也是不斷精進的體現——這就是專業力的根。別人買的不只是你的知識，而是感受到你願意持續精進的態度。\n\n💡 小做法：把逐字稿錄成音檔反覆聽，找出一個可以更精準的詞，改掉它。",
-  I: "準時出席看起來簡單，但每一次都是在練習「先配合、先臣服」——影響力最深的根。你願意先配合，別人才會願意被你影響。\n\n💡 小做法：下次開場前，主動問一句「今天你最想帶走什麼？」，影響力從傾聽開始。"
-};
+/* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
 /* ── 等級定義 ── */
 var LEVELS = [

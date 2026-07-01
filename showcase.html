@@ -25,6 +25,7 @@
 
 </div>
 
+<script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script>
 var DEMO = [
@@ -34,8 +35,28 @@ var DEMO = [
   {label:"現在",    A:73, T:87, P:67, I:83, income:300}
 ];
 DEMO.forEach(function(d) {
-  d.v = Math.round(Math.pow(d.A/100 * d.T/100 * d.P/100 * d.I/100, 0.8) * 1000);
+  d.v = calcPotential(d).unlocked;
 });
+
+/* 佔位文案，之後可直接替換文字內容。強項/弱項 pill 會依 DEMO 現在數值自動排序 */
+var COMBO = {
+  headline: "信任力 × 推進力 → 口碑自動轉介紹",
+  subtitle: "他的溝通變現甜蜜路徑",
+  steps: [
+    "別人先感受到你言出必行、真誠不做作，願意對你打開心房",
+    "你先做到「配合、臣服」的示範，讓對方相信跟著你走會有結果",
+    "口碑開始滾動，熟客主動把身邊的人介紹給你，不需要陌生開發",
+    "靠信任與轉介紹持續成交，價格也跟著口碑往上升"
+  ],
+  weakAlt: [
+    {dim:"A", text:"不用刻意經營個人品牌博眼球，讓被你信任的人主動幫你說故事、做轉介紹"},
+    {dim:"P", text:"用客戶的具體成果替代理論——「他跟著做之後收入翻倍了」比「我有一套方法論」更有說服力"}
+  ]
+};
+var LEVER = {
+  title: "是他現在最大的槓桿",
+  desc: "專業力決定對方願不願意付高單價——如果對方覺得「聽起來不錯但不確定有沒有用」，就不會成交。把能力用對方聽得懂的語言說出來，是接下來最省力的升級點。"
+};
 
 function renderShowcase() {
   var box = document.getElementById("showcase-list");
@@ -57,24 +78,24 @@ function renderShowcase() {
   /* 卡片2：折線圖 */
   var c2 = document.createElement("div");
   c2.className = "card";
-  var W=300, H=170, pl=44, pr=16, pt=18, pb=38;
+  var W=300, H=170, pl=34, pr=16, pt=18, pb=38;
   var pw=W-pl-pr, ph=H-pt-pb, n=DEMO.length;
-  var vMin=0, vMax=1000, iMax=300;
+  /* 潛力值與年收入(萬)共用同一座標軸，才能直接比較兩條線的成長幅度 */
+  var allVals = [];
+  DEMO.forEach(function(d) { allVals.push(d.v, d.income); });
+  var sharedMax = Math.ceil(Math.max.apply(null, allVals) / 100) * 100 || 100;
   function xP(i) { return pl + i*(pw/(n-1)); }
-  function yV(v) { return pt + ph - (v-vMin)/(vMax-vMin)*ph; }
-  function yI(inc) { return pt + ph - (inc/iMax)*ph; }
+  function yV(v) { return pt + ph - (v/sharedMax)*ph; }
+  function yI(inc) { return pt + ph - (inc/sharedMax)*ph; }
   var gridLines = "";
   [0,0.25,0.5,0.75,1].forEach(function(f) {
     var y = pt + ph*(1-f);
     gridLines += '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(168,128,96,0.12)" stroke-width="0.5"/>';
   });
   var axisLabels =
-    '<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#e8734a">1000</text>'
-   +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#e8734a">500</text>'
-   +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#e8734a">0</text>'
-   +'<text x="'+(W-pr+4)+'" y="'+(pt)+'" text-anchor="start" font-size="8" fill="#5DCAA5">300萬</text>'
-   +'<text x="'+(W-pr+4)+'" y="'+(pt+ph/2)+'" text-anchor="start" font-size="8" fill="#5DCAA5">150萬</text>'
-   +'<text x="'+(W-pr+4)+'" y="'+(pt+ph)+'" text-anchor="start" font-size="8" fill="#5DCAA5">0</text>';
+    '<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#a08060">'+sharedMax+'</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#a08060">'+(sharedMax/2)+'</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#a08060">0</text>';
   var vPts = DEMO.map(function(d,i) { return xP(i)+","+yV(d.v); }).join(" ");
   var iPts = DEMO.map(function(d,i) { return xP(i)+","+yI(d.income); }).join(" ");
   var vArea = "M"+xP(0)+","+yV(DEMO[0].v)+" "+DEMO.map(function(d,i){return "L"+xP(i)+","+yV(d.v);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
@@ -85,6 +106,7 @@ function renderShowcase() {
     dots += '<circle cx="'+x+'" cy="'+yv+'" r="3.5" fill="#e8734a" stroke="#fff" stroke-width="1.5"/>';
     dots += '<circle cx="'+x+'" cy="'+yi+'" r="3.5" fill="#5DCAA5" stroke="#fff" stroke-width="1.5"/>';
     dots += '<text x="'+x+'" y="'+(H-pb+14)+'" text-anchor="middle" font-size="8.5" fill="#a08060">'+d.label+'</text>';
+    dots += '<text x="'+x+'" y="'+(yv-7)+'" text-anchor="middle" font-size="8" fill="#e8734a">'+d.v+'</text>';
     if (d.income > 0) dots += '<text x="'+x+'" y="'+(yi-7)+'" text-anchor="middle" font-size="8" fill="#5DCAA5">'+d.income+'萬</text>';
   });
   var svg = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" xmlns="http://www.w3.org/2000/svg">'
@@ -126,6 +148,55 @@ function renderShowcase() {
     + '<div style="color:#6b4c30;">年收入 <span style="color:#5DCAA5;font-weight:600;">250萬+</span></div>'
     + '</div>';
   box.appendChild(c3);
+
+  /* 卡片2.5：強項組合 × 最省力變現路徑（潛力值是 A×T×P×I 相乘，不是逐項升級） */
+  var cCombo = document.createElement("div");
+  cCombo.className = "card";
+  var rankedDims = DORD.slice().sort(function(a, b) { return nowD[b] - nowD[a]; });
+  var strongDims = rankedDims.slice(0, 2);
+  var weakDims = rankedDims.slice(2);
+
+  var pillsHtml = rankedDims.map(function(k) {
+    var d = DIMS[k];
+    if (strongDims.indexOf(k) > -1) {
+      return '<span style="display:inline-block;font-size:13px;font-weight:600;color:'+d.color+';background:'+d.color+'1a;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+'</span>';
+    }
+    return '<span style="display:inline-block;font-size:13px;color:#a89880;background:#f0e9df;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+' 待提升</span>';
+  }).join("");
+
+  var stepsHtml = COMBO.steps.map(function(s, i) {
+    return '<div style="display:flex;gap:8px;margin-bottom:8px;">'
+      + '<div style="flex-shrink:0;font-size:12px;color:#e8734a;font-weight:600;">'+(i+1)+'</div>'
+      + '<div style="font-size:13px;color:#4a3220;line-height:1.6;">'+s+'</div>'
+      + '</div>';
+  }).join("");
+
+  var weakAltHtml = COMBO.weakAlt.map(function(w) {
+    var d = DIMS[w.dim];
+    return '<div style="font-size:13px;color:#4a3220;line-height:1.7;margin-bottom:6px;"><strong style="color:'+d.color+';">'+d.name+'弱</strong> → '+w.text+'</div>';
+  }).join("");
+
+  cCombo.innerHTML =
+      '<div style="font-size:12px;color:#a08060;margin-bottom:10px;">他的強項組合 × 最省力變現路徑</div>'
+    + pillsHtml
+    + '<div style="font-size:17px;font-weight:600;color:#2d1f0f;margin:14px 0 4px;">' + COMBO.headline + '</div>'
+    + '<div style="font-size:11px;color:#a08060;margin-bottom:10px;">' + COMBO.subtitle + '</div>'
+    + stepsHtml
+    + '<div class="hdiv"></div>'
+    + '<div style="font-size:11px;color:#a08060;margin-bottom:8px;">弱項不用補，用這個替代</div>'
+    + weakAltHtml;
+  box.appendChild(cCombo);
+
+  /* 卡片2.6：CP 值最高的能力槓桿（排名最後的維度） */
+  var cLever = document.createElement("div");
+  cLever.className = "card";
+  var leverDim = weakDims[weakDims.length - 1];
+  var ld = DIMS[leverDim];
+  cLever.innerHTML =
+      '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">掌握這個能力，CP 值最高</div>'
+    + '<div style="font-size:15px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">' + ld.name + '（讓人覺得你真的懂）' + LEVER.title + '</div>'
+    + '<div style="font-size:13px;color:#6b4c30;line-height:1.7;">' + LEVER.desc + '</div>';
+  box.appendChild(cLever);
 }
 
 renderShowcase();

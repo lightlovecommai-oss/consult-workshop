@@ -59,11 +59,12 @@
       <div class="dimgrid2" id="dim-grid2"></div>
     </div>
 
-    <!-- 最強維度 -->
+    <!-- 變現流程甜蜜點 -->
     <div class="strcard">
-      <div class="strlbl">你目前最強的維度</div>
-      <div class="strname" id="r-strong-name"></div>
-      <div class="strdesc" id="r-strong-desc"></div>
+      <div class="strlbl">你的變現流程甜蜜點</div>
+      <div class="combo-badges" id="r-combo-badges"></div>
+      <div class="strname" id="r-combo-title"></div>
+      <div class="strdesc" id="r-combo-flow"></div>
     </div>
 
     <!-- 下一步提示 -->
@@ -107,6 +108,7 @@
   </div>
 </div>
 
+<script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script>
 var current = null;
@@ -139,8 +141,10 @@ function personalRank(s) {
 
 function renderResult(s) {
   var scores = calcDims(s);
-  var sk = DORD.reduce(function(a, b) { return scores[a] > scores[b] ? a : b; });
-  var wk = DORD.reduce(function(a, b) { return scores[a] < scores[b] ? a : b; });
+  var sorted = DORD.slice().sort(function(a, b) { return scores[b] - scores[a]; });
+  var sk = sorted[0], sk2 = sorted[1], wk = sorted[3];
+  var comboKey = [sk, sk2].sort().join("");
+  var combo = COMBO_PATH[comboKey] || COMBO_PATH[Object.keys(COMBO_PATH)[0]];
   var total = totalScore(s);
   var lv = levelFor(total);
   var hpPct = Math.round((total / 29) * 100);
@@ -159,8 +163,15 @@ function renderResult(s) {
   document.getElementById("r-rank").textContent = pr + "th";
   document.getElementById("r-rank-sub").textContent = "共 " + STUDENTS.length + " 人";
 
-  document.getElementById("r-strong-name").textContent = DIMS[sk].name + "・" + DIMS[sk].desc;
-  document.getElementById("r-strong-desc").textContent = STRONG_DESC[sk];
+  var comboBadges = document.getElementById("r-combo-badges");
+  comboBadges.innerHTML = "";
+  [sk, sk2].forEach(function(k) {
+    var b = mk("div", "combo-badge", DIMS[k].name);
+    b.style.background = DIMS[k].color;
+    comboBadges.appendChild(b);
+  });
+  document.getElementById("r-combo-title").textContent = combo.title;
+  document.getElementById("r-combo-flow").textContent = combo.flow;
 
   document.getElementById("r-next").textContent = "🎯 " + lv.next;
   document.getElementById("r-weak").textContent = "⚡ " + DIMS[wk].name + "・" + DIMS[wk].inner;
