@@ -27,7 +27,7 @@ var BADGES = [
   {key:"team",     icon:"🏆", name:"團隊徽章", desc:"團隊賽得分"}
 ];
 
-/* ── 任務定義 ── */
+/* ── 專案任務（一次性，來自 Google Sheet 累積分數，其中 SPECIAL_DEFS 需導師審核）── */
 var TASK_DEFS = [
   {key:"attend1", cat:"attend",  pts:2, name:"第 1 場準時出席",    icon:"📅", bg:"#fff8f4"},
   {key:"attend2", cat:"attend",  pts:2, name:"第 2 場準時出席",    icon:"📅", bg:"#fff8f4"},
@@ -42,11 +42,81 @@ var SPECIAL_DEFS = [
   {key:"team1", cat:"team",     pts:6, name:"團隊賽得分",       icon:"⚔️", bg:"#fff4ec", desc:"兩兩互練 Role Play・導師計分"}
 ];
 
+/* ── 每日任務池（固定 10 項，每天最多算 3 項，可重複勾選）── */
+var DAILY_POOL = {
+  cap: 3,
+  caption: "每天最多算 3 項，多做也不加分，但明天可以重新選",
+  tasks: [
+    {key:"d1",  cat:"social",   pts:1, name:"發一則社群貼文",         icon:"📣"},
+    {key:"d2",  cat:"social",   pts:1, name:"留言互動 3 位夥伴的貼文", icon:"💬"},
+    {key:"d3",  cat:"team",     pts:1, name:"主動關心一位夥伴的近況", icon:"🤝"},
+    {key:"d4",  cat:"team",     pts:1, name:"在群組裡真誠回應一則訊息", icon:"💛"},
+    {key:"d5",  cat:"homework", pts:1, name:"寫 100 字今日反思",      icon:"📝"},
+    {key:"d6",  cat:"homework", pts:1, name:"練習一次開場白或提案台詞", icon:"🎤"},
+    {key:"d7",  cat:"homework", pts:1, name:"覆盤一件今天做得好的事", icon:"🔍"},
+    {key:"d8",  cat:"attend",   pts:1, name:"準時開始今天的行動",     icon:"⏰"},
+    {key:"d9",  cat:"attend",   pts:1, name:"完成今天排定的一件任務", icon:"✅"},
+    {key:"d10", cat:"social",   pts:1, name:"分享一則有價值的觀點",   icon:"✨"}
+  ]
+};
+
+/* ── 每週任務池（固定 5 項，每週最多算 2 項）── */
+var WEEKLY_POOL = {
+  cap: 2,
+  caption: "每週最多算 2 項，下週重新開放",
+  tasks: [
+    {key:"w1", cat:"attend",   pts:2, name:"出席本週固定會議／直播",   icon:"📅"},
+    {key:"w2", cat:"homework", pts:2, name:"交一份週報／進度整理",     icon:"📋"},
+    {key:"w3", cat:"team",     pts:2, name:"跟夥伴進行一次共學或角色扮演", icon:"🎭"},
+    {key:"w4", cat:"social",   pts:2, name:"開發一位新名單／新連結",   icon:"🌱"},
+    {key:"w5", cat:"team",     pts:2, name:"幫夥伴做一次回饋或複盤",   icon:"🪞"}
+  ]
+};
+
+/* ── 日期／週次小工具 ── */
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+}
+/* Sheet 讀回的日期可能是 Date 物件字串，統一normalize成本地 YYYY-MM-DD，才能跟 todayStr 比對 */
+function normDate(v) {
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return String(v).slice(0, 10);
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+}
+function weekStr(d) {
+  d = d || new Date();
+  var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  var yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  var weekNo = Math.ceil((((t - yearStart) / 86400000) + 1) / 7);
+  return t.getUTCFullYear() + "-W" + weekNo;
+}
+
+/* ── 每日/每週：今天/本週已完成的任務 key 清單 ── */
+function dailyDoneToday(s) {
+  var today = todayStr();
+  return s.dailyLog.filter(function(e) { return e.date === today; }).map(function(e) { return e.taskId; });
+}
+function weeklyDoneThisWeek(s) {
+  var wk = weekStr();
+  return s.weeklyLog.filter(function(e) { return e.week === wk; }).map(function(e) { return e.taskId; });
+}
+
 /* ── 計算函式 ── */
 function catSum(s, cat) {
   var sum = 0;
   TASK_DEFS.concat(SPECIAL_DEFS).forEach(function(t) {
     if (t.cat === cat && s.tasks[t.key]) sum += t.pts;
+  });
+  s.dailyLog.forEach(function(e) {
+    var t = DAILY_POOL.tasks.find(function(x) { return x.key === e.taskId; });
+    if (t && t.cat === cat) sum += t.pts;
+  });
+  s.weeklyLog.forEach(function(e) {
+    var t = WEEKLY_POOL.tasks.find(function(x) { return x.key === e.taskId; });
+    if (t && t.cat === cat) sum += t.pts;
   });
   return sum;
 }
@@ -74,12 +144,73 @@ function levelFor(total) {
   return lv;
 }
 
+/* 注意：max 是「整個營期固定滿分」的舊校準值。每日/每週任務可無限期累積，
+   長期下來分數一定會超過這個滿分，這裡先用 Math.min 頂住避免爆表——
+   但「多久算 100%」需要之後依實際節奏重新校準，不是能自動決定的事。 */
 function calcDims(s) {
   var sc = {};
   DORD.forEach(function(k) {
-    sc[k] = Math.round((catSum(s, DIMS[k].key) / DIMS[k].max) * 100);
+    sc[k] = Math.min(100, Math.round((catSum(s, DIMS[k].key) / DIMS[k].max) * 100));
   });
   return sc;
+}
+
+/* ── 回報成交（金額 + 當下的四維分數快照，用來畫「潛力值 × 金額」走勢圖）── */
+function addRevenue(s, amount, note) {
+  var scores = calcDims(s);
+  s.revenueLog.push({
+    date: todayStr(),
+    amount: amount,
+    note: note || "",
+    A: scores.A, T: scores.T, P: scores.P, I: scores.I
+  });
+}
+function revenueTotal(s) {
+  return s.revenueLog.reduce(function(sum, e) { return sum + e.amount; }, 0);
+}
+function revenueTrendPoints(s) {
+  return s.revenueLog.map(function(e) { return {label:e.date, A:e.A, T:e.T, P:e.P, I:e.I, income:e.amount}; });
+}
+
+/* ── 寫入 Google Sheet（打卡／成交）──
+   用 text/plain 避開 CORS 預檢；採樂觀更新，送出後不強依賴回應，
+   下次載入時以 Sheet 為準。 */
+function postToSheet(payload) {
+  return fetch(SHEET_API, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(payload)
+  }).catch(function(e) { console.log("postToSheet error:", e); });
+}
+
+function postCheckin(lineId, task, taskType, dateStr) {
+  var dim = DORD.find(function(k) { return DIMS[k].key === task.cat; }) || "";
+  return postToSheet({
+    action: "checkin",
+    lineId: lineId, taskKey: task.key, taskType: taskType,
+    dim: dim, pts: task.pts, date: dateStr
+  });
+}
+
+/* ── 從 Sheet 讀回某學員的打卡紀錄，轉成前端用的 dailyLog／weeklyLog 形狀 ── */
+async function loadLogs(userId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=logs&userId=" + encodeURIComponent(userId));
+    var d = await r.json();
+    if (d.status !== "ok") return {dailyLog: [], weeklyLog: []};
+    var dailyLog = [], weeklyLog = [];
+    (d.checkins || []).forEach(function(c) {
+      if (c.taskType === "weekly") {
+        weeklyLog.push({taskId: c.taskKey, week: weekStr(new Date(c.date)), date: normDate(c.date)});
+      } else {
+        dailyLog.push({taskId: c.taskKey, date: normDate(c.date)});
+      }
+    });
+    return {dailyLog: dailyLog, weeklyLog: weeklyLog};
+  } catch(e) {
+    console.log("loadLogs error:", e);
+    return {dailyLog: [], weeklyLog: []};
+  }
 }
 
 /* ── 學員資料 ── */
@@ -100,6 +231,11 @@ async function loadStudents() {
         team_score: +(s["團隊賽"]   || s.team_score || 0)
       };
       st.tasks = initTasks(st);
+      /* 每日/每週打卡紀錄、回報成交紀錄——目前只存在瀏覽器記憶體，重新整理會消失，
+         之後接上 Google Sheet／Apps Script 才會變成真的存起來 */
+      st.dailyLog = [];
+      st.weeklyLog = [];
+      st.revenueLog = [];
       return st;
     });
   }

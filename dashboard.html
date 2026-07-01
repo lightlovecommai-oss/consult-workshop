@@ -78,10 +78,28 @@
     <!-- 潛力值 -->
     <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
 
-    <!-- 實戰任務 -->
+    <!-- 每日任務 -->
+    <div class="section-head">
+      <div class="section-icon">☀️</div>
+      <div class="section-title">每日任務</div>
+      <div class="date-pill" id="r-daily-cap"></div>
+    </div>
+    <div style="font-size:11px;color:#a08060;margin:-6px 0 8px;" id="r-daily-caption"></div>
+    <div id="daily-task-list" style="margin-bottom:14px;"></div>
+
+    <!-- 每週任務 -->
+    <div class="section-head">
+      <div class="section-icon">🗓️</div>
+      <div class="section-title">每週任務</div>
+      <div class="date-pill" id="r-weekly-cap"></div>
+    </div>
+    <div style="font-size:11px;color:#a08060;margin:-6px 0 8px;" id="r-weekly-caption"></div>
+    <div id="weekly-task-list" style="margin-bottom:14px;"></div>
+
+    <!-- 專案任務 -->
     <div class="section-head">
       <div class="section-icon">📅</div>
-      <div class="section-title">實戰任務</div>
+      <div class="section-title">專案任務</div>
       <div class="date-pill" id="r-date"></div>
     </div>
     <div id="task-list" style="margin-bottom:14px;"></div>
@@ -93,6 +111,23 @@
       <div class="need-review-badge">⏱ 需導師審核</div>
     </div>
     <div id="special-task-list" style="margin-bottom:14px;"></div>
+
+    <!-- 回報成交 -->
+    <div class="section-head">
+      <div class="section-icon">💰</div>
+      <div class="section-title">回報成交</div>
+    </div>
+    <div class="card" style="padding:1rem;margin-bottom:14px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="rv-amount" type="number" placeholder="金額（例如 5000）" style="flex:1;min-width:0;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;">
+        <button class="btn-go" id="rv-submit" style="flex-shrink:0;">回報</button>
+      </div>
+      <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" style="width:100%;box-sizing:border-box;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px;">
+      <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆</div>
+    </div>
+
+    <!-- 潛力值 × 金額走勢圖 -->
+    <div class="card" style="padding:1rem;margin-bottom:14px;" id="r-trend-card"></div>
 
     <!-- 徽章牆 -->
     <div class="btitle">實戰徽章</div>
@@ -207,8 +242,34 @@ function renderResult(s) {
     dg.appendChild(c);
   });
 
+  /* 每日/每週任務 */
+  var dailyDone = dailyDoneToday(s);
+  renderPoolTaskList(s, DAILY_POOL, dailyDone, "daily-task-list", function(taskId) {
+    var t = DAILY_POOL.tasks.find(function(x) { return x.key === taskId; });
+    s.dailyLog.push({taskId: taskId, date: todayStr()});
+    postCheckin(s.lineId, t, "daily", todayStr());
+    renderResult(s);
+  });
+  document.getElementById("r-daily-cap").textContent = dailyDone.length + " / " + DAILY_POOL.cap;
+  document.getElementById("r-daily-caption").textContent = DAILY_POOL.caption;
+
+  var weeklyDone = weeklyDoneThisWeek(s);
+  renderPoolTaskList(s, WEEKLY_POOL, weeklyDone, "weekly-task-list", function(taskId) {
+    var t = WEEKLY_POOL.tasks.find(function(x) { return x.key === taskId; });
+    s.weeklyLog.push({taskId: taskId, week: weekStr()});
+    postCheckin(s.lineId, t, "weekly", todayStr());
+    renderResult(s);
+  });
+  document.getElementById("r-weekly-cap").textContent = weeklyDone.length + " / " + WEEKLY_POOL.cap;
+  document.getElementById("r-weekly-caption").textContent = WEEKLY_POOL.caption;
+
   renderTaskList(s, TASK_DEFS, "task-list", false);
   renderTaskList(s, SPECIAL_DEFS, "special-task-list", true);
+
+  /* 回報成交 */
+  document.getElementById("rv-total").textContent = revenueTotal(s);
+  document.getElementById("rv-count").textContent = s.revenueLog.length;
+  document.getElementById("r-trend-card").innerHTML = renderTrendChart(revenueTrendPoints(s));
 
   /* 徽章 */
   var bg = document.getElementById("badge-grid");
@@ -224,6 +285,44 @@ function renderResult(s) {
 
   renderLeaderboard(s.name);
   setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
+}
+
+function renderPoolTaskList(s, pool, doneKeys, containerId, onCheck) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  var capped = doneKeys.length >= pool.cap;
+  pool.tasks.forEach(function(t) {
+    var on = doneKeys.indexOf(t.key) > -1;
+    var dimKey = DORD.find(function(k) { return DIMS[k].key === t.cat; });
+    var dimName = DIMS[dimKey].name;
+
+    var row = mk("div", "tcard" + (on ? " done" : ""));
+    var img = mk("div","tcard-img", t.icon);
+    img.style.background = "#fff8f4";
+    row.appendChild(img);
+
+    var body = mk("div","tcard-body");
+    body.appendChild(mk("div","tcard-name", t.name));
+    body.appendChild(mk("div","tcard-desc", dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分"));
+    row.appendChild(body);
+
+    var right = mk("div","tcard-right");
+    right.appendChild(mk("div","tcard-pts", "+" + t.pts));
+    if (on) {
+      right.appendChild(mk("div","btn-done","✓ 完成"));
+    } else if (capped) {
+      var lockedTag = mk("div","btn-done","已達上限");
+      lockedTag.style.color = "#a08060";
+      lockedTag.style.background = "#f0e9df";
+      right.appendChild(lockedTag);
+    } else {
+      var btn = mk("button","btn-go", "打卡");
+      btn.onclick = function() { onCheck(t.key); };
+      right.appendChild(btn);
+    }
+    row.appendChild(right);
+    box.appendChild(row);
+  });
 }
 
 function renderTaskList(s, defs, containerId, isSpecial) {
@@ -287,6 +386,18 @@ document.getElementById("btn-back").addEventListener("click", function() {
   window.location.href = "showcase.html";
 });
 
+document.getElementById("rv-submit").addEventListener("click", function() {
+  if (!current) return;
+  var amountInput = document.getElementById("rv-amount");
+  var noteInput = document.getElementById("rv-note");
+  var amount = parseFloat(amountInput.value);
+  if (!amount || amount <= 0) return;
+  addRevenue(current, amount, noteInput.value);
+  amountInput.value = "";
+  noteInput.value = "";
+  renderResult(current);
+});
+
 async function init() {
   try {
     var params = new URLSearchParams(window.location.search);
@@ -296,7 +407,14 @@ async function init() {
     await loadStudents();
 
     var matched = STUDENTS.find(function(s) { return s.lineId === userId; });
-    if (matched) { current = matched; renderResult(current); return; }
+    if (matched) {
+      current = matched;
+      var logs = await loadLogs(userId);   // 從 Sheet 讀回已存的打卡紀錄
+      current.dailyLog = logs.dailyLog;
+      current.weeklyLog = logs.weeklyLog;
+      renderResult(current);
+      return;
+    }
   } catch(e) {
     console.log("dashboard error:", e);
   }

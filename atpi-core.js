@@ -153,3 +153,61 @@ function renderGrowthCard(startScores, nowScores, footerRight) {
     + '</div>';
   return '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>' + dimRows + '<div class="hdiv"></div>' + footer;
 }
+
+/* ── 潛力值 × 金額 走勢圖（雙線共用同一座標軸）
+      points: [{label, A, T, P, I, income}, ...]，至少要 2 筆才有線可畫
+      incomeUnit：金額的單位文字，預設「萬」── */
+function renderTrendChart(points, incomeUnit) {
+  incomeUnit = incomeUnit || "萬";
+  if (!points || points.length < 2) {
+    return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">潛力值 × 金額走勢</div>'
+      + '<div style="font-size:12px;color:#a08060;padding:24px 0;text-align:center;">還沒有足夠的紀錄，累積 2 筆以上「回報成交」後就會畫出趨勢線</div>';
+  }
+  var data = points.map(function(p) { return { label:p.label, v:calcPotential(p).unlocked, income:p.income }; });
+  var W=300, H=170, pl=34, pr=16, pt=18, pb=38;
+  var pw=W-pl-pr, ph=H-pt-pb, n=data.length;
+  var allVals = [];
+  data.forEach(function(d) { allVals.push(d.v, d.income); });
+  var sharedMax = Math.ceil(Math.max.apply(null, allVals) / 100) * 100 || 100;
+  function xP(i) { return pl + i*(pw/(n-1)); }
+  function yV(v) { return pt + ph - (v/sharedMax)*ph; }
+  function yI(inc) { return pt + ph - (inc/sharedMax)*ph; }
+  var gridLines = "";
+  [0,0.25,0.5,0.75,1].forEach(function(f) {
+    var y = pt + ph*(1-f);
+    gridLines += '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(168,128,96,0.12)" stroke-width="0.5"/>';
+  });
+  var axisLabels =
+    '<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#a08060">'+sharedMax+'</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#a08060">'+(sharedMax/2)+'</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#a08060">0</text>';
+  var vPts = data.map(function(d,i) { return xP(i)+","+yV(d.v); }).join(" ");
+  var iPts = data.map(function(d,i) { return xP(i)+","+yI(d.income); }).join(" ");
+  var vArea = "M"+xP(0)+","+yV(data[0].v)+" "+data.map(function(d,i){return "L"+xP(i)+","+yV(d.v);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+  var iArea = "M"+xP(0)+","+yI(data[0].income)+" "+data.map(function(d,i){return "L"+xP(i)+","+yI(d.income);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+  var dots = "";
+  data.forEach(function(d, i) {
+    var x=xP(i), yv=yV(d.v), yi=yI(d.income);
+    dots += '<circle cx="'+x+'" cy="'+yv+'" r="3.5" fill="#e8734a" stroke="#fff" stroke-width="1.5"/>';
+    dots += '<circle cx="'+x+'" cy="'+yi+'" r="3.5" fill="#5DCAA5" stroke="#fff" stroke-width="1.5"/>';
+    dots += '<text x="'+x+'" y="'+(H-pb+14)+'" text-anchor="middle" font-size="8.5" fill="#a08060">'+d.label+'</text>';
+    dots += '<text x="'+x+'" y="'+(yv-7)+'" text-anchor="middle" font-size="8" fill="#e8734a">'+d.v+'</text>';
+    if (d.income > 0) dots += '<text x="'+x+'" y="'+(yi-7)+'" text-anchor="middle" font-size="8" fill="#5DCAA5">'+d.income+incomeUnit+'</text>';
+  });
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" xmlns="http://www.w3.org/2000/svg">'
+   +'<defs>'
+   +'<linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8734a" stop-opacity="0.2"/><stop offset="100%" stop-color="#e8734a" stop-opacity="0"/></linearGradient>'
+   +'<linearGradient id="gI" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5DCAA5" stop-opacity="0.15"/><stop offset="100%" stop-color="#5DCAA5" stop-opacity="0"/></linearGradient>'
+   +'</defs>'+gridLines+axisLabels
+   +'<path d="'+vArea+'" fill="url(#gV)"/>'
+   +'<path d="'+iArea+'" fill="url(#gI)"/>'
+   +'<polyline points="'+vPts+'" fill="none" stroke="#e8734a" stroke-width="2" stroke-linejoin="round"/>'
+   +'<polyline points="'+iPts+'" fill="none" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>'
+   +dots+'</svg>';
+  var legend =
+    '<div style="display:flex;gap:14px;margin-bottom:8px;">'
+   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>已解鎖潛力</div>'
+   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#5DCAA5;border-radius:1px;"></div>金額</div>'
+   +'</div>';
+  return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">潛力值 × 金額走勢</div>' + legend + svg;
+}
