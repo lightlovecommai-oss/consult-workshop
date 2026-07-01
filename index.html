@@ -608,38 +608,64 @@ function renderShowcase(){
 
 document.getElementById("btn-back").addEventListener("click",function(){show("s-intro");});
 
-/* ─── LIFF 初始化 ─── */
+/* ─── 初始化 ─── */
+var LIFF_ID="2010316474-UovQ1zhe";
 var SHEET_API="https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
+
+async function loadStudents(){
+  var sr=await fetch(SHEET_API+"?action=students");
+  var sd=await sr.json();
+  if(sd.status==="ok"&&sd.students){
+    STUDENTS=sd.students.map(function(s){
+      var st={
+        lineId: s["LINE userId"]||s.lineId,
+        name:   s["姓名"]||s.name,
+        team:   s["團隊"]||s.team,
+        attend:     +(s["出席"]||s.attend||0),
+        social:     +(s["社群分享"]||s.social||0),
+        homework:   +(s["作業"]||s.homework||0),
+        team_score: +(s["團隊賽"]||s.team_score||0)
+      };
+      st.tasks=initTasks(st);
+      return st;
+    });
+  }
+}
+
+function matchAndRender(userId){
+  if(!userId) return false;
+  var matched=STUDENTS.find(function(s){return s.lineId===userId;});
+  if(matched){current=matched;renderResult(current);return true;}
+  return false;
+}
 
 async function init(){
   try{
-    /* 1. 從 URL 參數取得 userId */
+    /* 優先：URL 參數 ?id=（方便測試） */
     var params=new URLSearchParams(window.location.search);
-    var userId=params.get("id");
+    var urlId=params.get("id");
 
-    /* 2. 從 Sheet 抓學員名單 */
-    var sr=await fetch(SHEET_API+"?action=students");
-    var sd=await sr.json();
-    if(sd.status==="ok"&&sd.students){
-      STUDENTS=sd.students.map(function(s){
-        var st={lineId:s.lineId, name:s.name, team:s.team, attend:+(s.attend||0), social:+(s.social||0), homework:+(s.homework||0), team_score:+(s.team_score||0)};
-        st.tasks=initTasks(st);
-        return st;
-      });
-    }
+    await loadStudents();
 
-    /* 3. 有 userId → 比對學員 */
-    if(userId){
-      var matched=STUDENTS.find(function(s){return s.lineId===userId;});
-      if(matched){
-        current=matched;
-        renderResult(current);
-        return;
-      }
+    if(matchAndRender(urlId)) return;
+
+    /* 次要：透過 LIFF 取得 LINE userId */
+    var sc=document.createElement("script");
+    sc.src="https://static.line-scdn.net/liff/edge/2/sdk.js";
+    await new Promise(function(resolve,reject){sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc);});
+    await liff.init({liffId:LIFF_ID});
+
+    if(liff.isLoggedIn()){
+      var p=await liff.getProfile();
+      if(matchAndRender(p.userId)) return;
+    } else if(liff.isInClient()){
+      /* 在 LINE 裡但尚未授權 → 觸發登入，登入後跳回本頁 */
+      liff.login();
+      return;
     }
   }catch(e){console.log("init error:",e);}
 
-  /* 找不到 → 展示頁 */
+  /* 找不到學員 → 展示頁 */
   renderShowcase();
   show("s-notfound");
 }
