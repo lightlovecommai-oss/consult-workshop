@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>變現型顧問實戰營・成長儀表板</title>
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="card" style="padding:1.25rem;">
+
+    <!-- 頂部 bar -->
+    <div class="dash-topbar">
+      <div class="dash-topbar-title">變現型顧問實戰營</div>
+      <div class="dash-topbar-name" id="r-topname"></div>
+    </div>
+
+    <!-- 角色主卡 -->
+    <div class="charcard">
+      <div class="charcard-top">
+        <div class="char-avatar">🧠</div>
+        <div class="char-info">
+          <div class="char-role-pill" id="r-role"></div>
+          <div class="char-name" id="r-charname"></div>
+          <div class="char-lv">Lv <span id="r-lv"></span> <span class="char-lv-max">/ 29</span></div>
+        </div>
+      </div>
+      <div class="hp-row">
+        <div class="hp-label">❤️</div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="r-hpbar"></div></div>
+        <div class="hp-num" id="r-hpnum"></div>
+      </div>
+    </div>
+
+    <!-- 積分統計 -->
+    <div class="stat-row">
+      <div class="stat-cell">
+        <div class="stat-lbl">⭐ 個人積分</div>
+        <div class="stat-val" id="r-score"></div>
+        <div class="stat-sub">/ 29 滿分</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-lbl">🏆 戰隊</div>
+        <div class="stat-val blue" id="r-team-name"></div>
+        <div class="stat-sub" id="r-team-rank"></div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-lbl">📊 全營排名</div>
+        <div class="stat-val green" id="r-rank"></div>
+        <div class="stat-sub" id="r-rank-sub"></div>
+      </div>
+    </div>
+
+    <!-- 雷達圖 -->
+    <div class="radar-wrap">
+      <div class="radar-label">四維能力圖</div>
+      <canvas id="radar" width="260" height="200" style="display:block;margin:0 auto;"></canvas>
+      <div class="dimgrid2" id="dim-grid2"></div>
+    </div>
+
+    <!-- 最強維度 -->
+    <div class="strcard">
+      <div class="strlbl">你目前最強的維度</div>
+      <div class="strname" id="r-strong-name"></div>
+      <div class="strdesc" id="r-strong-desc"></div>
+    </div>
+
+    <!-- 下一步提示 -->
+    <div style="background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:14px;padding:1rem 1.25rem;margin-bottom:12px;color:#fff;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">下一階段目標</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.9);margin-bottom:10px;" id="r-next"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">最需補強</div>
+      <div style="font-size:14px;font-weight:500;color:#f0c882;" id="r-weak"></div>
+    </div>
+
+    <!-- 潛力值 -->
+    <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
+
+    <!-- 實戰任務 -->
+    <div class="section-head">
+      <div class="section-icon">📅</div>
+      <div class="section-title">實戰任務</div>
+      <div class="date-pill" id="r-date"></div>
+    </div>
+    <div id="task-list" style="margin-bottom:14px;"></div>
+
+    <!-- 特殊任務（需審核） -->
+    <div class="section-head">
+      <div class="section-icon">💎</div>
+      <div class="section-title">特殊任務</div>
+      <div class="need-review-badge">⏱ 需導師審核</div>
+    </div>
+    <div id="special-task-list" style="margin-bottom:14px;"></div>
+
+    <!-- 徽章牆 -->
+    <div class="btitle">實戰徽章</div>
+    <div class="badgegrid" id="badge-grid"></div>
+
+    <!-- 榮耀榜 -->
+    <div class="btitle">全營榮耀排行榜</div>
+    <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
+
+    <div class="copybox">每一場出席、每一次分享、每一份作業、每一場PK，都會立刻反映在你的能力雷達圖上。<strong>持續累積，等級與徽章就會一個一個解鎖</strong>，這就是變現型顧問的養成路徑。</div>
+    <button class="btnN ready" id="btn-back">← 換個人查看</button>
+
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script>
+var current = null;
+
+function mk(tag, cls, txt) {
+  var d = document.createElement(tag);
+  if (cls) d.className = cls;
+  if (txt !== undefined) d.textContent = txt;
+  return d;
+}
+
+function teamRank(s) {
+  var teams = {};
+  STUDENTS.forEach(function(st) {
+    var t = st.team || "無";
+    if (!teams[t]) teams[t] = 0;
+    teams[t] += totalScore(st);
+  });
+  var myTeam = s.team || "無";
+  var sorted = Object.keys(teams).sort(function(a, b) { return teams[b] - teams[a]; });
+  return sorted.indexOf(myTeam) + 1;
+}
+
+function personalRank(s) {
+  var myScore = totalScore(s);
+  var rank = 1;
+  STUDENTS.forEach(function(st) { if (totalScore(st) > myScore) rank++; });
+  return rank;
+}
+
+function renderResult(s) {
+  var scores = calcDims(s);
+  var sk = DORD.reduce(function(a, b) { return scores[a] > scores[b] ? a : b; });
+  var wk = DORD.reduce(function(a, b) { return scores[a] < scores[b] ? a : b; });
+  var total = totalScore(s);
+  var lv = levelFor(total);
+  var hpPct = Math.round((total / 29) * 100);
+
+  document.getElementById("r-topname").textContent = s.name + " ›";
+  document.getElementById("r-role").textContent = lv.title;
+  document.getElementById("r-charname").textContent = s.name + "（" + s.team + "）";
+  document.getElementById("r-lv").textContent = total;
+  document.getElementById("r-hpbar").style.width = hpPct + "%";
+  document.getElementById("r-hpnum").textContent = total + " / 29";
+
+  document.getElementById("r-score").textContent = total;
+  document.getElementById("r-team-name").textContent = s.team || "—";
+  document.getElementById("r-team-rank").textContent = "第 " + teamRank(s) + " 名";
+  var pr = personalRank(s);
+  document.getElementById("r-rank").textContent = pr + "th";
+  document.getElementById("r-rank-sub").textContent = "共 " + STUDENTS.length + " 人";
+
+  document.getElementById("r-strong-name").textContent = DIMS[sk].name + "・" + DIMS[sk].desc;
+  document.getElementById("r-strong-desc").textContent = STRONG_DESC[sk];
+
+  document.getElementById("r-next").textContent = "🎯 " + lv.next;
+  document.getElementById("r-weak").textContent = "⚡ " + DIMS[wk].name + "・" + DIMS[wk].inner;
+
+  /* 潛力值卡 */
+  var pot = calcPotential(scores);
+  var potPct = Math.round(pot.unlocked / 10);
+  document.getElementById("r-potential-card").innerHTML =
+    '<div style="font-size:11px;color:#a08060;margin-bottom:8px;">你的變現潛力</div>'
+   + '<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:10px;">'
+   + '<div style="font-size:28px;font-weight:700;color:#e8734a;line-height:1;">' + pot.unlocked + '</div>'
+   + '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">/ 1000 已解鎖</div>'
+   + '<div style="margin-left:auto;font-size:12px;color:#c8a84b;">尚未解鎖 <strong style="color:#c8a84b;">' + pot.locked + '</strong></div>'
+   + '</div>'
+   + '<div style="height:8px;background:#ede4da;border-radius:4px;overflow:hidden;margin-bottom:8px;">'
+   + '<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#c8a84b);width:' + potPct + '%;transition:width .6s;"></div>'
+   + '</div>'
+   + '<div style="font-size:11px;color:#a08060;">每完成一項任務，四力同步提升，潛力值跟著解鎖</div>';
+
+  /* 日期 */
+  var now = new Date();
+  var days = ["日","一","二","三","四","五","六"];
+  document.getElementById("r-date").textContent = (now.getMonth()+1) + "月" + now.getDate() + "日 週" + days[now.getDay()];
+
+  /* 維度格 */
+  var dg = document.getElementById("dim-grid2");
+  dg.innerHTML = "";
+  DORD.forEach(function(k) {
+    var d = DIMS[k];
+    var c = mk("div","dimc2");
+    var n = mk("div","dimn2", d.name);
+    var v = mk("div","dimv2", scores[k]);
+    v.style.color = d.color;
+    c.appendChild(n); c.appendChild(v);
+    dg.appendChild(c);
+  });
+
+  renderTaskList(s, TASK_DEFS, "task-list", false);
+  renderTaskList(s, SPECIAL_DEFS, "special-task-list", true);
+
+  /* 徽章 */
+  var bg = document.getElementById("badge-grid");
+  bg.innerHTML = "";
+  BADGES.forEach(function(b) {
+    var earned = catSum(s, b.key) > 0;
+    var c = mk("div", "badge" + (earned ? "" : " locked"));
+    c.appendChild(mk("div","bicon", b.icon));
+    c.appendChild(mk("div","bname", b.name));
+    c.appendChild(mk("div","bscore", earned ? (b.desc + " ✓") : "尚未解鎖"));
+    bg.appendChild(c);
+  });
+
+  renderLeaderboard(s.name);
+  setTimeout(function() { drawRadar(scores); }, 100);
+}
+
+function renderTaskList(s, defs, containerId, isSpecial) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  defs.forEach(function(t) {
+    var on = !!s.tasks[t.key];
+    var dimKey = DORD.find(function(k) { return DIMS[k].key === t.cat; });
+    var dimName = DIMS[dimKey].name;
+
+    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : ""));
+    var img = mk("div","tcard-img", t.icon);
+    img.style.background = t.bg;
+    row.appendChild(img);
+
+    var body = mk("div","tcard-body");
+    body.appendChild(mk("div","tcard-name", t.name));
+    var desc = mk("div","tcard-desc", dimName + " ・ +" + t.pts + " 分");
+    if (isSpecial && !on) {
+      var rv = mk("div","tcard-need-review","⏱ 繳交後等待審核");
+      desc.appendChild(document.createElement("br"));
+      desc.appendChild(rv);
+    }
+    if (on) desc.textContent = dimName + " ・ 已完成 +" + t.pts + " 分";
+    body.appendChild(desc);
+    row.appendChild(body);
+
+    var right = mk("div","tcard-right");
+    right.appendChild(mk("div","tcard-pts" + (isSpecial ? " special" : ""), "+" + t.pts));
+    if (on) {
+      right.appendChild(mk("div","btn-done","✓ 完成"));
+    } else {
+      var btn = mk("button","btn-go" + (isSpecial ? " special" : ""), isSpecial ? "繳交" : "立即打卡");
+      btn.onclick = function() { s.tasks[t.key] = true; renderResult(s); };
+      right.appendChild(btn);
+    }
+    row.appendChild(right);
+    box.appendChild(row);
+  });
+}
+
+function renderLeaderboard(currentName) {
+  var sorted = STUDENTS.slice().sort(function(a, b) { return totalScore(b) - totalScore(a); });
+  var box = document.getElementById("leaderboard");
+  box.innerHTML = "";
+  sorted.slice(0, 8).forEach(function(s, i) {
+    var row = mk("div","lbrow" + (i < 1 ? " top" : ""));
+    row.appendChild(mk("div","lbrank", String(i+1)));
+    var nameWrap = mk("div","lbname");
+    nameWrap.textContent = s.name + (s.name === currentName ? "（你）" : "");
+    var team = mk("div","lbteam", s.team);
+    nameWrap.appendChild(document.createElement("br"));
+    nameWrap.appendChild(team);
+    row.appendChild(nameWrap);
+    row.appendChild(mk("div","lbscore", totalScore(s) + " 分"));
+    box.appendChild(row);
+  });
+}
+
+function drawRadar(scores) {
+  var cv = document.getElementById("radar");
+  var ctx = cv.getContext("2d");
+  var W=260, H=200, cx=130, cy=108, mr=75;
+  ctx.clearRect(0, 0, W, H);
+  var vals = DORD.map(function(k) { return scores[k] / 100; });
+  var angles = DORD.map(function(_, i) { return (Math.PI*2*i/4) - Math.PI/2; });
+  function pt(r, a) { return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; }
+
+  [0.25,0.5,0.75,1.0].forEach(function(f) {
+    ctx.beginPath();
+    angles.forEach(function(a, i) { var p=pt(mr*f,a); i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]); });
+    ctx.closePath();
+    if (f===1) { ctx.fillStyle="rgba(240,228,218,0.4)"; ctx.fill(); }
+    ctx.strokeStyle="rgba(168,128,96,0.15)"; ctx.lineWidth=0.5; ctx.stroke();
+    ctx.font="10px sans-serif"; ctx.fillStyle="rgba(160,128,96,0.5)"; ctx.textAlign="right";
+    var lp = pt(mr*f, angles[3]);
+    ctx.fillText(Math.round(f*100), lp[0]-4, lp[1]);
+  });
+  angles.forEach(function(a) {
+    var p = pt(mr, a);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p[0],p[1]);
+    ctx.strokeStyle="rgba(168,128,96,0.12)"; ctx.lineWidth=0.5; ctx.stroke();
+  });
+  ctx.beginPath();
+  angles.forEach(function(a, i) { var p=pt(mr*Math.min(vals[i],1),a); i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]); });
+  ctx.closePath(); ctx.fillStyle="rgba(232,115,74,0.15)"; ctx.fill(); ctx.strokeStyle="#e8734a"; ctx.lineWidth=2; ctx.stroke();
+  DORD.forEach(function(k, i) {
+    var p = pt(mr*Math.min(vals[i],1), angles[i]);
+    ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2);
+    ctx.fillStyle=DIMS[k].color; ctx.fill(); ctx.strokeStyle="#fff"; ctx.lineWidth=1.5; ctx.stroke();
+  });
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  DORD.forEach(function(k, i) {
+    var p = pt(mr+20, angles[i]);
+    ctx.font="500 12px sans-serif"; ctx.fillStyle=DIMS[k].color; ctx.fillText(DIMS[k].name, p[0], p[1]);
+  });
+}
+
+document.getElementById("btn-back").addEventListener("click", function() {
+  window.location.href = "showcase.html";
+});
+
+async function init() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var userId = params.get("id");
+    if (!userId) { window.location.href = "index.html"; return; }
+
+    await loadStudents();
+
+    var matched = STUDENTS.find(function(s) { return s.lineId === userId; });
+    if (matched) { current = matched; renderResult(current); return; }
+  } catch(e) {
+    console.log("dashboard error:", e);
+  }
+  window.location.href = "index.html";
+}
+
+init();
+</script>
+</body>
+</html>

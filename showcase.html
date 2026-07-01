@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>變現型顧問實戰營・學員成長地圖</title>
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div style="text-align:center;margin-bottom:1.25rem;padding-top:.5rem;">
+    <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
+    <div style="font-size:19px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
+    <div style="font-size:12px;color:#a08060;line-height:1.7;">每完成一個任務，能力就往前一步<br>這是他們正在走的路</div>
+  </div>
+
+  <div id="showcase-list"></div>
+
+  <div class="card" style="text-align:center;padding:1.5rem 1.25rem;margin-top:.25rem;">
+    <div style="font-size:14px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">想讓你的變現四力也成長起來？</div>
+    <div style="font-size:12px;color:#a08060;line-height:1.7;margin-bottom:1rem;">加入變現型顧問實戰營<br>每週任務累積四力，收入跟著成長</div>
+    <a href="https://lightlovecommai-oss.github.io/lightlovecomm-landing/" style="display:block;background:#e8734a;color:#fff;border-radius:24px;padding:14px;font-size:15px;font-weight:500;text-decoration:none;text-align:center;">了解課程，開始成長 →</a>
+  </div>
+
+</div>
+
+<script src="common.js"></script>
+<script>
+var DEMO = [
+  {label:"2025/02", A:60, T:77, P:50, I:60, income:0},
+  {label:"2025/06", A:70, T:70, P:60, I:68, income:100},
+  {label:"2026/02", A:72, T:80, P:63, I:77, income:250},
+  {label:"現在",    A:73, T:87, P:67, I:83, income:300}
+];
+DEMO.forEach(function(d) {
+  d.v = Math.round(Math.pow(d.A/100 * d.T/100 * d.P/100 * d.I/100, 0.8) * 1000);
+});
+
+function renderShowcase() {
+  var box = document.getElementById("showcase-list");
+  box.innerHTML = "";
+
+  /* 卡片1：人物介紹 */
+  var c1 = document.createElement("div");
+  c1.className = "card";
+  c1.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">'
+   + '<div><div style="font-size:15px;font-weight:600;color:#2d1f0f;">徐哲彥</div>'
+   + '<div style="font-size:11px;color:#a08060;">講師・教練・1.5 年創業實錄</div></div>'
+   + '<div style="background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:10px;padding:3px 10px;font-size:11px;color:#e8734a;">信任力最強</div>'
+   + '</div>'
+   + '<div class="hdiv"></div>'
+   + '<div style="font-size:12px;color:#6b4c30;line-height:1.7;">從月收 0 到年收破 250 萬，四力每往前一步，收入就跟著動——這就是變現公式在真實生活裡的樣子。</div>';
+  box.appendChild(c1);
+
+  /* 卡片2：折線圖 */
+  var c2 = document.createElement("div");
+  c2.className = "card";
+  var W=300, H=170, pl=44, pr=16, pt=18, pb=38;
+  var pw=W-pl-pr, ph=H-pt-pb, n=DEMO.length;
+  var vMin=0, vMax=1000, iMax=300;
+  function xP(i) { return pl + i*(pw/(n-1)); }
+  function yV(v) { return pt + ph - (v-vMin)/(vMax-vMin)*ph; }
+  function yI(inc) { return pt + ph - (inc/iMax)*ph; }
+  var gridLines = "";
+  [0,0.25,0.5,0.75,1].forEach(function(f) {
+    var y = pt + ph*(1-f);
+    gridLines += '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(168,128,96,0.12)" stroke-width="0.5"/>';
+  });
+  var axisLabels =
+    '<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#e8734a">1000</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#e8734a">500</text>'
+   +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#e8734a">0</text>'
+   +'<text x="'+(W-pr+4)+'" y="'+(pt)+'" text-anchor="start" font-size="8" fill="#5DCAA5">300萬</text>'
+   +'<text x="'+(W-pr+4)+'" y="'+(pt+ph/2)+'" text-anchor="start" font-size="8" fill="#5DCAA5">150萬</text>'
+   +'<text x="'+(W-pr+4)+'" y="'+(pt+ph)+'" text-anchor="start" font-size="8" fill="#5DCAA5">0</text>';
+  var vPts = DEMO.map(function(d,i) { return xP(i)+","+yV(d.v); }).join(" ");
+  var iPts = DEMO.map(function(d,i) { return xP(i)+","+yI(d.income); }).join(" ");
+  var vArea = "M"+xP(0)+","+yV(DEMO[0].v)+" "+DEMO.map(function(d,i){return "L"+xP(i)+","+yV(d.v);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+  var iArea = "M"+xP(0)+","+yI(DEMO[0].income)+" "+DEMO.map(function(d,i){return "L"+xP(i)+","+yI(d.income);}).join(" ")+" L"+xP(n-1)+","+(pt+ph)+" L"+xP(0)+","+(pt+ph)+" Z";
+  var dots = "";
+  DEMO.forEach(function(d, i) {
+    var x=xP(i), yv=yV(d.v), yi=yI(d.income);
+    dots += '<circle cx="'+x+'" cy="'+yv+'" r="3.5" fill="#e8734a" stroke="#fff" stroke-width="1.5"/>';
+    dots += '<circle cx="'+x+'" cy="'+yi+'" r="3.5" fill="#5DCAA5" stroke="#fff" stroke-width="1.5"/>';
+    dots += '<text x="'+x+'" y="'+(H-pb+14)+'" text-anchor="middle" font-size="8.5" fill="#a08060">'+d.label+'</text>';
+    if (d.income > 0) dots += '<text x="'+x+'" y="'+(yi-7)+'" text-anchor="middle" font-size="8" fill="#5DCAA5">'+d.income+'萬</text>';
+  });
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" xmlns="http://www.w3.org/2000/svg">'
+   +'<defs>'
+   +'<linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8734a" stop-opacity="0.2"/><stop offset="100%" stop-color="#e8734a" stop-opacity="0"/></linearGradient>'
+   +'<linearGradient id="gI" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5DCAA5" stop-opacity="0.15"/><stop offset="100%" stop-color="#5DCAA5" stop-opacity="0"/></linearGradient>'
+   +'</defs>'+gridLines+axisLabels
+   +'<path d="'+vArea+'" fill="url(#gV)"/>'
+   +'<path d="'+iArea+'" fill="url(#gI)"/>'
+   +'<polyline points="'+vPts+'" fill="none" stroke="#e8734a" stroke-width="2" stroke-linejoin="round"/>'
+   +'<polyline points="'+iPts+'" fill="none" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>'
+   +dots+'</svg>';
+  var legend =
+    '<div style="display:flex;gap:14px;margin-bottom:8px;">'
+   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>已解鎖潛力</div>'
+   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#5DCAA5;border-radius:1px;"></div>年收入</div>'
+   +'</div>';
+  c2.innerHTML = '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">四力成長 × 收入驗證</div>' + legend + svg;
+  box.appendChild(c2);
+
+  /* 卡片3：起點 vs 現在 */
+  var c3 = document.createElement("div");
+  c3.className = "card";
+  var start = DEMO[0], nowD = DEMO[DEMO.length-1];
+  var dimRows = DORD.map(function(k) {
+    var d = DIMS[k], sv = start[k], ev = nowD[k], diff = ev - sv;
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      + '<div style="width:36px;font-size:11px;color:'+d.color+';">'+d.name+'</div>'
+      + '<div style="flex:1;height:4px;background:#ede4da;border-radius:2px;">'
+      + '<div style="height:4px;border-radius:2px;background:'+d.color+';width:'+ev+'%;"></div></div>'
+      + '<div style="font-size:11px;color:#a08060;width:76px;text-align:right;">'+sv+' → '+ev
+      + ' <span style="color:#5DCAA5;font-weight:500;">+'+diff+'</span></div>'
+      + '</div>';
+  }).join("");
+  c3.innerHTML = '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>' + dimRows
+    + '<div class="hdiv"></div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:12px;">'
+    + '<div style="color:#6b4c30;">已解鎖潛力 <span style="color:#e8734a;font-weight:600;">435</span> / 1000</div>'
+    + '<div style="color:#6b4c30;">年收入 <span style="color:#5DCAA5;font-weight:600;">250萬+</span></div>'
+    + '</div>';
+  box.appendChild(c3);
+}
+
+renderShowcase();
+</script>
+</body>
+</html>
