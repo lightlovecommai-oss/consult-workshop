@@ -206,6 +206,9 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
     <div style="font-size:14px;font-weight:500;color:#f0c882;" id="r-weak"></div>
   </div>
 
+  <!-- 潛力值 -->
+  <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
+
   <!-- 實戰任務 -->
   <div class="section-head">
     <div class="section-icon">📅</div>
@@ -243,6 +246,11 @@ var DIMS={
   I:{name:"影響力",desc:"別人聽你的話採取行動",color:"#c8a84b",key:"attend",max:4,inner:"自己先願意配合・臣服"}
 };
 var DORD=["A","T","P","I"];
+
+function calcPotential(scores){
+  var unlocked=Math.round(Math.pow(scores.A/100*scores.T/100*scores.P/100*scores.I/100,0.8)*1000);
+  return{unlocked:unlocked, locked:1000-unlocked};
+}
 
 var STRONG_DESC={
   A:"你主動分享故事、欣賞別人，批判心自然在降低——這正是吸引力的根。別人感受到你的開放，才會主動想靠近你。\n\n💡 小做法：下次分享時，先真心讚美一個人的故事，再說自己的，磁場會更強。",
@@ -376,6 +384,21 @@ function renderResult(s){
   /* 下一步 */
   document.getElementById("r-next").textContent="🎯 "+lv.next;
   document.getElementById("r-weak").textContent="⚡ "+DIMS[wk].name+"・"+DIMS[wk].inner;
+
+  /* 潛力值卡 */
+  var pot=calcPotential(scores);
+  var pct=Math.round(pot.unlocked/10);
+  document.getElementById("r-potential-card").innerHTML=
+    '<div style="font-size:11px;color:#a08060;margin-bottom:8px;">你的變現潛力</div>'
+   +'<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:10px;">'
+   +'<div style="font-size:28px;font-weight:700;color:#e8734a;line-height:1;">'+pot.unlocked+'</div>'
+   +'<div style="font-size:12px;color:#a08060;margin-bottom:4px;">/ 1000 已解鎖</div>'
+   +'<div style="margin-left:auto;font-size:12px;color:#c8a84b;">尚未解鎖 <strong style="color:#c8a84b;">'+pot.locked+'</strong></div>'
+   +'</div>'
+   +'<div style="height:8px;background:#ede4da;border-radius:4px;overflow:hidden;margin-bottom:8px;">'
+   +'<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#c8a84b);width:'+pct+'%;transition:width .6s;"></div>'
+   +'</div>'
+   +'<div style="font-size:11px;color:#a08060;">每完成一項任務，四力同步提升，潛力值跟著解鎖</div>';
 
   /* 日期 */
   var now=new Date();
@@ -523,7 +546,7 @@ var DEMO=[
   {label:"2026/02", A:72, T:80, P:63, I:77, income:250},
   {label:"現在",    A:73, T:87, P:67, I:83, income:300}
 ];
-DEMO.forEach(function(d){d.v=(d.A+d.T+d.P)*d.I;});
+DEMO.forEach(function(d){d.v=Math.round(Math.pow(d.A/100*d.T/100*d.P/100*d.I/100,0.8)*1000);});
 
 function renderShowcase(){
   var box=document.getElementById("showcase-list");
@@ -543,15 +566,15 @@ function renderShowcase(){
   c2.className="card";
   var W=300,H=170,pl=44,pr=16,pt=18,pb=38;
   var pw=W-pl-pr,ph=H-pt-pb,n=DEMO.length;
-  var vMin=10000,vMax=20000,iMax=300;
+  var vMin=0,vMax=1000,iMax=300;
   function xP(i){return pl+i*(pw/(n-1));}
   function yV(v){return pt+ph-(v-vMin)/(vMax-vMin)*ph;}
   function yI(inc){return pt+ph-(inc/iMax)*ph;}
   var gridLines="";
   [0,0.25,0.5,0.75,1].forEach(function(f){var y=pt+ph*(1-f);gridLines+='<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(168,128,96,0.12)" stroke-width="0.5"/>';});
-  var axisLabels='<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#e8734a">20k</text>'
-    +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#e8734a">15k</text>'
-    +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#e8734a">10k</text>'
+  var axisLabels='<text x="'+(pl-4)+'" y="'+(pt)+'" text-anchor="end" font-size="8" fill="#e8734a">1000</text>'
+    +'<text x="'+(pl-4)+'" y="'+(pt+ph/2)+'" text-anchor="end" font-size="8" fill="#e8734a">500</text>'
+    +'<text x="'+(pl-4)+'" y="'+(pt+ph)+'" text-anchor="end" font-size="8" fill="#e8734a">0</text>'
     +'<text x="'+(W-pr+4)+'" y="'+(pt)+'" text-anchor="start" font-size="8" fill="#5DCAA5">300萬</text>'
     +'<text x="'+(W-pr+4)+'" y="'+(pt+ph/2)+'" text-anchor="start" font-size="8" fill="#5DCAA5">150萬</text>'
     +'<text x="'+(W-pr+4)+'" y="'+(pt+ph)+'" text-anchor="start" font-size="8" fill="#5DCAA5">0</text>';
@@ -578,7 +601,7 @@ function renderShowcase(){
     +'<polyline points="'+iPts+'" fill="none" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>'
     +dots+'</svg>';
   var legend='<div style="display:flex;gap:14px;margin-bottom:8px;">'
-    +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>變現值</div>'
+    +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>已解鎖潛力</div>'
     +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#5DCAA5;border-radius:1px;"></div>年收入</div>'
     +'</div>';
   c2.innerHTML='<div style="font-size:12px;color:#a08060;margin-bottom:4px;">四力成長 × 收入驗證</div>'+legend+svg;
@@ -600,7 +623,7 @@ function renderShowcase(){
   c3.innerHTML='<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>'+dimRows
     +'<div class="hdiv"></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;">'
-    +'<div style="color:#6b4c30;">變現值 <span style="color:#e8734a;font-weight:600;">18,841</span></div>'
+    +'<div style="color:#6b4c30;">已解鎖潛力 <span style="color:#e8734a;font-weight:600;">435</span> / 1000</div>'
     +'<div style="color:#6b4c30;">年收入 <span style="color:#5DCAA5;font-weight:600;">250萬+</span></div>'
     +'</div>';
   box.appendChild(c3);
