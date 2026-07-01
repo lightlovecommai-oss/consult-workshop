@@ -62,3 +62,94 @@ var WEAK_DESC = {
   P: "專業力決定對方願不願意付你高單價——如果對方覺得你說的東西「聽起來不錯但不確定有沒有用」，就不會成交。\n\n你需要的是把你的能力用對方聽得懂的語言說出來。",
   I: "推進力是臨門一腳——前面吸引、信任、專業都做對了，但對方就是沒有採取行動。\n\n你需要的是在對的時機給對方一個說「好」的理由，而不是等他自己決定。"
 };
+
+/* ── 依分數找出強項組合 × 甜蜜路徑（各專案共用同一套判斷邏輯，不用各自重算）── */
+function getCombo(scores) {
+  var sorted = DORD.slice().sort(function(a, b) { return scores[b] - scores[a]; });
+  var sk = sorted[0], sk2 = sorted[1], wk = sorted[3];
+  var comboKey = [sk, sk2].sort().join("");
+  var combo = COMBO_PATH[comboKey] || COMBO_PATH[Object.keys(COMBO_PATH)[0]];
+  return { sorted: sorted, sk: sk, sk2: sk2, wk: wk, comboKey: comboKey, combo: combo };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   以下是渲染輔助函式（依賴呼叫端已定義好 DIMS 全域變數，
+   以及 CSS 裡的 .hdiv 樣式）。跟上面的純資料不同，這類函式
+   綁定了固定版面，只在「大部分專案都會長一樣」的部分才共用。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 四維能力雷達圖（SVG 向量版，取代舊的 canvas 畫法）
+      svgEl：一個 <svg> DOM 元素；scores：{A,T,P,I} 0-100 分數 ── */
+function drawRadarSVG(svgEl, scores) {
+  svgEl.innerHTML = "";
+  var cx = 130, cy = 140, mr = 90;
+  var vals = DORD.map(function(k) { return scores[k] / 100; });
+  var angles = DORD.map(function(_, i) { return (Math.PI*2*i/4) - Math.PI/2; });
+  function pt(r, a) { return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; }
+  function el(tag, attrs) {
+    var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.keys(attrs).forEach(function(k) { e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+  [0.25,0.5,0.75,1.0].forEach(function(f) {
+    var pts = angles.map(function(a) { var p = pt(mr*f, a); return p[0]+","+p[1]; }).join(" ");
+    svgEl.appendChild(el("polygon", {points:pts, fill:f===1?"rgba(240,228,218,0.4)":"none", stroke:"rgba(168,128,96,0.18)", "stroke-width":"0.8"}));
+  });
+  angles.forEach(function(a) {
+    var p = pt(mr, a);
+    svgEl.appendChild(el("line", {x1:cx, y1:cy, x2:p[0], y2:p[1], stroke:"rgba(168,128,96,0.15)", "stroke-width":"0.8"}));
+  });
+  var dpts = angles.map(function(a, i) { var p = pt(mr*Math.min(vals[i],1), a); return p[0]+","+p[1]; }).join(" ");
+  svgEl.appendChild(el("polygon", {points:dpts, fill:"rgba(232,115,74,0.15)", stroke:"#e8734a", "stroke-width":"2", "stroke-linejoin":"round"}));
+
+  var tip = el("g", {id:"radar-tip", opacity:"0", style:"pointer-events:none;"});
+  var tipBg = el("rect", {rx:"8", ry:"8", fill:"#2d1f0f", height:"26"});
+  var tipTxt = el("text", {"font-size":"12", "font-weight":"600", fill:"#fff", "text-anchor":"middle", "dominant-baseline":"middle", "font-family":"-apple-system,sans-serif"});
+  tip.appendChild(tipBg); tip.appendChild(tipTxt); svgEl.appendChild(tip);
+  function showTip(px, py, txt, color) {
+    tipTxt.textContent = txt;
+    tipBg.setAttribute("fill", color);
+    var tw = txt.length*7.5+16;
+    tipBg.setAttribute("width", tw); tipBg.setAttribute("x", px-tw/2); tipBg.setAttribute("y", py-34);
+    tipTxt.setAttribute("x", px); tipTxt.setAttribute("y", py-21);
+    tip.setAttribute("opacity", "1");
+  }
+  svgEl.addEventListener("click", function() { tip.setAttribute("opacity", "0"); });
+
+  DORD.forEach(function(k, i) {
+    var p = pt(mr*Math.min(vals[i],1), angles[i]);
+    var hit = el("circle", {cx:p[0], cy:p[1], r:"14", fill:"transparent", style:"cursor:pointer;"});
+    var c = el("circle", {cx:p[0], cy:p[1], r:"5", fill:DIMS[k].color, stroke:"#fff", "stroke-width":"1.5", style:"pointer-events:none;"});
+    hit.addEventListener("click", function(e) {
+      e.stopPropagation();
+      showTip(p[0], p[1], DIMS[k].name+" "+scores[k], DIMS[k].color);
+    });
+    svgEl.appendChild(hit); svgEl.appendChild(c);
+  });
+  DORD.forEach(function(k, i) {
+    var p = pt(mr+22, angles[i]);
+    var t = el("text", {x:p[0], y:p[1], "font-size":"12", "font-weight":"500", fill:DIMS[k].color, "text-anchor":"middle", "dominant-baseline":"middle", "font-family":"-apple-system,sans-serif"});
+    t.textContent = DIMS[k].name;
+    svgEl.appendChild(t);
+  });
+}
+
+/* ── 起點 vs 現在：四維度成長條 + 潛力值（+ 選填的右側欄位，如年收入）── */
+function renderGrowthCard(startScores, nowScores, footerRight) {
+  var dimRows = DORD.map(function(k) {
+    var d = DIMS[k], sv = startScores[k], ev = nowScores[k], diff = ev - sv;
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      + '<div style="width:36px;font-size:11px;color:'+d.color+';">'+d.name+'</div>'
+      + '<div style="flex:1;height:4px;background:#ede4da;border-radius:2px;">'
+      + '<div style="height:4px;border-radius:2px;background:'+d.color+';width:'+ev+'%;"></div></div>'
+      + '<div style="font-size:11px;color:#a08060;width:76px;text-align:right;">'+sv+' → '+ev
+      + ' <span style="color:#5DCAA5;font-weight:500;">+'+diff+'</span></div>'
+      + '</div>';
+  }).join("");
+  var potential = calcPotential(nowScores).unlocked;
+  var footer = '<div style="display:flex;justify-content:space-between;font-size:12px;">'
+    + '<div style="color:#6b4c30;">已解鎖潛力 <span style="color:#e8734a;font-weight:600;">'+potential+'</span> / 1000</div>'
+    + (footerRight ? '<div style="color:#6b4c30;">'+footerRight+'</div>' : '')
+    + '</div>';
+  return '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>' + dimRows + '<div class="hdiv"></div>' + footer;
+}

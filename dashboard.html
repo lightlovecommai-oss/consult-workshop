@@ -55,7 +55,7 @@
     <!-- 雷達圖 -->
     <div class="radar-wrap">
       <div class="radar-label">四維能力圖</div>
-      <canvas id="radar" width="260" height="200" style="display:block;margin:0 auto;"></canvas>
+      <svg id="radar" viewBox="0 0 260 270" width="260" height="270" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"></svg>
       <div class="dimgrid2" id="dim-grid2"></div>
     </div>
 
@@ -141,10 +141,8 @@ function personalRank(s) {
 
 function renderResult(s) {
   var scores = calcDims(s);
-  var sorted = DORD.slice().sort(function(a, b) { return scores[b] - scores[a]; });
-  var sk = sorted[0], sk2 = sorted[1], wk = sorted[3];
-  var comboKey = [sk, sk2].sort().join("");
-  var combo = COMBO_PATH[comboKey] || COMBO_PATH[Object.keys(COMBO_PATH)[0]];
+  var g = getCombo(scores);
+  var sk = g.sk, sk2 = g.sk2, wk = g.wk, combo = g.combo;
   var total = totalScore(s);
   var lv = levelFor(total);
   var hpPct = Math.round((total / 29) * 100);
@@ -225,7 +223,7 @@ function renderResult(s) {
   });
 
   renderLeaderboard(s.name);
-  setTimeout(function() { drawRadar(scores); }, 100);
+  setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
 }
 
 function renderTaskList(s, defs, containerId, isSpecial) {
@@ -282,45 +280,6 @@ function renderLeaderboard(currentName) {
     row.appendChild(nameWrap);
     row.appendChild(mk("div","lbscore", totalScore(s) + " 分"));
     box.appendChild(row);
-  });
-}
-
-function drawRadar(scores) {
-  var cv = document.getElementById("radar");
-  var ctx = cv.getContext("2d");
-  var W=260, H=200, cx=130, cy=108, mr=75;
-  ctx.clearRect(0, 0, W, H);
-  var vals = DORD.map(function(k) { return scores[k] / 100; });
-  var angles = DORD.map(function(_, i) { return (Math.PI*2*i/4) - Math.PI/2; });
-  function pt(r, a) { return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; }
-
-  [0.25,0.5,0.75,1.0].forEach(function(f) {
-    ctx.beginPath();
-    angles.forEach(function(a, i) { var p=pt(mr*f,a); i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]); });
-    ctx.closePath();
-    if (f===1) { ctx.fillStyle="rgba(240,228,218,0.4)"; ctx.fill(); }
-    ctx.strokeStyle="rgba(168,128,96,0.15)"; ctx.lineWidth=0.5; ctx.stroke();
-    ctx.font="10px sans-serif"; ctx.fillStyle="rgba(160,128,96,0.5)"; ctx.textAlign="right";
-    var lp = pt(mr*f, angles[3]);
-    ctx.fillText(Math.round(f*100), lp[0]-4, lp[1]);
-  });
-  angles.forEach(function(a) {
-    var p = pt(mr, a);
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p[0],p[1]);
-    ctx.strokeStyle="rgba(168,128,96,0.12)"; ctx.lineWidth=0.5; ctx.stroke();
-  });
-  ctx.beginPath();
-  angles.forEach(function(a, i) { var p=pt(mr*Math.min(vals[i],1),a); i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]); });
-  ctx.closePath(); ctx.fillStyle="rgba(232,115,74,0.15)"; ctx.fill(); ctx.strokeStyle="#e8734a"; ctx.lineWidth=2; ctx.stroke();
-  DORD.forEach(function(k, i) {
-    var p = pt(mr*Math.min(vals[i],1), angles[i]);
-    ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2);
-    ctx.fillStyle=DIMS[k].color; ctx.fill(); ctx.strokeStyle="#fff"; ctx.lineWidth=1.5; ctx.stroke();
-  });
-  ctx.textAlign="center"; ctx.textBaseline="middle";
-  DORD.forEach(function(k, i) {
-    var p = pt(mr+20, angles[i]);
-    ctx.font="500 12px sans-serif"; ctx.fillStyle=DIMS[k].color; ctx.fillText(DIMS[k].name, p[0], p[1]);
   });
 }
 
