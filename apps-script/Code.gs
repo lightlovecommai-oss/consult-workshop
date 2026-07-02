@@ -92,11 +92,11 @@ function doGet(e) {
 
     if (action === "logs") {
       var uid = String(p.userId || "");
-      var checkins = rows_(TABS.checkins).filter(function(r){ return String(r.lineId) === uid; }).map(function(r) {
+      var checkins = rows_(TABS.checkins).filter(function(r){ return String(r.lineId || r["LINE userId"] || "") === uid; }).map(function(r) {
         return { workshopId: String(r.workshopId || ""), taskKey: String(r.taskKey || ""), cadence: String(r.cadence || r.taskType || "daily"),
                  dim: String(r.dim || ""), pts: Number(r.pts) || 0, date: r.date };
       });
-      var revenue = rows_(TABS.revenue).filter(function(r){ return String(r.lineId) === uid; }).map(function(r) {
+      var revenue = rows_(TABS.revenue).filter(function(r){ return String(r.lineId || r["LINE userId"] || "") === uid; }).map(function(r) {
         return { workshopId: String(r.workshopId || ""), amount: Number(r.amount) || 0, date: r.date, note: String(r.note || ""),
                  A: Number(r.A) || 0, T: Number(r.T) || 0, P: Number(r.P) || 0, I: Number(r.I) || 0 };
       });
@@ -108,7 +108,7 @@ function doGet(e) {
       var byUser = {};
       rows_(TABS.checkins).forEach(function(r) {
         if (wid && String(r.workshopId) !== wid) return;
-        var id = String(r.lineId); if (!id) return;
+        var id = String(r.lineId || r["LINE userId"] || ""); if (!id) return;
         byUser[id] = (byUser[id] || 0) + (Number(r.pts) || 0);
       });
       var idx = {};
