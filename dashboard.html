@@ -46,7 +46,7 @@
         <div class="stat-sub" id="r-team-rank"></div>
       </div>
       <div class="stat-cell">
-        <div class="stat-lbl">📊 全營排名</div>
+        <div class="stat-lbl">📊 本班排名</div>
         <div class="stat-val green" id="r-rank"></div>
         <div class="stat-sub" id="r-rank-sub"></div>
       </div>
@@ -54,7 +54,7 @@
 
     <!-- 雷達圖 -->
     <div class="radar-wrap">
-      <div class="radar-label">四維能力圖</div>
+      <div class="radar-label">四維能力圖（跨所有課程合併）</div>
       <svg id="radar" viewBox="0 0 260 270" width="260" height="270" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"></svg>
       <div class="dimgrid2" id="dim-grid2"></div>
     </div>
@@ -81,7 +81,11 @@
     <!-- 潛力值 -->
     <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
 
-    <!-- 回報成交（移到任務區最上方） -->
+    <!-- 課程切換（一次開多班時，切這裡任務／回報／排行榜都跟著換） -->
+    <div style="font-size:12px;color:#a08060;margin-bottom:6px;">選擇課程</div>
+    <div class="ws-pills" id="ws-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+    <!-- 回報成交 -->
     <div class="section-head">
       <div class="section-icon">💰</div>
       <div class="section-title">回報成交</div>
@@ -92,7 +96,7 @@
         <button class="btn-go" id="rv-submit" style="flex-shrink:0;">回報</button>
       </div>
       <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" style="width:100%;box-sizing:border-box;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px;">
-      <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆</div>
+      <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
     </div>
 
     <!-- 潛力值 × 金額走勢圖 -->
@@ -143,7 +147,7 @@
     <div class="badgegrid" id="badge-grid"></div>
 
     <!-- 榮耀榜 -->
-    <div class="btitle">全營榮耀排行榜</div>
+    <div class="btitle" id="lb-title">榮耀排行榜</div>
     <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
 
     <div class="copybox">出席、分享、作業、PK 幫你累積投入，把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。這就是變現型顧問的養成路徑。</div>
@@ -154,7 +158,7 @@
       <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
 
         <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">能力分數怎麼算？</div>
-        <div style="margin-bottom:12px;">你的四維能力（吸引力・信任力・專業力・推進力）＝ <strong>你的投入 × 市場的驗證</strong>。<br>投入＝做每日／每週／專案任務累積；市場驗證＝你實際回報的成交（金額＋筆數）。</div>
+        <div style="margin-bottom:12px;">你的四維能力（吸引力・信任力・專業力・推進力）＝ <strong>你的投入 × 市場的驗證</strong>。<br>投入＝所有課程的任務累積（合併計算）；市場驗證＝你實際回報的成交（金額＋筆數）。</div>
 
         <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">為什麼我做了任務，分數還是不高？</div>
         <div style="margin-bottom:12px;">因為能力要「市場買單」才算數。做功課讓你有潛力，但在還沒成交前，只先兌現一半（保底 50%）。這不是打擊你，是提醒你——<strong>把練習變成真的成交</strong>。</div>
@@ -165,8 +169,11 @@
         <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">變現潛力值怎麼算？</div>
         <div style="margin-bottom:12px;">四力相乘（A×T×P×I）。因為是相乘，<strong>任何一維是 0，潛力就是 0</strong>——四力要均衡發展，不能偏科。</div>
 
+        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">一次上多個課程怎麼算？</div>
+        <div style="margin-bottom:12px;">能力（雷達圖／潛力值）是<strong>你這個人</strong>的，所有課程的投入合併算成一份。任務區與排行榜則依你選的課程各自呈現，排行榜同課程同儕比較。</div>
+
         <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">任務規則</div>
-        <div style="margin-bottom:12px;">每日任務：固定池，每天最多算 3 項，隔天重置。<br>每週任務：每週最多算 2 項，下週重開。<br>專案任務：一次性。</div>
+        <div style="margin-bottom:12px;">每日任務：每天最多算 3 項，隔天重置。<br>每週任務：每週最多算 2 項，下週重開。<br>專案任務：一次性。特殊任務：需導師審核後計分。</div>
 
         <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">自評 vs 市場</div>
         <div>測驗的自評分數只是你的「起點假設」，儀表板顯示的是「市場驗證後」的能力。兩者不同很正常——目標是讓市場驗證追上、甚至超過你當初的自評。</div>
@@ -183,6 +190,7 @@
 <script src="common.js"></script>
 <script>
 var current = null;
+var activeWorkshop = null;
 
 function mk(tag, cls, txt) {
   var d = document.createElement(tag);
@@ -191,24 +199,25 @@ function mk(tag, cls, txt) {
   return d;
 }
 
-/* 跨學員比較一律用 baseScore（導師計分）——只有它每位學員都讀得到，見 common.js 的說明。 */
-function teamRank(s) {
-  var teams = {};
-  STUDENTS.forEach(function(st) {
-    var t = st.team || "無";
-    if (!teams[t]) teams[t] = 0;
-    teams[t] += baseScore(st);
+/* ── 課程切換 pills ── */
+function renderWorkshopPills(s) {
+  var box = document.getElementById("ws-pills");
+  box.innerHTML = "";
+  var list = s.workshops || [];
+  if (list.length <= 1) { box.style.display = "none"; } else { box.style.display = "flex"; }
+  list.forEach(function(w) {
+    var on = w.id === activeWorkshop;
+    var b = mk("button", null, w.name || w.id);
+    b.type = "button";
+    b.style.cssText = "border:0.5px solid " + (on ? "#e8734a" : "#e8ddd2") + ";background:" + (on ? "#e8734a" : "#fff")
+      + ";color:" + (on ? "#fff" : "#6b4c30") + ";border-radius:16px;padding:6px 14px;font-size:12px;cursor:pointer;";
+    b.onclick = function() {
+      if (activeWorkshop === w.id) return;
+      activeWorkshop = w.id;
+      renderResult(s);
+    };
+    box.appendChild(b);
   });
-  var myTeam = s.team || "無";
-  var sorted = Object.keys(teams).sort(function(a, b) { return teams[b] - teams[a]; });
-  return sorted.indexOf(myTeam) + 1;
-}
-
-function personalRank(s) {
-  var myScore = baseScore(s);
-  var rank = 1;
-  STUDENTS.forEach(function(st) { if (baseScore(st) > myScore) rank++; });
-  return rank;
 }
 
 function renderResult(s) {
@@ -229,10 +238,6 @@ function renderResult(s) {
 
   document.getElementById("r-score").textContent = total;
   document.getElementById("r-team-name").textContent = s.team || "—";
-  document.getElementById("r-team-rank").textContent = "第 " + teamRank(s) + " 名";
-  var pr = personalRank(s);
-  document.getElementById("r-rank").textContent = pr + "th";
-  document.getElementById("r-rank-sub").textContent = "共 " + STUDENTS.length + " 人";
 
   var comboBadges = document.getElementById("r-combo-badges");
   comboBadges.innerHTML = "";
@@ -244,7 +249,7 @@ function renderResult(s) {
   document.getElementById("r-combo-title").textContent = combo.title;
   document.getElementById("r-combo-flow").textContent = combo.flow;
 
-  /* 自評起點 × 市場驗證（沒測驗資料就隱藏） */
+  /* 自評起點 × 市場驗證 */
   var seCard = document.getElementById("selfeval-card");
   if (s.selfEval) {
     seCard.style.display = "";
@@ -289,40 +294,30 @@ function renderResult(s) {
     dg.appendChild(c);
   });
 
-  /* 每日/每週任務 */
-  var dailyDone = dailyDoneToday(s);
-  renderPoolTaskList(s, DAILY_POOL, dailyDone, "daily-task-list", function(taskId) {
-    var t = DAILY_POOL.tasks.find(function(x) { return x.key === taskId; });
-    s.dailyLog.push({taskId: taskId, date: todayStr()});
-    postCheckin(s.lineId, t, "daily", todayStr());
-    renderResult(s);
-  });
-  document.getElementById("r-daily-cap").textContent = dailyDone.length + " / " + DAILY_POOL.cap;
-  document.getElementById("r-daily-caption").textContent = DAILY_POOL.caption;
+  /* 課程切換 + 任務區（依 activeWorkshop） */
+  renderWorkshopPills(s);
+  renderCadenceList(s, "daily",   "daily-task-list");
+  renderCadenceList(s, "weekly",  "weekly-task-list");
+  renderCadenceList(s, "once",    "task-list");
+  renderCadenceList(s, "special", "special-task-list");
 
-  var weeklyDone = weeklyDoneThisWeek(s);
-  renderPoolTaskList(s, WEEKLY_POOL, weeklyDone, "weekly-task-list", function(taskId) {
-    var t = WEEKLY_POOL.tasks.find(function(x) { return x.key === taskId; });
-    s.weeklyLog.push({taskId: taskId, week: weekStr()});
-    postCheckin(s.lineId, t, "weekly", todayStr());
-    renderResult(s);
-  });
-  document.getElementById("r-weekly-cap").textContent = weeklyDone.length + " / " + WEEKLY_POOL.cap;
-  document.getElementById("r-weekly-caption").textContent = WEEKLY_POOL.caption;
-
-  renderTaskList(s, TASK_DEFS, "task-list", false);
-  renderTaskList(s, SPECIAL_DEFS, "special-task-list", true);
+  var dailyDone = dailyDoneToday(s, activeWorkshop);
+  document.getElementById("r-daily-cap").textContent = dailyDone.length + " / " + CADENCE_CFG.daily.cap;
+  document.getElementById("r-daily-caption").textContent = CADENCE_CFG.daily.caption;
+  var weeklyDone = weeklyDoneThisWeek(s, activeWorkshop);
+  document.getElementById("r-weekly-cap").textContent = weeklyDone.length + " / " + CADENCE_CFG.weekly.cap;
+  document.getElementById("r-weekly-caption").textContent = CADENCE_CFG.weekly.caption;
 
   /* 回報成交 */
   document.getElementById("rv-total").textContent = revenueTotal(s);
   document.getElementById("rv-count").textContent = s.revenueLog.length;
   document.getElementById("r-trend-card").innerHTML = renderTrendChart(revenueTrendPoints(s));
 
-  /* 徽章 */
+  /* 徽章（四維各一，該維有累積即點亮） */
   var bg = document.getElementById("badge-grid");
   bg.innerHTML = "";
   BADGES.forEach(function(b) {
-    var earned = catSum(s, b.key) > 0;
+    var earned = investDim(s, b.dim) > 0;
     var c = mk("div", "badge" + (earned ? "" : " locked"));
     c.appendChild(mk("div","bicon", b.icon));
     c.appendChild(mk("div","bname", b.name));
@@ -330,12 +325,119 @@ function renderResult(s) {
     bg.appendChild(c);
   });
 
-  renderLeaderboard(s.name);
+  refreshLeaderboard(s);
   setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
-  updateTaskSliderHeight();  // 任務清單重畫後，把滑動卡片高度貼合目前分頁
+  updateTaskSliderHeight();
 }
 
-/* ── 任務滑動分頁：點上方分頁或左右滑都能切換，高度自動貼合當前分頁 ── */
+/* ── 任務清單（四種節奏共用；daily/weekly 有每期上限，needReview 走待審核不可自打）── */
+function renderCadenceList(s, cadence, containerId) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  var tasks = tasksFor(activeWorkshop, cadence);
+  if (!tasks.length) {
+    var hint = mk("div", null, "這個課程目前沒有這類任務");
+    hint.style.cssText = "font-size:12px;color:#a08060;padding:16px 4px;text-align:center;";
+    box.appendChild(hint);
+    return;
+  }
+  var isPool = (cadence === "daily" || cadence === "weekly");
+  var doneKeys = cadence === "daily" ? dailyDoneToday(s, activeWorkshop)
+              : cadence === "weekly" ? weeklyDoneThisWeek(s, activeWorkshop)
+              : Object.keys(onceDoneMap(s, activeWorkshop));
+  var cap = isPool ? CADENCE_CFG[cadence].cap : Infinity;
+  var capped = isPool && doneKeys.length >= cap;
+  var isSpecial = (cadence === "special");
+
+  tasks.forEach(function(t) {
+    var on = doneKeys.indexOf(t.key) > -1;
+    var dimName = (DIMS[t.dim] || {name:"—"}).name;
+
+    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : ""));
+    var img = mk("div","tcard-img", t.icon || "✅");
+    img.style.background = isSpecial ? "#fff4ec" : "#fff8f4";
+    row.appendChild(img);
+
+    var body = mk("div","tcard-body");
+    body.appendChild(mk("div","tcard-name", t.name));
+    var desc = mk("div","tcard-desc", dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分");
+    if (t.needReview && !on) {
+      var rv = mk("div","tcard-need-review","⏱ 繳交後等待導師審核計分");
+      desc.appendChild(document.createElement("br"));
+      desc.appendChild(rv);
+    }
+    body.appendChild(desc);
+    row.appendChild(body);
+
+    var right = mk("div","tcard-right");
+    right.appendChild(mk("div","tcard-pts" + (isSpecial ? " special" : ""), "+" + t.pts));
+    if (on) {
+      right.appendChild(mk("div","btn-done","✓ 完成"));
+    } else if (t.needReview) {
+      var pend = mk("div","btn-done","待審核");
+      pend.style.color = "#a08060"; pend.style.background = "#f0e9df";
+      right.appendChild(pend);
+    } else if (capped) {
+      var lockedTag = mk("div","btn-done","已達上限");
+      lockedTag.style.color = "#a08060"; lockedTag.style.background = "#f0e9df";
+      right.appendChild(lockedTag);
+    } else {
+      var btn = mk("button","btn-go", isPool ? "打卡" : "立即打卡");
+      btn.onclick = function() { doCheckin(s, t, activeWorkshop); renderResult(s); };
+      right.appendChild(btn);
+    }
+    row.appendChild(right);
+    box.appendChild(row);
+  });
+}
+
+/* ── 排行榜（後端彙總，各 workshop 各一張）＋ 本班排名／戰隊排名 ── */
+async function refreshLeaderboard(s) {
+  var wsName = (s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).name || "";
+  document.getElementById("lb-title").textContent = (wsName ? wsName + "・" : "") + "榮耀排行榜";
+
+  var rows = await loadLeaderboard(activeWorkshop);
+
+  /* 本班個人排名 */
+  var myIdx = rows.findIndex(function(r){ return r.lineId === s.lineId; });
+  var myRank = myIdx > -1 ? myIdx + 1 : rows.length + 1;
+  document.getElementById("r-rank").textContent = myRank + "th";
+  document.getElementById("r-rank-sub").textContent = "共 " + rows.length + " 人";
+
+  /* 戰隊排名（用榜單分數依團隊加總） */
+  var teams = {};
+  rows.forEach(function(r){ var t = r.team || "無"; teams[t] = (teams[t] || 0) + r.score; });
+  var teamSorted = Object.keys(teams).sort(function(a, b){ return teams[b] - teams[a]; });
+  var myTeamRank = teamSorted.indexOf(s.team || "無");
+  document.getElementById("r-team-rank").textContent = myTeamRank > -1 ? "第 " + (myTeamRank + 1) + " 名" : "—";
+
+  /* 榜單前 8 */
+  var box = document.getElementById("leaderboard");
+  box.innerHTML = "";
+  var cap = mk("div", null, "依本課程任務累計分");
+  cap.style.cssText = "font-size:10.5px;color:#a08060;padding:2px 4px 6px;";
+  box.appendChild(cap);
+  if (!rows.length) {
+    var empty = mk("div", null, "這個課程還沒有人打卡");
+    empty.style.cssText = "font-size:12px;color:#a08060;padding:10px 4px;";
+    box.appendChild(empty);
+    return;
+  }
+  rows.slice(0, 8).forEach(function(r, i) {
+    var row = mk("div","lbrow" + (i < 1 ? " top" : ""));
+    row.appendChild(mk("div","lbrank", String(i+1)));
+    var nameWrap = mk("div","lbname");
+    nameWrap.textContent = r.name + (r.lineId === s.lineId ? "（你）" : "");
+    var team = mk("div","lbteam", r.team);
+    nameWrap.appendChild(document.createElement("br"));
+    nameWrap.appendChild(team);
+    row.appendChild(nameWrap);
+    row.appendChild(mk("div","lbscore", r.score + " 分"));
+    box.appendChild(row);
+  });
+}
+
+/* ── 任務滑動分頁 ── */
 var taskActiveIdx = 0;
 function updateTaskSliderHeight() {
   var slider = document.getElementById("task-slider");
@@ -366,104 +468,6 @@ function setupTaskSlider() {
   });
 }
 
-function renderPoolTaskList(s, pool, doneKeys, containerId, onCheck) {
-  var box = document.getElementById(containerId);
-  box.innerHTML = "";
-  var capped = doneKeys.length >= pool.cap;
-  pool.tasks.forEach(function(t) {
-    var on = doneKeys.indexOf(t.key) > -1;
-    var dimKey = DORD.find(function(k) { return DIMS[k].key === t.cat; });
-    var dimName = DIMS[dimKey].name;
-
-    var row = mk("div", "tcard" + (on ? " done" : ""));
-    var img = mk("div","tcard-img", t.icon);
-    img.style.background = "#fff8f4";
-    row.appendChild(img);
-
-    var body = mk("div","tcard-body");
-    body.appendChild(mk("div","tcard-name", t.name));
-    body.appendChild(mk("div","tcard-desc", dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分"));
-    row.appendChild(body);
-
-    var right = mk("div","tcard-right");
-    right.appendChild(mk("div","tcard-pts", "+" + t.pts));
-    if (on) {
-      right.appendChild(mk("div","btn-done","✓ 完成"));
-    } else if (capped) {
-      var lockedTag = mk("div","btn-done","已達上限");
-      lockedTag.style.color = "#a08060";
-      lockedTag.style.background = "#f0e9df";
-      right.appendChild(lockedTag);
-    } else {
-      var btn = mk("button","btn-go", "打卡");
-      btn.onclick = function() { onCheck(t.key); };
-      right.appendChild(btn);
-    }
-    row.appendChild(right);
-    box.appendChild(row);
-  });
-}
-
-function renderTaskList(s, defs, containerId, isSpecial) {
-  var box = document.getElementById(containerId);
-  box.innerHTML = "";
-  defs.forEach(function(t) {
-    var on = !!s.tasks[t.key];
-    var dimKey = DORD.find(function(k) { return DIMS[k].key === t.cat; });
-    var dimName = DIMS[dimKey].name;
-
-    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : ""));
-    var img = mk("div","tcard-img", t.icon);
-    img.style.background = t.bg;
-    row.appendChild(img);
-
-    var body = mk("div","tcard-body");
-    body.appendChild(mk("div","tcard-name", t.name));
-    var desc = mk("div","tcard-desc", dimName + " ・ +" + t.pts + " 分");
-    if (isSpecial && !on) {
-      var rv = mk("div","tcard-need-review","⏱ 繳交後等待審核");
-      desc.appendChild(document.createElement("br"));
-      desc.appendChild(rv);
-    }
-    if (on) desc.textContent = dimName + " ・ 已完成 +" + t.pts + " 分";
-    body.appendChild(desc);
-    row.appendChild(body);
-
-    var right = mk("div","tcard-right");
-    right.appendChild(mk("div","tcard-pts" + (isSpecial ? " special" : ""), "+" + t.pts));
-    if (on) {
-      right.appendChild(mk("div","btn-done","✓ 完成"));
-    } else {
-      var btn = mk("button","btn-go" + (isSpecial ? " special" : ""), isSpecial ? "繳交" : "立即打卡");
-      btn.onclick = function() { s.tasks[t.key] = true; renderResult(s); };
-      right.appendChild(btn);
-    }
-    row.appendChild(right);
-    box.appendChild(row);
-  });
-}
-
-function renderLeaderboard(currentName) {
-  var sorted = STUDENTS.slice().sort(function(a, b) { return baseScore(b) - baseScore(a); });
-  var box = document.getElementById("leaderboard");
-  box.innerHTML = "";
-  var cap = mk("div", null, "依專案任務計分（導師計分）");
-  cap.style.cssText = "font-size:10.5px;color:#a08060;padding:2px 4px 6px;";
-  box.appendChild(cap);
-  sorted.slice(0, 8).forEach(function(s, i) {
-    var row = mk("div","lbrow" + (i < 1 ? " top" : ""));
-    row.appendChild(mk("div","lbrank", String(i+1)));
-    var nameWrap = mk("div","lbname");
-    nameWrap.textContent = s.name + (s.name === currentName ? "（你）" : "");
-    var team = mk("div","lbteam", s.team);
-    nameWrap.appendChild(document.createElement("br"));
-    nameWrap.appendChild(team);
-    row.appendChild(nameWrap);
-    row.appendChild(mk("div","lbscore", baseScore(s) + " 分"));
-    box.appendChild(row);
-  });
-}
-
 document.getElementById("btn-back").addEventListener("click", function() {
   window.location.href = "showcase.html";
 });
@@ -474,7 +478,7 @@ document.getElementById("rv-submit").addEventListener("click", function() {
   var noteInput = document.getElementById("rv-note");
   var amount = parseFloat(amountInput.value);
   if (!amount || amount <= 0) return;
-  addRevenue(current, amount, noteInput.value);
+  addRevenue(current, amount, noteInput.value, activeWorkshop);
   amountInput.value = "";
   noteInput.value = "";
   renderResult(current);
@@ -486,18 +490,19 @@ async function init() {
     var userId = params.get("id");
     if (!userId) { window.location.href = "index.html"; return; }
 
-    await loadStudents();
+    await Promise.all([loadStudents(), loadConfig()]);
 
     var matched = STUDENTS.find(function(s) { return s.lineId === userId; });
     if (matched) {
       current = matched;
-      var logsP = loadLogs(userId);        // 從 Sheet 讀回已存的打卡紀錄
-      var selfP = loadSelfEval(userId);    // 讀回測驗自評（對照用，可能是 null）
+      var logsP = loadLogs(userId);
+      var selfP = loadSelfEval(userId);
       var logs = await logsP;
-      current.dailyLog = logs.dailyLog;
-      current.weeklyLog = logs.weeklyLog;
-      current.revenueLog = logs.revenueLog;
+      current.checkinLog = logs.checkins;
+      current.revenueLog = logs.revenue;
       current.selfEval = await selfP;
+      current.workshops = enrolledWorkshops(userId);
+      activeWorkshop = current.workshops.length ? current.workshops[0].id : null;
       renderResult(current);
       return;
     }
