@@ -2,11 +2,14 @@ var LIFF_ID = "2010316474-UovQ1zhe";
 var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
 /* ── 四維度定義 ── */
+/* k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
+   不是硬性滿分——投入% 永遠逼近 100 不爆表，所以可跨多 workshop 無限加總、加 workshop 免校準。
+   k 是軟旋鈕（大概「累積多少分算投入到位一半」），待真實數據微調，抓錯只影響曲線胖瘦不會頂死。 */
 var DIMS = {
-  A: {name:"吸引力", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   max:9,  inner:"批判心少・容易欣賞別人"},
-  T: {name:"信任力", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     max:6,  inner:"真誠・心口合一"},
-  P: {name:"專業力", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", max:10, inner:"不斷精進・有上進心・當責"},
-  I: {name:"推進力", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   max:4,  inner:"自己先願意配合・臣服"}
+  A: {name:"吸引力", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
+  T: {name:"信任力", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     k:6,  inner:"真誠・心口合一"},
+  P: {name:"專業力", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
+  I: {name:"推進力", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
 };
 /* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
@@ -113,17 +116,20 @@ function weeklyDoneThisWeek(s) {
 
 /* ── 計算函式 ── */
 function catSum(s, cat) {
+  var wantDim = DORD.find(function(k) { return DIMS[k].key === cat; });
   var sum = 0;
   TASK_DEFS.concat(SPECIAL_DEFS).forEach(function(t) {
     if (t.cat === cat && s.tasks[t.key]) sum += t.pts;
   });
-  s.dailyLog.forEach(function(e) {
-    var t = DAILY_POOL.tasks.find(function(x) { return x.key === e.taskId; });
-    if (t && t.cat === cat) sum += t.pts;
-  });
-  s.weeklyLog.forEach(function(e) {
-    var t = WEEKLY_POOL.tasks.find(function(x) { return x.key === e.taskId; });
-    if (t && t.cat === cat) sum += t.pts;
+  /* 每日／每週：優先用打卡紀錄裡存的 dim/pts（跨 workshop 安全，不必回查本專案任務池——
+     別的 workshop 的任務 key 不在這裡也算得到）；舊資料或樂觀更新沒帶 dim/pts 時，退回用 taskId 查任務池。 */
+  s.dailyLog.concat(s.weeklyLog).forEach(function(e) {
+    if (e.dim && e.pts != null) {
+      if (e.dim === wantDim) sum += e.pts;
+    } else {
+      var t = DAILY_POOL.tasks.concat(WEEKLY_POOL.tasks).find(function(x) { return x.key === e.taskId; });
+      if (t && t.cat === cat) sum += t.pts;
+    }
   });
   return sum;
 }
@@ -151,6 +157,28 @@ function levelFor(total) {
   return lv;
 }
 
+/* 目前等級 + 到下一級的進度。totalScore 現在含每日／每週打卡、會無限累積，
+   所以血條不能再用固定 /29——改成「本級區間內的進度」，pct 永遠 0~100 不爆表。
+   封頂（最高級）時 capped=true、pct=100，nextMin=null。 */
+function levelProgress(total) {
+  var idx = 0;
+  LEVELS.forEach(function(l, i) { if (total >= l.min) idx = i; });
+  var lv = LEVELS[idx], next = LEVELS[idx + 1] || null;
+  if (!next) return { lv: lv, nextMin: null, capped: true, pct: 100 };
+  var pct = Math.round((total - lv.min) / (next.min - lv.min) * 100);
+  return { lv: lv, nextMin: next.min, capped: false, pct: Math.max(0, Math.min(100, pct)) };
+}
+
+/* 導師計分（專案＋特殊任務，來自 Google Sheet，每位學員都有）。
+   排行榜／排名只能用這個才公平——每日／每週打卡目前只讀得到當前學員自己的，
+   別人的 dailyLog／weeklyLog 是空的，拿 totalScore 跨人比較會讓當前學員灌水。 */
+function baseScore(s, workshopId) {
+  return TASK_DEFS.concat(SPECIAL_DEFS).reduce(function(sum, t) {
+    if (workshopId && t.workshop && t.workshop !== workshopId) return sum;  // 各 workshop 各一張榜；任務尚未帶 workshop 前為 no-op
+    return sum + (s.tasks[t.key] ? t.pts : 0);
+  }, 0);
+}
+
 /* 市場驗證係數：0~1 之間。沒成交時＝保底值，隨累計金額與簽單數往 1.0 靠。
    金額與簽單數兩個達成度「相乘」——一張大單（金額到但單數少）不會 full 兌現，
    逼學員反覆簽得下來才算真本事，順帶擋掉靠一張運氣單灌水。 */
@@ -160,14 +188,16 @@ function validationFactor(s) {
   return VALID_FLOOR + (1 - VALID_FLOOR) * (amtAchieve * cntAchieve);
 }
 
-/* 每維「市場驗證能力」＝ 投入%（做功課累積，min 100 頂住）× 市場驗證係數。
-   所以做很多功課但沒變現，能力會卡在天花板下——這是刻意的設計，不是 bug。
-   （投入的 max 仍是舊的營期滿分，長期校準另議，見 CLAUDE.md 已知待處理。）*/
+/* 每維「市場驗證能力」＝ 投入%（飽和曲線）× 市場驗證係數。
+   投入% = 100 × 累積分 /(累積分 + k)：累積到 k 分＝50%、3k＝75%，永遠逼近 100 不爆表——
+   所以跨多 workshop 無限加總也不會頂死，加 workshop 免重新校準（見專案記憶 multi-workshop-architecture）。
+   做很多功課但沒變現，能力仍會被驗證係數壓在天花板下——這是刻意的設計，不是 bug。 */
 function calcDims(s) {
   var factor = validationFactor(s);
   var sc = {};
   DORD.forEach(function(k) {
-    var effortPct = Math.min(100, (catSum(s, DIMS[k].key) / DIMS[k].max) * 100);
+    var invest = catSum(s, DIMS[k].key);                    // 該維累積投入分（跨所有來源／workshop 加總）
+    var effortPct = 100 * invest / (invest + DIMS[k].k);
     sc[k] = Math.round(effortPct * factor);
   });
   return sc;
@@ -188,8 +218,9 @@ function addRevenue(s, amount, note) {
 function revenueTotal(s) {
   return s.revenueLog.reduce(function(sum, e) { return sum + e.amount; }, 0);
 }
+/* 走勢圖的金額換算成「萬」再畫（回報時存的是「元」），跟 showcase 的示範資料同單位。 */
 function revenueTrendPoints(s) {
-  return s.revenueLog.map(function(e) { return {label:e.date, A:e.A, T:e.T, P:e.P, I:e.I, income:e.amount}; });
+  return s.revenueLog.map(function(e) { return {label:e.date, A:e.A, T:e.T, P:e.P, I:e.I, income: Math.round(e.amount/1000)/10}; });
 }
 
 /* ── 寫入 Google Sheet（打卡／成交）──
@@ -228,10 +259,12 @@ async function loadLogs(userId) {
     if (d.status !== "ok") return {dailyLog: [], weeklyLog: [], revenueLog: []};
     var dailyLog = [], weeklyLog = [];
     (d.checkins || []).forEach(function(c) {
+      /* 保留 dim/pts：calcDims 直接靠它們加總投入，不必回查本專案任務池（跨 workshop 才安全）。 */
+      var dim = c.dim || "", pts = Number(c.pts) || 0;
       if (c.taskType === "weekly") {
-        weeklyLog.push({taskId: c.taskKey, week: weekStr(new Date(c.date)), date: normDate(c.date)});
+        weeklyLog.push({taskId: c.taskKey, week: weekStr(new Date(c.date)), date: normDate(c.date), dim: dim, pts: pts});
       } else {
-        dailyLog.push({taskId: c.taskKey, date: normDate(c.date)});
+        dailyLog.push({taskId: c.taskKey, date: normDate(c.date), dim: dim, pts: pts});
       }
     });
     var revenueLog = (d.revenue || []).map(function(e) {
@@ -277,8 +310,8 @@ async function loadStudents() {
         team_score: +(s["團隊賽"]   || s.team_score || 0)
       };
       st.tasks = initTasks(st);
-      /* 每日/每週打卡紀錄、回報成交紀錄——目前只存在瀏覽器記憶體，重新整理會消失，
-         之後接上 Google Sheet／Apps Script 才會變成真的存起來 */
+      /* 先給空陣列佔位；當前學員的每日／每週打卡與成交紀錄會在 dashboard init 時
+         用 loadLogs() 從 Google Sheet 讀回覆蓋（其他學員維持空，見 baseScore 說明）。 */
       st.dailyLog = [];
       st.weeklyLog = [];
       st.revenueLog = [];

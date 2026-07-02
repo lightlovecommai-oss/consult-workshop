@@ -23,7 +23,7 @@
         <div class="char-info">
           <div class="char-role-pill" id="r-role"></div>
           <div class="char-name" id="r-charname"></div>
-          <div class="char-lv">Lv <span id="r-lv"></span> <span class="char-lv-max">/ 29</span></div>
+          <div class="char-lv">Lv <span id="r-lv"></span> <span class="char-lv-max" id="r-lv-max"></span></div>
         </div>
       </div>
       <div class="hp-row">
@@ -38,7 +38,7 @@
       <div class="stat-cell">
         <div class="stat-lbl">⭐ 個人積分</div>
         <div class="stat-val" id="r-score"></div>
-        <div class="stat-sub">/ 29 滿分</div>
+        <div class="stat-sub">累計投入分</div>
       </div>
       <div class="stat-cell">
         <div class="stat-lbl">🏆 戰隊</div>
@@ -146,7 +146,7 @@
     <div class="btitle">全營榮耀排行榜</div>
     <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
 
-    <div class="copybox">每一場出席、每一次分享、每一份作業、每一場PK，都會立刻反映在你的能力雷達圖上。<strong>持續累積，等級與徽章就會一個一個解鎖</strong>，這就是變現型顧問的養成路徑。</div>
+    <div class="copybox">出席、分享、作業、PK 幫你累積投入，把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。這就是變現型顧問的養成路徑。</div>
 
     <!-- 計分規則說明（預設收合，放最底部不占版面） -->
     <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
@@ -191,12 +191,13 @@ function mk(tag, cls, txt) {
   return d;
 }
 
+/* 跨學員比較一律用 baseScore（導師計分）——只有它每位學員都讀得到，見 common.js 的說明。 */
 function teamRank(s) {
   var teams = {};
   STUDENTS.forEach(function(st) {
     var t = st.team || "無";
     if (!teams[t]) teams[t] = 0;
-    teams[t] += totalScore(st);
+    teams[t] += baseScore(st);
   });
   var myTeam = s.team || "無";
   var sorted = Object.keys(teams).sort(function(a, b) { return teams[b] - teams[a]; });
@@ -204,9 +205,9 @@ function teamRank(s) {
 }
 
 function personalRank(s) {
-  var myScore = totalScore(s);
+  var myScore = baseScore(s);
   var rank = 1;
-  STUDENTS.forEach(function(st) { if (totalScore(st) > myScore) rank++; });
+  STUDENTS.forEach(function(st) { if (baseScore(st) > myScore) rank++; });
   return rank;
 }
 
@@ -215,15 +216,16 @@ function renderResult(s) {
   var g = getCombo(scores);
   var sk = g.sk, sk2 = g.sk2, wk = g.wk, combo = g.combo;
   var total = totalScore(s);
-  var lv = levelFor(total);
-  var hpPct = Math.round((total / 29) * 100);
+  var lp = levelProgress(total);
+  var lv = lp.lv;
 
   document.getElementById("r-topname").textContent = s.name + " ›";
   document.getElementById("r-role").textContent = lv.title;
   document.getElementById("r-charname").textContent = s.name + "（" + s.team + "）";
   document.getElementById("r-lv").textContent = total;
-  document.getElementById("r-hpbar").style.width = hpPct + "%";
-  document.getElementById("r-hpnum").textContent = total + " / 29";
+  document.getElementById("r-lv-max").textContent = lp.capped ? "・封頂" : "→ " + lp.nextMin;
+  document.getElementById("r-hpbar").style.width = lp.pct + "%";
+  document.getElementById("r-hpnum").textContent = lp.capped ? total + "（封頂）" : total + " / " + lp.nextMin;
 
   document.getElementById("r-score").textContent = total;
   document.getElementById("r-team-name").textContent = s.team || "—";
@@ -267,7 +269,7 @@ function renderResult(s) {
    + '<div style="height:8px;background:#ede4da;border-radius:4px;overflow:hidden;margin-bottom:8px;">'
    + '<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#c8a84b);width:' + potPct + '%;transition:width .6s;"></div>'
    + '</div>'
-   + '<div style="font-size:11px;color:#a08060;">每完成一項任務，四力同步提升，潛力值跟著解鎖</div>';
+   + '<div style="font-size:11px;color:#a08060;">四力相乘算出潛力，靠你回報的每一筆成交把它一格格解鎖</div>';
 
   /* 日期 */
   var now = new Date();
@@ -442,9 +444,12 @@ function renderTaskList(s, defs, containerId, isSpecial) {
 }
 
 function renderLeaderboard(currentName) {
-  var sorted = STUDENTS.slice().sort(function(a, b) { return totalScore(b) - totalScore(a); });
+  var sorted = STUDENTS.slice().sort(function(a, b) { return baseScore(b) - baseScore(a); });
   var box = document.getElementById("leaderboard");
   box.innerHTML = "";
+  var cap = mk("div", null, "依專案任務計分（導師計分）");
+  cap.style.cssText = "font-size:10.5px;color:#a08060;padding:2px 4px 6px;";
+  box.appendChild(cap);
   sorted.slice(0, 8).forEach(function(s, i) {
     var row = mk("div","lbrow" + (i < 1 ? " top" : ""));
     row.appendChild(mk("div","lbrank", String(i+1)));
@@ -454,7 +459,7 @@ function renderLeaderboard(currentName) {
     nameWrap.appendChild(document.createElement("br"));
     nameWrap.appendChild(team);
     row.appendChild(nameWrap);
-    row.appendChild(mk("div","lbscore", totalScore(s) + " 分"));
+    row.appendChild(mk("div","lbscore", baseScore(s) + " 分"));
     box.appendChild(row);
   });
 }
