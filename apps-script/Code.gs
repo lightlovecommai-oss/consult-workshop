@@ -191,3 +191,62 @@ function doPost(e) {
     return json_({ status: "error", message: String(err) });
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   一鍵初始化：在 Apps Script 編輯器選這個 setup 函式 → 按「執行」一次即可。
+   會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (遊戲)課程 / (遊戲)任務並填資料。
+   第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
+   ═══════════════════════════════════════════════════════════ */
+function setup() {
+  ensureColumn_(TABS.checkins, "課程");
+  ensureColumn_(TABS.revenue, "課程");
+  writeSheet_(TABS.workshops, [
+    ["workshopId", "name", "active"],
+    ["一階", "溝通變現・一階", true]
+  ]);
+  writeSheet_(TABS.tasks, TASKS_SEED);
+  return "初始化完成";
+}
+
+function ensureColumn_(tab, header) {
+  var sh = ss_().getSheetByName(tab);
+  if (!sh) return;
+  var lastCol = Math.max(1, sh.getLastColumn());
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  if (headers.indexOf(header) > -1) return;
+  sh.getRange(1, sh.getLastColumn() + 1).setValue(header);
+}
+
+function writeSheet_(name, rows) {
+  var ss = ss_();
+  var sh = ss.getSheetByName(name) || ss.insertSheet(name);
+  sh.clearContents();
+  sh.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+var TASKS_SEED = [
+  ["workshopId", "taskKey", "cadence", "dim", "pts", "name", "icon", "needReview"],
+  ["一階", "attend1", "once", "I", 2, "第 1 場準時出席", "📅", false],
+  ["一階", "attend2", "once", "I", 2, "第 2 場準時出席", "📅", false],
+  ["一階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false],
+  ["一階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false],
+  ["一階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false],
+  ["一階", "hw1", "special", "P", 5, "作業：開場逐字稿", "✍️", true],
+  ["一階", "hw2", "special", "P", 5, "作業：收單逐字稿", "📝", true],
+  ["一階", "team1", "special", "T", 6, "團隊賽得分", "⚔️", true],
+  ["一階", "d1", "daily", "A", 1, "發一則社群貼文", "📣", false],
+  ["一階", "d2", "daily", "A", 1, "留言互動 3 位夥伴的貼文", "💬", false],
+  ["一階", "d3", "daily", "T", 1, "主動關心一位夥伴的近況", "🤝", false],
+  ["一階", "d4", "daily", "T", 1, "在群組裡真誠回應一則訊息", "💛", false],
+  ["一階", "d5", "daily", "P", 1, "寫 100 字今日反思", "📝", false],
+  ["一階", "d6", "daily", "P", 1, "練習一次開場白或提案台詞", "🎤", false],
+  ["一階", "d7", "daily", "P", 1, "覆盤一件今天做得好的事", "🔍", false],
+  ["一階", "d8", "daily", "I", 1, "準時開始今天的行動", "⏰", false],
+  ["一階", "d9", "daily", "I", 1, "完成今天排定的一件任務", "✅", false],
+  ["一階", "d10", "daily", "A", 1, "分享一則有價值的觀點", "✨", false],
+  ["一階", "wk1", "weekly", "I", 2, "出席本週固定會議／直播", "📅", false],
+  ["一階", "wk2", "weekly", "P", 2, "交一份週報／進度整理", "📋", false],
+  ["一階", "wk3", "weekly", "T", 2, "跟夥伴進行一次共學或角色扮演", "🎭", false],
+  ["一階", "wk4", "weekly", "A", 2, "開發一位新名單／新連結", "🌱", false],
+  ["一階", "wk5", "weekly", "T", 2, "幫夥伴做一次回饋或複盤", "🪞", false]
+];
