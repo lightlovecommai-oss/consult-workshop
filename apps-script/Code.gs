@@ -30,7 +30,7 @@ var COLS = {
               date:["日期","date"], note:["備註","note"],
               A:["吸引力","A"], T:["信任力","T"], P:["專業力","P"], I:["推進力","I"] },
   quiz:     { lineId:["LINE userId","userId","lineId"], A:["吸引力","scoreA","A"], T:["信任力","scoreT","T"],
-              P:["專業力","scoreP","P"], I:["推進力","scoreI","I"] }
+              P:["專業力","scoreP","P"], I:["影響力","推進力","scoreI","I"] }
 };
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
