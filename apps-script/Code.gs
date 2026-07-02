@@ -10,13 +10,13 @@
 var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是獨立的，填試算表 ID
 
 var TABS = {
-  students:    "學員",       // 身份：LINE userId | 姓名 | 團隊
-  workshops:   "workshops",  // workshopId | name | active
-  tasks:       "tasks",      // workshopId | taskKey | cadence | dim | pts | name | icon | needReview
-  enrollments: "enrollments",// lineId | workshopId
-  checkins:    "打卡紀錄",    // lineId | workshopId | taskKey | cadence | dim | pts | date
-  revenue:     "成交紀錄",    // lineId | workshopId | amount | date | note | A | T | P | I
-  quiz:        "測驗結果"     // 自評來源（comconverttest 寫入）：userId | scoreA | scoreT | scoreP | scoreI
+  students:    "(遊戲)學員名單",       // 身份：LINE userId | 姓名(或 LINE名稱) | 團隊
+  workshops:   "(遊戲)課程",           // ⬅ 需新建：workshopId | name | active（匯入 seed-workshops.csv）
+  tasks:       "(遊戲)任務",           // ⬅ 需新建：workshopId | taskKey | cadence | dim | pts | name | icon | needReview（匯入 seed-tasks.csv）
+  enrollments: "(引流.T)課程報名紀錄", // 沿用既有：讀 LINE userId + 課程 欄當 workshopId
+  checkins:    "(遊戲)打卡紀錄",       // lineId | workshopId | taskKey | cadence | dim | pts | date
+  revenue:     "(遊戲)成交紀錄",       // lineId | workshopId | amount | date | note | A | T | P | I
+  quiz:        "(引流.A)能力測驗"      // 自評來源（暫定，待確認）：需含 LINE userId + ATPI 分數欄
 };
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
@@ -62,7 +62,7 @@ function doGet(e) {
 
     if (action === "students") {
       var students = rows_(TABS.students).map(function(r) {
-        return { lineId: String(r["LINE userId"] || r.lineId || ""), name: String(r["姓名"] || r.name || ""), team: String(r["團隊"] || r.team || "") };
+        return { lineId: String(r["LINE userId"] || r.lineId || ""), name: String(r["姓名"] || r["LINE名稱"] || r.name || ""), team: String(r["團隊"] || r.team || "") };
       }).filter(function(s){ return s.lineId; });
       return json_({ status: "ok", students: students });
     }
@@ -85,7 +85,7 @@ function doGet(e) {
         };
       }).filter(function(t){ return t.workshopId && t.key; });
       var enrollments = rows_(TABS.enrollments).map(function(r) {
-        return { lineId: String(r.lineId || r["LINE userId"] || ""), workshopId: String(r.workshopId || "") };
+        return { lineId: String(r.lineId || r["LINE userId"] || ""), workshopId: String(r.workshopId || r["課程"] || "") };
       }).filter(function(x){ return x.lineId && x.workshopId; });
       return json_({ status: "ok", workshops: workshops, tasks: tasks, enrollments: enrollments });
     }
@@ -114,7 +114,7 @@ function doGet(e) {
       var idx = {};
       rows_(TABS.students).forEach(function(r) {
         var id = String(r["LINE userId"] || r.lineId || "");
-        if (id) idx[id] = { name: String(r["姓名"] || r.name || ""), team: String(r["團隊"] || r.team || "") };
+        if (id) idx[id] = { name: String(r["姓名"] || r["LINE名稱"] || r.name || ""), team: String(r["團隊"] || r.team || "") };
       });
       var out = Object.keys(byUser).map(function(id) {
         return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "", score: byUser[id] };

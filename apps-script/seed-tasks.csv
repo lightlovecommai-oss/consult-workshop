@@ -1,24 +1,24 @@
 workshopId,taskKey,cadence,dim,pts,name,icon,needReview
-w1,attend1,once,I,2,第 1 場準時出席,📅,false
-w1,attend2,once,I,2,第 2 場準時出席,📅,false
-w1,social1,once,A,3,社群分享：自己故事,📣,false
-w1,social2,once,A,3,社群分享：導師故事,📖,false
-w1,social3,once,A,3,社群分享：培訓心得,✨,false
-w1,hw1,special,P,5,作業：開場逐字稿,✍️,true
-w1,hw2,special,P,5,作業：收單逐字稿,📝,true
-w1,team1,special,T,6,團隊賽得分,⚔️,true
-w1,d1,daily,A,1,發一則社群貼文,📣,false
-w1,d2,daily,A,1,留言互動 3 位夥伴的貼文,💬,false
-w1,d3,daily,T,1,主動關心一位夥伴的近況,🤝,false
-w1,d4,daily,T,1,在群組裡真誠回應一則訊息,💛,false
-w1,d5,daily,P,1,寫 100 字今日反思,📝,false
-w1,d6,daily,P,1,練習一次開場白或提案台詞,🎤,false
-w1,d7,daily,P,1,覆盤一件今天做得好的事,🔍,false
-w1,d8,daily,I,1,準時開始今天的行動,⏰,false
-w1,d9,daily,I,1,完成今天排定的一件任務,✅,false
-w1,d10,daily,A,1,分享一則有價值的觀點,✨,false
-w1,wk1,weekly,I,2,出席本週固定會議／直播,📅,false
-w1,wk2,weekly,P,2,交一份週報／進度整理,📋,false
-w1,wk3,weekly,T,2,跟夥伴進行一次共學或角色扮演,🎭,false
-w1,wk4,weekly,A,2,開發一位新名單／新連結,🌱,false
-w1,wk5,weekly,T,2,幫夥伴做一次回饋或複盤,🪞,false
+一階,attend1,once,I,2,第 1 場準時出席,📅,false
+一階,attend2,once,I,2,第 2 場準時出席,📅,false
+一階,social1,once,A,3,社群分享：自己故事,📣,false
+一階,social2,once,A,3,社群分享：導師故事,📖,false
+一階,social3,once,A,3,社群分享：培訓心得,✨,false
+一階,hw1,special,P,5,作業：開場逐字稿,✍️,true
+一階,hw2,special,P,5,作業：收單逐字稿,📝,true
+一階,team1,special,T,6,團隊賽得分,⚔️,true
+一階,d1,daily,A,1,發一則社群貼文,📣,false
+一階,d2,daily,A,1,留言互動 3 位夥伴的貼文,💬,false
+一階,d3,daily,T,1,主動關心一位夥伴的近況,🤝,false
+一階,d4,daily,T,1,在群組裡真誠回應一則訊息,💛,false
+一階,d5,daily,P,1,寫 100 字今日反思,📝,false
+一階,d6,daily,P,1,練習一次開場白或提案台詞,🎤,false
+一階,d7,daily,P,1,覆盤一件今天做得好的事,🔍,false
+一階,d8,daily,I,1,準時開始今天的行動,⏰,false
+一階,d9,daily,I,1,完成今天排定的一件任務,✅,false
+一階,d10,daily,A,1,分享一則有價值的觀點,✨,false
+一階,wk1,weekly,I,2,出席本週固定會議／直播,📅,false
+一階,wk2,weekly,P,2,交一份週報／進度整理,📋,false
+一階,wk3,weekly,T,2,跟夥伴進行一次共學或角色扮演,🎭,false
+一階,wk4,weekly,A,2,開發一位新名單／新連結,🌱,false
+一階,wk5,weekly,T,2,幫夥伴做一次回饋或複盤,🪞,false
