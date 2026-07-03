@@ -205,7 +205,29 @@ function setup() {
     ["一階", "溝通變現・一階", true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
-  return "初始化完成";
+  var enr = enrollAll();
+  return "初始化完成；" + enr;
+}
+
+/* 把「(遊戲)學員名單」裡每個人補報名到第一個課程（已報名的跳過，不重複）。 */
+function enrollAll() {
+  var wsRows = rows_(TABS.workshops);
+  if (!wsRows.length) return "沒有課程可報名";
+  var wid = String(wsRows[0].workshopId || wsRows[0].id || "");
+  if (!ss_().getSheetByName(TABS.enrollments)) return "找不到報名分頁";
+  var existing = {};
+  rows_(TABS.enrollments).forEach(function(r) {
+    var id = String(pick_(r, COLS.enroll.lineId));
+    if (id) existing[id + "|" + String(pick_(r, COLS.enroll.workshopId))] = true;
+  });
+  var added = 0;
+  rows_(TABS.students).forEach(function(r) {
+    var id = String(pick_(r, COLS.students.lineId));
+    if (!id || existing[id + "|" + wid]) return;
+    appendMapped_(TABS.enrollments, COLS.enroll, { lineId: id, workshopId: wid });
+    added++;
+  });
+  return "已補報名 " + added + " 人（課程 " + wid + "）";
 }
 
 function ensureColumn_(tab, header) {
