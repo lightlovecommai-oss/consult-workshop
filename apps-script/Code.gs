@@ -109,6 +109,92 @@ function weekPct_(dates, today, tz) {
   return Math.round(hit / elapsed * 100);
 }
 
+/* ── 共用計算（各端點與 bootstrap 共用，單一真相）── */
+function computeStudent_(uid) {
+  var st = null;
+  rows_(TABS.students).forEach(function(r) {
+    var id = String(pick_(r, COLS.students.lineId));
+    if (id === uid) st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)) };
+  });
+  return st;
+}
+function computeConfig_() {
+  var workshops = rows_(TABS.workshops)
+    .filter(function(r){ return r.active === "" || r.active === undefined || truthy_(r.active); })
+    .map(function(r){
+      function mod(v){ return (v === "" || v === undefined) ? true : truthy_(v); }
+      return { id: String(r.workshopId || r.id || ""), name: String(r.name || ""),
+               modules: { team: mod(r.team), leaderboard: mod(r.leaderboard), badges: mod(r.badges), revenue: mod(r.revenue) } };
+    }).filter(function(w){ return w.id; });
+  var tasks = rows_(TABS.tasks).map(function(r){
+    return { workshopId: String(r.workshopId || ""), key: String(r.taskKey || r.key || ""), cadence: String(r.cadence || "once"),
+             dim: String(r.dim || ""), pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""), needReview: truthy_(r.needReview) };
+  }).filter(function(t){ return t.workshopId && t.key; });
+  var enrollments = rows_(TABS.enrollments).map(function(r){
+    return { lineId: String(pick_(r, COLS.enroll.lineId)), workshopId: String(pick_(r, COLS.enroll.workshopId)) };
+  }).filter(function(x){ return x.lineId && x.workshopId; });
+  return { workshops: workshops, tasks: tasks, enrollments: enrollments };
+}
+function computeLogs_(uid) {
+  var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
+    return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
+             cadence: String(pick_(r, COLS.checkins.cadence) || "daily"), dim: String(pick_(r, COLS.checkins.dim)),
+             pts: Number(pick_(r, COLS.checkins.pts)) || 0, date: pick_(r, COLS.checkins.date) };
+  });
+  var revenue = rows_(TABS.revenue).filter(function(r){ return String(pick_(r, COLS.revenue.lineId)) === uid; }).map(function(r){
+    return { workshopId: String(pick_(r, COLS.revenue.workshopId)), amount: Number(pick_(r, COLS.revenue.amount)) || 0,
+             date: pick_(r, COLS.revenue.date), note: String(pick_(r, COLS.revenue.note)),
+             A: Number(pick_(r, COLS.revenue.A)) || 0, T: Number(pick_(r, COLS.revenue.T)) || 0,
+             P: Number(pick_(r, COLS.revenue.P)) || 0, I: Number(pick_(r, COLS.revenue.I)) || 0 };
+  });
+  return { checkins: checkins, revenue: revenue };
+}
+function computeSelfEval_(uid) {
+  var row = rows_(TABS.quiz).filter(function(r){ return String(pick_(r, COLS.quiz.lineId)) === uid; }).pop();
+  if (!row) return null;
+  return { A: Number(pick_(row, COLS.quiz.A)) || 0, T: Number(pick_(row, COLS.quiz.T)) || 0,
+           P: Number(pick_(row, COLS.quiz.P)) || 0, I: Number(pick_(row, COLS.quiz.I)) || 0 };
+}
+function computeLeaderboard_(wid) {
+  var byUser = {};
+  rows_(TABS.checkins).forEach(function(r){
+    if (wid && String(pick_(r, COLS.checkins.workshopId)) !== wid) return;
+    var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
+    byUser[id] = (byUser[id] || 0) + (Number(pick_(r, COLS.checkins.pts)) || 0);
+  });
+  var idx = {};
+  rows_(TABS.students).forEach(function(r){
+    var id = String(pick_(r, COLS.students.lineId));
+    if (id) idx[id] = { name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)) };
+  });
+  return Object.keys(byUser).map(function(id){
+    return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "", score: byUser[id] };
+  }).sort(function(a, b){ return b.score - a.score; });
+}
+function computeTeam_(wid) {
+  var enrolled = {};
+  rows_(TABS.enrollments).forEach(function(r){ if (String(pick_(r, COLS.enroll.workshopId)) === wid) enrolled[String(pick_(r, COLS.enroll.lineId))] = true; });
+  var sinfo = {};
+  rows_(TABS.students).forEach(function(r){
+    var id = String(pick_(r, COLS.students.lineId));
+    if (id) sinfo[id] = { name: String(pick_(r, COLS.students.name)) || id, group: String(pick_(r, COLS.students.team)) };
+  });
+  var byU = {};
+  rows_(TABS.checkins).forEach(function(r){
+    if (String(pick_(r, COLS.checkins.workshopId)) !== wid) return;
+    var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
+    var m = byU[id] || (byU[id] = { invest: 0, dates: {} });
+    m.invest += Number(pick_(r, COLS.checkins.pts)) || 0;
+    var ds = normDateStr_(pick_(r, COLS.checkins.date)); if (ds) m.dates[ds] = true;
+  });
+  var tz = Session.getScriptTimeZone(), now = new Date();
+  return Object.keys(enrolled).map(function(id){
+    var m = byU[id] || { invest: 0, dates: {} };
+    return { lineId: id, name: (sinfo[id] || {}).name || id, group: (sinfo[id] || {}).group || "",
+             invest: m.invest, streak: streak_(m.dates, now, tz), weekPct: weekPct_(m.dates, now, tz) };
+  });
+}
+
 function doGet(e) {
   try {
     var p = e.parameter || {};
@@ -122,102 +208,41 @@ function doGet(e) {
     }
 
     if (action === "config") {
-      var workshops = rows_(TABS.workshops)
-        .filter(function(r){ return r.active === "" || r.active === undefined || truthy_(r.active); })
-        .map(function(r){
-          function mod(v){ return (v === "" || v === undefined) ? true : truthy_(v); }  // 空白＝開；填 false 才關
-          return { id: String(r.workshopId || r.id || ""), name: String(r.name || ""),
-                   modules: { team: mod(r.team), leaderboard: mod(r.leaderboard), badges: mod(r.badges), revenue: mod(r.revenue) } };
-        })
-        .filter(function(w){ return w.id; });
-      var tasks = rows_(TABS.tasks).map(function(r) {
-        return {
-          workshopId: String(r.workshopId || ""),
-          key:        String(r.taskKey || r.key || ""),
-          cadence:    String(r.cadence || "once"),       // once | special | daily | weekly
-          dim:        String(r.dim || ""),               // A | T | P | I
-          pts:        Number(r.pts) || 0,
-          name:       String(r.name || ""),
-          icon:       String(r.icon || ""),
-          needReview: truthy_(r.needReview)
-        };
-      }).filter(function(t){ return t.workshopId && t.key; });
-      var enrollments = rows_(TABS.enrollments).map(function(r) {
-        return { lineId: String(pick_(r, COLS.enroll.lineId)), workshopId: String(pick_(r, COLS.enroll.workshopId)) };
-      }).filter(function(x){ return x.lineId && x.workshopId; });
-      return json_({ status: "ok", workshops: workshops, tasks: tasks, enrollments: enrollments });
+      var cfg = computeConfig_();
+      return json_({ status: "ok", workshops: cfg.workshops, tasks: cfg.tasks, enrollments: cfg.enrollments });
+    }
+
+    if (action === "bootstrap") {  // 一通回傳整個儀表板需要的資料（B：減少往返）
+      var buid = String(p.userId || "");
+      var bcfg = computeConfig_();
+      var blogs = computeLogs_(buid);
+      var enrolledWids = bcfg.enrollments.filter(function(e){ return e.lineId === buid; }).map(function(e){ return e.workshopId; });
+      var defWid = "";
+      for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } }
+      if (!defWid && bcfg.workshops.length) defWid = bcfg.workshops[0].id;
+      return json_({ status: "ok", student: computeStudent_(buid),
+                     workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments,
+                     checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
+                     defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid) });
     }
 
     if (action === "logs") {
-      var uid = String(p.userId || "");
-      var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r) {
-        return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
-                 cadence: String(pick_(r, COLS.checkins.cadence) || "daily"), dim: String(pick_(r, COLS.checkins.dim)),
-                 pts: Number(pick_(r, COLS.checkins.pts)) || 0, date: pick_(r, COLS.checkins.date) };
-      });
-      var revenue = rows_(TABS.revenue).filter(function(r){ return String(pick_(r, COLS.revenue.lineId)) === uid; }).map(function(r) {
-        return { workshopId: String(pick_(r, COLS.revenue.workshopId)), amount: Number(pick_(r, COLS.revenue.amount)) || 0,
-                 date: pick_(r, COLS.revenue.date), note: String(pick_(r, COLS.revenue.note)),
-                 A: Number(pick_(r, COLS.revenue.A)) || 0, T: Number(pick_(r, COLS.revenue.T)) || 0,
-                 P: Number(pick_(r, COLS.revenue.P)) || 0, I: Number(pick_(r, COLS.revenue.I)) || 0 };
-      });
-      return json_({ status: "ok", checkins: checkins, revenue: revenue });
+      var logs = computeLogs_(String(p.userId || ""));
+      return json_({ status: "ok", checkins: logs.checkins, revenue: logs.revenue });
     }
 
     if (action === "leaderboard") {
-      var wid = String(p.workshopId || "");
-      var byUser = {};
-      rows_(TABS.checkins).forEach(function(r) {
-        if (wid && String(pick_(r, COLS.checkins.workshopId)) !== wid) return;
-        var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
-        byUser[id] = (byUser[id] || 0) + (Number(pick_(r, COLS.checkins.pts)) || 0);
-      });
-      var idx = {};
-      rows_(TABS.students).forEach(function(r) {
-        var id = String(pick_(r, COLS.students.lineId));
-        if (id) idx[id] = { name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)) };
-      });
-      var out = Object.keys(byUser).map(function(id) {
-        return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "", score: byUser[id] };
-      }).sort(function(a, b){ return b.score - a.score; });
-      return json_({ status: "ok", rows: out });
+      return json_({ status: "ok", rows: computeLeaderboard_(String(p.workshopId || "")) });
     }
 
-    if (action === "team") {  // 夥伴頁：同 workshop 每位組員的努力指標（不含成交/能力）
-      var twid = String(p.workshopId || "");
-      var enrolled = {};
-      rows_(TABS.enrollments).forEach(function(r) {
-        if (String(pick_(r, COLS.enroll.workshopId)) === twid) enrolled[String(pick_(r, COLS.enroll.lineId))] = true;
-      });
-      var sinfo = {};
-      rows_(TABS.students).forEach(function(r) {
-        var id = String(pick_(r, COLS.students.lineId));
-        if (id) sinfo[id] = { name: String(pick_(r, COLS.students.name)) || id, group: String(pick_(r, COLS.students.team)) };
-      });
-      var byU = {};
-      rows_(TABS.checkins).forEach(function(r) {
-        if (String(pick_(r, COLS.checkins.workshopId)) !== twid) return;
-        var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
-        var m = byU[id] || (byU[id] = { invest: 0, dates: {} });
-        m.invest += Number(pick_(r, COLS.checkins.pts)) || 0;
-        var ds = normDateStr_(pick_(r, COLS.checkins.date));
-        if (ds) m.dates[ds] = true;
-      });
-      var tz = Session.getScriptTimeZone(), now = new Date();
-      var members = Object.keys(enrolled).map(function(id) {
-        var m = byU[id] || { invest: 0, dates: {} };
-        return { lineId: id, name: (sinfo[id] || {}).name || id, group: (sinfo[id] || {}).group || "",
-                 invest: m.invest, streak: streak_(m.dates, now, tz), weekPct: weekPct_(m.dates, now, tz) };
-      });
-      return json_({ status: "ok", members: members });
+    if (action === "team") {
+      return json_({ status: "ok", members: computeTeam_(String(p.workshopId || "")) });
     }
 
     if (p.userId) {  // 自評（測驗結果），無 action
-      var uid2 = String(p.userId);
-      var row = rows_(TABS.quiz).filter(function(r){ return String(pick_(r, COLS.quiz.lineId)) === uid2; }).pop();
-      if (!row) return json_({ status: "none" });
-      return json_({ status: "ok", scoreA: Number(pick_(row, COLS.quiz.A)) || 0, scoreT: Number(pick_(row, COLS.quiz.T)) || 0,
-                     scoreP: Number(pick_(row, COLS.quiz.P)) || 0, scoreI: Number(pick_(row, COLS.quiz.I)) || 0 });
+      var se = computeSelfEval_(String(p.userId));
+      if (!se) return json_({ status: "none" });
+      return json_({ status: "ok", scoreA: se.A, scoreT: se.T, scoreP: se.P, scoreI: se.I });
     }
 
     return json_({ status: "error", message: "unknown action" });

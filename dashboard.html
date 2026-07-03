@@ -226,6 +226,21 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 <script>
 var current = null;
 var activeWorkshop = null;
+var LB_CACHE = {}, TEAM_CACHE = {};
+
+/* 把一通 bootstrap 的資料灌進全域狀態 */
+function applyBootstrap(d, userId) {
+  WORKSHOPS = d.workshops || [];
+  TASKS = d.tasks || [];
+  ENROLLMENTS = d.enrollments || [];
+  var st = d.student || { lineId: userId, name: userId, team: "" };
+  current = { lineId: st.lineId, name: st.name, team: st.team,
+              checkinLog: d.checkins || [], revenueLog: d.revenue || [], selfEval: d.selfEval || null };
+  current.workshops = enrolledWorkshops(userId);
+  activeWorkshop = d.defaultWorkshop || (current.workshops.length ? current.workshops[0].id : null);
+  if (d.leaderboard) LB_CACHE[activeWorkshop] = d.leaderboard;
+  if (d.team) TEAM_CACHE[activeWorkshop] = d.team;
+}
 
 function mk(tag, cls, txt) {
   var d = document.createElement(tag);
@@ -468,7 +483,8 @@ async function refreshLeaderboard(s) {
   var wsName = (s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).name || "";
   document.getElementById("lb-title").textContent = (wsName ? wsName + "・" : "") + "榮耀排行榜";
 
-  var rows = await loadLeaderboard(activeWorkshop);
+  var rows = LB_CACHE[activeWorkshop];
+  if (!rows) { rows = await loadLeaderboard(activeWorkshop); LB_CACHE[activeWorkshop] = rows; }
 
   var myIdx = rows.findIndex(function(r){ return r.lineId === s.lineId; });
   var myRank = myIdx > -1 ? myIdx + 1 : rows.length + 1;
@@ -517,7 +533,8 @@ function nudge(btn) {
 async function refreshTeam(s) {
   var box = document.getElementById("team-card");
   box.innerHTML = '<div style="font-size:12px;color:#a08060;padding:8px 4px;">載入中…</div>';
-  var members = await loadTeam(activeWorkshop);
+  var members = TEAM_CACHE[activeWorkshop];
+  if (!members) { members = await loadTeam(activeWorkshop); TEAM_CACHE[activeWorkshop] = members; }
   if (!members.length) {
     box.innerHTML = '<div class="card" style="padding:1rem;font-size:12px;color:#a08060;">這個課程還沒有夥伴資料（需要學員報名並在「團隊」欄分組）</div>';
     return;
@@ -620,31 +637,28 @@ document.getElementById("rv-submit").addEventListener("click", function() {
 });
 
 async function init() {
+  var params = new URLSearchParams(window.location.search);
+  var userId = params.get("id");
+  if (!userId) { window.location.href = "index.html"; return; }
+  var key = "boot_" + userId;
+
+  /* C：先用上次快取秒開（若有），背景再更新 */
   try {
-    var params = new URLSearchParams(window.location.search);
-    var userId = params.get("id");
-    if (!userId) { window.location.href = "index.html"; return; }
+    var cachedStr = localStorage.getItem(key);
+    if (cachedStr) { applyBootstrap(JSON.parse(cachedStr), userId); renderResult(current); }
+  } catch (e) {}
 
-    await Promise.all([loadStudents(), loadConfig()]);
-
-    var matched = STUDENTS.find(function(s) { return s.lineId === userId; });
-    if (matched) {
-      current = matched;
-      var logsP = loadLogs(userId);
-      var selfP = loadSelfEval(userId);
-      var logs = await logsP;
-      current.checkinLog = logs.checkins;
-      current.revenueLog = logs.revenue;
-      current.selfEval = await selfP;
-      current.workshops = enrolledWorkshops(userId);
-      activeWorkshop = current.workshops.length ? current.workshops[0].id : null;
-      renderResult(current);
-      return;
-    }
-  } catch(e) {
-    console.log("dashboard error:", e);
+  /* B：一通抓最新資料 */
+  var fresh = await loadBootstrap(userId);
+  if (fresh) {
+    if (!fresh.student) { window.location.href = "index.html"; return; }
+    LB_CACHE = {}; TEAM_CACHE = {};
+    applyBootstrap(fresh, userId);
+    renderResult(current);
+    try { localStorage.setItem(key, JSON.stringify(fresh)); } catch (e) {}
+    return;
   }
-  window.location.href = "index.html";
+  if (!current) { window.location.href = "index.html"; }  // 沒快取又抓不到
 }
 
 setupTaskSlider();

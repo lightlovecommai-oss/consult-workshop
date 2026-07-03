@@ -250,6 +250,28 @@ async function loadLeaderboard(workshopId) {
   }
 }
 
+/* ── Bootstrap：一通把整個儀表板需要的資料抓回來（取代 6 通分開呼叫，大幅降延遲）──
+   回傳 student/workshops/tasks/enrollments/checkins/revenue/selfEval/defaultWorkshop/leaderboard/team。 */
+async function loadBootstrap(userId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId));
+    var d = await r.json();
+    if (d.status !== "ok") return null;
+    d.checkins = (d.checkins || []).map(function(c){
+      return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
+               dim: String(c.dim || ""), pts: Number(c.pts) || 0, date: normDate(c.date), week: weekStr(new Date(c.date)) };
+    });
+    d.revenue = (d.revenue || []).map(function(e){
+      return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
+               A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
+    });
+    return d;
+  } catch (e) {
+    console.log("loadBootstrap error:", e);
+    return null;
+  }
+}
+
 /* ── 夥伴頁：該課程每位組員的努力指標（連續天數/本週完成率/投入分）── */
 async function loadTeam(workshopId) {
   try {
