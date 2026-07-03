@@ -124,7 +124,11 @@ function doGet(e) {
     if (action === "config") {
       var workshops = rows_(TABS.workshops)
         .filter(function(r){ return r.active === "" || r.active === undefined || truthy_(r.active); })
-        .map(function(r){ return { id: String(r.workshopId || r.id || ""), name: String(r.name || "") }; })
+        .map(function(r){
+          function mod(v){ return (v === "" || v === undefined) ? true : truthy_(v); }  // 空白＝開；填 false 才關
+          return { id: String(r.workshopId || r.id || ""), name: String(r.name || ""),
+                   modules: { team: mod(r.team), leaderboard: mod(r.leaderboard), badges: mod(r.badges), revenue: mod(r.revenue) } };
+        })
         .filter(function(w){ return w.id; });
       var tasks = rows_(TABS.tasks).map(function(r) {
         return {

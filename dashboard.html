@@ -85,7 +85,8 @@
     <div style="font-size:12px;color:#a08060;margin-bottom:6px;">選擇課程</div>
     <div class="ws-pills" id="ws-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
 
-    <!-- 回報成交 -->
+    <!-- 回報成交（可開關模組）-->
+    <div id="sec-revenue">
     <div class="section-head">
       <div class="section-icon">💰</div>
       <div class="section-title">回報成交</div>
@@ -101,6 +102,7 @@
 
     <!-- 潛力值 × 金額走勢圖 -->
     <div class="card" style="padding:1rem;margin-bottom:14px;" id="r-trend-card"></div>
+    </div>
 
     <!-- 任務（滑動式分頁卡片，左右滑或點上方切換） -->
     <div class="task-tabs" id="task-tabs">
@@ -142,17 +144,23 @@
       </div>
     </div>
 
-    <!-- 徽章牆 -->
+    <!-- 徽章牆（可開關模組）-->
+    <div id="sec-badges">
     <div class="btitle">實戰徽章</div>
     <div class="badgegrid" id="badge-grid"></div>
+    </div>
 
-    <!-- 夥伴・我的小組 -->
+    <!-- 夥伴・我的小組（可開關模組）-->
+    <div id="sec-team">
     <div class="btitle">夥伴・我的小組</div>
     <div id="team-card" style="margin-bottom:1rem;"></div>
+    </div>
 
-    <!-- 榮耀榜 -->
+    <!-- 榮耀榜（可開關模組）-->
+    <div id="sec-leaderboard">
     <div class="btitle" id="lb-title">榮耀排行榜</div>
     <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
+    </div>
 
     <div class="copybox">出席、分享、作業、PK 幫你累積投入，把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。這就是變現型顧問的養成路徑。</div>
 
@@ -329,8 +337,16 @@ function renderResult(s) {
     bg.appendChild(c);
   });
 
-  refreshLeaderboard(s);
-  refreshTeam(s);
+  /* 模組開關：依所選課程的 modules 設定，顯示/隱藏板塊（未設定＝預設開）*/
+  var mods = (s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {};
+  function showSec(id, on) { var el = document.getElementById(id); if (el) el.style.display = (on === false) ? "none" : ""; }
+  showSec("sec-revenue", mods.revenue);
+  showSec("sec-badges", mods.badges);
+  showSec("sec-team", mods.team);
+  showSec("sec-leaderboard", mods.leaderboard);
+
+  if (mods.leaderboard !== false) refreshLeaderboard(s);
+  if (mods.team !== false) refreshTeam(s);
   setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
   updateTaskSliderHeight();
 }
