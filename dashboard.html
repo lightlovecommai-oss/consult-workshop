@@ -5,197 +5,213 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>變現型顧問實戰營・成長儀表板</title>
 <link rel="stylesheet" href="common.css">
+<style>
+.tabpanel{display:none;}
+.tabpanel.active{display:block;}
+.botnav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e8ddd2;padding:7px 0 max(10px,env(safe-area-inset-bottom));}
+.botnav button{flex:1;background:none;border:0;color:#b4b2a9;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;}
+.botnav button .ic{font-size:19px;line-height:1;}
+.botnav button.active{color:#e8734a;}
+details.foldcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;margin-bottom:12px;}
+details.foldcard>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;color:#6b4c30;font-weight:500;display:flex;justify-content:space-between;align-items:center;}
+details.foldcard>summary::-webkit-details-marker{display:none;}
+details.foldcard>summary::after{content:"▾";color:#a08060;font-size:12px;}
+details.foldcard[open]>summary::after{content:"▴";}
+details.foldcard .foldbody{padding:0 14px 14px;}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="card" style="padding:1.25rem;">
+  <div class="card" style="padding:1.25rem 1.25rem 90px;">
 
-    <!-- 頂部 bar -->
+    <!-- 頂部 bar（三分頁共用）-->
     <div class="dash-topbar">
       <div class="dash-topbar-title">變現型顧問實戰營</div>
       <div class="dash-topbar-name" id="r-topname"></div>
     </div>
 
-    <!-- 角色主卡 -->
-    <div class="charcard">
-      <div class="charcard-top">
-        <div class="char-avatar">🧠</div>
-        <div class="char-info">
-          <div class="char-role-pill" id="r-role"></div>
-          <div class="char-name" id="r-charname"></div>
-          <div class="char-lv">Lv <span id="r-lv"></span> <span class="char-lv-max" id="r-lv-max"></span></div>
+    <!-- ═══ 分頁 1：能力（首頁）＝ 能力 + 回報成交 + 任務 ═══ -->
+    <div class="tabpanel active" data-tab="ability">
+
+      <div class="charcard">
+        <div class="charcard-top">
+          <div class="char-avatar">🧠</div>
+          <div class="char-info">
+            <div class="char-role-pill" id="r-role"></div>
+            <div class="char-name" id="r-charname"></div>
+            <div class="char-lv">Lv <span id="r-lv"></span> <span class="char-lv-max" id="r-lv-max"></span></div>
+          </div>
+        </div>
+        <div class="hp-row">
+          <div class="hp-label">❤️</div>
+          <div class="hp-bar-wrap"><div class="hp-bar" id="r-hpbar"></div></div>
+          <div class="hp-num" id="r-hpnum"></div>
         </div>
       </div>
-      <div class="hp-row">
-        <div class="hp-label">❤️</div>
-        <div class="hp-bar-wrap"><div class="hp-bar" id="r-hpbar"></div></div>
-        <div class="hp-num" id="r-hpnum"></div>
-      </div>
-    </div>
 
-    <!-- 積分統計 -->
-    <div class="stat-row">
-      <div class="stat-cell">
-        <div class="stat-lbl">⭐ 個人積分</div>
-        <div class="stat-val" id="r-score"></div>
-        <div class="stat-sub">累計投入分</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-lbl">🏆 戰隊</div>
-        <div class="stat-val blue" id="r-team-name"></div>
-        <div class="stat-sub" id="r-team-rank"></div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-lbl">📊 本班排名</div>
-        <div class="stat-val green" id="r-rank"></div>
-        <div class="stat-sub" id="r-rank-sub"></div>
-      </div>
-    </div>
-
-    <!-- 雷達圖 -->
-    <div class="radar-wrap">
-      <div class="radar-label">四維能力圖（跨所有課程合併）</div>
-      <svg id="radar" viewBox="0 0 260 270" width="260" height="270" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"></svg>
-      <div class="dimgrid2" id="dim-grid2"></div>
-    </div>
-
-    <!-- 自評起點 × 市場驗證（有測驗資料才顯示） -->
-    <div class="card" style="padding:1rem;margin-bottom:12px;display:none;" id="selfeval-card"></div>
-
-    <!-- 變現流程甜蜜點 -->
-    <div class="strcard">
-      <div class="strlbl">你的變現流程甜蜜點</div>
-      <div class="combo-badges" id="r-combo-badges"></div>
-      <div class="strname" id="r-combo-title"></div>
-      <div class="strdesc" id="r-combo-flow"></div>
-    </div>
-
-    <!-- 下一步提示 -->
-    <div style="background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:14px;padding:1rem 1.25rem;margin-bottom:12px;color:#fff;">
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">下一階段目標</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.9);margin-bottom:10px;" id="r-next"></div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">最需補強</div>
-      <div style="font-size:14px;font-weight:500;color:#f0c882;" id="r-weak"></div>
-    </div>
-
-    <!-- 潛力值 -->
-    <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
-
-    <!-- 課程切換（一次開多班時，切這裡任務／回報／排行榜都跟著換） -->
-    <div style="font-size:12px;color:#a08060;margin-bottom:6px;">選擇課程</div>
-    <div class="ws-pills" id="ws-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
-
-    <!-- 回報成交（可開關模組）-->
-    <div id="sec-revenue">
-    <div class="section-head">
-      <div class="section-icon">💰</div>
-      <div class="section-title">回報成交</div>
-    </div>
-    <div class="card" style="padding:1rem;margin-bottom:14px;">
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <input id="rv-amount" type="number" placeholder="金額（例如 5000）" style="flex:1;min-width:0;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;">
-        <button class="btn-go" id="rv-submit" style="flex-shrink:0;">回報</button>
-      </div>
-      <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" style="width:100%;box-sizing:border-box;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px;">
-      <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
-    </div>
-
-    <!-- 潛力值 × 金額走勢圖 -->
-    <div class="card" style="padding:1rem;margin-bottom:14px;" id="r-trend-card"></div>
-    </div>
-
-    <!-- 任務（滑動式分頁卡片，左右滑或點上方切換） -->
-    <div class="task-tabs" id="task-tabs">
-      <button class="task-tab active" type="button">☀️ 每日</button>
-      <button class="task-tab" type="button">🗓️ 每週</button>
-      <button class="task-tab" type="button">📅 專案</button>
-      <button class="task-tab" type="button">💎 特殊</button>
-    </div>
-    <div class="task-slider" id="task-slider">
-      <!-- 每日 -->
-      <div class="task-panel">
-        <div class="task-panel-head">
-          <div class="task-panel-cap" id="r-daily-caption"></div>
-          <div class="date-pill" id="r-daily-cap"></div>
+      <div class="stat-row">
+        <div class="stat-cell">
+          <div class="stat-lbl">⭐ 個人積分</div>
+          <div class="stat-val" id="r-score"></div>
+          <div class="stat-sub">累計投入分</div>
         </div>
-        <div id="daily-task-list"></div>
-      </div>
-      <!-- 每週 -->
-      <div class="task-panel">
-        <div class="task-panel-head">
-          <div class="task-panel-cap" id="r-weekly-caption"></div>
-          <div class="date-pill" id="r-weekly-cap"></div>
+        <div class="stat-cell">
+          <div class="stat-lbl">🏆 戰隊</div>
+          <div class="stat-val blue" id="r-team-name"></div>
+          <div class="stat-sub" id="r-team-rank"></div>
         </div>
-        <div id="weekly-task-list"></div>
-      </div>
-      <!-- 專案 -->
-      <div class="task-panel">
-        <div class="task-panel-head" style="justify-content:flex-end;">
-          <div class="date-pill" id="r-date"></div>
+        <div class="stat-cell">
+          <div class="stat-lbl">📊 本班排名</div>
+          <div class="stat-val green" id="r-rank"></div>
+          <div class="stat-sub" id="r-rank-sub"></div>
         </div>
-        <div id="task-list"></div>
       </div>
-      <!-- 特殊（需審核） -->
-      <div class="task-panel">
-        <div class="task-panel-head" style="justify-content:flex-end;">
-          <div class="need-review-badge">⏱ 需導師審核</div>
+
+      <div class="radar-wrap">
+        <div class="radar-label">四維能力圖（跨所有課程合併）</div>
+        <svg id="radar" viewBox="0 0 260 270" width="260" height="270" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"></svg>
+        <div class="dimgrid2" id="dim-grid2"></div>
+      </div>
+
+      <!-- 自評起點 × 市場驗證（有測驗資料才顯示） -->
+      <div class="card" style="padding:1rem;margin-bottom:12px;display:none;" id="selfeval-card"></div>
+
+      <!-- 潛力值 -->
+      <div id="r-potential-card" style="background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:14px 16px;margin-bottom:12px;"></div>
+
+      <!-- 三個收合卡片（平常縮起來，點箭頭展開） -->
+      <details class="foldcard">
+        <summary>變現流程甜蜜點</summary>
+        <div class="foldbody">
+          <div class="combo-badges" id="r-combo-badges" style="margin-bottom:8px;"></div>
+          <div class="strname" id="r-combo-title"></div>
+          <div class="strdesc" id="r-combo-flow"></div>
         </div>
-        <div id="special-task-list"></div>
+      </details>
+
+      <details class="foldcard">
+        <summary>最需補強 & 下一步</summary>
+        <div class="foldbody">
+          <div style="background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:14px;padding:1rem 1.25rem;color:#fff;">
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">下一階段目標</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.9);margin-bottom:10px;" id="r-next"></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">最需補強</div>
+            <div style="font-size:14px;font-weight:500;color:#f0c882;" id="r-weak"></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="foldcard" id="fold-trend">
+        <summary>潛力值 × 金額走勢</summary>
+        <div class="foldbody"><div id="r-trend-card"></div></div>
+      </details>
+
+      <!-- 課程切換 -->
+      <div style="font-size:12px;color:#a08060;margin-bottom:6px;">選擇課程</div>
+      <div class="ws-pills" id="ws-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+      <!-- 回報成交（可開關模組，放在任務上面，養成一變現就輸入）-->
+      <div id="sec-revenue">
+        <div class="section-head">
+          <div class="section-icon">💰</div>
+          <div class="section-title">回報成交</div>
+        </div>
+        <div class="card" style="padding:1rem;margin-bottom:14px;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <input id="rv-amount" type="number" placeholder="金額（例如 5000）" style="flex:1;min-width:0;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <button class="btn-go" id="rv-submit" style="flex-shrink:0;">回報</button>
+          </div>
+          <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" style="width:100%;box-sizing:border-box;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px;">
+          <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
+        </div>
+      </div>
+
+      <!-- 任務（滑動式分頁卡片，左右滑或點上方切換） -->
+      <div class="task-tabs" id="task-tabs">
+        <button class="task-tab active" type="button">☀️ 每日</button>
+        <button class="task-tab" type="button">🗓️ 每週</button>
+        <button class="task-tab" type="button">📅 專案</button>
+        <button class="task-tab" type="button">💎 特殊</button>
+      </div>
+      <div class="task-slider" id="task-slider">
+        <div class="task-panel">
+          <div class="task-panel-head">
+            <div class="task-panel-cap" id="r-daily-caption"></div>
+            <div class="date-pill" id="r-daily-cap"></div>
+          </div>
+          <div id="daily-task-list"></div>
+        </div>
+        <div class="task-panel">
+          <div class="task-panel-head">
+            <div class="task-panel-cap" id="r-weekly-caption"></div>
+            <div class="date-pill" id="r-weekly-cap"></div>
+          </div>
+          <div id="weekly-task-list"></div>
+        </div>
+        <div class="task-panel">
+          <div class="task-panel-head" style="justify-content:flex-end;">
+            <div class="date-pill" id="r-date"></div>
+          </div>
+          <div id="task-list"></div>
+        </div>
+        <div class="task-panel">
+          <div class="task-panel-head" style="justify-content:flex-end;">
+            <div class="need-review-badge">⏱ 需導師審核</div>
+          </div>
+          <div id="special-task-list"></div>
+        </div>
+      </div>
+
+      <div class="copybox">任務幫你累積投入、把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。</div>
+
+      <!-- 計分規則說明（收合） -->
+      <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（點開看你的分數怎麼算）</summary>
+        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">能力分數怎麼算？</div>
+          <div style="margin-bottom:12px;">四維能力＝ <strong>你的投入 × 市場的驗證</strong>。投入＝所有課程的任務累積（合併）；市場驗證＝你回報的成交（金額＋筆數）。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">為什麼做了任務分數還不高？</div>
+          <div style="margin-bottom:12px;">能力要「市場買單」才算數。還沒成交前只先兌現一半（保底 50%），提醒你<strong>把練習變成真的成交</strong>。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">怎麼完全解鎖？</div>
+          <div style="margin-bottom:12px;">反覆成交。系統同時看「累計金額」和「簽單數」，兩個都要到位，能力就一格格解鎖到滿。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">變現潛力值？</div>
+          <div>四力相乘（A×T×P×I），任一維是 0 潛力就是 0——四力要均衡，不能偏科。</div>
+        </div>
+      </details>
+
+      <button class="btnN ready" id="btn-back">← 換個人查看</button>
+
+    </div>
+
+    <!-- ═══ 分頁 2：成就 ═══ -->
+    <div class="tabpanel" data-tab="honor">
+      <div id="sec-badges">
+        <div class="btitle">實戰徽章</div>
+        <div class="badgegrid" id="badge-grid"></div>
+      </div>
+      <div class="card" style="padding:1.25rem 1rem;font-size:12px;color:#a08060;text-align:center;margin-top:4px;">更多榮譽系統陸續開放中 🏅</div>
+    </div>
+
+    <!-- ═══ 分頁 3：排行榜 ═══ -->
+    <div class="tabpanel" data-tab="rank">
+      <div id="sec-team">
+        <div class="btitle">夥伴・我的小組</div>
+        <div id="team-card" style="margin-bottom:1rem;"></div>
+      </div>
+      <div id="sec-leaderboard">
+        <div class="btitle" id="lb-title">榮耀排行榜</div>
+        <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
       </div>
     </div>
-
-    <!-- 徽章牆（可開關模組）-->
-    <div id="sec-badges">
-    <div class="btitle">實戰徽章</div>
-    <div class="badgegrid" id="badge-grid"></div>
-    </div>
-
-    <!-- 夥伴・我的小組（可開關模組）-->
-    <div id="sec-team">
-    <div class="btitle">夥伴・我的小組</div>
-    <div id="team-card" style="margin-bottom:1rem;"></div>
-    </div>
-
-    <!-- 榮耀榜（可開關模組）-->
-    <div id="sec-leaderboard">
-    <div class="btitle" id="lb-title">榮耀排行榜</div>
-    <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
-    </div>
-
-    <div class="copybox">出席、分享、作業、PK 幫你累積投入，把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。這就是變現型顧問的養成路徑。</div>
-
-    <!-- 計分規則說明（預設收合，放最底部不占版面） -->
-    <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-      <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（點開看你的分數怎麼算）</summary>
-      <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">能力分數怎麼算？</div>
-        <div style="margin-bottom:12px;">你的四維能力（吸引力・信任力・專業力・推進力）＝ <strong>你的投入 × 市場的驗證</strong>。<br>投入＝所有課程的任務累積（合併計算）；市場驗證＝你實際回報的成交（金額＋筆數）。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">為什麼我做了任務，分數還是不高？</div>
-        <div style="margin-bottom:12px;">因為能力要「市場買單」才算數。做功課讓你有潛力，但在還沒成交前，只先兌現一半（保底 50%）。這不是打擊你，是提醒你——<strong>把練習變成真的成交</strong>。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">怎麼把分數完全解鎖？</div>
-        <div style="margin-bottom:12px;">反覆成交。系統同時看「累計金額」和「簽單數」，<strong>兩個都要到位</strong>（避免靠一張大單灌水）。持續簽得下來，能力就一格一格解鎖到滿。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">變現潛力值怎麼算？</div>
-        <div style="margin-bottom:12px;">四力相乘（A×T×P×I）。因為是相乘，<strong>任何一維是 0，潛力就是 0</strong>——四力要均衡發展，不能偏科。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">一次上多個課程怎麼算？</div>
-        <div style="margin-bottom:12px;">能力（雷達圖／潛力值）是<strong>你這個人</strong>的，所有課程的投入合併算成一份。任務區與排行榜則依你選的課程各自呈現，排行榜同課程同儕比較。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">任務規則</div>
-        <div style="margin-bottom:12px;">每日任務：每天最多算 3 項，隔天重置。<br>每週任務：每週最多算 2 項，下週重開。<br>專案任務：一次性。特殊任務：需導師審核後計分。</div>
-
-        <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">自評 vs 市場</div>
-        <div>測驗的自評分數只是你的「起點假設」，儀表板顯示的是「市場驗證後」的能力。兩者不同很正常——目標是讓市場驗證追上、甚至超過你當初的自評。</div>
-
-      </div>
-    </details>
-
-    <button class="btnN ready" id="btn-back">← 換個人查看</button>
 
   </div>
+</div>
+
+<!-- 底部分頁列 -->
+<div class="botnav">
+  <button id="nav-ability" data-tab="ability" class="active" onclick="switchTab('ability')"><span class="ic">🎯</span>能力</button>
+  <button id="nav-honor" data-tab="honor" onclick="switchTab('honor')"><span class="ic">🏅</span>成就</button>
+  <button id="nav-rank" data-tab="rank" onclick="switchTab('rank')"><span class="ic">🏆</span>排行榜</button>
 </div>
 
 <script src="atpi-core.js"></script>
@@ -209,6 +225,29 @@ function mk(tag, cls, txt) {
   if (cls) d.className = cls;
   if (txt !== undefined) d.textContent = txt;
   return d;
+}
+
+/* ── 底部分頁切換 ── */
+function switchTab(name) {
+  Array.prototype.forEach.call(document.querySelectorAll(".tabpanel"), function(p) {
+    p.classList.toggle("active", p.getAttribute("data-tab") === name);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".botnav button"), function(b) {
+    b.classList.toggle("active", b.getAttribute("data-tab") === name);
+  });
+  window.scrollTo(0, 0);
+  if (name === "ability") updateTaskSliderHeight();
+}
+/* 模組全關時隱藏對應分頁；若正看的分頁被關，切回能力 */
+function updateTabVisibility(honorOn, rankOn) {
+  var nh = document.getElementById("nav-honor"), nr = document.getElementById("nav-rank");
+  if (nh) nh.style.display = honorOn ? "" : "none";
+  if (nr) nr.style.display = rankOn ? "" : "none";
+  var active = document.querySelector(".tabpanel.active");
+  if (active) {
+    var t = active.getAttribute("data-tab");
+    if ((t === "honor" && !honorOn) || (t === "rank" && !rankOn)) switchTab("ability");
+  }
 }
 
 /* ── 課程切換 pills ── */
@@ -337,13 +376,15 @@ function renderResult(s) {
     bg.appendChild(c);
   });
 
-  /* 模組開關：依所選課程的 modules 設定，顯示/隱藏板塊（未設定＝預設開）*/
+  /* 模組開關：依所選課程 modules 顯示/隱藏板塊 + 分頁（未設定＝預設開）*/
   var mods = (s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {};
   function showSec(id, on) { var el = document.getElementById(id); if (el) el.style.display = (on === false) ? "none" : ""; }
   showSec("sec-revenue", mods.revenue);
+  showSec("fold-trend", mods.revenue);
   showSec("sec-badges", mods.badges);
   showSec("sec-team", mods.team);
   showSec("sec-leaderboard", mods.leaderboard);
+  updateTabVisibility(mods.badges !== false, (mods.team !== false || mods.leaderboard !== false));
 
   if (mods.leaderboard !== false) refreshLeaderboard(s);
   if (mods.team !== false) refreshTeam(s);
@@ -419,20 +460,17 @@ async function refreshLeaderboard(s) {
 
   var rows = await loadLeaderboard(activeWorkshop);
 
-  /* 本班個人排名 */
   var myIdx = rows.findIndex(function(r){ return r.lineId === s.lineId; });
   var myRank = myIdx > -1 ? myIdx + 1 : rows.length + 1;
   document.getElementById("r-rank").textContent = myRank + "th";
   document.getElementById("r-rank-sub").textContent = "共 " + rows.length + " 人";
 
-  /* 戰隊排名（用榜單分數依團隊加總） */
   var teams = {};
   rows.forEach(function(r){ var t = r.team || "無"; teams[t] = (teams[t] || 0) + r.score; });
   var teamSorted = Object.keys(teams).sort(function(a, b){ return teams[b] - teams[a]; });
   var myTeamRank = teamSorted.indexOf(s.team || "無");
   document.getElementById("r-team-rank").textContent = myTeamRank > -1 ? "第 " + (myTeamRank + 1) + " 名" : "—";
 
-  /* 榜單前 8 */
   var box = document.getElementById("leaderboard");
   box.innerHTML = "";
   var cap = mk("div", null, "依本課程任務累計分");
