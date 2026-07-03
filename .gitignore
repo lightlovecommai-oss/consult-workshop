@@ -1,0 +1,5 @@
+# macOS 系統檔
+.DS_Store
+
+# 本機設定
+.claude/
