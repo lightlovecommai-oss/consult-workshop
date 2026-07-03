@@ -250,6 +250,18 @@ async function loadLeaderboard(workshopId) {
   }
 }
 
+/* ── 夥伴頁：該課程每位組員的努力指標（連續天數/本週完成率/投入分）── */
+async function loadTeam(workshopId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=team&workshopId=" + encodeURIComponent(workshopId || ""));
+    var d = await r.json();
+    return d.status === "ok" ? d.members : [];
+  } catch (e) {
+    console.log("loadTeam error:", e);
+    return [];
+  }
+}
+
 /* ── 自評起點：讀回測驗自評 ATPI（只當對照顯示，不進計分）── */
 async function loadSelfEval(userId) {
   try {

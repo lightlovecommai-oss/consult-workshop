@@ -146,6 +146,10 @@
     <div class="btitle">實戰徽章</div>
     <div class="badgegrid" id="badge-grid"></div>
 
+    <!-- 夥伴・我的小組 -->
+    <div class="btitle">夥伴・我的小組</div>
+    <div id="team-card" style="margin-bottom:1rem;"></div>
+
     <!-- 榮耀榜 -->
     <div class="btitle" id="lb-title">榮耀排行榜</div>
     <div class="card" style="padding:.5rem .75rem;margin-bottom:1rem;" id="leaderboard"></div>
@@ -326,6 +330,7 @@ function renderResult(s) {
   });
 
   refreshLeaderboard(s);
+  refreshTeam(s);
   setTimeout(function() { drawRadarSVG(document.getElementById("radar"), scores); }, 100);
   updateTaskSliderHeight();
 }
@@ -435,6 +440,72 @@ async function refreshLeaderboard(s) {
     row.appendChild(mk("div","lbscore", r.score + " 分"));
     box.appendChild(row);
   });
+}
+
+/* ── 夥伴・我的小組（努力數據 + 待進步 + 組別榜）── */
+function nudge(btn) {
+  btn.textContent = "已加油 ✓";
+  btn.disabled = true;
+  btn.style.background = "#f0e9df";
+  btn.style.color = "#a08060";
+}
+
+async function refreshTeam(s) {
+  var box = document.getElementById("team-card");
+  box.innerHTML = '<div style="font-size:12px;color:#a08060;padding:8px 4px;">載入中…</div>';
+  var members = await loadTeam(activeWorkshop);
+  if (!members.length) {
+    box.innerHTML = '<div class="card" style="padding:1rem;font-size:12px;color:#a08060;">這個課程還沒有夥伴資料（需要學員報名並在「團隊」欄分組）</div>';
+    return;
+  }
+  function esc(t) { return String(t).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
+
+  var myGroup = s.team || (members.find(function(m){ return m.lineId === s.lineId; }) || {}).group || "";
+  var mine = members.filter(function(m){ return (m.group || "") === myGroup; });
+  if (!mine.length) mine = members;
+
+  var groups = {};
+  members.forEach(function(m){ var g = m.group || "未分組"; (groups[g] = groups[g] || []).push(m); });
+  var groupRows = Object.keys(groups).map(function(g){
+    var a = groups[g];
+    return { group: g, avg: Math.round(a.reduce(function(x,m){ return x + m.invest; }, 0) / a.length) };
+  }).sort(function(a,b){ return b.avg - a.avg; });
+  var myRank = groupRows.findIndex(function(g){ return g.group === myGroup; }) + 1;
+  var myAvg = (groupRows.find(function(g){ return g.group === myGroup; }) || {avg:"-"}).avg;
+
+  var weekAvg = Math.round(mine.reduce(function(x,m){ return x + m.weekPct; }, 0) / mine.length);
+  var boost = mine.filter(function(m){ return m.weekPct < weekAvg; }).sort(function(a,b){ return a.weekPct - b.weekPct; });
+  var ok = mine.filter(function(m){ return m.weekPct >= weekAvg; }).sort(function(a,b){ return b.weekPct - a.weekPct; });
+
+  function row(m, boostFlag) {
+    var you = m.lineId === s.lineId ? '<span style="color:#a08060;font-size:11px;font-weight:400;">（你）</span>' : '';
+    var btn = boostFlag ? '<button class="btn-go" style="padding:5px 12px;font-size:12px;flex-shrink:0;" onclick="nudge(this)">👊 加油</button>' : '';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0e9df;">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:13px;color:#2d1f0f;' + (m.lineId === s.lineId ? 'font-weight:600;' : '') + '">' + esc(m.name) + you + '</div>'
+      + '<div style="font-size:11px;color:' + (boostFlag ? '#c26b3a' : '#a08060') + ';">連 ' + m.streak + ' 天　本週 ' + m.weekPct + '%　投入 ' + m.invest + '</div>'
+      + '</div>' + btn + '</div>';
+  }
+
+  var html = '<div style="font-size:15px;font-weight:700;color:#2d1f0f;">我的小組・' + esc(myGroup || "未分組") + '</div>'
+    + '<div style="font-size:12px;color:#a08060;margin:2px 0 12px;">組平均 <strong style="color:#e8734a;">' + myAvg + ' 分</strong>　全班第 <strong style="color:#e8734a;">' + myRank + '</strong> / ' + groupRows.length + ' 組</div>'
+    + '<div class="card" style="padding:0 12px;margin-bottom:12px;">' + ok.map(function(m){ return row(m, false); }).join("") + '</div>';
+
+  if (boost.length) {
+    html += '<div style="font-size:11px;color:#c26b3a;font-weight:600;margin-bottom:6px;">⚡ 待進步空間（本週完成率低於組平均，去拉他一把）</div>'
+      + '<div style="background:#fff4ec;border:1px solid #f0c9b0;border-radius:14px;padding:0 12px;margin-bottom:12px;">' + boost.map(function(m){ return row(m, true); }).join("") + '</div>';
+  }
+
+  html += '<div style="font-size:12px;color:#a08060;font-weight:600;margin-bottom:6px;">組別榜（比平均投入分）</div>'
+    + '<div class="card" style="padding:2px 12px;">' + groupRows.map(function(g, i){
+      var me = g.group === myGroup;
+      return '<div style="display:flex;gap:8px;padding:7px 0;font-size:12px;' + (me ? "font-weight:600;" : "") + 'border-bottom:1px solid #f0e9df;">'
+        + '<span style="width:18px;color:' + (i === 0 ? "#c8a84b" : me ? "#e8734a" : "#a08060") + ';font-weight:700;">' + (i+1) + '</span>'
+        + '<span style="flex:1;color:#2d1f0f;">' + esc(g.group) + (me ? " ★" : "") + '</span>'
+        + '<span style="color:' + (me ? "#e8734a" : "#a08060") + ';">' + g.avg + '</span></div>';
+    }).join("") + '</div>';
+
+  box.innerHTML = html;
 }
 
 /* ── 任務滑動分頁 ── */
