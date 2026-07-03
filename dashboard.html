@@ -21,6 +21,61 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 #loading-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#fdfaf6;}
 .spinner{width:34px;height:34px;border:3px solid #ede4da;border-top-color:#e8734a;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── 榮譽系統 ── */
+.honor-banner{background:linear-gradient(160deg,#2d1f0f,#5a3d1c);border-radius:16px;padding:18px 16px;text-align:center;color:#fff;margin-bottom:14px;box-shadow:0 4px 18px rgba(90,61,28,.25);}
+.honor-banner .hb-crown{font-size:30px;line-height:1;margin-bottom:2px;}
+.honor-banner .hb-title{font-size:20px;font-weight:800;color:#f6d68a;letter-spacing:1px;}
+.honor-banner .hb-sub{font-size:12px;color:rgba(255,255,255,.72);margin-top:5px;}
+
+.honor-next-card{background:#fff4ec;border:1px solid #f0c9b0;border-radius:14px;padding:12px 14px;margin-bottom:16px;}
+.honor-next-card .hn-title{font-size:12px;font-weight:700;color:#c26b3a;margin-bottom:8px;}
+.hn-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.hn-row:last-child{margin-bottom:0;}
+.hn-name{font-size:12px;color:#2d1f0f;flex:0 0 46%;}
+.hn-bar{flex:1;height:6px;background:#f0dccb;border-radius:3px;overflow:hidden;}
+.hn-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,#e8734a,#c8a84b);}
+
+.honorgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.honor{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px 10px;text-align:center;}
+.honor.locked{opacity:.42;filter:grayscale(.55);}
+.honor .hicon{font-size:26px;margin-bottom:4px;line-height:1;}
+.honor .hname{font-size:12px;font-weight:600;color:#2d1f0f;}
+.honor .hdesc{font-size:10.5px;color:#a08060;margin-top:3px;line-height:1.35;}
+.honor.rare{border-color:#e8b23a;background:linear-gradient(160deg,#fffdf6,#fff4dd);}
+.honor.legend{border:0;background:linear-gradient(160deg,#3a2a12,#6b4a1e);box-shadow:0 4px 16px rgba(200,140,40,.28);}
+.honor.legend .hname{color:#f6d68a;}
+.honor.legend .hdesc{color:rgba(255,255,255,.62);}
+.honor.rare.locked,.honor.legend.locked{background:#fff;box-shadow:none;}
+.honor.legend.locked .hname{color:#2d1f0f;}
+.honor.legend.locked .hdesc{color:#a08060;}
+
+.dimbadgewrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.dimbadge{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:11px 12px;}
+.dimbadge.locked{opacity:.7;}
+.dimbadge.silver{background:linear-gradient(160deg,#fff,#f2f4f6);}
+.dimbadge.gold{background:linear-gradient(160deg,#fffdf5,#fff2cf);border-color:#e8c96a;}
+.dimbadge.diamond{background:linear-gradient(160deg,#f6fdff,#e3f6fb);border-color:#8fd3e0;box-shadow:0 2px 10px rgba(90,180,200,.2);}
+.dimbadge-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dimbadge-medal{font-size:24px;line-height:1;}
+.dimbadge-info{min-width:0;}
+.dimbadge-name{font-size:13px;font-weight:700;}
+.dimbadge-tier{font-size:10.5px;color:#a08060;margin-top:1px;}
+.dimbadge-bar{height:5px;background:#ede4da;border-radius:3px;overflow:hidden;margin-bottom:5px;}
+.dimbadge-fill{height:5px;border-radius:3px;}
+.dimbadge-hint{font-size:10px;color:#a08060;}
+
+/* ── 解鎖慶祝彈窗 ── */
+.celebrate-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(20,12,4,.72);padding:24px;}
+.celebrate-card{position:relative;background:linear-gradient(165deg,#2d1f0f,#5a3d1c);border-radius:22px;padding:34px 26px 26px;text-align:center;color:#fff;max-width:300px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden;animation:pop .4s cubic-bezier(.2,1.3,.5,1);}
+@keyframes pop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.cc-glow{position:absolute;top:-38%;left:50%;width:200px;height:200px;transform:translateX(-50%);background:radial-gradient(circle,rgba(246,214,138,.5),transparent 65%);animation:spin 6s linear infinite;}
+.cc-glow.big{width:270px;height:270px;background:radial-gradient(circle,rgba(246,214,138,.78),transparent 62%);}
+.cc-icon{position:relative;font-size:60px;line-height:1;margin-bottom:8px;animation:pop .5s .15s both cubic-bezier(.2,1.5,.5,1);}
+.cc-label{position:relative;font-size:12px;letter-spacing:3px;color:#f6d68a;font-weight:600;}
+.cc-name{position:relative;font-size:23px;font-weight:800;color:#fff;margin:4px 0 6px;}
+.cc-desc{position:relative;font-size:12.5px;color:rgba(255,255,255,.72);margin-bottom:20px;line-height:1.5;}
+.cc-btn{position:relative;background:linear-gradient(90deg,#e8734a,#c8a84b);color:#fff;border:0;border-radius:22px;padding:11px 30px;font-size:14px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -183,17 +238,25 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         </div>
       </details>
 
-      <button class="btnN ready" id="btn-back">← 換個人查看</button>
-
     </div>
 
     <!-- ═══ 分頁 2：成就 ═══ -->
     <div class="tabpanel" data-tab="honor">
       <div id="sec-badges">
-        <div class="btitle">實戰徽章</div>
-        <div class="badgegrid" id="badge-grid"></div>
+        <!-- 稱號橫幅 -->
+        <div class="honor-banner" id="honor-banner"></div>
+        <!-- 就快了 -->
+        <div id="honor-next"></div>
+        <!-- 💎 變現榮譽 -->
+        <div class="btitle">💎 變現榮譽・真本事才解得開</div>
+        <div class="honorgrid" id="honor-revenue"></div>
+        <!-- 🏅 四維分級徽章 -->
+        <div class="btitle">🏅 四維實戰徽章</div>
+        <div class="dimbadgewrap" id="honor-dim"></div>
+        <!-- 🔥 努力堅持 -->
+        <div class="btitle">🔥 努力堅持・人人可得</div>
+        <div class="honorgrid" id="honor-effort"></div>
       </div>
-      <div class="card" style="padding:1.25rem 1rem;font-size:12px;color:#a08060;text-align:center;margin-top:4px;">更多榮譽系統陸續開放中 🏅</div>
     </div>
 
     <!-- ═══ 分頁 3：排行榜 ═══ -->
@@ -209,6 +272,11 @@ details.foldcard .foldbody{padding:0 14px 14px;}
     </div>
 
   </div>
+</div>
+
+<!-- 解鎖慶祝彈窗 -->
+<div id="celebrate-overlay" class="celebrate-overlay" style="display:none;">
+  <div class="celebrate-card" id="celebrate-card"></div>
 </div>
 
 <!-- 底部分頁列 -->
@@ -383,17 +451,8 @@ function renderResult(s) {
   document.getElementById("rv-count").textContent = s.revenueLog.length;
   document.getElementById("r-trend-card").innerHTML = renderTrendChart(revenueTrendPoints(s));
 
-  /* 徽章（四維各一，該維有累積即點亮） */
-  var bg = document.getElementById("badge-grid");
-  bg.innerHTML = "";
-  BADGES.forEach(function(b) {
-    var earned = investDim(s, b.dim) > 0;
-    var c = mk("div", "badge" + (earned ? "" : " locked"));
-    c.appendChild(mk("div","bicon", b.icon));
-    c.appendChild(mk("div","bname", b.name));
-    c.appendChild(mk("div","bscore", earned ? (b.desc + " ✓") : "尚未解鎖"));
-    bg.appendChild(c);
-  });
+  /* 榮譽系統（稱號 + 變現 + 四維分級 + 努力堅持 + 慶祝彈窗） */
+  renderHonors(s);
 
   /* 模組開關：依所選課程 modules 顯示/隱藏板塊 + 分頁（未設定＝預設開）*/
   var mods = (s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {};
@@ -586,6 +645,128 @@ async function refreshTeam(s) {
   box.innerHTML = html;
 }
 
+/* ═══ 榮譽系統（成就分頁）═══ */
+function renderHonors(s) {
+  var ctx = buildHonorCtx(s);
+  var earned = evalHonors(ctx);
+  var earnedSet = {};
+  earned.forEach(function(id){ earnedSet[id] = 1; });
+
+  /* 稱號橫幅 */
+  document.getElementById("honor-banner").innerHTML =
+    '<div class="hb-crown">👑</div>'
+   + '<div class="hb-title">' + pickTitle(earned) + '</div>'
+   + '<div class="hb-sub">已解鎖 <strong>' + earned.length + '</strong> / ' + HONORS.length + ' 個榮譽</div>';
+
+  renderHonorGrid("honor-revenue", HONORS_REVENUE, earnedSet);
+  renderDimBadges("honor-dim", ctx);
+  renderHonorGrid("honor-effort", HONORS_EFFORT, earnedSet);
+  renderHonorNext(ctx, earnedSet);
+  checkCelebrations(s.lineId, earned);
+}
+
+/* 一般榮譽卡格（變現／努力）。tier=rare/legend 會發光。 */
+function renderHonorGrid(containerId, list, earnedSet) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  list.forEach(function(h) {
+    var on = !!earnedSet[h.id];
+    var c = mk("div", "honor" + (on ? "" : " locked") + (h.tier ? (" " + h.tier) : ""));
+    c.appendChild(mk("div", "hicon", h.icon));
+    c.appendChild(mk("div", "hname", h.name));
+    c.appendChild(mk("div", "hdesc", (on ? "" : "🔒 ") + h.desc));
+    box.appendChild(c);
+  });
+}
+
+/* 四維分級徽章：每維一張，顯示目前達到的最高階 + 到下一階的進度。 */
+function renderDimBadges(containerId, ctx) {
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  DORD.forEach(function(k) {
+    var d = DIMS[k], pct = ctx.investPct[k];
+    var achieved = null, next = null;
+    HONOR_TIERS.forEach(function(t) {
+      if (pct >= t.pct) achieved = t;
+      else if (!next) next = t;
+    });
+    var card = mk("div", "dimbadge" + (achieved ? (" " + achieved.tier) : " locked"));
+    var top = mk("div", "dimbadge-top");
+    top.appendChild(mk("div", "dimbadge-medal", achieved ? achieved.icon : "🔒"));
+    var info = mk("div", "dimbadge-info");
+    var nm = mk("div", "dimbadge-name", d.name);
+    nm.style.color = d.color;
+    info.appendChild(nm);
+    info.appendChild(mk("div", "dimbadge-tier", (achieved ? achieved.label + "徽" : "未解鎖") + " ・ 投入 " + pct + "%"));
+    top.appendChild(info);
+    card.appendChild(top);
+    var bar = mk("div", "dimbadge-bar");
+    var fill = mk("div", "dimbadge-fill");
+    fill.style.width = (next ? Math.min(100, Math.round(pct / next.pct * 100)) : 100) + "%";
+    fill.style.background = d.color;
+    bar.appendChild(fill);
+    card.appendChild(bar);
+    card.appendChild(mk("div", "dimbadge-hint", next ? ("再 " + (next.pct - pct) + "% 升「" + next.label + "徽」") : "已達最高階 💎"));
+    box.appendChild(card);
+  });
+}
+
+/* 「就快了」：未解鎖且有數值門檻的榮譽，取最接近的 1-2 個給下一步動力。 */
+function renderHonorNext(ctx, earnedSet) {
+  var box = document.getElementById("honor-next");
+  var cands = [];
+  HONORS.forEach(function(h) {
+    if (earnedSet[h.id] || typeof h.test === "function" || !h.metric) return;
+    var v = honorMetricVal(ctx, h.metric);
+    if (typeof v !== "number") return;
+    var ratio = v / h.value;
+    if (ratio <= 0 || ratio >= 1) return;
+    cands.push({ h: h, ratio: ratio });
+  });
+  cands.sort(function(a, b){ return b.ratio - a.ratio; });
+  if (!cands.length) { box.innerHTML = ""; return; }
+  var html = '<div class="honor-next-card"><div class="hn-title">🎯 就快了</div>';
+  cands.slice(0, 2).forEach(function(c) {
+    var name = c.h.cat === "dim" ? (DIMS[c.h.dim].name + "・" + c.h.tierLabel + "徽") : c.h.name;
+    html += '<div class="hn-row"><div class="hn-name">' + c.h.icon + ' ' + name + '</div>'
+         + '<div class="hn-bar"><div class="hn-fill" style="width:' + Math.round(c.ratio * 100) + '%;"></div></div></div>';
+  });
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+/* ── 慶祝彈窗：跟 localStorage 存的舊解鎖集合 diff，新解鎖的排隊彈出 ── */
+var celebrateQueue = [], celebrating = false;
+function checkCelebrations(lineId, earned) {
+  var key = "honors_" + lineId;
+  var raw = localStorage.getItem(key);
+  var prev = {};
+  try { (JSON.parse(raw) || []).forEach(function(id){ prev[id] = 1; }); } catch (e) {}
+  try { localStorage.setItem(key, JSON.stringify(earned)); } catch (e) {}
+  if (raw === null) return;  /* 第一次載入只建基準，不轟炸既有成就 */
+  earned.forEach(function(id) {
+    if (!prev[id]) { var h = honorById(id); if (h) celebrateQueue.push(h); }
+  });
+  if (celebrateQueue.length && !celebrating) showNextCelebration();
+}
+function showNextCelebration() {
+  var ov = document.getElementById("celebrate-overlay");
+  if (!celebrateQueue.length) { celebrating = false; ov.style.display = "none"; return; }
+  celebrating = true;
+  var h = celebrateQueue.shift();
+  var name = h.cat === "dim" ? (DIMS[h.dim].name + "・" + h.tierLabel + "徽") : h.name;
+  var big = (h.tier === "legend" || h.cat === "revenue");
+  document.getElementById("celebrate-card").innerHTML =
+    '<div class="cc-glow' + (big ? " big" : "") + '"></div>'
+   + '<div class="cc-icon">' + h.icon + '</div>'
+   + '<div class="cc-label">榮譽解鎖</div>'
+   + '<div class="cc-name">' + name + '</div>'
+   + '<div class="cc-desc">' + h.desc + '</div>'
+   + '<button class="cc-btn" id="cc-close">' + (celebrateQueue.length ? "下一個 →" : "太讚了！") + '</button>';
+  ov.style.display = "flex";
+  document.getElementById("cc-close").onclick = showNextCelebration;
+}
+
 /* ── 任務滑動分頁 ── */
 var taskActiveIdx = 0;
 function updateTaskSliderHeight() {
@@ -616,10 +797,6 @@ function setupTaskSlider() {
     }, 60);
   });
 }
-
-document.getElementById("btn-back").addEventListener("click", function() {
-  window.location.href = "showcase.html";
-});
 
 document.getElementById("rv-submit").addEventListener("click", function() {
   if (!current) return;
