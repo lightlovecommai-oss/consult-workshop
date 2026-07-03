@@ -84,6 +84,31 @@ function truthy_(v) {
   return String(v).toLowerCase() === "true" || String(v) === "1";
 }
 
+/* 把 Sheet 的日期值（Date 物件或字串）統一成 yyyy-MM-dd。 */
+function normDateStr_(v) {
+  if (v === "" || v === null || v === undefined) return "";
+  if (Object.prototype.toString.call(v) === "[object Date]") return Utilities.formatDate(v, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  return String(v).slice(0, 10);
+}
+function dstr_(d, tz) { return Utilities.formatDate(d, tz, "yyyy-MM-dd"); }
+/* 連續打卡天數：從今天（或昨天，若今天還沒打）往回數，dates 有的天就 +1。 */
+function streak_(dates, today, tz) {
+  var n = 0, d = new Date(today);
+  if (!dates[dstr_(d, tz)]) d.setDate(d.getDate() - 1);
+  while (dates[dstr_(d, tz)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+/* 本週完成率＝本週一到今天「有打卡的天數 / 已過天數」。 */
+function weekPct_(dates, today, tz) {
+  var elapsed = Number(Utilities.formatDate(today, tz, "u")); // 1=一 … 7=日
+  var hit = 0, d = new Date(today);
+  for (var i = 0; i < elapsed; i++) {
+    if (dates[dstr_(d, tz)]) hit++;
+    d.setDate(d.getDate() - 1);
+  }
+  return Math.round(hit / elapsed * 100);
+}
+
 function doGet(e) {
   try {
     var p = e.parameter || {};
@@ -152,6 +177,35 @@ function doGet(e) {
         return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "", score: byUser[id] };
       }).sort(function(a, b){ return b.score - a.score; });
       return json_({ status: "ok", rows: out });
+    }
+
+    if (action === "team") {  // 夥伴頁：同 workshop 每位組員的努力指標（不含成交/能力）
+      var twid = String(p.workshopId || "");
+      var enrolled = {};
+      rows_(TABS.enrollments).forEach(function(r) {
+        if (String(pick_(r, COLS.enroll.workshopId)) === twid) enrolled[String(pick_(r, COLS.enroll.lineId))] = true;
+      });
+      var sinfo = {};
+      rows_(TABS.students).forEach(function(r) {
+        var id = String(pick_(r, COLS.students.lineId));
+        if (id) sinfo[id] = { name: String(pick_(r, COLS.students.name)) || id, group: String(pick_(r, COLS.students.team)) };
+      });
+      var byU = {};
+      rows_(TABS.checkins).forEach(function(r) {
+        if (String(pick_(r, COLS.checkins.workshopId)) !== twid) return;
+        var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
+        var m = byU[id] || (byU[id] = { invest: 0, dates: {} });
+        m.invest += Number(pick_(r, COLS.checkins.pts)) || 0;
+        var ds = normDateStr_(pick_(r, COLS.checkins.date));
+        if (ds) m.dates[ds] = true;
+      });
+      var tz = Session.getScriptTimeZone(), now = new Date();
+      var members = Object.keys(enrolled).map(function(id) {
+        var m = byU[id] || { invest: 0, dates: {} };
+        return { lineId: id, name: (sinfo[id] || {}).name || id, group: (sinfo[id] || {}).group || "",
+                 invest: m.invest, streak: streak_(m.dates, now, tz), weekPct: weekPct_(m.dates, now, tz) };
+      });
+      return json_({ status: "ok", members: members });
     }
 
     if (p.userId) {  // 自評（測驗結果），無 action
