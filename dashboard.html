@@ -76,6 +76,15 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .cc-name{position:relative;font-size:23px;font-weight:800;color:#fff;margin:4px 0 6px;}
 .cc-desc{position:relative;font-size:12.5px;color:rgba(255,255,255,.72);margin-bottom:20px;line-height:1.5;}
 .cc-btn{position:relative;background:linear-gradient(90deg,#e8734a,#c8a84b);color:#fff;border:0;border-radius:22px;padding:11px 30px;font-size:14px;font-weight:700;cursor:pointer;}
+
+/* ── 首頁：他人榮譽快閃（文雅版，3 秒淡出）── */
+.honor-toast{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:12px;pointer-events:none;opacity:0;transform:translateY(-130%);transition:transform .55s cubic-bezier(.2,.85,.3,1),opacity .55s ease;}
+.honor-toast.show{opacity:1;transform:translateY(0);}
+.honor-toast-inner{max-width:452px;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(45,31,15,.95),rgba(90,61,28,.95));border:1px solid rgba(246,214,138,.32);border-radius:14px;padding:10px 15px;box-shadow:0 8px 26px rgba(45,31,15,.32);}
+.honor-toast .ht-badge{font-size:22px;line-height:1;flex-shrink:0;}
+.honor-toast .ht-tag{font-size:9.5px;letter-spacing:2px;color:rgba(246,214,138,.72);margin-bottom:2px;}
+.honor-toast .ht-text{font-size:12.5px;color:rgba(255,255,255,.9);line-height:1.35;}
+.honor-toast .ht-name{color:#f6d68a;font-weight:700;}
 </style>
 </head>
 <body>
@@ -274,6 +283,11 @@ details.foldcard .foldbody{padding:0 14px 14px;}
   </div>
 </div>
 
+<!-- 首頁：他人榮譽快閃（3 秒淡出） -->
+<div id="honor-toast" class="honor-toast">
+  <div class="honor-toast-inner" id="honor-toast-inner"></div>
+</div>
+
 <!-- 解鎖慶祝彈窗 -->
 <div id="celebrate-overlay" class="celebrate-overlay" style="display:none;">
   <div class="celebrate-card" id="celebrate-card"></div>
@@ -323,7 +337,8 @@ function switchTab(name) {
     b.classList.toggle("active", b.getAttribute("data-tab") === name);
   });
   window.scrollTo(0, 0);
-  if (name === "ability") updateTaskSliderHeight();
+  if (name === "ability") { updateTaskSliderHeight(); if (current) showHonorToast(current); }
+  else document.getElementById("honor-toast").classList.remove("show");
 }
 /* 模組全關時隱藏對應分頁；若正看的分頁被關，切回能力 */
 function updateTabVisibility(honorOn, rankOn) {
@@ -576,6 +591,7 @@ async function refreshLeaderboard(s) {
     row.appendChild(mk("div","lbscore", r.score + " 分"));
     box.appendChild(row);
   });
+  showHonorToast(s);  /* 排行資料到齊後補觸發（首頁才會真的顯示） */
 }
 
 /* ── 夥伴・我的小組（努力數據 + 待進步 + 組別榜）── */
@@ -643,6 +659,50 @@ async function refreshTeam(s) {
     }).join("") + '</div>';
 
   box.innerHTML = html;
+  showHonorToast(s);  /* 夥伴資料到齊後補觸發（首頁才會真的顯示） */
+}
+
+/* ═══ 首頁：他人榮譽快閃 ═══
+   用手上真實資料（同課夥伴的連續天數/本週全勤 + 榜首）湊出高光時刻，
+   輪流在首頁頂端輕輕滑入、停 3 秒淡出，激勵但不喧嘩。無資料就不顯示（不杜撰）。 */
+function buildHonorFeed(s) {
+  var feed = [], seen = {};
+  function push(name, icon, label) {
+    var k = name + "|" + label;
+    if (name && !seen[k]) { seen[k] = 1; feed.push({ name: name, icon: icon, label: label }); }
+  }
+  (TEAM_CACHE[activeWorkshop] || []).forEach(function(m) {
+    if (m.lineId === s.lineId) return;
+    if (m.weekPct >= 100)     push(m.name, "📅", "本週任務全勤，穩穩收尾");
+    if (m.streak >= 30)       push(m.name, "🏔️", "連續打卡 " + m.streak + " 天，鐵人之姿");
+    else if (m.streak >= 7)   push(m.name, "🔥", "連續打卡 " + m.streak + " 天不間斷");
+  });
+  var rows = LB_CACHE[activeWorkshop] || [];
+  if (rows.length && rows[0].lineId !== s.lineId) push(rows[0].name, "👑", "登上本班修為榜首");
+  return feed;
+}
+var honorToastIdx = 0, honorToastTimer = null;
+function showHonorToast(s) {
+  var el = document.getElementById("honor-toast");
+  /* 只在首頁（能力分頁）出現 */
+  var onHome = document.querySelector('.tabpanel.active') && document.querySelector('.tabpanel.active').getAttribute("data-tab") === "ability";
+  var feed = onHome ? buildHonorFeed(s) : [];
+  if (!feed.length) { el.classList.remove("show"); return; }
+  var item = feed[honorToastIdx % feed.length];
+  honorToastIdx++;
+  var inner = document.getElementById("honor-toast-inner");
+  inner.innerHTML = "";
+  inner.appendChild(mk("div", "ht-badge", item.icon));
+  var col = mk("div"); col.style.cssText = "flex:1;min-width:0;";
+  col.appendChild(mk("div", "ht-tag", "✨ 本班榮譽動態"));
+  var txt = mk("div", "ht-text");
+  txt.appendChild(mk("span", "ht-name", item.name));
+  txt.appendChild(document.createTextNode(" " + item.label));
+  col.appendChild(txt);
+  inner.appendChild(col);
+  el.classList.add("show");
+  clearTimeout(honorToastTimer);
+  honorToastTimer = setTimeout(function() { el.classList.remove("show"); }, 3000);
 }
 
 /* ═══ 榮譽系統（成就分頁）═══ */

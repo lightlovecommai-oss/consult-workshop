@@ -235,3 +235,114 @@ function renderTrendChart(points, incomeUnit) {
    +'</div>';
   return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">潛力值 × 金額走勢</div>' + legend + svg;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   榮譽系統（跨專案共用目錄）
+   榮譽是「人」的屬性、跟著人走、跨 workshop 共用一份牆。
+   這裡只放「純目錄 HONORS + 通用評估器」；各專案用自己的資料組出
+   正規化 ctx 再傳進來（跟 drawRadarSVG 一樣：共用邏輯、各自餵資料）。
+   ctx 形狀：{scores:{A,T,P,I}, potential, revenueTotal, dealCount,
+             checkinCount, investPct:{A,T,P,I}, dimsCovered,
+             workshopsActive, streak, bestWeekDays}
+   本專案 consult-workshop 餵得齊全部；comconverttest 只餵得出分數/潛力類，
+   投入/成交類自然點不亮（顯示未解鎖）。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 四維分級徽章的階梯：門檻綁「投入%」，各維 k 不同也公平（跟計分同一把尺）。 */
+var HONOR_TIERS = [
+  {tier:"bronze",  label:"銅", pct:30, icon:"🥉"},
+  {tier:"silver",  label:"銀", pct:50, icon:"🥈"},
+  {tier:"gold",    label:"金", pct:70, icon:"🥇"},
+  {tier:"diamond", label:"鑽", pct:85, icon:"💎"}
+];
+
+/* 🔥 努力堅持（來自打卡，人人可得） */
+var HONORS_EFFORT = [
+  {id:"streak7",   cat:"effort", icon:"🔥", name:"連七",     desc:"連續打卡 7 天",    metric:"streak",          value:7},
+  {id:"streak30",  cat:"effort", icon:"🔥", name:"連三十",   desc:"連續打卡 30 天",   metric:"streak",          value:30,  celebrate:true},
+  {id:"streak100", cat:"effort", icon:"🏔️", name:"連百",     desc:"連續打卡 100 天",  metric:"streak",          value:100, celebrate:true},
+  {id:"allweek",   cat:"effort", icon:"📅", name:"全勤週",   desc:"一週天天都打卡",   metric:"bestWeekDays",    value:7,   celebrate:true},
+  {id:"balanced",  cat:"effort", icon:"🌈", name:"四維並進", desc:"四維都有投入不偏科", metric:"dimsCovered",   value:4},
+  {id:"crossws",   cat:"effort", icon:"🎓", name:"跨界學員", desc:"在 2 門以上課都打卡", metric:"workshopsActive", value:2, celebrate:true},
+  {id:"check100",  cat:"effort", icon:"💯", name:"百次打卡", desc:"累積打卡 100 次",  metric:"checkinCount",    value:100},
+  {id:"check500",  cat:"effort", icon:"🏅", name:"五百次打卡", desc:"累積打卡 500 次", metric:"checkinCount",    value:500, celebrate:true}
+];
+
+/* 💎 變現里程碑（來自成交，稀有・會發光）。門檻對齊計分常數 TARGET_AMOUNT/TARGET_COUNT/潛力畢業錨點。 */
+var HONORS_REVENUE = [
+  {id:"firstdeal", cat:"revenue", tier:"rare",   icon:"🎉", name:"開張大吉",     desc:"回報第一筆成交",         metric:"dealCount",    value:1,       celebrate:true},
+  {id:"rev1w",     cat:"revenue", tier:"rare",   icon:"💰", name:"破萬",         desc:"累計成交突破 1 萬",      metric:"revenueTotal", value:10000},
+  {id:"rev10w",    cat:"revenue", tier:"rare",   icon:"💰", name:"破十萬",       desc:"累計成交突破 10 萬",     metric:"revenueTotal", value:100000,  celebrate:true},
+  {id:"rev100w",   cat:"revenue", tier:"legend", icon:"💰", name:"破百萬",       desc:"累計成交突破 100 萬",    metric:"revenueTotal", value:1000000, celebrate:true},
+  {id:"club300",   cat:"revenue", tier:"legend", icon:"👑", name:"三百萬俱樂部", desc:"累計成交達畢業錨點 300 萬", metric:"revenueTotal", value:3000000, celebrate:true},
+  {id:"deal3",     cat:"revenue", tier:"rare",   icon:"✍️", name:"穩定簽單",     desc:"累計簽下 3 單",          metric:"dealCount",    value:3},
+  {id:"deal5",     cat:"revenue", tier:"rare",   icon:"✍️", name:"簽單達人",     desc:"累計簽下 5 單",          metric:"dealCount",    value:5,       celebrate:true},
+  {id:"pot300",    cat:"revenue", tier:"rare",   icon:"⭐", name:"潛力覺醒",     desc:"變現潛力突破 300",       metric:"potential",    value:300,     celebrate:true},
+  {id:"pot600",    cat:"revenue", tier:"legend", icon:"🌟", name:"潛力大師",     desc:"變現潛力突破 600",       metric:"potential",    value:600,     celebrate:true},
+  {id:"sweetmaster", cat:"revenue", tier:"legend", icon:"🗝️", name:"甜蜜點大師", desc:"最強兩維都破 60 且反覆成交，走通你的變現路徑",
+     test:function(ctx){
+       var s = ctx.scores;
+       var sorted = DORD.slice().sort(function(a,b){ return s[b] - s[a]; });
+       return s[sorted[0]] >= 60 && s[sorted[1]] >= 60 && ctx.dealCount >= 3;
+     }, celebrate:true}
+];
+
+/* 🏅 四維分級徽章：DORD × 四階自動展開（名稱由呼叫端用自己的維度名合成）。 */
+var HONORS_DIM = [];
+DORD.forEach(function(k) {
+  HONOR_TIERS.forEach(function(t) {
+    HONORS_DIM.push({
+      id:"dim_"+k+"_"+t.tier, cat:"dim", dim:k, tier:t.tier, tierLabel:t.label,
+      icon:t.icon, metric:"investPct."+k, value:t.pct,
+      celebrate:(t.tier === "gold" || t.tier === "diamond")
+    });
+  });
+});
+
+/* 完整目錄（各專案可再 concat 自己 workshop 的專屬榮譽——Phase 2）。 */
+var HONORS = HONORS_DIM.concat(HONORS_EFFORT, HONORS_REVENUE);
+
+/* 稱號：由已解鎖成就合成，優先序 變現 > 分級 > 堅持。頂在成就頁橫幅。 */
+var HONOR_TITLES = [
+  {id:"club300",   title:"三百萬變現家"},
+  {id:"rev100w",   title:"百萬實戰家"},
+  {id:"pot600",    title:"潛力大師"},
+  {id:"sweetmaster", title:"甜蜜點大師"},
+  {id:"deal5",     title:"簽單達人"},
+  {id:"rev10w",    title:"十萬俱樂部"},
+  {id:"pot300",    title:"潛力覺醒者"},
+  {id:"firstdeal", title:"開張新星"},
+  {id:"streak100", title:"鐵人顧問"},
+  {id:"streak30",  title:"堅持者"},
+  {id:"balanced",  title:"均衡型選手"}
+];
+
+/* 取 ctx 裡的指標值（支援 "investPct.A" 這種點路徑）。 */
+function honorMetricVal(ctx, metric) {
+  if (!metric) return undefined;
+  var parts = metric.split("."), v = ctx;
+  for (var i = 0; i < parts.length; i++) { if (v == null) return undefined; v = v[parts[i]]; }
+  return v;
+}
+/* 單一榮譽是否解鎖：有 test 用 test，否則 ctx[metric] >= value。 */
+function honorMet(h, ctx) {
+  if (typeof h.test === "function") return !!h.test(ctx);
+  var v = honorMetricVal(ctx, h.metric);
+  return typeof v === "number" && v >= h.value;
+}
+/* 回傳已解鎖的榮譽 id 陣列（依 HONORS 順序）。 */
+function evalHonors(ctx) {
+  return HONORS.filter(function(h){ return honorMet(h, ctx); }).map(function(h){ return h.id; });
+}
+/* 依已解鎖清單選出顯示稱號（優先序見 HONOR_TITLES），沒有就給預設。 */
+function pickTitle(earnedIds) {
+  for (var i = 0; i < HONOR_TITLES.length; i++) {
+    if (earnedIds.indexOf(HONOR_TITLES[i].id) > -1) return HONOR_TITLES[i].title;
+  }
+  return "見習學員";
+}
+/* 依 id 取回完整榮譽定義（慶祝彈窗用）。 */
+function honorById(id) {
+  for (var i = 0; i < HONORS.length; i++) { if (HONORS[i].id === id) return HONORS[i]; }
+  return null;
+}

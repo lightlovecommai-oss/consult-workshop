@@ -35,13 +35,7 @@ var LEVELS = [
   {min:29, title:"顧問大師", beat:97, next:"你已站上頂端，現在聚焦長期合作與規模化"}
 ];
 
-/* ── 徽章：四維各一枚，該維有累積任務即點亮 ── */
-var BADGES = [
-  {dim:"A", icon:"📣", name:"吸引力徽章", desc:"累積吸引力任務"},
-  {dim:"T", icon:"🤝", name:"信任力徽章", desc:"累積信任力任務"},
-  {dim:"P", icon:"✍️", name:"專業力徽章", desc:"累積專業力任務"},
-  {dim:"I", icon:"🚀", name:"推進力徽章", desc:"累積推進力任務"}
-];
+/* 徽章已升級成榮譽系統（四維分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
 
 /* ═══════════════════════════════════════════════════════════
    任務設定：全部資料驅動，來自 Google Sheet 的 tasks 分頁（不再寫死）。
@@ -296,6 +290,60 @@ async function loadSelfEval(userId) {
     return null;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   榮譽系統 ctx：把本專案的打卡/成交聚合成 atpi-core 的 evalHonors 吃的正規化 ctx。
+   榮譽跨所有 workshop 合併算（跟雷達/潛力一致）——榮譽是「人」的屬性、跟著人走。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 最長連續打卡天數（best-ever，才不會因為斷過一次就熄滅歷史榮譽）。 */
+function bestStreakDays(s) {
+  var set = {};
+  s.checkinLog.forEach(function(e){ if (e.date) set[e.date] = 1; });
+  var dates = Object.keys(set).sort();
+  if (!dates.length) return 0;
+  var best = 1, run = 1;
+  for (var i = 1; i < dates.length; i++) {
+    var prev = new Date(dates[i-1] + "T00:00:00"), cur = new Date(dates[i] + "T00:00:00");
+    if (Math.round((cur - prev) / 86400000) === 1) { run++; if (run > best) best = run; }
+    else run = 1;
+  }
+  return best;
+}
+/* 某一週內打卡過的最多不同天數（best-ever，供「全勤週」判定）。 */
+function bestWeekDays(s) {
+  var weeks = {};
+  s.checkinLog.forEach(function(e){
+    if (!e.date) return;
+    var w = e.week || weekStr(new Date(e.date));
+    (weeks[w] = weeks[w] || {})[e.date] = 1;
+  });
+  var best = 0;
+  Object.keys(weeks).forEach(function(w){ var n = Object.keys(weeks[w]).length; if (n > best) best = n; });
+  return best;
+}
+/* 組出榮譽評估用 ctx（全域合併，跨所有 workshop）。 */
+function buildHonorCtx(s) {
+  var scores = calcDims(s);
+  var invPct = {};
+  DORD.forEach(function(k){ var iv = investDim(s, k); invPct[k] = iv > 0 ? Math.round(100 * iv / (iv + DIMS[k].k)) : 0; });
+  var wsSet = {};
+  s.checkinLog.forEach(function(e){ if (e.workshopId) wsSet[e.workshopId] = 1; });
+  return {
+    scores: scores,
+    potential: calcPotential(scores).unlocked,
+    revenueTotal: revenueTotal(s),
+    dealCount: s.revenueLog.length,
+    checkinCount: s.checkinLog.length,
+    investPct: invPct,
+    dimsCovered: DORD.filter(function(k){ return investDim(s, k) > 0; }).length,
+    workshopsActive: Object.keys(wsSet).length,
+    streak: bestStreakDays(s),
+    bestWeekDays: bestWeekDays(s)
+  };
+}
+/* 已解鎖榮譽 id 陣列。 */
+function earnedHonors(s) { return evalHonors(buildHonorCtx(s)); }
 
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];
