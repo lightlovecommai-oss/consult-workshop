@@ -384,6 +384,27 @@ function wsHonorById(id) {
   for (var i = 0; i < WS_HONORS.length; i++) if (WS_HONORS[i].id === id) return WS_HONORS[i];
   return null;
 }
+/* 榮譽顯示名：四維分級徽章要合成「吸引力・銀徽」，其餘用 name。 */
+function honorLabel(h) {
+  return h.cat === "dim" ? (DIMS[h.dim].name + "・" + h.tierLabel + "徽") : h.name;
+}
+
+/* ── 榮譽解鎖事件流（首頁他人快閃的真事件來源）── */
+var HONOR_FEED = [];  // [{lineId, name, honorId, honorName, icon, ts}]，時間新到舊
+
+/* 偵測到新解鎖時 POST 一筆事件（後端去重，一人一榮譽只記一次）。 */
+function postHonorEvent(lineId, h) {
+  return postToSheet({ action: "honorEvent", lineId: lineId, honorId: h.id,
+                       name: honorLabel(h), icon: h.icon || "🏅" });
+}
+/* 讀回最近的榮譽解鎖事件（bootstrap 已帶一份，這支供之後刷新用）。 */
+async function loadHonorFeed(limit) {
+  try {
+    var r = await fetch(SHEET_API + "?action=honorFeed&limit=" + (limit || 30));
+    var d = await r.json();
+    return d.status === "ok" ? d.events : [];
+  } catch (e) { console.log("loadHonorFeed error:", e); return []; }
+}
 
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];

@@ -320,6 +320,7 @@ function applyBootstrap(d, userId) {
   TASKS = d.tasks || [];
   ENROLLMENTS = d.enrollments || [];
   WS_HONORS = normalizeWsHonors(d.honors);
+  HONOR_FEED = d.honorFeed || [];
   var st = d.student || { lineId: userId, name: userId, team: "" };
   current = { lineId: st.lineId, name: st.name, team: st.team,
               checkinLog: d.checkins || [], revenueLog: d.revenue || [], selfEval: d.selfEval || null };
@@ -671,9 +672,27 @@ async function refreshTeam(s) {
 }
 
 /* ═══ 首頁：他人榮譽快閃 ═══
-   用手上真實資料（同課夥伴的連續天數/本週全勤 + 榜首）湊出高光時刻，
-   輪流在首頁頂端輕輕滑入、停 3 秒淡出，激勵但不喧嘩。無資料就不顯示（不杜撰）。 */
+   優先讀「真實榮譽解鎖事件流」HONOR_FEED（誰、什麼榮譽、何時），排除自己；
+   事件流還空（剛上線）時退回舊的近似版（夥伴當下高光），首頁頂端滑入、停 3 秒淡出。 */
+function relTime(ts) {
+  var diff = Date.now() - ts;
+  if (!ts || diff < 0) return "";
+  var m = Math.floor(diff / 60000);
+  if (m < 1) return "剛剛";
+  if (m < 60) return m + " 分鐘前";
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + " 小時前";
+  var d = Math.floor(h / 24);
+  return d === 1 ? "昨天" : d + " 天前";
+}
 function buildHonorFeed(s) {
+  var real = (HONOR_FEED || []).filter(function(e){ return e.lineId !== s.lineId && e.honorName; })
+    .map(function(e){ return { name: e.name, icon: e.icon || "🏅", label: "解鎖了 " + e.honorName, ts: e.ts }; });
+  if (real.length) return real;
+  return buildHonorFeedFallback(s);
+}
+/* 退路：事件流還沒資料時，用夥伴當下高光 + 榜首湊，無材料就空（不杜撰）。 */
+function buildHonorFeedFallback(s) {
   var feed = [], seen = {};
   function push(name, icon, label) {
     var k = name + "|" + label;
@@ -698,11 +717,12 @@ function showHonorToast(s) {
   if (!feed.length) { el.classList.remove("show"); return; }
   var item = feed[honorToastIdx % feed.length];
   honorToastIdx++;
+  var rt = relTime(item.ts);
   var inner = document.getElementById("honor-toast-inner");
   inner.innerHTML = "";
   inner.appendChild(mk("div", "ht-badge", item.icon));
   var col = mk("div"); col.style.cssText = "flex:1;min-width:0;";
-  col.appendChild(mk("div", "ht-tag", "✨ 本班榮譽動態"));
+  col.appendChild(mk("div", "ht-tag", "✨ 本班榮譽動態" + (rt ? "・" + rt : "")));
   var txt = mk("div", "ht-text");
   txt.appendChild(mk("span", "ht-name", item.name));
   txt.appendChild(document.createTextNode(" " + item.label));
@@ -836,7 +856,10 @@ function checkCelebrations(lineId, earned) {
   try { localStorage.setItem(key, JSON.stringify(earned)); } catch (e) {}
   if (raw === null) return;  /* 第一次載入只建基準，不轟炸既有成就 */
   earned.forEach(function(id) {
-    if (!prev[id]) { var h = honorById(id) || wsHonorById(id); if (h) celebrateQueue.push(h); }
+    if (!prev[id]) {
+      var h = honorById(id) || wsHonorById(id);
+      if (h) { celebrateQueue.push(h); postHonorEvent(lineId, h); }  /* 同步記進榮譽事件流（後端去重）*/
+    }
   });
   if (celebrateQueue.length && !celebrating) showNextCelebration();
 }

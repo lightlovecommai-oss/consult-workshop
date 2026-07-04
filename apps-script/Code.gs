@@ -15,6 +15,7 @@ var TABS = {
   workshops:   "(遊戲)課程",           // ⬅ 需新建：workshopId | name | active（匯入 seed-workshops.csv）
   tasks:       "(遊戲)任務",           // ⬅ 需新建：workshopId | taskKey | cadence | dim | pts | name | icon | needReview（匯入 seed-tasks.csv）
   honors:      "(遊戲)榮譽",           // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
+  honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
   enrollments: "(引流.T)課程報名紀錄", // 沿用既有：LINE userId + 課程
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
@@ -148,6 +149,27 @@ function computeHonors_() {
              tier: String(r.tier || ""), celebrate: truthy_(r.celebrate), scope: String(r.scope || "workshop") };
   }).filter(function(h){ return h.honorId && h.name; });
 }
+/* 榮譽解鎖事件流：最近 N 筆（時間新到舊），供首頁他人快閃。 */
+function computeHonorFeed_(limit) {
+  limit = limit || 30;
+  var rows = rows_(TABS.honorEvents).map(function(r){
+    return { lineId: String(r.lineId || ""), name: String(r["姓名"] || r.name || ""),
+             honorId: String(r.honorId || ""), honorName: String(r["榮譽名"] || r.honorName || ""),
+             icon: String(r.icon || ""), ts: Number(r.ts) || 0 };
+  }).filter(function(e){ return e.lineId && e.honorName; });
+  rows.sort(function(a, b){ return b.ts - a.ts; });
+  return rows.slice(0, limit);
+}
+/* 事件表不存在就自動建立（含表頭），使用者不用手開分頁。 */
+function ensureHonorEventsSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.honorEvents);
+  if (!sh) {
+    sh = ss.insertSheet(TABS.honorEvents);
+    sh.getRange(1, 1, 1, 7).setValues([["lineId", "姓名", "honorId", "榮譽名", "icon", "時間", "ts"]]);
+  }
+  return sh;
+}
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
@@ -236,7 +258,8 @@ function doGet(e) {
       return json_({ status: "ok", student: computeStudent_(buid),
                      workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
                      checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
-                     defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid) });
+                     defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
+                     honorFeed: computeHonorFeed_(30) });
     }
 
     if (action === "logs") {
@@ -250,6 +273,10 @@ function doGet(e) {
 
     if (action === "team") {
       return json_({ status: "ok", members: computeTeam_(String(p.workshopId || "")) });
+    }
+
+    if (action === "honorFeed") {
+      return json_({ status: "ok", events: computeHonorFeed_(Number(p.limit) || 30) });
     }
 
     if (p.userId) {  // 自評（測驗結果），無 action
@@ -280,6 +307,20 @@ function doPost(e) {
         lineId: body.lineId, workshopId: body.workshopId || "", amount: body.amount || 0, date: body.date || today,
         note: body.note || "", A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0
       });
+      return json_({ status: "ok" });
+    }
+    if (body.action === "honorEvent") {  // 榮譽解鎖事件：一人一榮譽只記一次（去重）
+      var eid = String(body.lineId || ""), hid = String(body.honorId || "");
+      if (!eid || !hid) return json_({ status: "error", message: "missing lineId/honorId" });
+      var existing = rows_(TABS.honorEvents);
+      for (var k = 0; k < existing.length; k++) {
+        if (String(existing[k].lineId) === eid && String(existing[k].honorId) === hid) return json_({ status: "ok", dup: true });
+      }
+      var st = computeStudent_(eid), now = new Date();
+      ensureHonorEventsSheet_().appendRow([
+        eid, (st ? st.name : eid), hid, String(body.name || ""), String(body.icon || ""),
+        Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"), now.getTime()
+      ]);
       return json_({ status: "ok" });
     }
     return json_({ status: "error", message: "unknown action" });
