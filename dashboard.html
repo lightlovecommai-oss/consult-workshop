@@ -49,6 +49,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .honor.rare.locked,.honor.legend.locked{background:#fff;box-shadow:none;}
 .honor.legend.locked .hname{color:#2d1f0f;}
 .honor.legend.locked .hdesc{color:#a08060;}
+.honor .hws{font-size:9.5px;color:#a08060;margin-top:5px;padding-top:5px;border-top:0.5px solid rgba(160,128,96,.18);letter-spacing:.5px;}
+.honor.legend .hws{color:rgba(246,214,138,.6);border-top-color:rgba(246,214,138,.2);}
 
 .dimbadgewrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
 .dimbadge{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:11px 12px;}
@@ -265,6 +267,11 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         <!-- 🔥 努力堅持 -->
         <div class="btitle">🔥 努力堅持・人人可得</div>
         <div class="honorgrid" id="honor-effort"></div>
+        <!-- 🎖️ 課程專屬榮譽（資料驅動，有資料才顯示） -->
+        <div id="sec-honor-ws" style="display:none;">
+          <div class="btitle">🎖️ 課程專屬榮譽</div>
+          <div class="honorgrid" id="honor-ws"></div>
+        </div>
       </div>
     </div>
 
@@ -312,6 +319,7 @@ function applyBootstrap(d, userId) {
   WORKSHOPS = d.workshops || [];
   TASKS = d.tasks || [];
   ENROLLMENTS = d.enrollments || [];
+  WS_HONORS = normalizeWsHonors(d.honors);
   var st = d.student || { lineId: userId, name: userId, team: "" };
   current = { lineId: st.lineId, name: st.name, team: st.team,
               checkinLog: d.checkins || [], revenueLog: d.revenue || [], selfEval: d.selfEval || null };
@@ -708,21 +716,44 @@ function showHonorToast(s) {
 /* ═══ 榮譽系統（成就分頁）═══ */
 function renderHonors(s) {
   var ctx = buildHonorCtx(s);
-  var earned = evalHonors(ctx);
+  var earnedCore = evalHonors(ctx);
+  var wsList = evalWsHonors(s);                                   // 各 workshop 專屬（scope-aware）
+  var earnedWs = wsList.filter(function(x){ return x.earned; }).map(function(x){ return x.def.id; });
+  var earned = earnedCore.concat(earnedWs);
   var earnedSet = {};
   earned.forEach(function(id){ earnedSet[id] = 1; });
+  var totalCount = HONORS.length + wsList.length;
 
   /* 稱號橫幅 */
   document.getElementById("honor-banner").innerHTML =
     '<div class="hb-crown">👑</div>'
-   + '<div class="hb-title">' + pickTitle(earned) + '</div>'
-   + '<div class="hb-sub">已解鎖 <strong>' + earned.length + '</strong> / ' + HONORS.length + ' 個榮譽</div>';
+   + '<div class="hb-title">' + pickTitle(earnedCore) + '</div>'
+   + '<div class="hb-sub">已解鎖 <strong>' + earned.length + '</strong> / ' + totalCount + ' 個榮譽</div>';
 
   renderHonorGrid("honor-revenue", HONORS_REVENUE, earnedSet);
   renderDimBadges("honor-dim", ctx);
   renderHonorGrid("honor-effort", HONORS_EFFORT, earnedSet);
+  renderWsHonors("honor-ws", wsList);
   renderHonorNext(ctx, earnedSet);
   checkCelebrations(s.lineId, earned);
+}
+
+/* 課程專屬榮譽區塊（每卡標課名；無資料整區隱藏）。 */
+function renderWsHonors(containerId, wsList) {
+  var sec = document.getElementById("sec-honor-ws");
+  if (!wsList.length) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  var box = document.getElementById(containerId);
+  box.innerHTML = "";
+  wsList.forEach(function(x) {
+    var h = x.def, on = x.earned;
+    var c = mk("div", "honor" + (on ? "" : " locked") + (h.tier ? (" " + h.tier) : ""));
+    c.appendChild(mk("div", "hicon", h.icon || "🎖️"));
+    c.appendChild(mk("div", "hname", h.name));
+    c.appendChild(mk("div", "hdesc", (on ? "" : "🔒 ") + (h.desc || "")));
+    c.appendChild(mk("div", "hws", x.wsName));
+    box.appendChild(c);
+  });
 }
 
 /* 一般榮譽卡格（變現／努力）。tier=rare/legend 會發光。 */
@@ -805,7 +836,7 @@ function checkCelebrations(lineId, earned) {
   try { localStorage.setItem(key, JSON.stringify(earned)); } catch (e) {}
   if (raw === null) return;  /* 第一次載入只建基準，不轟炸既有成就 */
   earned.forEach(function(id) {
-    if (!prev[id]) { var h = honorById(id); if (h) celebrateQueue.push(h); }
+    if (!prev[id]) { var h = honorById(id) || wsHonorById(id); if (h) celebrateQueue.push(h); }
   });
   if (celebrateQueue.length && !celebrating) showNextCelebration();
 }

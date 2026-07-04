@@ -45,6 +45,19 @@ var LEVELS = [
 var WORKSHOPS = [];    // [{id, name}]
 var TASKS = [];        // [{workshopId, key, cadence, dim, pts, name, icon, needReview}]
 var ENROLLMENTS = [];  // [{lineId, workshopId}]
+var WS_HONORS = [];    // 各 workshop 專屬榮譽（來自 (遊戲)榮譽 分頁，資料驅動）
+
+/* 正規化 Sheet 帶回的專屬榮譽（型別清一清）。 */
+function normalizeWsHonors(arr) {
+  return (arr || []).map(function(h){
+    return { id: String(h.honorId || h.id || ""), workshopId: String(h.workshopId || ""),
+             metric: String(h.metric || ""), value: Number(h.value) || 0,
+             icon: String(h.icon || "🎖️"), name: String(h.name || ""), desc: String(h.desc || ""),
+             tier: String(h.tier || ""),
+             celebrate: (h.celebrate === true || String(h.celebrate).toLowerCase() === "true"),
+             scope: String(h.scope || "workshop") };
+  }).filter(function(h){ return h.id && h.name; });
+}
 
 async function loadConfig() {
   try {
@@ -54,6 +67,7 @@ async function loadConfig() {
       WORKSHOPS = d.workshops || [];
       TASKS = (d.tasks || []);
       ENROLLMENTS = d.enrollments || [];
+      WS_HONORS = normalizeWsHonors(d.honors);
     }
   } catch (e) { console.log("loadConfig error:", e); }
 }
@@ -342,8 +356,34 @@ function buildHonorCtx(s) {
     bestWeekDays: bestWeekDays(s)
   };
 }
-/* 已解鎖榮譽 id 陣列。 */
+/* 已解鎖榮譽 id 陣列（核心目錄，全域）。 */
 function earnedHonors(s) { return evalHonors(buildHonorCtx(s)); }
+
+/* 只保留某 workshop 打卡/成交的「子學員」，餵給 buildHonorCtx 就得到該課 scoped ctx。 */
+function subStudent(s, wid) {
+  return {
+    lineId: s.lineId,
+    checkinLog: s.checkinLog.filter(function(e){ return e.workshopId === wid; }),
+    revenueLog: s.revenueLog.filter(function(e){ return (e.workshopId || "") === wid; })
+  };
+}
+/* 評估各 workshop 專屬榮譽：scope=workshop 用該課過濾 ctx，否則用全域 ctx。
+   回傳每筆帶 {def, earned, wsName}，供成就頁渲染 + 慶祝彈窗收集 earned id。 */
+function evalWsHonors(s) {
+  var globalCtx = null, wsCtx = {};
+  return WS_HONORS.map(function(h) {
+    var ctx;
+    if (h.scope === "workshop") ctx = wsCtx[h.workshopId] || (wsCtx[h.workshopId] = buildHonorCtx(subStudent(s, h.workshopId)));
+    else ctx = globalCtx || (globalCtx = buildHonorCtx(s));
+    var wsName = (WORKSHOPS.find(function(w){ return w.id === h.workshopId; }) || {}).name || h.workshopId;
+    return { def: h, earned: honorMet(h, ctx), wsName: wsName };
+  });
+}
+/* ws honor id → def（慶祝彈窗查得到）。 */
+function wsHonorById(id) {
+  for (var i = 0; i < WS_HONORS.length; i++) if (WS_HONORS[i].id === id) return WS_HONORS[i];
+  return null;
+}
 
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];

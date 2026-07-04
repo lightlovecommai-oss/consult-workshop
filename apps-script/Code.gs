@@ -14,6 +14,7 @@ var TABS = {
   students:    "(遊戲)學員名單",       // LINE userId | 姓名 | 團隊
   workshops:   "(遊戲)課程",           // ⬅ 需新建：workshopId | name | active（匯入 seed-workshops.csv）
   tasks:       "(遊戲)任務",           // ⬅ 需新建：workshopId | taskKey | cadence | dim | pts | name | icon | needReview（匯入 seed-tasks.csv）
+  honors:      "(遊戲)榮譽",           // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   enrollments: "(引流.T)課程報名紀錄", // 沿用既有：LINE userId + 課程
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
@@ -133,7 +134,19 @@ function computeConfig_() {
   var enrollments = rows_(TABS.enrollments).map(function(r){
     return { lineId: String(pick_(r, COLS.enroll.lineId)), workshopId: String(pick_(r, COLS.enroll.workshopId)) };
   }).filter(function(x){ return x.lineId && x.workshopId; });
-  return { workshops: workshops, tasks: tasks, enrollments: enrollments };
+  return { workshops: workshops, tasks: tasks, enrollments: enrollments, honors: computeHonors_() };
+}
+/* 各 workshop 專屬榮譽（資料驅動，欄名為英文 key，跟 tasks 一致）。
+   metric 對照前端 ctx：dealCount/revenueTotal/potential/streak/checkinCount/dimsCovered/
+   workshopsActive/bestWeekDays/investPct.A|T|P|I/scores.A|T|P|I。
+   scope=workshop（預設）用該課過濾後資料算；scope=global 用跨課合併資料算。 */
+function computeHonors_() {
+  return rows_(TABS.honors).map(function(r){
+    return { honorId: String(r.honorId || r.id || ""), workshopId: String(r.workshopId || ""),
+             metric: String(r.metric || ""), value: Number(r.value) || 0,
+             icon: String(r.icon || ""), name: String(r.name || ""), desc: String(r.desc || ""),
+             tier: String(r.tier || ""), celebrate: truthy_(r.celebrate), scope: String(r.scope || "workshop") };
+  }).filter(function(h){ return h.honorId && h.name; });
 }
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
@@ -209,7 +222,7 @@ function doGet(e) {
 
     if (action === "config") {
       var cfg = computeConfig_();
-      return json_({ status: "ok", workshops: cfg.workshops, tasks: cfg.tasks, enrollments: cfg.enrollments });
+      return json_({ status: "ok", workshops: cfg.workshops, tasks: cfg.tasks, enrollments: cfg.enrollments, honors: cfg.honors });
     }
 
     if (action === "bootstrap") {  // 一通回傳整個儀表板需要的資料（B：減少往返）
@@ -221,7 +234,7 @@ function doGet(e) {
       for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } }
       if (!defWid && bcfg.workshops.length) defWid = bcfg.workshops[0].id;
       return json_({ status: "ok", student: computeStudent_(buid),
-                     workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments,
+                     workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
                      checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
                      defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid) });
     }
