@@ -359,6 +359,23 @@ function buildHonorCtx(s) {
 /* 已解鎖榮譽 id 陣列（核心目錄，全域）。 */
 function earnedHonors(s) { return evalHonors(buildHonorCtx(s)); }
 
+/* 排行榜列的稱號：後端帶回該人跨 workshop 的精簡 logs，這裡組成合成學員、
+   走跟本人一模一樣的 earnedHonors/pickTitle（單一真相，不另寫一套）。
+   預設稱號「見習學員」回空字串——版面只秀有料的人，才有識別/炫耀感。 */
+function titleForLogs(logs) {
+  if (!logs || !logs.checkins) return "";
+  var syn = {
+    lineId: "",
+    checkinLog: logs.checkins.map(function(c){
+      return { workshopId: c.workshopId || "", dim: c.dim || "", pts: Number(c.pts) || 0,
+               date: normDate(c.date), week: weekStr(new Date(c.date)) };
+    }),
+    revenueLog: (logs.revenue || []).map(function(r){ return { amount: Number(r.amount) || 0 }; })
+  };
+  var t = pickTitle(earnedHonors(syn));
+  return t === "見習學員" ? "" : t;
+}
+
 /* 只保留某 workshop 打卡/成交的「子學員」，餵給 buildHonorCtx 就得到該課 scoped ctx。 */
 function subStudent(s, wid) {
   return {

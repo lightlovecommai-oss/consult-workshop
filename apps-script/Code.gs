@@ -191,11 +191,26 @@ function computeSelfEval_(uid) {
            P: Number(pick_(row, COLS.quiz.P)) || 0, I: Number(pick_(row, COLS.quiz.I)) || 0 };
 }
 function computeLeaderboard_(wid) {
-  var byUser = {};
+  var byUser = {};        // 分數：只算本課程（各 workshop 各一張榜）
   rows_(TABS.checkins).forEach(function(r){
     if (wid && String(pick_(r, COLS.checkins.workshopId)) !== wid) return;
     var id = String(pick_(r, COLS.checkins.lineId)); if (!id) return;
     byUser[id] = (byUser[id] || 0) + (Number(pick_(r, COLS.checkins.pts)) || 0);
+  });
+  // 稱號用的打卡紀錄：跨所有 workshop（榮譽是「人」的屬性），只帶 honor ctx 需要的欄。
+  var logsByUser = {};
+  rows_(TABS.checkins).forEach(function(r){
+    var id = String(pick_(r, COLS.checkins.lineId)); if (!id || byUser[id] == null) return;
+    (logsByUser[id] || (logsByUser[id] = { checkins: [], revenue: [] })).checkins.push({
+      workshopId: String(pick_(r, COLS.checkins.workshopId)), dim: String(pick_(r, COLS.checkins.dim)),
+      pts: Number(pick_(r, COLS.checkins.pts)) || 0, date: normDateStr_(pick_(r, COLS.checkins.date))
+    });
+  });
+  rows_(TABS.revenue).forEach(function(r){
+    var id = String(pick_(r, COLS.revenue.lineId)); if (!id || byUser[id] == null) return;
+    (logsByUser[id] || (logsByUser[id] = { checkins: [], revenue: [] })).revenue.push({
+      amount: Number(pick_(r, COLS.revenue.amount)) || 0
+    });
   });
   var idx = {};
   rows_(TABS.students).forEach(function(r){
@@ -203,7 +218,8 @@ function computeLeaderboard_(wid) {
     if (id) idx[id] = { name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)) };
   });
   return Object.keys(byUser).map(function(id){
-    return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "", score: byUser[id] };
+    return { lineId: id, name: (idx[id] || {}).name || id, team: (idx[id] || {}).team || "",
+             score: byUser[id], logs: logsByUser[id] || { checkins: [], revenue: [] } };
   }).sort(function(a, b){ return b.score - a.score; });
 }
 function computeTeam_(wid) {

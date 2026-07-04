@@ -568,8 +568,12 @@ async function refreshLeaderboard(s) {
 
   var myIdx = rows.findIndex(function(r){ return r.lineId === s.lineId; });
   var myRank = myIdx > -1 ? myIdx + 1 : rows.length + 1;
-  document.getElementById("r-rank").textContent = myRank + "th";
-  document.getElementById("r-rank-sub").textContent = "共 " + rows.length + " 人";
+  var ahead = myIdx > 0 ? rows[myIdx - 1] : null;   // 前一名（用來算差多少、激勵往前）
+  document.getElementById("r-rank").textContent = "第 " + myRank + " 名";
+  document.getElementById("r-rank-sub").textContent =
+    myIdx === 0 ? "本班榜首 👑" :
+    ahead ? "再 " + (ahead.score - rows[myIdx].score) + " 分超越 " + ahead.name :
+    "共 " + rows.length + " 人";
 
   var teams = {};
   rows.forEach(function(r){ var t = r.team || "無"; teams[t] = (teams[t] || 0) + r.score; });
@@ -588,18 +592,31 @@ async function refreshLeaderboard(s) {
     box.appendChild(empty);
     return;
   }
-  rows.slice(0, 8).forEach(function(r, i) {
-    var row = mk("div","lbrow" + (i < 1 ? " top" : ""));
-    row.appendChild(mk("div","lbrank", String(i+1)));
-    var nameWrap = mk("div","lbname");
-    nameWrap.textContent = r.name + (r.lineId === s.lineId ? "（你）" : "");
-    var team = mk("div","lbteam", r.team);
-    nameWrap.appendChild(document.createElement("br"));
-    nameWrap.appendChild(team);
+  var MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  function lbRow(r, rank, isMe, pinned) {
+    var row = mk("div", "lbrow" + (rank <= 3 ? " top" : "") + (isMe ? " me" : "") + (pinned ? " pin" : ""));
+    var rk = mk("div", "lbrank" + (MEDALS[rank] ? " medal m" + rank : ""), MEDALS[rank] || ("#" + rank));
+    row.appendChild(rk);
+    var nameWrap = mk("div", "lbname");
+    var nm = mk("span", null, r.name + (isMe ? "（你）" : ""));
+    nameWrap.appendChild(nm);
+    var title = titleForLogs(r.logs);
+    var sub = mk("div", "lbsub");
+    if (title) { var chip = mk("span", "lbtitle", title); sub.appendChild(chip); }
+    if (r.team) sub.appendChild(mk("span", "lbteam", r.team));
+    if (title || r.team) nameWrap.appendChild(sub);
     row.appendChild(nameWrap);
-    row.appendChild(mk("div","lbscore", r.score + " 分"));
-    box.appendChild(row);
-  });
+    row.appendChild(mk("div", "lbscore", r.score + " 分"));
+    return row;
+  }
+  rows.slice(0, 8).forEach(function(r, i) { box.appendChild(lbRow(r, i + 1, r.lineId === s.lineId, false)); });
+  /* 自己不在前 8：釘一列在底部，永遠看得到自己在第幾名、差前一名多少 */
+  if (myIdx >= 8) {
+    var div = mk("div", null, "⋯");
+    div.style.cssText = "text-align:center;color:#c9bcae;font-size:12px;padding:2px 0;";
+    box.appendChild(div);
+    box.appendChild(lbRow(rows[myIdx], myRank, true, true));
+  }
   showHonorToast(s);  /* 排行資料到齊後補觸發（首頁才會真的顯示） */
 }
 
@@ -620,6 +637,14 @@ async function refreshTeam(s) {
     box.innerHTML = '<div class="card" style="padding:1rem;font-size:12px;color:#a08060;">這個課程還沒有夥伴資料（需要學員報名並在「團隊」欄分組）</div>';
     return;
   }
+  /* 自適應：人少／沒真的分小隊（不同組別 < 2）就整塊收起，只留乾淨的個人榜。
+     依開班邏輯——5 人全個人參加、破 15 人才分小隊，未達門檻不秀組別/加油。 */
+  var distinctGroups = {};
+  members.forEach(function(m){ if (m.group) distinctGroups[m.group] = 1; });
+  var sec = document.getElementById("sec-team");
+  if (Object.keys(distinctGroups).length < 2) { if (sec) sec.style.display = "none"; return; }
+  if (sec) sec.style.display = "";
+
   function esc(t) { return String(t).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
 
   var myGroup = s.team || (members.find(function(m){ return m.lineId === s.lineId; }) || {}).group || "";
