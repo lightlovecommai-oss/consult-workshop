@@ -953,20 +953,22 @@ async function init() {
   var params = new URLSearchParams(window.location.search);
   var userId = params.get("id");
   if (!userId) { window.location.href = "index.html"; return; }
+  var w = params.get("w") || "";           // 入口帶進來的課程（只切畫面，不給權限）
   var key = "boot_" + userId;
 
-  /* C：先用上次快取秒開（若有），背景再更新 */
+  /* C：先用上次快取秒開（若有且有開通課程），背景再更新 */
   try {
     var cachedStr = localStorage.getItem(key);
-    if (cachedStr) { applyBootstrap(JSON.parse(cachedStr), userId); renderResult(current); }
+    if (cachedStr) { applyBootstrap(JSON.parse(cachedStr), userId); if (current.workshops.length) renderResult(current); }
   } catch (e) {}
 
   /* B：一通抓最新資料 */
-  var fresh = await loadBootstrap(userId);
+  var fresh = await loadBootstrap(userId, w);
   if (fresh) {
     if (!fresh.student) { window.location.href = "index.html"; return; }
     LB_CACHE = {}; TEAM_CACHE = {};
     applyBootstrap(fresh, userId);
+    if (!current.workshops.length) { window.location.href = "showcase.html"; return; }  // 一門都沒開通 → 展示頁
     renderResult(current);
     try { localStorage.setItem(key, JSON.stringify(fresh)); } catch (e) {}
     return;

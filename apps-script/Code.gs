@@ -16,7 +16,7 @@ var TABS = {
   tasks:       "(遊戲)任務",           // ⬅ 需新建：workshopId | taskKey | cadence | dim | pts | name | icon | needReview（匯入 seed-tasks.csv）
   honors:      "(遊戲)榮譽",           // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
-  enrollments: "(引流.T)課程報名紀錄", // 沿用既有：LINE userId + 課程
+  enrollments: "(遊戲)開通名單",       // 一人一列，每門課一欄；格子打勾＝開通。欄名＝workshopId
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
   quiz:        "(引流.A)能力測驗"      // 自評來源（暫定，待確認）：LINE userId + ATPI 分數
@@ -85,6 +85,14 @@ function truthy_(v) {
   if (v === true || v === 1) return true;
   return String(v).toLowerCase() === "true" || String(v) === "1";
 }
+/* 開通格判定：核取方塊 TRUE、或打勾類文字(✅/是/v/o…)＝開通；空白或叉/否/0＝沒開通。 */
+function granted_(v) {
+  if (v === true || v === 1) return true;
+  var s = String(v).trim().toLowerCase();
+  if (s === "") return false;
+  if (s === "false" || s === "0" || s === "x" || s === "✗" || s === "✕" || s === "否" || s === "-") return false;
+  return true;
+}
 
 /* 把 Sheet 的日期值（Date 物件或字串）統一成 yyyy-MM-dd。 */
 function normDateStr_(v) {
@@ -132,9 +140,14 @@ function computeConfig_() {
     return { workshopId: String(r.workshopId || ""), key: String(r.taskKey || r.key || ""), cadence: String(r.cadence || "once"),
              dim: String(r.dim || ""), pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""), needReview: truthy_(r.needReview) };
   }).filter(function(t){ return t.workshopId && t.key; });
-  var enrollments = rows_(TABS.enrollments).map(function(r){
-    return { lineId: String(pick_(r, COLS.enroll.lineId)), workshopId: String(pick_(r, COLS.enroll.workshopId)) };
-  }).filter(function(x){ return x.lineId && x.workshopId; });
+  /* 開通名單是寬表：一人一列，每門課一欄(欄名＝workshopId)，格子打勾＝開通。 */
+  var wids = workshops.map(function(w){ return w.id; });
+  var enrollments = [];
+  rows_(TABS.enrollments).forEach(function(r){
+    var lineId = String(pick_(r, COLS.enroll.lineId));
+    if (!lineId) return;
+    wids.forEach(function(wid){ if (granted_(r[wid])) enrollments.push({ lineId: lineId, workshopId: wid }); });
+  });
   return { workshops: workshops, tasks: tasks, enrollments: enrollments, honors: computeHonors_() };
 }
 /* 各 workshop 專屬榮譽（資料驅動，欄名為英文 key，跟 tasks 一致）。
@@ -224,7 +237,7 @@ function computeLeaderboard_(wid) {
 }
 function computeTeam_(wid) {
   var enrolled = {};
-  rows_(TABS.enrollments).forEach(function(r){ if (String(pick_(r, COLS.enroll.workshopId)) === wid) enrolled[String(pick_(r, COLS.enroll.lineId))] = true; });
+  rows_(TABS.enrollments).forEach(function(r){ if (granted_(r[wid])) enrolled[String(pick_(r, COLS.enroll.lineId))] = true; });
   var sinfo = {};
   rows_(TABS.students).forEach(function(r){
     var id = String(pick_(r, COLS.students.lineId));
@@ -268,9 +281,10 @@ function doGet(e) {
       var bcfg = computeConfig_();
       var blogs = computeLogs_(buid);
       var enrolledWids = bcfg.enrollments.filter(function(e){ return e.lineId === buid; }).map(function(e){ return e.workshopId; });
+      var bw = String(p.w || "");  // 入口帶的課程：有開通才用它當預設，否則落在第一門開通的
       var defWid = "";
-      for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } }
-      if (!defWid && bcfg.workshops.length) defWid = bcfg.workshops[0].id;
+      if (bw && enrolledWids.indexOf(bw) > -1) defWid = bw;
+      else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
       return json_({ status: "ok", student: computeStudent_(buid),
                      workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
                      checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
@@ -355,32 +369,15 @@ function setup() {
   ensureColumn_(TABS.revenue, "課程");
   writeSheet_(TABS.workshops, [
     ["workshopId", "name", "active"],
-    ["一階", "溝通變現・一階", true]
+    ["一階", "一階", true],
+    ["二階", "二階", true],
+    ["三階", "三階", true],
+    ["1v1顧問實戰", "1v1顧問實戰", true],
+    ["主持人實戰", "主持人實戰", true],
+    ["短影音實戰", "短影音實戰", true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
-  var enr = enrollAll();
-  return "初始化完成；" + enr;
-}
-
-/* 把「(遊戲)學員名單」裡每個人補報名到第一個課程（已報名的跳過，不重複）。 */
-function enrollAll() {
-  var wsRows = rows_(TABS.workshops);
-  if (!wsRows.length) return "沒有課程可報名";
-  var wid = String(wsRows[0].workshopId || wsRows[0].id || "");
-  if (!ss_().getSheetByName(TABS.enrollments)) return "找不到報名分頁";
-  var existing = {};
-  rows_(TABS.enrollments).forEach(function(r) {
-    var id = String(pick_(r, COLS.enroll.lineId));
-    if (id) existing[id + "|" + String(pick_(r, COLS.enroll.workshopId))] = true;
-  });
-  var added = 0;
-  rows_(TABS.students).forEach(function(r) {
-    var id = String(pick_(r, COLS.students.lineId));
-    if (!id || existing[id + "|" + wid]) return;
-    appendMapped_(TABS.enrollments, COLS.enroll, { lineId: id, workshopId: wid });
-    added++;
-  });
-  return "已補報名 " + added + " 人（課程 " + wid + "）";
+  return "初始化完成（開通名單請手動維護：一人一列、每門課一欄打勾）";
 }
 
 function ensureColumn_(tab, header) {

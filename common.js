@@ -83,8 +83,7 @@ function taskDef(workshopId, key) {
 /* 某學員報名的 workshop（依 enrollments，比對 WORKSHOPS 取名稱） */
 function enrolledWorkshops(lineId) {
   var ids = ENROLLMENTS.filter(function(e){ return e.lineId === lineId; }).map(function(e){ return e.workshopId; });
-  var list = WORKSHOPS.filter(function(w){ return ids.indexOf(w.id) > -1; });
-  return list.length ? list : WORKSHOPS.slice();  // 沒設 enrollment 就先給全部，避免空畫面
+  return WORKSHOPS.filter(function(w){ return ids.indexOf(w.id) > -1; });  // 只回開通的；一門都沒有＝空（呼叫端會導去 showcase）
 }
 
 /* ── 日期／週次小工具 ── */
@@ -260,9 +259,9 @@ async function loadLeaderboard(workshopId) {
 
 /* ── Bootstrap：一通把整個儀表板需要的資料抓回來（取代 6 通分開呼叫，大幅降延遲）──
    回傳 student/workshops/tasks/enrollments/checkins/revenue/selfEval/defaultWorkshop/leaderboard/team。 */
-async function loadBootstrap(userId) {
+async function loadBootstrap(userId, w) {
   try {
-    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId));
+    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || ""));
     var d = await r.json();
     if (d.status !== "ok") return null;
     d.checkins = (d.checkins || []).map(function(c){
