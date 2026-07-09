@@ -377,7 +377,30 @@ function setup() {
     ["短影音實戰", "短影音實戰", true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
-  return "初始化完成（開通名單請手動維護：一人一列、每門課一欄打勾）";
+  var e = ensureEnrollmentSheet_();
+  return "初始化完成；" + e;
+}
+
+/* 建「開通名單」寬表：一人一列、每門課一欄(核取方塊)，預設把第一門課(一階)開通。
+   已存在就「不覆蓋」，避免洗掉你手動的開通設定。 */
+function ensureEnrollmentSheet_() {
+  var ss = ss_();
+  if (ss.getSheetByName(TABS.enrollments)) return "開通名單已存在，未變動";
+  var sh = ss.insertSheet(TABS.enrollments);
+  var wids = rows_(TABS.workshops).map(function(r){ return String(r.workshopId || r.id || ""); }).filter(function(x){ return x; });
+  var header = ["LINE userId", "姓名"].concat(wids);
+  var firstCourse = wids[0] || "";
+  var out = [header];
+  rows_(TABS.students).forEach(function(r){
+    var id = String(pick_(r, COLS.students.lineId));
+    if (!id) return;
+    var line = [id, String(pick_(r, COLS.students.name)) || ""];
+    wids.forEach(function(w){ line.push(w === firstCourse); });  // 預設開通第一門課
+    out.push(line);
+  });
+  sh.getRange(1, 1, out.length, header.length).setValues(out);
+  if (out.length > 1 && wids.length) sh.getRange(2, 3, out.length - 1, wids.length).insertCheckboxes();
+  return "已建開通名單，" + (out.length - 1) + " 人，預設開通「" + firstCourse + "」";
 }
 
 function ensureColumn_(tab, header) {
