@@ -22,6 +22,13 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .spinner{width:34px;height:34px;border:3px solid #ede4da;border-top-color:#e8734a;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+/* ── 課程切換下拉選單 ── */
+.ws-select-wrap{position:relative;display:flex;align-items:center;background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:0 12px;height:44px;}
+.ws-select-icon{font-size:17px;margin-right:8px;flex-shrink:0;}
+.ws-select{flex:1;min-width:0;appearance:none;-webkit-appearance:none;border:0;background:transparent;font-size:14px;font-weight:600;color:#2d1f0f;padding:0 22px 0 0;height:100%;}
+.ws-select:focus{outline:none;}
+.ws-select-arrow{position:absolute;right:12px;color:#a08060;font-size:12px;pointer-events:none;}
+
 /* ── 榮譽系統 ── */
 .honor-banner{background:linear-gradient(160deg,#2d1f0f,#5a3d1c);border-radius:16px;padding:18px 16px;text-align:center;color:#fff;margin-bottom:14px;box-shadow:0 4px 18px rgba(90,61,28,.25);}
 .honor-banner .hb-crown{font-size:30px;line-height:1;margin-bottom:2px;}
@@ -176,9 +183,15 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         </div>
       </details>
 
-      <!-- 課程切換 -->
-      <div style="font-size:12px;color:#a08060;margin-bottom:6px;">選擇課程</div>
-      <div class="ws-pills" id="ws-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <!-- 課程切換（下拉選單，課程一多也不會擠成一團） -->
+      <div class="ws-switch" id="ws-switch" style="margin-bottom:14px;">
+        <div style="font-size:12px;color:#a08060;margin-bottom:6px;">目前課程</div>
+        <div class="ws-select-wrap">
+          <span class="ws-select-icon">📚</span>
+          <select class="ws-select" id="ws-select"></select>
+          <span class="ws-select-arrow">▾</span>
+        </div>
+      </div>
 
       <!-- 回報成交（可開關模組，放在任務上面，養成一變現就輸入）-->
       <div id="sec-revenue">
@@ -361,25 +374,41 @@ function updateTabVisibility(honorOn, rankOn) {
   }
 }
 
-/* ── 課程切換 pills ── */
+/* ── 課程切換（下拉選單）── 依課程名稱關鍵字給個 icon，多課程時比一排 pill 更清爽 */
+function workshopIcon(name) {
+  name = name || "";
+  if (name.indexOf("1v1") > -1 || name.indexOf("顧問") > -1) return "🧑‍💼";
+  if (name.indexOf("主持") > -1) return "🎤";
+  if (name.indexOf("短影音") > -1) return "🎬";
+  if (name.indexOf("募資") > -1) return "💰";
+  if (name.indexOf("一階") > -1) return "🌱";
+  if (name.indexOf("二階") > -1) return "🌿";
+  if (name.indexOf("三階") > -1) return "🌳";
+  return "📚";
+}
+
 function renderWorkshopPills(s) {
-  var box = document.getElementById("ws-pills");
-  box.innerHTML = "";
+  var wrap = document.getElementById("ws-switch");
+  var sel = document.getElementById("ws-select");
   var list = s.workshops || [];
-  if (list.length <= 1) { box.style.display = "none"; } else { box.style.display = "flex"; }
+
+  if (list.length <= 1) { wrap.style.display = "none"; return; }
+  wrap.style.display = "";
+
+  sel.innerHTML = "";
   list.forEach(function(w) {
-    var on = w.id === activeWorkshop;
-    var b = mk("button", null, w.name || w.id);
-    b.type = "button";
-    b.style.cssText = "border:0.5px solid " + (on ? "#e8734a" : "#e8ddd2") + ";background:" + (on ? "#e8734a" : "#fff")
-      + ";color:" + (on ? "#fff" : "#6b4c30") + ";border-radius:16px;padding:6px 14px;font-size:12px;cursor:pointer;";
-    b.onclick = function() {
-      if (activeWorkshop === w.id) return;
-      activeWorkshop = w.id;
-      renderResult(s);
-    };
-    box.appendChild(b);
+    var opt = document.createElement("option");
+    opt.value = w.id;
+    opt.textContent = workshopIcon(w.name) + "  " + (w.name || w.id);
+    if (w.id === activeWorkshop) opt.selected = true;
+    sel.appendChild(opt);
   });
+
+  sel.onchange = function() {
+    if (sel.value === activeWorkshop) return;
+    activeWorkshop = sel.value;
+    renderResult(s);
+  };
 }
 
 function renderResult(s) {
