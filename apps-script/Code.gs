@@ -12,8 +12,8 @@ var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是
 
 var TABS = {
   students:    "(遊戲)學員名單",       // LINE userId | 姓名 | 團隊
-  workshops:   "(遊戲)課程",           // ⬅ 需新建：workshopId | name | active（匯入 seed-workshops.csv）
-  tasks:       "(遊戲)任務",           // ⬅ 需新建：workshopId | taskKey | cadence | dim | pts | name | icon | needReview（匯入 seed-tasks.csv）
+  workshops:   "(遊戲)課程",           // workshopId | name | active（跑 setup() 自動建立/覆蓋，不用手動匯入 CSV）
+  tasks:       "(遊戲)任務",           // workshopId | taskKey | cadence | dim | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
   honors:      "(遊戲)榮譽",           // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
   enrollments: "(遊戲)開通名單",       // 一人一列，每門課一欄；格子打勾＝開通。欄名＝workshopId
@@ -369,8 +369,8 @@ function setup() {
   ensureColumn_(TABS.revenue, "課程");
   writeSheet_(TABS.workshops, [
     ["workshopId", "name", "active"],
-    ["一階", "一階", true],
-    ["二階", "二階", true],
+    ["二階", "二階", true],           // ← 目前定錨的正式課程，排第一＝預設落點
+    ["一階", "一階", false],          // 沒在跑，停用（保留列，之後要開再打開 active）
     ["三階", "三階", true],
     ["1v1顧問實戰", "1v1顧問實戰", true],
     ["主持人實戰", "主持人實戰", true],
@@ -381,7 +381,27 @@ function setup() {
   return "初始化完成；" + e;
 }
 
-/* 建「開通名單」寬表：一人一列、每門課一欄(核取方塊)，預設把第一門課(一階)開通。
+/* ═══════════════════════════════════════════════════════════
+   一次性：把舊的「一階」測試打卡／成交紀錄清掉（過往資料是測試資料，覆蓋掉沒關係）。
+   只清資料列、保留標題列；之後這個專案就乾淨地以「二階」為主繼續跑。
+   在 Apps Script 選 clearOldTestData → 執行 一次即可，之後不用再跑。
+   ═══════════════════════════════════════════════════════════ */
+function clearOldTestData() {
+  var a = clearSheetRows_(TABS.checkins);
+  var b = clearSheetRows_(TABS.revenue);
+  return "已清空舊測試資料：打卡紀錄 " + a + " 列、成交紀錄 " + b + " 列（標題列保留）";
+}
+function clearSheetRows_(tab) {
+  var sh = ss_().getSheetByName(tab);
+  if (!sh) return 0;
+  var lastRow = sh.getLastRow();
+  if (lastRow < 2) return 0;
+  var n = lastRow - 1;
+  sh.getRange(2, 1, n, sh.getLastColumn()).clearContent();
+  return n;
+}
+
+/* 建「開通名單」寬表：一人一列、每門課一欄(核取方塊)，預設把第一門課(目前是二階)開通。
    已存在就「不覆蓋」，避免洗掉你手動的開通設定。 */
 function ensureEnrollmentSheet_() {
   var ss = ss_();
@@ -421,27 +441,27 @@ function writeSheet_(name, rows) {
 
 var TASKS_SEED = [
   ["workshopId", "taskKey", "cadence", "dim", "pts", "name", "icon", "needReview"],
-  ["一階", "attend1", "once", "I", 2, "第 1 場準時出席", "📅", false],
-  ["一階", "attend2", "once", "I", 2, "第 2 場準時出席", "📅", false],
-  ["一階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false],
-  ["一階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false],
-  ["一階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false],
-  ["一階", "hw1", "special", "P", 5, "作業：開場逐字稿", "✍️", true],
-  ["一階", "hw2", "special", "P", 5, "作業：收單逐字稿", "📝", true],
-  ["一階", "team1", "special", "T", 6, "團隊賽得分", "⚔️", true],
-  ["一階", "d1", "daily", "A", 1, "發一則社群貼文", "📣", false],
-  ["一階", "d2", "daily", "A", 1, "留言互動 3 位夥伴的貼文", "💬", false],
-  ["一階", "d3", "daily", "T", 1, "主動關心一位夥伴的近況", "🤝", false],
-  ["一階", "d4", "daily", "T", 1, "在群組裡真誠回應一則訊息", "💛", false],
-  ["一階", "d5", "daily", "P", 1, "寫 100 字今日反思", "📝", false],
-  ["一階", "d6", "daily", "P", 1, "練習一次開場白或提案台詞", "🎤", false],
-  ["一階", "d7", "daily", "P", 1, "覆盤一件今天做得好的事", "🔍", false],
-  ["一階", "d8", "daily", "I", 1, "準時開始今天的行動", "⏰", false],
-  ["一階", "d9", "daily", "I", 1, "完成今天排定的一件任務", "✅", false],
-  ["一階", "d10", "daily", "A", 1, "分享一則有價值的觀點", "✨", false],
-  ["一階", "wk1", "weekly", "I", 2, "出席本週固定會議／直播", "📅", false],
-  ["一階", "wk2", "weekly", "P", 2, "交一份週報／進度整理", "📋", false],
-  ["一階", "wk3", "weekly", "T", 2, "跟夥伴進行一次共學或角色扮演", "🎭", false],
-  ["一階", "wk4", "weekly", "A", 2, "開發一位新名單／新連結", "🌱", false],
-  ["一階", "wk5", "weekly", "T", 2, "幫夥伴做一次回饋或複盤", "🪞", false]
+  ["二階", "attend1", "once", "I", 2, "第 1 場準時出席", "📅", false],
+  ["二階", "attend2", "once", "I", 2, "第 2 場準時出席", "📅", false],
+  ["二階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false],
+  ["二階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false],
+  ["二階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false],
+  ["二階", "hw1", "special", "P", 5, "作業：開場逐字稿", "✍️", true],
+  ["二階", "hw2", "special", "P", 5, "作業：收單逐字稿", "📝", true],
+  ["二階", "team1", "special", "T", 6, "團隊賽得分", "⚔️", true],
+  ["二階", "d1", "daily", "A", 1, "發一則社群貼文", "📣", false],
+  ["二階", "d2", "daily", "A", 1, "留言互動 3 位夥伴的貼文", "💬", false],
+  ["二階", "d3", "daily", "T", 1, "主動關心一位夥伴的近況", "🤝", false],
+  ["二階", "d4", "daily", "T", 1, "在群組裡真誠回應一則訊息", "💛", false],
+  ["二階", "d5", "daily", "P", 1, "寫 100 字今日反思", "📝", false],
+  ["二階", "d6", "daily", "P", 1, "練習一次開場白或提案台詞", "🎤", false],
+  ["二階", "d7", "daily", "P", 1, "覆盤一件今天做得好的事", "🔍", false],
+  ["二階", "d8", "daily", "I", 1, "準時開始今天的行動", "⏰", false],
+  ["二階", "d9", "daily", "I", 1, "完成今天排定的一件任務", "✅", false],
+  ["二階", "d10", "daily", "A", 1, "分享一則有價值的觀點", "✨", false],
+  ["二階", "wk1", "weekly", "I", 2, "出席本週固定會議／直播", "📅", false],
+  ["二階", "wk2", "weekly", "P", 2, "交一份週報／進度整理", "📋", false],
+  ["二階", "wk3", "weekly", "T", 2, "跟夥伴進行一次共學或角色扮演", "🎭", false],
+  ["二階", "wk4", "weekly", "A", 2, "開發一位新名單／新連結", "🌱", false],
+  ["二階", "wk5", "weekly", "T", 2, "幫夥伴做一次回饋或複盤", "🪞", false]
 ];
