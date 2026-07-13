@@ -22,12 +22,13 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .spinner{width:34px;height:34px;border:3px solid #ede4da;border-top-color:#e8734a;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── 課程切換下拉選單 ── */
-.ws-select-wrap{position:relative;display:flex;align-items:center;background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:0 12px;height:44px;}
-.ws-select-icon{font-size:17px;margin-right:8px;flex-shrink:0;}
-.ws-select{flex:1;min-width:0;appearance:none;-webkit-appearance:none;border:0;background:transparent;font-size:14px;font-weight:600;color:#2d1f0f;padding:0 22px 0 0;height:100%;}
-.ws-select:focus{outline:none;}
-.ws-select-arrow{position:absolute;right:12px;color:#a08060;font-size:12px;pointer-events:none;}
+/* ── 課程切換下拉選單（放在頂部深色 bar 裡，取代品牌標題）── */
+.topbar-ws-wrap{position:relative;display:flex;align-items:center;gap:5px;min-width:0;}
+.topbar-ws-icon{font-size:14px;line-height:1;flex-shrink:0;}
+.topbar-ws-select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:#f0e8dc;font-size:14px;font-weight:500;letter-spacing:.02em;padding:0 16px 0 0;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-ws-select:focus{outline:none;}
+.topbar-ws-select option{color:#2d1f0f;}
+.topbar-ws-arrow{position:absolute;right:0;color:#a08060;font-size:10px;pointer-events:none;}
 
 /* ── 榮譽系統 ── */
 .honor-banner{background:linear-gradient(160deg,#2d1f0f,#5a3d1c);border-radius:16px;padding:18px 16px;text-align:center;color:#fff;margin-bottom:14px;box-shadow:0 4px 18px rgba(90,61,28,.25);}
@@ -104,9 +105,14 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 <div class="wrap">
   <div class="card" style="padding:1.25rem 1.25rem 90px;">
 
-    <!-- 頂部 bar（三分頁共用）-->
+    <!-- 頂部 bar（三分頁共用）：只開通一門課＝顯示品牌標題；開通多門課＝直接在這切換 -->
     <div class="dash-topbar">
-      <div class="dash-topbar-title">變現型顧問實戰營</div>
+      <div class="dash-topbar-title" id="topbar-title">變現型顧問實戰營</div>
+      <div class="topbar-ws-wrap" id="ws-switch" style="display:none;">
+        <span class="topbar-ws-icon">📚</span>
+        <select class="topbar-ws-select" id="ws-select"></select>
+        <span class="topbar-ws-arrow">▾</span>
+      </div>
       <div class="dash-topbar-name" id="r-topname"></div>
     </div>
 
@@ -182,16 +188,6 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           </div>
         </div>
       </details>
-
-      <!-- 課程切換（下拉選單，課程一多也不會擠成一團） -->
-      <div class="ws-switch" id="ws-switch" style="margin-bottom:14px;">
-        <div style="font-size:12px;color:#a08060;margin-bottom:6px;">目前課程</div>
-        <div class="ws-select-wrap">
-          <span class="ws-select-icon">📚</span>
-          <select class="ws-select" id="ws-select"></select>
-          <span class="ws-select-arrow">▾</span>
-        </div>
-      </div>
 
       <!-- 回報成交（可開關模組，放在任務上面，養成一變現就輸入）-->
       <div id="sec-revenue">
@@ -388,12 +384,14 @@ function workshopIcon(name) {
 }
 
 function renderWorkshopPills(s) {
+  var title = document.getElementById("topbar-title");
   var wrap = document.getElementById("ws-switch");
   var sel = document.getElementById("ws-select");
   var list = s.workshops || [];
 
-  if (list.length <= 1) { wrap.style.display = "none"; return; }
-  wrap.style.display = "";
+  if (list.length <= 1) { wrap.style.display = "none"; title.style.display = ""; return; }
+  title.style.display = "none";
+  wrap.style.display = "flex";
 
   sel.innerHTML = "";
   list.forEach(function(w) {
