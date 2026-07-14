@@ -223,6 +223,20 @@ function postRevenue(lineId, amount, note, scores, workshopId) {
     scoreA: scores.A, scoreT: scores.T, scoreP: scores.P, scoreI: scores.I
   });
 }
+/* ── 代幣兌換：伺服器端重算餘額，回傳 {status:"ok"} 或 {status:"error", message} ── */
+async function redeem(lineId, rewardId) {
+  try {
+    var r = await fetch(SHEET_API, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({ action: "redeem", lineId: lineId, rewardId: rewardId })
+    });
+    return await r.json();
+  } catch (e) {
+    console.log("redeem error:", e);
+    return { status: "error", message: "網路錯誤，請稍後再試" };
+  }
+}
 
 /* ── 讀回某學員的打卡＋成交紀錄 ── */
 async function loadLogs(userId) {

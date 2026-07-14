@@ -19,7 +19,9 @@ var TABS = {
   enrollments: "(遊戲)開通名單",       // 一人一列，每門課一欄；格子打勾＝開通。欄名＝workshopId
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
-  quiz:        "(引流.A)能力測驗"      // 自評來源（暫定，待確認）：LINE userId + ATPI 分數
+  quiz:        "(引流.A)能力測驗",     // 自評來源（暫定，待確認）：LINE userId + ATPI 分數
+  rewards:     "(遊戲)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
+  redemptions: "(遊戲)代幣兌換紀錄"    // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。 */
@@ -163,6 +165,55 @@ function computeHonors_() {
              tier: String(r.tier || ""), celebrate: truthy_(r.celebrate), scope: String(r.scope || "workshop") };
   }).filter(function(h){ return h.honorId && h.name; });
 }
+
+/* ── 代幣兌換：跨所有 workshop 共用一個錢包（比照 ATPI 是「人」的屬性）──
+   代幣天花板 = 該生已開通的每個 workshop「一次性任務」(cadence=once/special) 滿分加總，
+   避免每日/每週這種可無限重複打的任務把代幣灌爆（浮濫）。 */
+function computeRewards_() {
+  return rows_(TABS.rewards)
+    .filter(function(r){ return r.active === "" || r.active === undefined || truthy_(r.active); })
+    .map(function(r){
+      return { rewardId: String(r.rewardId || r.id || ""), name: String(r.name || ""), desc: String(r.desc || ""),
+               cost: Number(r.cost) || 0, value: String(r.value || ""), icon: String(r.icon || "") };
+    }).filter(function(r){ return r.rewardId && r.name; });
+}
+function computeTokenBalance_(uid) {
+  var cfg = computeConfig_();
+  var enrolledWids = cfg.enrollments.filter(function(e){ return e.lineId === uid; }).map(function(e){ return e.workshopId; });
+  var ceiling = 0;
+  cfg.tasks.forEach(function(t){
+    if ((t.cadence === "once" || t.cadence === "special") && enrolledWids.indexOf(t.workshopId) > -1) ceiling += t.pts;
+  });
+  var earnedRaw = 0;
+  rows_(TABS.checkins).forEach(function(r){
+    if (String(pick_(r, COLS.checkins.lineId)) === uid) earnedRaw += Number(pick_(r, COLS.checkins.pts)) || 0;
+  });
+  var earned = Math.min(earnedRaw, ceiling);
+  var spent = 0;
+  rows_(TABS.redemptions).forEach(function(r){
+    var rid = String(r["LINE userId"] || r.lineId || "");
+    var status = String(r["狀態"] || r.status || "");
+    if (rid === uid && status !== "已拒絕") spent += Number(r["代幣"] || r.cost) || 0;
+  });
+  return { ceiling: ceiling, earned: earned, spent: spent, balance: Math.max(0, earned - spent) };
+}
+/* 兌換紀錄表不存在就自動建立（含表頭）。 */
+function ensureRedemptionSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.redemptions);
+  if (!sh) {
+    sh = ss.insertSheet(TABS.redemptions);
+    sh.getRange(1, 1, 1, 7).setValues([["LINE userId", "姓名", "rewardId", "名稱", "代幣", "申請時間", "狀態"]]);
+  }
+  return sh;
+}
+/* 該生的兌換紀錄（給前端顯示「待審核／已核准」狀態用）。 */
+function computeRedemptions_(uid) {
+  return rows_(TABS.redemptions).filter(function(r){ return String(r["LINE userId"] || r.lineId || "") === uid; }).map(function(r){
+    return { rewardId: String(r.rewardId || ""), name: String(r["名稱"] || r.name || ""), cost: Number(r["代幣"] || r.cost) || 0,
+             date: String(r["申請時間"] || r.date || ""), status: String(r["狀態"] || r.status || "") };
+  });
+}
 /* 榮譽解鎖事件流：最近 N 筆（時間新到舊），供首頁他人快閃。 */
 function computeHonorFeed_(limit) {
   limit = limit || 30;
@@ -290,7 +341,8 @@ function doGet(e) {
                      workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
                      checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
                      defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
-                     honorFeed: computeHonorFeed_(30) });
+                     honorFeed: computeHonorFeed_(30),
+                     rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid) });
     }
 
     if (action === "logs") {
@@ -354,6 +406,19 @@ function doPost(e) {
       ]);
       return json_({ status: "ok" });
     }
+    if (body.action === "redeem") {  // 代幣兌換申請：伺服器端重算餘額防竄改，送出後狀態＝待審核，人工審核
+      var uid = String(body.lineId || ""), rid = String(body.rewardId || "");
+      var reward = computeRewards_().filter(function(r){ return r.rewardId === rid; })[0];
+      if (!reward) return json_({ status: "error", message: "找不到兌換品項" });
+      var bal = computeTokenBalance_(uid);
+      if (bal.balance < reward.cost) return json_({ status: "error", message: "代幣不足" });
+      var rst = computeStudent_(uid);
+      ensureRedemptionSheet_().appendRow([
+        uid, (rst ? rst.name : uid), rid, reward.name, reward.cost,
+        Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"), "待審核"
+      ]);
+      return json_({ status: "ok" });
+    }
     return json_({ status: "error", message: "unknown action" });
   } catch (err) {
     return json_({ status: "error", message: String(err) });
@@ -379,7 +444,22 @@ function setup() {
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
   var e = ensureEnrollmentSheet_();
-  return "初始化完成；" + e;
+  var r = ensureRewardsSheet_();
+  return "初始化完成；" + e + "；" + r;
+}
+
+/* 建「兌換品項」表（代幣可換的獎勵，跨所有 workshop 共用）。已存在就不覆蓋，
+   避免洗掉你之後手動加/改的獎勵（例如之後要補上 Podcast）。 */
+function ensureRewardsSheet_() {
+  var ss = ss_();
+  if (ss.getSheetByName(TABS.rewards)) return "兌換品項已存在，未變動";
+  var sh = ss.insertSheet(TABS.rewards);
+  sh.getRange(1, 1, 3, 7).setValues([
+    ["rewardId", "name", "desc", "cost", "value", "icon", "active"],
+    ["course_discount", "課程折抵 5000 元", "折抵下一期課程學費 5000 元", 25, "5000元", "🎓", true],
+    ["consult", "光頭 1對1 諮詢", "與光頭進行一次 1對1 諮詢（約2000元）", 10, "2000元", "🧑‍💼", true]
+  ]);
+  return "已建兌換品項，2 項獎勵";
 }
 
 /* ═══════════════════════════════════════════════════════════
