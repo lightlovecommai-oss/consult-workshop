@@ -435,17 +435,46 @@ function setup() {
   ensureColumn_(TABS.revenue, "課程");
   writeSheet_(TABS.workshops, [
     ["workshopId", "name", "active"],
-    ["二階", "二階", true],           // ← 目前定錨的正式課程，排第一＝預設落點
-    ["一階", "一階", false],          // 沒在跑，停用（保留列，之後要開再打開 active）
-    ["三階", "三階", true],
-    ["1v1顧問實戰", "1v1顧問實戰", true],
-    ["主持人實戰", "主持人實戰", true],
-    ["短影音實戰", "短影音實戰", true]
+    ["二階", "吸引式1v1顧問成交", true],        // ← 目前定錨的正式課程，排第一＝預設落點
+    ["一階", "吸引式聊天變現課", false],         // 沒在跑，停用（保留列，之後要開再打開 active）
+    ["三階", "吸引式1vN公眾演說", true],
+    ["1v1顧問實戰", "1v1顧問實戰工作坊", true],
+    ["主持人實戰", "1VN主持人實戰工作坊", true],
+    ["短影音實戰", "短影音實戰工作坊", true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
   var e = ensureEnrollmentSheet_();
   var r = ensureRewardsSheet_();
   return "初始化完成；" + e + "；" + r;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   一次性：把 6 門課的顯示名稱改成正式課名，只動「name」這一欄，
+   不會動到 active／team／leaderboard 等你手動設定過的欄位（跟重跑 setup() 不同，很安全）。
+   在 Apps Script 選 updateWorkshopNames → 執行 一次即可，之後不用再跑。
+   ═══════════════════════════════════════════════════════════ */
+function updateWorkshopNames() {
+  var names = {
+    "一階": "吸引式聊天變現課",
+    "二階": "吸引式1v1顧問成交",
+    "三階": "吸引式1vN公眾演說",
+    "1v1顧問實戰": "1v1顧問實戰工作坊",
+    "主持人實戰": "1VN主持人實戰工作坊",
+    "短影音實戰": "短影音實戰工作坊"
+  };
+  var sh = ss_().getSheetByName(TABS.workshops);
+  if (!sh) return "找不到「" + TABS.workshops + "」分頁";
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idCol = headers.indexOf("workshopId") + 1;
+  var nameCol = headers.indexOf("name") + 1;
+  if (idCol < 1 || nameCol < 1) return "找不到 workshopId 或 name 欄位";
+  var lastRow = sh.getLastRow();
+  var updated = 0;
+  for (var r = 2; r <= lastRow; r++) {
+    var wid = String(sh.getRange(r, idCol).getValue()).trim();
+    if (names[wid]) { sh.getRange(r, nameCol).setValue(names[wid]); updated++; }
+  }
+  return "已更新 " + updated + " 門課程的正式名稱";
 }
 
 /* 建「兌換品項」表（代幣可換的獎勵，跨所有 workshop 共用）。已存在就不覆蓋，
