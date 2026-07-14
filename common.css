@@ -98,6 +98,7 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 .tcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
 .tcard.done{opacity:.5;}
 .tcard.special{background:#fff8f4;border-color:#f0c8b0;}
+.tcard.locked-task{background:#f4f1ec;opacity:.6;filter:grayscale(.6);}
 .tcard-img{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
 .tcard-body{flex:1;min-width:0;}
 .tcard-name{font-size:14px;font-weight:500;color:#2d1f0f;margin-bottom:2px;}

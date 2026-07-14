@@ -592,18 +592,19 @@ function renderCadenceList(s, cadence, containerId) {
   tasks.forEach(function(t) {
     var on = doneKeys.indexOf(t.key) > -1;
     var dimName = (DIMS[t.dim] || {name:"—"}).name;
+    var locked = !!t.locked;
 
-    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : ""));
+    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : "") + (locked ? " locked-task" : ""));
     row.style.cursor = "pointer";
     row.onclick = function() { openTaskDetail(t, s, dimName, on, capped); };
-    var img = mk("div","tcard-img", t.icon || "✅");
+    var img = mk("div","tcard-img", locked ? "🔒" : (t.icon || "✅"));
     img.style.background = isSpecial ? "#fff4ec" : "#fff8f4";
     row.appendChild(img);
 
     var body = mk("div","tcard-body");
     body.appendChild(mk("div","tcard-name", t.name));
-    var desc = mk("div","tcard-desc", dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分");
-    if (t.needReview && !on) {
+    var desc = mk("div","tcard-desc", locked ? "尚未開放，敬請期待" : (dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分"));
+    if (t.needReview && !on && !locked) {
       var rv = mk("div","tcard-need-review","⏱ 繳交後等待導師審核計分");
       desc.appendChild(document.createElement("br"));
       desc.appendChild(rv);
@@ -613,7 +614,11 @@ function renderCadenceList(s, cadence, containerId) {
 
     var right = mk("div","tcard-right");
     right.appendChild(mk("div","tcard-pts" + (isSpecial ? " special" : ""), "+" + t.pts));
-    if (on) {
+    if (locked) {
+      var lockTag = mk("div","btn-done","尚未開放");
+      lockTag.style.color = "#a08060"; lockTag.style.background = "#f0e9df";
+      right.appendChild(lockTag);
+    } else if (on) {
       right.appendChild(mk("div","btn-done","✓ 完成"));
     } else if (t.needReview) {
       var pend = mk("div","btn-done","待審核");
@@ -637,16 +642,18 @@ function renderCadenceList(s, cadence, containerId) {
 function openTaskDetail(t, s, dimName, done, capped) {
   var ov = document.getElementById("taskdetail-overlay");
   var card = document.getElementById("taskdetail-card");
-  var tip = t.desc ? '<div class="td-tip"><div class="td-tip-label">💡 複習一下這個技巧</div><div class="td-tip-body">' + t.desc + '</div></div>' : "";
+  var locked = !!t.locked;
+  var tip = (t.desc && !locked) ? '<div class="td-tip"><div class="td-tip-label">💡 複習一下這個技巧</div><div class="td-tip-body">' + t.desc + '</div></div>' : "";
 
   var btnHtml;
-  if (done) btnHtml = '<button class="td-confirm" disabled>✓ 已完成</button>';
+  if (locked) btnHtml = '<button class="td-confirm" disabled>🔒 尚未開放，敬請期待</button>';
+  else if (done) btnHtml = '<button class="td-confirm" disabled>✓ 已完成</button>';
   else if (t.needReview) btnHtml = '<button class="td-confirm" disabled>待審核，請依課程指示繳交作業</button>';
   else if (capped) btnHtml = '<button class="td-confirm" disabled>今日／本週已達上限</button>';
   else btnHtml = '<button class="td-confirm" id="td-confirm-btn">確認打卡</button>';
 
   card.innerHTML =
-    '<div class="td-top"><div class="td-icon">' + (t.icon || "✅") + '</div><button class="td-close" onclick="closeTaskDetail()">✕</button></div>'
+    '<div class="td-top"><div class="td-icon">' + (locked ? "🔒" : (t.icon || "✅")) + '</div><button class="td-close" onclick="closeTaskDetail()">✕</button></div>'
     + '<div class="td-name">' + t.name + '</div>'
     + '<div class="td-meta">' + dimName + '・+' + t.pts + ' 分</div>'
     + tip + btnHtml;
