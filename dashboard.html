@@ -222,12 +222,18 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- 任務（滑動式分頁卡片，左右滑或點上方切換） -->
       <div class="task-tabs" id="task-tabs">
-        <button class="task-tab active" type="button">☀️ 每日</button>
+        <button class="task-tab active" type="button">📅 課程</button>
+        <button class="task-tab" type="button">☀️ 每日</button>
         <button class="task-tab" type="button">🗓️ 每週</button>
         <button class="task-tab" type="button">💎 特殊</button>
-        <button class="task-tab" type="button">📅 課程</button>
       </div>
       <div class="task-slider" id="task-slider">
+        <div class="task-panel">
+          <div class="task-panel-head" style="justify-content:flex-end;">
+            <div class="task-panel-cap">出席＋作業，點卡片看詳情</div>
+          </div>
+          <div id="special-task-list"></div>
+        </div>
         <div class="task-panel">
           <div class="task-panel-head">
             <div class="task-panel-cap" id="r-daily-caption"></div>
@@ -247,12 +253,6 @@ details.foldcard .foldbody{padding:0 14px 14px;}
             <div class="date-pill" id="r-date"></div>
           </div>
           <div id="task-list"></div>
-        </div>
-        <div class="task-panel">
-          <div class="task-panel-head" style="justify-content:flex-end;">
-            <div class="task-panel-cap">出席＋作業，點卡片看詳情</div>
-          </div>
-          <div id="special-task-list"></div>
         </div>
       </div>
 
