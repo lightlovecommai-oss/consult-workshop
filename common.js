@@ -87,8 +87,8 @@ function enrolledWorkshops(lineId) {
 }
 
 /* ── 日期／週次小工具 ── */
-function todayStr() {
-  var d = new Date();
+function todayStr(d) {
+  d = d || new Date();
   return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
 }
 /* Sheet 讀回的日期可能是 Date 物件字串，統一 normalize 成本地 YYYY-MM-DD，才能跟 todayStr 比對 */
@@ -106,6 +106,14 @@ function weekStr(d) {
   var weekNo = Math.ceil((((t - yearStart) / 86400000) + 1) / 7);
   return t.getUTCFullYear() + "-W" + weekNo;
 }
+/* 每日／每週任務池改成「中午12:00才換日／換週」，不是午夜——半夜到中午前還算前一天／上週，
+   給晚睡的人一點緩衝。做法：把「現在」往回撥 12 小時，再用一般午夜起算的算法即可。
+   只用在每日/每週任務的打卡日期與比對，不影響回報成交、也不影響畫面上顯示的真實日期。 */
+function taskCycleNow_() {
+  return new Date(Date.now() - 12 * 60 * 60 * 1000);
+}
+function taskDayStr() { return todayStr(taskCycleNow_()); }
+function taskWeekStr() { return weekStr(taskCycleNow_()); }
 
 /* ═══════════════════════════════════════════════════════════
    打卡紀錄 checkinLog 是投入的唯一真相來源（每筆帶 workshopId/cadence/dim/pts）。
@@ -157,14 +165,15 @@ function validationFactor(s) {
   return VALID_FLOOR + (1 - VALID_FLOOR) * (amtAchieve * cntAchieve);
 }
 
-/* ── 某 workshop 內：今天／本週已完成的每日／每週任務 key、已完成的一次性任務 ── */
+/* ── 某 workshop 內：今天／本週已完成的每日／每週任務 key、已完成的一次性任務 ──
+   換日／換週都改中午12:00才算（見 taskDayStr/taskWeekStr），不是午夜。 */
 function dailyDoneToday(s, workshopId) {
-  var today = todayStr();
+  var today = taskDayStr();
   return s.checkinLog.filter(function(e){ return e.cadence === "daily" && e.date === today && e.workshopId === workshopId; })
                      .map(function(e){ return e.taskKey; });
 }
 function weeklyDoneThisWeek(s, workshopId) {
-  var wk = weekStr();
+  var wk = taskWeekStr();
   return s.checkinLog.filter(function(e){ return e.cadence === "weekly" && e.week === wk && e.workshopId === workshopId; })
                      .map(function(e){ return e.taskKey; });
 }
@@ -177,13 +186,17 @@ function onceDoneMap(s, workshopId) {
   return m;
 }
 
-/* ── 打卡：樂觀更新 checkinLog，同時寫進 Sheet ── */
+/* ── 打卡：樂觀更新 checkinLog，同時寫進 Sheet ──
+   每日／每週任務存的日期要跟 dailyDoneToday/weeklyDoneThisWeek 比對的基準一致，
+   所以也用 taskDayStr()（中午換日）；一次性任務用真實日期即可，不影響完成判斷。 */
 function doCheckin(s, task, workshopId) {
+  var isPool = (task.cadence === "daily" || task.cadence === "weekly");
+  var d = isPool ? taskDayStr() : todayStr();
   s.checkinLog.push({
     workshopId: workshopId, taskKey: task.key, cadence: task.cadence,
-    dim: task.dim, pts: task.pts, date: todayStr(), week: weekStr()
+    dim: task.dim, pts: task.pts, date: d, week: weekStr(new Date(d))
   });
-  postCheckin(s.lineId, task, workshopId);
+  postCheckin(s.lineId, task, workshopId, d);
 }
 
 /* ── 回報成交（金額 + 當下四維快照，供走勢圖）── */
@@ -211,10 +224,10 @@ function postToSheet(payload) {
     body: JSON.stringify(payload)
   }).catch(function(e){ console.log("postToSheet error:", e); });
 }
-function postCheckin(lineId, task, workshopId) {
+function postCheckin(lineId, task, workshopId, dateStr) {
   return postToSheet({
     action: "checkin", lineId: lineId, workshopId: workshopId || "",
-    taskKey: task.key, cadence: task.cadence, dim: task.dim, pts: task.pts, date: todayStr()
+    taskKey: task.key, cadence: task.cadence, dim: task.dim, pts: task.pts, date: dateStr || todayStr()
   });
 }
 function postRevenue(lineId, amount, note, scores, workshopId) {
