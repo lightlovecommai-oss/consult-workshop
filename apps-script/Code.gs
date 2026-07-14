@@ -138,7 +138,8 @@ function computeConfig_() {
     }).filter(function(w){ return w.id; });
   var tasks = rows_(TABS.tasks).map(function(r){
     return { workshopId: String(r.workshopId || ""), key: String(r.taskKey || r.key || ""), cadence: String(r.cadence || "once"),
-             dim: String(r.dim || ""), pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""), needReview: truthy_(r.needReview) };
+             dim: String(r.dim || ""), pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""),
+             needReview: truthy_(r.needReview), desc: String(r.desc || "") };
   }).filter(function(t){ return t.workshopId && t.key; });
   /* 開通名單是寬表：一人一列，每門課一欄(欄名＝workshopId)，格子打勾＝開通。 */
   var wids = workshops.map(function(w){ return w.id; });
@@ -440,28 +441,43 @@ function writeSheet_(name, rows) {
 }
 
 var TASKS_SEED = [
-  ["workshopId", "taskKey", "cadence", "dim", "pts", "name", "icon", "needReview"],
-  ["二階", "attend1", "once", "I", 2, "第 1 場準時出席", "📅", false],
-  ["二階", "attend2", "once", "I", 2, "第 2 場準時出席", "📅", false],
-  ["二階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false],
-  ["二階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false],
-  ["二階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false],
-  ["二階", "hw1", "special", "P", 5, "作業：開場逐字稿", "✍️", true],
-  ["二階", "hw2", "special", "P", 5, "作業：收單逐字稿", "📝", true],
-  ["二階", "team1", "special", "T", 6, "團隊賽得分", "⚔️", true],
-  ["二階", "d1", "daily", "A", 1, "發一則社群貼文", "📣", false],
-  ["二階", "d2", "daily", "A", 1, "留言互動 3 位夥伴的貼文", "💬", false],
-  ["二階", "d3", "daily", "T", 1, "主動關心一位夥伴的近況", "🤝", false],
-  ["二階", "d4", "daily", "T", 1, "在群組裡真誠回應一則訊息", "💛", false],
-  ["二階", "d5", "daily", "P", 1, "寫 100 字今日反思", "📝", false],
-  ["二階", "d6", "daily", "P", 1, "練習一次開場白或提案台詞", "🎤", false],
-  ["二階", "d7", "daily", "P", 1, "覆盤一件今天做得好的事", "🔍", false],
-  ["二階", "d8", "daily", "I", 1, "準時開始今天的行動", "⏰", false],
-  ["二階", "d9", "daily", "I", 1, "完成今天排定的一件任務", "✅", false],
-  ["二階", "d10", "daily", "A", 1, "分享一則有價值的觀點", "✨", false],
-  ["二階", "wk1", "weekly", "I", 2, "出席本週固定會議／直播", "📅", false],
-  ["二階", "wk2", "weekly", "P", 2, "交一份週報／進度整理", "📋", false],
-  ["二階", "wk3", "weekly", "T", 2, "跟夥伴進行一次共學或角色扮演", "🎭", false],
-  ["二階", "wk4", "weekly", "A", 2, "開發一位新名單／新連結", "🌱", false],
-  ["二階", "wk5", "weekly", "T", 2, "幫夥伴做一次回饋或複盤", "🪞", false]
+  ["workshopId", "taskKey", "cadence", "dim", "pts", "name", "icon", "needReview", "desc"],
+
+  /* 特殊（cadence=once，社群分享3項）*/
+  ["二階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false, "分享一則你自己的故事，讓大家更認識真實的你。"],
+  ["二階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false, "分享一則跟導師學到的故事或啟發。"],
+  ["二階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false, "分享一則這次培訓給你的心得或轉變。"],
+
+  /* 課程（cadence=special，四堂課各一組 出席+作業；hw2-4 待補完整內容）*/
+  ["二階", "w1",  "special", "I", 2, "第 1 堂出席打卡", "📅", false, "完成 Lesson 5：建立自己變現「甜蜜」路徑 的出席打卡。"],
+  ["二階", "hw1", "special", "P", 5, "作業：優化你的變現路徑", "✍️", true, "請研究 ATPI 手冊，並於下次討論課，説出你會如何優化你的「變現路徑」，寫出 1-2 條路徑。"],
+  ["二階", "w2",  "special", "I", 2, "第 2 堂出席打卡", "📅", false, "完成 Lesson 6：「甜蜜」路徑2大指南針 的出席打卡。"],
+  ["二階", "hw2", "special", "P", 5, "作業：(待公布)", "✍️", true, "(待出作業)"],
+  ["二階", "w3",  "special", "I", 2, "第 3 堂出席打卡", "📅", false, "完成 Lesson 7：高單價最後一哩路（上） 的出席打卡。"],
+  ["二階", "hw3", "special", "P", 5, "作業：(待公布)", "✍️", true, "(待出作業)"],
+  ["二階", "w4",  "special", "I", 2, "第 4 堂出席打卡", "📅", false, "完成 Lesson 8：高單價最後一哩路（下） 的出席打卡。"],
+  ["二階", "hw4", "special", "P", 5, "作業：(待公布)", "✍️", true, "(待出作業)"],
+
+  /* 每日（cadence=daily，7項：3心態+4技法，每天上限3項）*/
+  ["二階", "d1", "daily", "I", 1, "開始累計就有奇蹟：信任感才是成交關鍵，不求今天就有結果", "🔥", false,
+    "累計才有奇蹟——7-11-4 法則：信任要靠反覆累積接觸（約7次/11小時/4個平台）才會發生，信任感才是成交關鍵。今天做一次曝光或互動就好，不用急著看結果。"],
+  ["二階", "d2", "daily", "P", 1, "對齊內心：用 ATPI 架構，寫下今天溝通中一件你喜歡/不喜歡的事", "🪞", false,
+    "對齊內心——用 ATPI（A吸引/T信任/P專業/I推進）當鏡子，回想今天一次溝通，寫下你喜歡或不喜歡的地方。"],
+  ["二階", "d3", "daily", "T", 1, "同理心：今天主動跟一個人要一次反饋，理解「你在客戶內心樣貌」", "🤝", false,
+    "同理心——今天主動找一個人要一句真實反饋，聽完先不解釋、不辯解，單純接住，理解「你在客戶內心的樣貌」。"],
+  ["二階", "d4", "daily", "A", 1, "提升吸引力，讓開口更吸引人", "🥩", false,
+    "今天任選一個技巧練習：①端牛肉（說出核心價值一句話）②講故事 ③吸引Combo技（牛肉+故事+啟示）④關鍵問句。"],
+  ["二階", "d5", "daily", "T", 1, "提升信任力，讓對方更願意說真話", "❓", false,
+    "今天任選一個技巧練習：①Whyyyy（深挖問題，問一次為什麼）②Whoooo（想清楚利害關係人）③A→B消費者歷程 ④接收回饋（請對方打0-10分）。"],
+  ["二階", "d6", "daily", "P", 1, "提升專業力，讓對方覺得你真的懂", "💡", false,
+    "今天任選一個技巧練習：①創造對比（讓對方自己做做看）②帶入情境（想好應用場景）③乾貨佐證（用邏輯或數據佐證）。"],
+  ["二階", "d7", "daily", "I", 1, "提升推進力，讓對方更願意馬上行動", "🎯", false,
+    "塑造價值——今天跟一個人說一句「這樣做對你的好處」。"],
+
+  /* 每週（cadence=weekly，維持不變）*/
+  ["二階", "wk1", "weekly", "I", 2, "出席本週固定會議／直播", "📅", false, ""],
+  ["二階", "wk2", "weekly", "P", 2, "交一份週報／進度整理", "📋", false, ""],
+  ["二階", "wk3", "weekly", "T", 2, "跟夥伴進行一次共學或角色扮演", "🎭", false, ""],
+  ["二階", "wk4", "weekly", "A", 2, "開發一位新名單／新連結", "🌱", false, ""],
+  ["二階", "wk5", "weekly", "T", 2, "幫夥伴做一次回饋或複盤", "🪞", false, ""]
 ];
