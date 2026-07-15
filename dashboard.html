@@ -693,6 +693,12 @@ function renderCadenceList(s, cadence, containerId) {
   var box = document.getElementById(containerId);
   box.innerHTML = "";
   var tasks = tasksFor(activeWorkshop, cadence);
+  /* 課程 tab：先修課(pre_*)一律排在週次之前（不受分頁列序影響；sort 穩定，其餘維持原序）*/
+  if (cadence === "special") {
+    tasks = tasks.slice().sort(function(a, b){
+      return (/^pre/.test(a.key) ? 0 : 1) - (/^pre/.test(b.key) ? 0 : 1);
+    });
+  }
   if (!tasks.length) {
     var hint = mk("div", null, "這個課程目前沒有這類任務");
     hint.style.cssText = "font-size:12px;color:#a08060;padding:16px 4px;text-align:center;";
