@@ -436,7 +436,7 @@ function setup() {
   writeSheet_(TABS.workshops, [
     ["workshopId", "name", "active"],
     ["二階", "2階-吸引式1v1顧問成交", true],        // ← 目前定錨的正式課程，排第一＝預設落點
-    ["一階", "1階-吸引式聊天變現課", false],         // 沒在跑，停用（保留列，之後要開再打開 active）
+    ["一階", "1階-吸引式聊天變現課", true],          // 已開課（跑 openLevel1() 安全上線，不必重跑 setup）
     ["三階", "3階-吸引式1vN公眾演說", true],
     ["1v1顧問實戰", "工作坊-1v1顧問實戰", true],
     ["主持人實戰", "工作坊-1VN主持人實戰", true],
@@ -475,6 +475,48 @@ function updateWorkshopNames() {
     if (names[wid]) { sh.getRange(r, nameCol).setValue(names[wid]); updated++; }
   }
   return "已更新 " + updated + " 門課程的正式名稱";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   一次性：安全開通「一階」——不重跑 setup（那會蓋掉你手動改過的 active／locked）。
+   做兩件事：
+   (1) workshops 分頁把「一階」那列 active 設為 TRUE（其他課完全不動）；
+   (2) tasks 分頁把 TASKS_SEED 裡「一階」的任務列 append 進去（已存在同 taskKey 就跳過，可重複執行）。
+   在 Apps Script 選 openLevel1 → 執行 一次即可。
+   ═══════════════════════════════════════════════════════════ */
+function openLevel1() {
+  var wid = "一階";
+  // (1) 開 active
+  var wsMsg = "workshops 找不到一階列";
+  var wsh = ss_().getSheetByName(TABS.workshops);
+  if (wsh) {
+    var wh = wsh.getRange(1, 1, 1, wsh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+    var idC = wh.indexOf("workshopId") + 1, acC = wh.indexOf("active") + 1;
+    if (idC > 0 && acC > 0) {
+      for (var r = 2; r <= wsh.getLastRow(); r++) {
+        if (String(wsh.getRange(r, idC).getValue()).trim() === wid) { wsh.getRange(r, acC).setValue(true); wsMsg = "已開通一階 active=TRUE"; break; }
+      }
+    }
+  }
+  // (2) append 一階任務（跳過已存在的 taskKey，可重複執行不重複）
+  var tsh = ss_().getSheetByName(TABS.tasks);
+  if (!tsh) return wsMsg + "；找不到任務分頁";
+  var th = tsh.getRange(1, 1, 1, tsh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var wC = th.indexOf("workshopId"), kC = th.indexOf("taskKey");
+  var existing = {};
+  var data = tsh.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) { if (String(data[i][wC]).trim() === wid) existing[String(data[i][kC]).trim()] = true; }
+  var header = TASKS_SEED[0];
+  var toAdd = [];
+  for (var s = 1; s < TASKS_SEED.length; s++) {
+    var row = TASKS_SEED[s];
+    if (row[0] !== wid) continue;
+    if (existing[row[1]]) continue;
+    var line = th.map(function(h){ var ci = header.indexOf(h); return ci > -1 ? row[ci] : ""; });
+    toAdd.push(line);
+  }
+  if (toAdd.length) tsh.getRange(tsh.getLastRow() + 1, 1, toAdd.length, th.length).setValues(toAdd);
+  return wsMsg + "；一階任務新增 " + toAdd.length + " 列（已存在的已跳過）";
 }
 
 /* 建「兌換品項」表（代幣可換的獎勵，跨所有 workshop 共用）。已存在就不覆蓋，
@@ -597,5 +639,57 @@ var TASKS_SEED = [
   ["二階", "wk4", "weekly", "P", 2, "讓人更理解你的專業能力（建議讓客戶有體驗）", "🎯", false,
     "讓客戶親身體驗你的專業，而不只是聽你說——體驗比說服更有說服力。", false],
   ["二階", "wk5", "weekly", "I", 2, "本週主動推進一位已經聊過的準客戶，問一次下一步", "🚀", false,
-    "找一位已經聊過的準客戶，主動問一次「我們可以往下一步了嗎」，練習不逃避推進的時刻。", false]
+    "找一位已經聊過的準客戶，主動問一次「我們可以往下一步了嗎」，練習不逃避推進的時刻。", false],
+
+  /* ═══════ 一階｜1階-吸引式聊天變現課（4 週，每週對應一個 ATPI 維度）═══════
+     出席維度＝該週維度（W1=A吸引 / W2=T信任 / W3=P專業 / W4=I推進），上完四週四維均勻點亮。
+     只有第1週開放，W2 起(出席+作業)預設 locked=true，邊教邊在(遊戲)任務分頁把該列 locked 改 FALSE。
+     daily/weekly 特意跟二階不同：切到日常人際場景(家庭/朋友/社群/貼文)，用一階自己的技法，變化性才夠。*/
+
+  /* 社群分享（once，A，同二階）*/
+  ["一階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false, "分享一則你自己的故事，讓大家更認識真實的你。", false],
+  ["一階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false, "分享一則跟導師學到的故事或啟發。", false],
+  ["一階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false, "分享一則這次培訓給你的心得或轉變。", false],
+
+  /* 課程（special，每週乾貨課+討論課+作業，維度＝該週維度）*/
+  ["一階", "w1a", "special", "A", 2, "第1週｜乾貨課出席", "📅", false, "完成第1週乾貨課出席打卡。本週 A吸引力：Core1 吸引式溝通4核心・Core2 5大黃金選擇・Core3 秀肌肉・Core4 萬能關鍵問句。", false],
+  ["一階", "w1b", "special", "A", 2, "第1週｜討論課出席", "🗣️", false, "完成第1週討論課出席打卡，一起討論你的「秀肌肉」怎麼說更吸引。", false],
+  ["一階", "hw1", "special", "A", 5, "作業：練你的「秀肌肉」一句話", "✍️", true, "寫出一句能讓人眼睛一亮的核心亮點（秀肌肉），下次討論課分享。", false],
+  ["一階", "w2a", "special", "T", 2, "第2週｜乾貨課出席", "📅", false, "完成第2週乾貨課出席打卡。本週 T信任力：英雄之旅・Whyyyy深挖信任・句號還是問號。", true],
+  ["一階", "w2b", "special", "T", 2, "第2週｜討論課出席", "🗣️", false, "完成第2週討論課出席打卡。", true],
+  ["一階", "hw2", "special", "T", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
+  ["一階", "w3a", "special", "P", 2, "第3週｜乾貨課出席", "📅", false, "完成第3週乾貨課出席打卡。本週 P專業力：乾貨 vs 乾貨感・5感體驗法・打造專屬影響技巧。", true],
+  ["一階", "w3b", "special", "P", 2, "第3週｜討論課出席", "🗣️", false, "完成第3週討論課出席打卡。", true],
+  ["一階", "hw3", "special", "P", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
+  ["一階", "w4a", "special", "I", 2, "第4週｜乾貨課出席", "📅", false, "完成第4週乾貨課出席打卡。本週 I推進力：家庭/朋友/社群三大場景整合・不銷而銷・讓人主動行動。", true],
+  ["一階", "w4b", "special", "I", 2, "第4週｜討論課出席", "🗣️", false, "完成第4週討論課出席打卡。", true],
+  ["一階", "hw4", "special", "I", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
+
+  /* 每日（daily，7項，每天上限3）— 一階技法 × 日常對話 */
+  ["一階", "d1", "daily", "A", 1, "秀肌肉：今天用一句話說出你的核心亮點", "💪", false,
+    "用一句話「秀肌肉」——說出讓人眼睛一亮的核心亮點/結果，今天找一次對話或貼文用出來。", false],
+  ["一階", "d2", "daily", "A", 1, "關鍵問句：今天用一個會勾到對方需求的問句，抓住對方焦點", "❓", false,
+    "用一個好問句代替一句陳述，勾到對方真正在意的需求，抓住焦點讓他想繼續說。", false],
+  ["一階", "d3", "daily", "T", 1, "英雄之旅：今天跟一個人分享你一段真實的低谷→轉變", "📖", false,
+    "用「英雄之旅」說一段你自己的真實故事（低谷→轉變），讓對方覺得你真實、可信。", false],
+  ["一階", "d4", "daily", "T", 1, "Whyyyy：今天在一次聊天多問一次「為什麼」", "🔍", false,
+    "深挖信任——在一次聊天多問一次為什麼，問出對方真正在意的事。", false],
+  ["一階", "d5", "daily", "T", 1, "句號變問號：把一句陳述句改成問句再說出口", "💬", false,
+    "用句號還是問號？今天刻意把一句陳述改成問句再說出口，感受對話質量的不同。", false],
+  ["一階", "d6", "daily", "P", 1, "乾貨感：說專業時用一個比喻或畫面讓對方「有感」", "💡", false,
+    "乾貨 vs 乾貨感——說專業時用一個比喻/畫面/情境讓對方真的有感，而不是丟一堆資訊。", false],
+  ["一階", "d7", "daily", "I", 1, "不銷而銷：對話結尾自然帶對方看到「下一步的好處」", "🎯", false,
+    "在一次對話結尾，自然帶對方看到往下一步的好處，不推銷也能推進。", false],
+
+  /* 每週（weekly，5項，每週上限2）— 家庭/朋友/社群，不是客戶 */
+  ["一階", "wk1", "weekly", "A", 2, "發一則貼文/限動，用「秀肌肉＋故事」結構寫", "🌱", false,
+    "用「秀肌肉＋故事」的結構發一則貼文或限動，讓讀者覺得「這就是在說我」。", false],
+  ["一階", "wk2", "weekly", "T", 2, "找一位家人或朋友深聊，聽他的英雄之旅故事", "🎭", false,
+    "找一位家人或朋友深聊一次，用英雄之旅的方式聽他的故事，建立更深連結。", false],
+  ["一階", "wk3", "weekly", "T", 2, "主動向一個人吐露你的真實感受（不是報告事情）", "🫶", false,
+    "主動讓一個人知道你的真實感受，不只是報告事情——真誠會換來真誠。", false],
+  ["一階", "wk4", "weekly", "P", 2, "跟一個人解釋你在做的事，讓他「聽得懂又有感」", "🎯", false,
+    "跟一個人解釋你在做的事，用對方聽得懂又有感的方式，而不是專業術語。", false],
+  ["一階", "wk5", "weekly", "I", 2, "在一次對話中自然推進一段關係到下一步", "🚀", false,
+    "在一次對話中主動推進一段關係到下一步（約下次見面/合作/延續話題）。", false]
 ];
