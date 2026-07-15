@@ -37,6 +37,31 @@ var LEVELS = [
 
 /* 徽章已升級成榮譽系統（四維分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
 
+/* ── 稱號階梯（綁「變現潛力 0-1000」，不是投入分）──
+   角色卡的稱號＝真本事：靠 calcPotential(A×T×P×I) 決定，努力有 0.5 保底所以新學員也非零、稱號會慢慢動，成交後乘到滿。
+   門檻是軟旋鈕，待真實潛力分佈再校準。 */
+var POTENTIAL_TIERS = [
+  {min:0,   icon:"🌱", title:"初露鋒芒", next:"衝到變現潛力 120，晉升「嶄露頭角」"},
+  {min:120, icon:"✨", title:"嶄露頭角", next:"衝到變現潛力 300，晉升「獨當一面」"},
+  {min:300, icon:"🔥", title:"獨當一面", next:"衝到變現潛力 550，晉升「變現高手」"},
+  {min:550, icon:"💎", title:"變現高手", next:"衝到變現潛力 800，晉升「變現大師」"},
+  {min:800, icon:"👑", title:"變現大師", next:"你已站上變現金字塔頂端，聚焦長期合作與規模化"}
+];
+function potentialTier(pot) {
+  var t = POTENTIAL_TIERS[0];
+  POTENTIAL_TIERS.forEach(function(l){ if (pot >= l.min) t = l; });
+  return t;
+}
+/* 目前階＋到下一階的潛力進度。pct 0~100 不爆表；封頂 capped=true、nextMin=null。 */
+function potentialProgress(pot) {
+  var idx = 0;
+  POTENTIAL_TIERS.forEach(function(l, i){ if (pot >= l.min) idx = i; });
+  var t = POTENTIAL_TIERS[idx], next = POTENTIAL_TIERS[idx + 1] || null;
+  if (!next) return { tier: t, nextMin: null, capped: true, pct: 100 };
+  var pct = Math.round((pot - t.min) / (next.min - t.min) * 100);
+  return { tier: t, nextMin: next.min, capped: false, pct: Math.max(0, Math.min(100, pct)) };
+}
+
 /* ═══════════════════════════════════════════════════════════
    任務設定：全部資料驅動，來自 Google Sheet 的 tasks 分頁（不再寫死）。
    每筆 task：{workshopId, key, cadence, dim, pts, name, icon, needReview}
