@@ -44,15 +44,6 @@ function potentialTier(pot) {
   POTENTIAL_TIERS.forEach(function(l){ if (pot >= l.min) t = l; });
   return t;
 }
-/* 目前階＋到下一階的潛力進度。pct 0~100 不爆表；封頂 capped=true、nextMin=null。 */
-function potentialProgress(pot) {
-  var idx = 0;
-  POTENTIAL_TIERS.forEach(function(l, i){ if (pot >= l.min) idx = i; });
-  var t = POTENTIAL_TIERS[idx], next = POTENTIAL_TIERS[idx + 1] || null;
-  if (!next) return { tier: t, nextMin: null, capped: true, pct: 100 };
-  var pct = Math.round((pot - t.min) / (next.min - t.min) * 100);
-  return { tier: t, nextMin: next.min, capped: false, pct: Math.max(0, Math.min(100, pct)) };
-}
 
 /* ═══════════════════════════════════════════════════════════
    任務設定：全部資料驅動，來自 Google Sheet 的 tasks 分頁（不再寫死）。

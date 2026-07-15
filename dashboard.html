@@ -170,11 +170,6 @@ details.foldcard .foldbody{padding:0 14px 14px;}
             <div class="char-name" id="r-charname"></div>
           </div>
         </div>
-        <div class="hp-row">
-          <div class="hp-label">💎</div>
-          <div class="hp-bar-wrap"><div class="hp-bar" id="r-hpbar"></div></div>
-          <div class="hp-num" id="r-hpnum"></div>
-        </div>
       </div>
 
       <div class="stat-row">
@@ -496,17 +491,14 @@ function renderResult(s) {
   var g = getCombo(scores);
   var sk = g.sk, sk2 = g.sk2, wk = g.wk, combo = g.combo;
   var total = totalScore(s);
-  var pot = calcPotential(scores);              // 變現潛力 0-1000，驅動稱號＋血條
-  var pp = potentialProgress(pot.unlocked);
-  var tier = pp.tier;
+  var pot = calcPotential(scores);              // 變現潛力 0-1000，驅動稱號
+  var tier = potentialTier(pot.unlocked);
 
   document.getElementById("r-topname").textContent = s.name;
   document.getElementById("r-avatar").innerHTML = avatarSVG(g.comboKey);   // 依最強兩維組合換頭像
   document.getElementById("r-role").textContent = tier.icon + " " + tier.title;
   var charTeamOn = ((s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {}).team !== false;
   document.getElementById("r-charname").textContent = (charTeamOn && s.team) ? (s.name + "（" + s.team + "）") : s.name;
-  document.getElementById("r-hpbar").style.width = pp.pct + "%";
-  document.getElementById("r-hpnum").textContent = pp.capped ? "潛力 " + pot.unlocked + "（頂端）" : "潛力 " + pot.unlocked + " / " + pp.nextMin;
 
   document.getElementById("r-score").textContent = total;   // 個人積分＝投入總額（完整數字）
   document.getElementById("r-team-name").textContent = s.team || "—";
