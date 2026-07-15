@@ -595,6 +595,67 @@ function upsertRewards() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   從「測驗分頁」把新 userId 同步進「學員名單」——只補不覆蓋，可重複執行。
+   找分頁：先用 TABS.quiz；找不到就掃描名稱含「測驗」的分頁。
+   若回報「找不到／0 筆」，代表測驗寫在另一份試算表 → 需要那份的 ID/分頁名。
+   在 Apps Script 選 syncStudentsFromQuiz → 執行 一次即可（之後每次要同步就再跑）。
+   ═══════════════════════════════════════════════════════════ */
+function syncStudentsFromQuiz() {
+  var ss = ss_();
+  var qsh = ss.getSheetByName(TABS.quiz);
+  if (!qsh) {
+    var all = ss.getSheets();
+    for (var i = 0; i < all.length; i++) { if (all[i].getName().indexOf("測驗") > -1) { qsh = all[i]; break; } }
+  }
+  if (!qsh) return "找不到測驗分頁（TABS.quiz=「" + TABS.quiz + "」，也沒有名稱含『測驗』的分頁）——測驗可能寫在另一份試算表，請提供該試算表 ID 或分頁名。";
+  var qrows = readSheetObjs_(qsh);
+  if (!qrows.length) return "測驗分頁「" + qsh.getName() + "」讀到 0 筆資料（可能寫在另一份試算表）。";
+
+  var stSh = ss.getSheetByName(TABS.students);
+  if (!stSh) return "找不到學員名單分頁「" + TABS.students + "」。";
+  var existing = {};
+  rows_(TABS.students).forEach(function(r){ var id = String(pick_(r, COLS.students.lineId)).trim(); if (id) existing[id] = true; });
+
+  var stHeaders = stSh.getRange(1, 1, 1, stSh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var uidAliases  = ["LINE userId", "userId", "lineId", "userID", "使用者ID"];
+  var nameAliases = ["姓名", "name", "displayName", "LINE名稱", "暱稱", "名字"];
+  var teamAliases = ["團隊", "team", "組別"];
+
+  var added = 0, skipped = 0, sample = [];
+  qrows.forEach(function(q){
+    var uid = String(pick_(q, uidAliases)).trim();
+    if (!uid) return;
+    if (existing[uid]) { skipped++; return; }
+    existing[uid] = true;
+    var name = String(pick_(q, nameAliases)).trim();
+    var team = String(pick_(q, teamAliases)).trim();
+    var line = stHeaders.map(function(h){
+      if (COLS.students.lineId.indexOf(h) > -1) return uid;
+      if (COLS.students.name.indexOf(h)  > -1) return name;
+      if (COLS.students.team.indexOf(h)  > -1) return team;
+      return "";
+    });
+    stSh.appendRow(line);
+    added++;
+    if (sample.length < 10) sample.push(name || uid.slice(0, 10) + "…");
+  });
+  return "同步完成：測驗分頁「" + qsh.getName() + "」" + qrows.length + " 筆 → 新增學員 " + added + " 位、已存在略過 " + skipped + "。新增名單：" + (sample.join("、") || "無") + "。（記得再到『開通名單』勾選他們要上的課）";
+}
+/* 讀某「分頁物件」成物件陣列（rows_ 吃分頁名，這支吃 Sheet 物件，供掃描到的分頁用）。 */
+function readSheetObjs_(sh) {
+  var values = sh.getDataRange().getValues();
+  if (values.length < 2) return [];
+  var headers = values[0].map(function(h){ return String(h).trim(); });
+  var out = [];
+  for (var i = 1; i < values.length; i++) {
+    var o = {};
+    for (var j = 0; j < headers.length; j++) if (headers[j]) o[headers[j]] = values[i][j];
+    out.push(o);
+  }
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════
    一次性：把舊的「一階」測試打卡／成交紀錄清掉（過往資料是測試資料，覆蓋掉沒關係）。
    只清資料列、保留標題列；之後這個專案就乾淨地以「二階」為主繼續跑。
    在 Apps Script 選 clearOldTestData → 執行 一次即可，之後不用再跑。
