@@ -641,6 +641,44 @@ function syncStudentsFromQuiz() {
   });
   return "同步完成：測驗分頁「" + qsh.getName() + "」" + qrows.length + " 筆 → 新增學員 " + added + " 位、已存在略過 " + skipped + "。新增名單：" + (sample.join("、") || "無") + "。（記得再到『開通名單』勾選他們要上的課）";
 }
+/* ═══════════════════════════════════════════════════════════
+   把「學員名單有、但開通名單還沒有」的人補一列進開通名單（課程欄預設未勾）。
+   syncStudentsFromQuiz 只補學員名單；這支補開通名單，兩支各跑一次就到位。可重複執行。
+   在 Apps Script 選 syncEnrollmentRows → 執行。
+   ═══════════════════════════════════════════════════════════ */
+function syncEnrollmentRows() {
+  var ss = ss_();
+  var esh = ss.getSheetByName(TABS.enrollments);
+  if (!esh) return "找不到開通名單分頁「" + TABS.enrollments + "」，請先跑 setup。";
+  var headers = esh.getRange(1, 1, 1, esh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var uidIdx = -1, nameIdx = -1;
+  for (var c = 0; c < headers.length; c++) {
+    if (uidIdx < 0 && COLS.students.lineId.indexOf(headers[c]) > -1) uidIdx = c;
+    else if (nameIdx < 0 && COLS.students.name.indexOf(headers[c]) > -1) nameIdx = c;
+  }
+  if (uidIdx < 0) return "開通名單找不到 userId 欄";
+  var courseCols = [];
+  for (var c2 = 0; c2 < headers.length; c2++) { if (c2 !== uidIdx && c2 !== nameIdx && headers[c2]) courseCols.push(c2); }
+
+  var existing = {};
+  var data = esh.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) { var id = String(data[i][uidIdx]).trim(); if (id) existing[id] = true; }
+
+  var added = 0, names = [];
+  rows_(TABS.students).forEach(function(r){
+    var uid = String(pick_(r, COLS.students.lineId)).trim(); if (!uid) return;
+    if (existing[uid]) return;
+    existing[uid] = true;
+    var name = String(pick_(r, COLS.students.name)).trim();
+    var line = headers.map(function(h, ci){ return ci === uidIdx ? uid : (ci === nameIdx ? name : false); });
+    var newRow = esh.getLastRow() + 1;
+    esh.getRange(newRow, 1, 1, headers.length).setValues([line]);
+    courseCols.forEach(function(cc){ esh.getRange(newRow, cc + 1).insertCheckboxes(); });
+    added++; names.push(name || uid.slice(0, 8));
+  });
+  return "開通名單補列：新增 " + added + " 人（" + (names.join("、") || "無") + "），課程欄預設未勾，請到分頁勾選要開通的課。";
+}
+
 /* 讀某「分頁物件」成物件陣列（rows_ 吃分頁名，這支吃 Sheet 物件，供掃描到的分頁用）。 */
 function readSheetObjs_(sh) {
   var values = sh.getDataRange().getValues();
