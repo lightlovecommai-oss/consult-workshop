@@ -42,6 +42,14 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .reward-cost{font-size:12px;color:#e8734a;font-weight:700;margin-top:3px;}
 .reward-btn{background:#e8734a;color:#fff;border:0;border-radius:14px;padding:8px 14px;font-size:12.5px;font-weight:600;flex-shrink:0;cursor:pointer;}
 .reward-btn[disabled]{background:#f0e9df;color:#a08060;cursor:default;}
+/* ── 回報成交（沿用代幣咖啡色卡，highlight 並跟能力/任務白卡區隔）── */
+.revenue-card{background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:16px;padding:16px 18px;color:#fff;margin-bottom:14px;}
+.revenue-card .rv-input{box-sizing:border-box;background:rgba(255,255,255,.08);border:0.5px solid rgba(246,214,138,.35);border-radius:8px;padding:9px 11px;font-size:13px;color:#fff;}
+.revenue-card .rv-input::placeholder{color:rgba(255,255,255,.45);}
+.revenue-card .rv-input:focus{outline:none;border-color:#f6d68a;background:rgba(255,255,255,.12);}
+.revenue-card .rv-foot{font-size:12px;color:rgba(255,255,255,.7);}
+.revenue-card .rv-foot strong{color:#f6d68a;}
+.rv-btn{background:#e8734a;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;}
 .redemption-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6b4c30;padding:8px 0;border-bottom:0.5px solid #f0e9df;}
 .redemption-status{font-size:11px;padding:2px 8px;border-radius:10px;background:#fff4ec;color:#c26b3a;}
 .redemption-status.approved{background:#e1f5ee;color:#0f6e56;}
@@ -226,13 +234,13 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           <div class="section-icon">💰</div>
           <div class="section-title">回報成交</div>
         </div>
-        <div class="card" style="padding:1rem;margin-bottom:14px;">
+        <div class="revenue-card">
           <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <input id="rv-amount" type="number" placeholder="金額（例如 5000）" style="flex:1;min-width:0;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;">
-            <button class="btn-go" id="rv-submit" style="flex-shrink:0;">回報</button>
+            <input id="rv-amount" type="number" placeholder="金額（例如 5000）" class="rv-input" style="flex:1;min-width:0;">
+            <button class="rv-btn" id="rv-submit">回報</button>
           </div>
-          <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" style="width:100%;box-sizing:border-box;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px;">
-          <div style="font-size:12px;color:#6b4c30;">累計回報 <strong id="rv-total" style="color:#e8734a;"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
+          <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" class="rv-input" style="width:100%;margin-bottom:8px;">
+          <div class="rv-foot">累計回報 <strong id="rv-total"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
         </div>
       </div>
 
