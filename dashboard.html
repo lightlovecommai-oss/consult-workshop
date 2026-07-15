@@ -150,7 +150,6 @@ details.foldcard .foldbody{padding:0 14px 14px;}
     <div class="dash-topbar">
       <div class="dash-topbar-title" id="topbar-title">變現型顧問實戰營</div>
       <div class="topbar-ws-wrap" id="ws-switch" style="display:none;">
-        <span class="topbar-ws-icon">📚</span>
         <select class="topbar-ws-select" id="ws-select"></select>
         <span class="topbar-ws-arrow">▾</span>
       </div>
@@ -477,9 +476,10 @@ function renderResult(s) {
   var lp = levelProgress(total);
   var lv = lp.lv;
 
-  document.getElementById("r-topname").textContent = s.name + " ›";
+  document.getElementById("r-topname").textContent = s.name;
   document.getElementById("r-role").textContent = lv.title;
-  document.getElementById("r-charname").textContent = s.name + "（" + s.team + "）";
+  var charTeamOn = ((s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {}).team !== false;
+  document.getElementById("r-charname").textContent = (charTeamOn && s.team) ? (s.name + "（" + s.team + "）") : s.name;
   document.getElementById("r-lv").textContent = total;
   document.getElementById("r-lv-max").textContent = lp.capped ? "・封頂" : "→ " + lp.nextMin;
   document.getElementById("r-hpbar").style.width = lp.pct + "%";
