@@ -279,28 +279,89 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <div class="copybox">任務幫你累積投入、把四力撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。</div>
 
-      <!-- 計分規則說明（收合） -->
-      <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（點開看你的分數怎麼算）</summary>
+      <!-- 說明中心（4 個收合區塊：計分／QA／愛的貨幣／ATPI）-->
+      <!-- ① 計分規則說明 -->
+      <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（你的分數怎麼算）</summary>
         <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">能力分數怎麼算？</div>
-          <div style="margin-bottom:12px;">四維能力＝ <strong>你的投入 × 市場的驗證</strong>。投入＝所有課程的任務累積（合併）；市場驗證＝你回報的成交（金額＋筆數）。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">為什麼做了任務分數還不高？</div>
-          <div style="margin-bottom:12px;">能力要「市場買單」才算數。還沒成交前只先兌現一半（保底 50%），提醒你<strong>把練習變成真的成交</strong>。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">怎麼完全解鎖？</div>
-          <div style="margin-bottom:12px;">反覆成交。系統同時看「累計金額」和「簽單數」，兩個都要到位，能力就一格格解鎖到滿。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">變現潛力值？</div>
-          <div style="margin-bottom:12px;">四力相乘（A×T×P×I），任一維是 0 潛力就是 0——四力要均衡，不能偏科。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">每日／每週任務什麼時候重置？</div>
-          <div style="margin-bottom:12px;">中午 12:00 才會換日／換週，不是半夜 12 點。半夜到中午前打卡，都還算「前一天／上週」的份；過了中午才會重新開放新的一輪。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">任務卡片是灰色的、打不開怎麼辦？</div>
-          <div style="margin-bottom:12px;">代表這項任務<strong>尚未開放</strong>（例如還沒上到那堂課的作業），點進去會看到「尚未開放，敬請期待」。等導師開放後就能打卡，不用重新整理或找客服。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">愛的貨幣是什麼？跟能力分數一樣嗎？</div>
-          <div style="margin-bottom:12px;">愛的貨幣是另一套「可以花掉」的獎勵點數，在<strong>成就頁</strong>可以兌換課程折抵、1對1諮詢等真實獎勵；跟四維能力分數各自獨立、互不影響。愛的貨幣有天花板（累計打卡分數封頂），不會無限累積。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">送出的作業／兌換申請，什麼時候會有結果？</div>
-          <div style="margin-bottom:12px;">這兩種都需要導師<strong>人工審核</strong>，不會馬上生效，狀態會顯示「待審核」。審核通過後分數／愛的貨幣才會正式入帳，請耐心等候，不用重複送出。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">同時報了不只一門課，要怎麼切換？</div>
-          <div>畫面最上方（原本顯示課程名稱的地方）會變成一個下拉選單，點開就能切換你已開通的課程；只開通一門課的話不會出現這個選單。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">能力分數怎麼算？</div>
+          <div style="margin-bottom:10px;">每一維能力＝ <strong>投入% × 市場驗證係數</strong>。<br>・投入%：任務打卡累積（跨所有課程合併），走「飽和曲線」——越後面越難加，永遠逼近 100 不爆表。<br>・市場驗證係數：你回報的成交（金額＋筆數），0.5～1.0。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼做了任務、分數還不高？</div>
+          <div style="margin-bottom:10px;">因為能力要「<strong>市場買單</strong>」才算數。還沒成交前，投入只先兌現一半（保底 50%）——這是刻意設計，提醒你把練習變成真的成交，而不是一直做功課。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">怎麼把能力完全解鎖到滿？</div>
+          <div style="margin-bottom:10px;">反覆成交。系統同時看「<strong>累計金額</strong>」和「<strong>簽單數</strong>」，兩個都要到位（相乘），能力才會一格格解鎖到滿——防止一張大單灌水。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">變現潛力值是什麼？</div>
+          <div style="margin-bottom:10px;">四力<strong>相乘</strong>（A×T×P×I）換算成 0～1000。因為是相乘，<strong>任一維是 0，潛力就是 0</strong>——四力要均衡，不能偏科。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">頭像上的稱號怎麼來的？</div>
+          <div style="margin-bottom:10px;">稱號＝你的「真本事」，綁<strong>變現潛力</strong>：🌱初露鋒芒 → ✨嶄露頭角 → 🔥獨當一面 → 💎變現高手 → 👑變現大師。潛力越高、稱號越前面。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">「個人積分」跟「變現潛力」差在哪？</div>
+          <div style="margin-bottom:10px;">個人積分＝你<strong>投入的努力總量</strong>（打卡分加總，會一直累積）；變現潛力＝<strong>被市場驗證後的真本事</strong>。一個看努力、一個看結果，各自獨立。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">排行榜怎麼排？</div>
+          <div style="margin-bottom:10px;">每一門課<strong>各一張榜</strong>，依該課的任務投入分排名。能力雷達圖與潛力值則是跨所有課程合併計算。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">每日／每週任務什麼時候重置？</div>
+          <div>中午 <strong>12:00</strong> 才換日／換週，不是半夜 12 點。半夜到中午前打卡都還算「前一天／上週」的份，過了中午才開新的一輪。</div>
+        </div>
+      </details>
+
+      <!-- ② QA 疑難問題 -->
+      <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">❓ QA 疑難問題說明</summary>
+        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">任務卡片是灰色的、打不開？</div>
+          <div style="margin-bottom:10px;">代表這項任務<strong>尚未開放</strong>（例如還沒上到那堂課的作業）。等導師開放後就能打卡，不用重新整理或找客服。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">我打過卡的任務怎麼不見了？</div>
+          <div style="margin-bottom:10px;">已完成的卡片會<strong>自動收起</strong>，只留還沒做的，讓你專注在「接下來要做什麼」。分數已經入袋，不會不見。整批做完會看到完成提示。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">作業／兌換申請什麼時候會有結果？</div>
+          <div style="margin-bottom:10px;">這兩種都要導師<strong>人工審核</strong>，狀態會顯示「待審核」，不會馬上生效。審核通過後分數／愛的貨幣才正式入帳，請耐心等候、不用重複送出。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">同時報了不只一門課，怎麼切換？</div>
+          <div style="margin-bottom:10px;">畫面最上方（原本顯示課程名稱的地方）會變成<strong>下拉選單</strong>，點開就能切換你已開通的課程；只開通一門課時不會出現。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">「自評分數」是什麼？會算進能力嗎？</div>
+          <div style="margin-bottom:10px;">那是你入營前測驗的<strong>起點快照</strong>，只當對照顯示（你怎麼看自己 × 市場怎麼看你），<strong>不進計分</strong>。能力一律從任務＋成交重新賺。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">成交金額打錯了怎麼辦？</div>
+          <div>回報後的紀錄請找導師協助更正，避免影響能力驗證與走勢圖。</div>
+        </div>
+      </details>
+
+      <!-- ③ 愛的貨幣說明 -->
+      <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">💛 愛的貨幣說明</summary>
+        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">愛的貨幣是什麼？</div>
+          <div style="margin-bottom:10px;">一套「<strong>可以花掉</strong>」的獎勵點數，跟四維能力分數<strong>各自獨立、互不影響</strong>。能力是拿來看成長的，愛的貨幣是拿來換真實獎勵的。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">怎麼賺？</div>
+          <div style="margin-bottom:10px;">完成課程裡的任務（打卡）就會累積。<strong>跨所有課程共用同一個錢包</strong>，跟著人走。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼有「天花板」？</div>
+          <div style="margin-bottom:10px;">愛的貨幣有上限（依你已開通課程的一次性任務滿分加總），<strong>不會無限累積</strong>，避免通膨、讓獎勵有價值。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">怎麼用？</div>
+          <div style="margin-bottom:10px;">到<strong>成就頁</strong>的「愛的貨幣兌換」挑獎勵（課程折抵、1對1 諮詢、顧問健檢等），按兌換送出申請。獎勵價值與愛的貨幣<strong>等比例換算</strong>（約 200 元＝1 枚）。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">兌換是即時的嗎？</div>
+          <div>不是，兌換申請需導師<strong>人工審核</strong>，狀態顯示「待審核」，通過後才會扣點並發放。</div>
+        </div>
+      </details>
+
+      <!-- ④ ATPI 說明（精簡自使用手冊） -->
+      <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">🧭 ATPI 溝通變現框架（精簡手冊）</summary>
+        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+          <div style="margin:10px 0;padding:10px 12px;background:#fff4ec;border-radius:10px;font-weight:600;color:#2d1f0f;text-align:center;">溝通變現潛力 ＝ A × T × P × I<br><span style="font-weight:400;font-size:11.5px;color:#a08060;">缺任何一個維度，整體就會被拖垮（相乘・缺一即零）</span></div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">成交需要四個環節，缺一個就卡住</div>
+          <div style="margin-bottom:4px;"><strong style="color:#e8734a;">A 吸引力</strong>：讓人想靠近你、想繼續聽你說。<br><span style="color:#a08060;">不夠 → 說了很多，對方點頭就走。</span></div>
+          <div style="margin-bottom:4px;"><strong style="color:#5DCAA5;">T 信任力</strong>：讓人覺得你懂他、願意說真心話。<br><span style="color:#a08060;">不夠 → 喜歡你，但還不願掏錢。</span></div>
+          <div style="margin-bottom:4px;"><strong style="color:#378ADD;">P 專業力</strong>：把專業說到對方聽懂，知道你能解決他的問題。<br><span style="color:#a08060;">不夠 → 覺得不錯，但不確定有沒有用。</span></div>
+          <div style="margin-bottom:10px;"><strong style="color:#c8a84b;">I 推進力</strong>：讓人願意現在就行動。<br><span style="color:#a08060;">不夠 → 前三關都過，最後一句「我再想想」。</span></div>
+          <div style="text-align:center;color:#a08060;margin:8px 0 10px;">A 吸引力 → T 信任力 → P 專業力 → I 推進力</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">六種強項組合 × 最省力變現路徑</div>
+          <div style="margin-bottom:2px;">每個人天生擅長兩個維度，順著強項走、不用硬補弱：</div>
+          <div style="margin-bottom:10px;">
+            ・<strong>A+T 強</strong>：社群養粉 × 轉介紹成交<br>
+            ・<strong>A+P 強</strong>：知識型內容 × 課程產品<br>
+            ・<strong>A+I 強</strong>：演講亮相 × 現場收單 → 後端升級<br>
+            ・<strong>T+P 強</strong>：深度服務 × 口碑轉介紹循環<br>
+            ・<strong>T+I 強</strong>：人脈深耕 × 結果說話 → 持續升價<br>
+            ・<strong>P+I 強</strong>：專業提案 × B2B 企業成交
+          </div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼是「乘法」不是加總？</div>
+          <div>KLT、AIDA、影響力7原則都是「做什麼策略」；ATPI 講的是「你天生擅長哪一塊」的<strong>個人能力框架</strong>。用乘法是因為四維缺一即為零——這是其他框架沒說清楚的護城河。</div>
         </div>
       </details>
 
