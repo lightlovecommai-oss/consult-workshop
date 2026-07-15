@@ -1128,13 +1128,15 @@ function showNextCelebration() {
   celebrating = true;
   var h = celebrateQueue.shift();
   var name = h.cat === "dim" ? (DIMS[h.dim].name + "・" + h.tierLabel + "徽") : h.name;
+  /* 四維分級徽章沒有 desc 欄，補一句門檻說明，別顯示 undefined */
+  var desc = h.desc || (h.cat === "dim" && DIMS[h.dim] ? (DIMS[h.dim].name + "投入達 " + h.value + "%") : "");
   var big = (h.tier === "legend" || h.cat === "revenue");
   document.getElementById("celebrate-card").innerHTML =
     '<div class="cc-glow' + (big ? " big" : "") + '"></div>'
    + '<div class="cc-icon">' + h.icon + '</div>'
    + '<div class="cc-label">榮譽解鎖</div>'
    + '<div class="cc-name">' + name + '</div>'
-   + '<div class="cc-desc">' + h.desc + '</div>'
+   + '<div class="cc-desc">' + desc + '</div>'
    + '<button class="cc-btn" id="cc-close">' + (celebrateQueue.length ? "下一個 →" : "太讚了！") + '</button>';
   ov.style.display = "flex";
   document.getElementById("cc-close").onclick = showNextCelebration;

@@ -26,14 +26,6 @@ var CADENCE_CFG = {
   weekly: {cap:2, caption:"每週最多算 2 項，下週重新開放"}
 };
 
-/* ── 等級定義（門檻沿用舊模型，血條改走 levelProgress 進度制，不再有 /29 上限）── */
-var LEVELS = [
-  {min:0,  title:"見習顧問", beat:20, next:"累積到 10 分，解鎖「顧問」稱號"},
-  {min:10, title:"顧問",     beat:45, next:"累積到 18 分，解鎖「資深顧問」稱號"},
-  {min:18, title:"資深顧問", beat:68, next:"累積到 24 分，解鎖「變現顧問」稱號"},
-  {min:24, title:"變現顧問", beat:88, next:"累積到 29 分，解鎖「顧問大師」稱號"},
-  {min:29, title:"顧問大師", beat:97, next:"你已站上頂端，現在聚焦長期合作與規模化"}
-];
 
 /* 徽章已升級成榮譽系統（四維分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
 
@@ -166,21 +158,6 @@ function calcDims(s) {
 /* 個人總分（所有 workshop、所有節奏的打卡分加總）——驅動等級／血條 */
 function totalScore(s) {
   return s.checkinLog.reduce(function(sum, e){ return sum + e.pts; }, 0);
-}
-
-function levelFor(total) {
-  var lv = LEVELS[0];
-  LEVELS.forEach(function(l){ if (total >= l.min) lv = l; });
-  return lv;
-}
-/* 目前等級 + 到下一級的進度。pct 永遠 0~100 不爆表；封頂時 capped=true、nextMin=null。 */
-function levelProgress(total) {
-  var idx = 0;
-  LEVELS.forEach(function(l, i){ if (total >= l.min) idx = i; });
-  var lv = LEVELS[idx], next = LEVELS[idx + 1] || null;
-  if (!next) return { lv: lv, nextMin: null, capped: true, pct: 100 };
-  var pct = Math.round((total - lv.min) / (next.min - lv.min) * 100);
-  return { lv: lv, nextMin: next.min, capped: false, pct: Math.max(0, Math.min(100, pct)) };
 }
 
 /* 市場驗證係數：0~1。沒成交時＝保底值，隨累計金額與簽單數往 1.0 靠（兩者相乘，擋一張大單灌水）。 */
