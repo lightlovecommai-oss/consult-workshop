@@ -433,14 +433,16 @@ function doPost(e) {
 function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
+  /* team 欄：階課程(一/二/三階)＝FALSE（中間格改顯示「愛的貨幣」、隱藏夥伴小組頁）；
+     工作坊＝TRUE（戰隊才是重點）。空白視為 TRUE。 */
   writeSheet_(TABS.workshops, [
-    ["workshopId", "name", "active"],
-    ["二階", "2階-吸引式1v1顧問成交", true],        // ← 目前定錨的正式課程，排第一＝預設落點
-    ["一階", "1階-吸引式聊天變現課", true],          // 已開課（跑 openLevel1() 安全上線，不必重跑 setup）
-    ["三階", "3階-吸引式1vN公眾演說", true],
-    ["1v1顧問實戰", "工作坊-1v1顧問實戰", true],
-    ["主持人實戰", "工作坊-1VN主持人實戰", true],
-    ["短影音實戰", "工作坊-短影音實戰", true]
+    ["workshopId", "name", "active", "team"],
+    ["二階", "2階-吸引式1v1顧問成交", true, false],  // ← 目前定錨的正式課程，排第一＝預設落點
+    ["一階", "1階-吸引式聊天變現課", true, false],   // 已開課（跑 openLevel1() 安全上線，不必重跑 setup）
+    ["三階", "3階-吸引式1vN公眾演說", true, false],
+    ["1v1顧問實戰", "工作坊-1v1顧問實戰", true, true],
+    ["主持人實戰", "工作坊-1VN主持人實戰", true, true],
+    ["短影音實戰", "工作坊-短影音實戰", true, true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
   var e = ensureEnrollmentSheet_();
@@ -475,6 +477,32 @@ function updateWorkshopNames() {
     if (names[wid]) { sh.getRange(r, nameCol).setValue(names[wid]); updated++; }
   }
   return "已更新 " + updated + " 門課程的正式名稱";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   一次性：把「戰隊」在階課程換成「愛的貨幣」——安全，不重跑 setup。
+   在 workshops 分頁確保有 team 欄，並設：一/二/三階＝FALSE、工作坊＝TRUE。
+   前端會據此把中間 stat 格改成💛愛的貨幣、並隱藏夥伴小組頁。
+   在 Apps Script 選 applyCourseTeamOff → 執行 一次即可。
+   ═══════════════════════════════════════════════════════════ */
+function applyCourseTeamOff() {
+  var courseOff = { "一階": false, "二階": false, "三階": false };  // 只這三門關 team；其餘(工作坊)維持開
+  var sh = ss_().getSheetByName(TABS.workshops);
+  if (!sh) return "找不到「" + TABS.workshops + "」分頁";
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idCol = headers.indexOf("workshopId") + 1;
+  if (idCol < 1) return "找不到 workshopId 欄位";
+  var teamCol = headers.indexOf("team") + 1;
+  if (teamCol < 1) { teamCol = sh.getLastColumn() + 1; sh.getRange(1, teamCol).setValue("team"); }  // 沒有就新增一欄
+  var updated = 0;
+  for (var r = 2; r <= sh.getLastRow(); r++) {
+    var wid = String(sh.getRange(r, idCol).getValue()).trim();
+    if (!wid) continue;
+    var v = courseOff.hasOwnProperty(wid) ? false : true;  // 階課程 FALSE、其餘 TRUE
+    sh.getRange(r, teamCol).setValue(v);
+    updated++;
+  }
+  return "已設定 team 欄：階課程 FALSE／工作坊 TRUE，共 " + updated + " 列";
 }
 
 /* ═══════════════════════════════════════════════════════════

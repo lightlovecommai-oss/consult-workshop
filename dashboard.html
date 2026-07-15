@@ -50,6 +50,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .revenue-card .rv-foot{font-size:12px;color:rgba(255,255,255,.7);}
 .revenue-card .rv-foot strong{color:#f6d68a;}
 .rv-btn{background:#e8734a;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;}
+/* ── 咖啡色標題框（回報成交／愛的貨幣兌換等要 highlight 的區塊標題）── */
+.coffee-title{background:linear-gradient(135deg,#2d1f0f,#4a3220);color:#fff;font-size:13px;font-weight:600;padding:9px 14px;border-radius:12px;margin-bottom:10px;}
 .redemption-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6b4c30;padding:8px 0;border-bottom:0.5px solid #f0e9df;}
 .redemption-status{font-size:11px;padding:2px 8px;border-radius:10px;background:#fff4ec;color:#c26b3a;}
 .redemption-status.approved{background:#e1f5ee;color:#0f6e56;}
@@ -180,8 +182,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           <div class="stat-val" id="r-score"></div>
           <div class="stat-sub">累計投入分</div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-lbl">🏆 戰隊</div>
+        <div class="stat-cell" id="r-mid-cell">
+          <div class="stat-lbl" id="r-mid-lbl">🏆 戰隊</div>
           <div class="stat-val blue" id="r-team-name"></div>
           <div class="stat-sub" id="r-team-rank"></div>
         </div>
@@ -230,10 +232,7 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- 回報成交（可開關模組，放在任務上面，養成一變現就輸入）-->
       <div id="sec-revenue">
-        <div class="section-head">
-          <div class="section-icon">💰</div>
-          <div class="section-title">回報成交</div>
-        </div>
+        <div class="coffee-title">💰 回報成交</div>
         <div class="revenue-card">
           <div style="display:flex;gap:8px;margin-bottom:8px;">
             <input id="rv-amount" type="number" placeholder="金額（例如 5000）" class="rv-input" style="flex:1;min-width:0;">
@@ -298,10 +297,10 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           <div style="margin-bottom:12px;">中午 12:00 才會換日／換週，不是半夜 12 點。半夜到中午前打卡，都還算「前一天／上週」的份；過了中午才會重新開放新的一輪。</div>
           <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">任務卡片是灰色的、打不開怎麼辦？</div>
           <div style="margin-bottom:12px;">代表這項任務<strong>尚未開放</strong>（例如還沒上到那堂課的作業），點進去會看到「尚未開放，敬請期待」。等導師開放後就能打卡，不用重新整理或找客服。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">代幣是什麼？跟能力分數一樣嗎？</div>
-          <div style="margin-bottom:12px;">代幣是另一套「可以花掉」的獎勵點數，在<strong>成就頁</strong>可以兌換課程折抵、1對1諮詢等真實獎勵；跟四維能力分數各自獨立、互不影響。代幣有天花板（累計打卡分數封頂），不會無限累積。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">愛的貨幣是什麼？跟能力分數一樣嗎？</div>
+          <div style="margin-bottom:12px;">愛的貨幣是另一套「可以花掉」的獎勵點數，在<strong>成就頁</strong>可以兌換課程折抵、1對1諮詢等真實獎勵；跟四維能力分數各自獨立、互不影響。愛的貨幣有天花板（累計打卡分數封頂），不會無限累積。</div>
           <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">送出的作業／兌換申請，什麼時候會有結果？</div>
-          <div style="margin-bottom:12px;">這兩種都需要導師<strong>人工審核</strong>，不會馬上生效，狀態會顯示「待審核」。審核通過後分數／代幣才會正式入帳，請耐心等候，不用重複送出。</div>
+          <div style="margin-bottom:12px;">這兩種都需要導師<strong>人工審核</strong>，不會馬上生效，狀態會顯示「待審核」。審核通過後分數／愛的貨幣才會正式入帳，請耐心等候，不用重複送出。</div>
           <div style="font-weight:600;color:#2d1f0f;margin-bottom:2px;">同時報了不只一門課，要怎麼切換？</div>
           <div>畫面最上方（原本顯示課程名稱的地方）會變成一個下拉選單，點開就能切換你已開通的課程；只開通一門課的話不會出現這個選單。</div>
         </div>
@@ -311,8 +310,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
     <!-- ═══ 分頁 2：成就 ═══ -->
     <div class="tabpanel" data-tab="honor">
-      <!-- 🎁 代幣兌換 -->
-      <div class="btitle">🎁 代幣兌換</div>
+      <!-- 💛 愛的貨幣兌換 -->
+      <div class="coffee-title">💛 愛的貨幣兌換</div>
       <div id="token-card" style="margin-bottom:16px;"></div>
 
       <div id="sec-badges">
@@ -577,6 +576,29 @@ function renderResult(s) {
   showSec("sec-badges", mods.badges);
   showSec("sec-team", mods.team);
   showSec("sec-leaderboard", mods.leaderboard);
+
+  /* 中間 stat 格：workshop（team 開）顯示🏆戰隊；階課程（team 關）改顯示💛愛的貨幣，點擊跳成就頁兌換 */
+  var midCell = document.getElementById("r-mid-cell");
+  var midLbl = document.getElementById("r-mid-lbl");
+  var midVal = document.getElementById("r-team-name");
+  var midSub = document.getElementById("r-team-rank");
+  if (mods.team === false) {
+    var tb = s.tokenBalance || { balance: 0 };
+    midLbl.textContent = "💛 愛的貨幣";
+    midVal.className = "stat-val";
+    midVal.style.color = "#c8902a";
+    midVal.textContent = "💛 " + tb.balance;
+    midSub.textContent = "點我兌換 ›";
+    midCell.style.cursor = "pointer";
+    midCell.onclick = function() { switchTab("honor"); };
+  } else {
+    midLbl.textContent = "🏆 戰隊";
+    midVal.className = "stat-val blue";
+    midVal.style.color = "";
+    midCell.style.cursor = "";
+    midCell.onclick = null;
+    /* 戰隊名/排名由 line 490 與 refreshLeaderboard 設定，這裡不覆蓋 */
+  }
   updateTabVisibility(mods.badges !== false, (mods.team !== false || mods.leaderboard !== false));
 
   if (mods.leaderboard !== false) refreshLeaderboard(s);
@@ -706,7 +728,9 @@ async function refreshLeaderboard(s) {
   rows.forEach(function(r){ var t = r.team || "無"; teams[t] = (teams[t] || 0) + r.score; });
   var teamSorted = Object.keys(teams).sort(function(a, b){ return teams[b] - teams[a]; });
   var myTeamRank = teamSorted.indexOf(s.team || "無");
-  document.getElementById("r-team-rank").textContent = myTeamRank > -1 ? "第 " + (myTeamRank + 1) + " 名" : "—";
+  /* team 關（階課程）時中間格是「愛的貨幣」，別覆寫掉它的 sub「點我兌換」 */
+  var teamOn = ((s.workshops.find(function(w){ return w.id === activeWorkshop; }) || {}).modules || {}).team !== false;
+  if (teamOn) document.getElementById("r-team-rank").textContent = myTeamRank > -1 ? "第 " + (myTeamRank + 1) + " 名" : "—";
 
   var box = document.getElementById("leaderboard");
   box.innerHTML = "";
@@ -893,8 +917,8 @@ function renderTokenCard(s) {
 
   var bal = s.tokenBalance || { ceiling: 0, earned: 0, spent: 0, balance: 0 };
   var html = '<div class="token-balance-card">'
-    + '<div style="font-size:11px;color:rgba(255,255,255,.6);">目前代幣</div>'
-    + '<div class="token-balance-num">🪙 ' + bal.balance + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,.6);">目前愛的貨幣</div>'
+    + '<div class="token-balance-num">💛 ' + bal.balance + '</div>'
     + '<div class="token-balance-sub">已賺 ' + bal.earned + ' ／ 已花 ' + bal.spent + ' ／ 天花板 ' + bal.ceiling + '（跨所有課程共用）</div>'
     + '</div>';
 
@@ -902,13 +926,13 @@ function renderTokenCard(s) {
     var can = bal.balance >= r.cost;
     var btn = can
       ? '<button class="reward-btn" onclick="handleRedeem(\'' + r.rewardId + '\')">兌換</button>'
-      : '<button class="reward-btn" disabled>代幣不足</button>';
+      : '<button class="reward-btn" disabled>愛的貨幣不足</button>';
     html += '<div class="reward-card">'
       + '<div class="reward-icon">' + (r.icon || "🎁") + '</div>'
       + '<div class="reward-body">'
       + '<div class="reward-name">' + esc(r.name) + '</div>'
       + '<div class="reward-desc">' + esc(r.desc) + (r.value ? '（價值約' + esc(r.value) + '）' : '') + '</div>'
-      + '<div class="reward-cost">🪙 ' + r.cost + ' 代幣</div>'
+      + '<div class="reward-cost">💛 ' + r.cost + ' 愛的貨幣</div>'
       + '</div>' + btn + '</div>';
   });
 
@@ -917,7 +941,7 @@ function renderTokenCard(s) {
     html += '<div style="font-size:12px;color:#a08060;font-weight:600;margin:10px 0 4px;">我的兌換紀錄</div><div class="card" style="padding:0 12px;">';
     redemptions.forEach(function(r) {
       var approved = (r.status === "已核准" || r.status === "已完成");
-      html += '<div class="redemption-row"><span>' + esc(r.name) + '（🪙' + r.cost + '）</span>'
+      html += '<div class="redemption-row"><span>' + esc(r.name) + '（💛' + r.cost + '）</span>'
         + '<span class="redemption-status' + (approved ? ' approved' : '') + '">' + esc(r.status || "待審核") + '</span></div>';
     });
     html += '</div>';
