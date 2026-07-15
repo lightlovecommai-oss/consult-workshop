@@ -549,16 +549,49 @@ function openLevel1() {
 
 /* 建「兌換品項」表（代幣可換的獎勵，跨所有 workshop 共用）。已存在就不覆蓋，
    避免洗掉你之後手動加/改的獎勵（例如之後要補上 Podcast）。 */
+/* 兌換品項種子：cost 一律等比例換算＝原價 ÷ 200 元/愛的貨幣（5000→25、2000→10、3600→18、7800→39）。
+   desc 只寫一次原價、不用「約」，前端不再重複顯示價值。value 欄保留但已不顯示。 */
+var REWARDS_SEED = [
+  ["rewardId", "name", "desc", "cost", "value", "icon", "active"],
+  ["course_discount", "課程折抵",         "折抵下一期課程學費，原價 5000 元",   25, "", "🎓", true],
+  ["consult",         "光頭 1對1 諮詢",    "與光頭進行一次 1對1 深度諮詢，原價 2000 元", 10, "", "🧑‍💼", true],
+  ["sv_check",        "專業短影音顧問健檢", "短影音一對一專業顧問健檢，原價 3600 元", 18, "", "🎬", true],
+  ["biz_consult",     "企業顧問諮詢",       "企業經營顧問諮詢一次，原價 3600 元",   18, "", "🏢", true],
+  ["bizmodel_course", "商業模式課程兌換",   "兌換商業模式課程，原價 7800 元",       39, "", "📈", true]
+];
+
 function ensureRewardsSheet_() {
   var ss = ss_();
   if (ss.getSheetByName(TABS.rewards)) return "兌換品項已存在，未變動";
   var sh = ss.insertSheet(TABS.rewards);
-  sh.getRange(1, 1, 3, 7).setValues([
-    ["rewardId", "name", "desc", "cost", "value", "icon", "active"],
-    ["course_discount", "課程折抵 5000 元", "折抵下一期課程學費 5000 元", 25, "5000元", "🎓", true],
-    ["consult", "光頭 1對1 諮詢", "與光頭進行一次 1對1 諮詢（約2000元）", 10, "2000元", "🧑‍💼", true]
-  ]);
-  return "已建兌換品項，2 項獎勵";
+  sh.getRange(1, 1, REWARDS_SEED.length, REWARDS_SEED[0].length).setValues(REWARDS_SEED);
+  return "已建兌換品項，" + (REWARDS_SEED.length - 1) + " 項獎勵";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   一次性：把 REWARDS_SEED 的 5 項兌換品 upsert 進「兌換品項」分頁——安全，不重跑 setup。
+   依 rewardId 比對：已存在就更新該列、不存在就 append；不在種子裡的其他品項完全不動。
+   在 Apps Script 選 upsertRewards → 執行 一次即可（改價/加品後可重跑）。
+   ═══════════════════════════════════════════════════════════ */
+function upsertRewards() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.rewards);
+  if (!sh) { var m = ensureRewardsSheet_(); return "兌換品項不存在→" + m; }
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idCol = headers.indexOf("rewardId");
+  if (idCol < 0) return "找不到 rewardId 欄";
+  var data = sh.getDataRange().getValues();
+  var rowOf = {};
+  for (var i = 1; i < data.length; i++) { var id = String(data[i][idCol]).trim(); if (id) rowOf[id] = i + 1; }
+  var seedHeader = REWARDS_SEED[0], added = 0, updated = 0;
+  for (var s = 1; s < REWARDS_SEED.length; s++) {
+    var row = REWARDS_SEED[s];
+    var rid = row[seedHeader.indexOf("rewardId")];
+    var line = headers.map(function(h){ var ci = seedHeader.indexOf(h); return ci > -1 ? row[ci] : ""; });
+    if (rowOf[rid]) { sh.getRange(rowOf[rid], 1, 1, headers.length).setValues([line]); updated++; }
+    else { sh.getRange(sh.getLastRow() + 1, 1, 1, headers.length).setValues([line]); added++; }
+  }
+  return "兌換品項 upsert 完成：新增 " + added + "、更新 " + updated + " 項（等比例 200元/愛的貨幣）";
 }
 
 /* ═══════════════════════════════════════════════════════════
