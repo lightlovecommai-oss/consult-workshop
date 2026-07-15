@@ -51,7 +51,10 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .revenue-card .rv-foot strong{color:#f6d68a;}
 .rv-btn{background:#e8734a;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;}
 /* ── 咖啡色標題框（回報成交／愛的貨幣兌換等要 highlight 的區塊標題）── */
-.coffee-title{background:linear-gradient(135deg,#2d1f0f,#4a3220);color:#fff;font-size:13px;font-weight:600;padding:9px 14px;border-radius:12px;margin-bottom:10px;}
+/* 標題框與下方咖啡卡連成一整塊：標題只圓上緣、下緣切平且無間距；下方卡只圓下緣 */
+.coffee-title{background:linear-gradient(135deg,#2d1f0f,#3d2a16);color:#fff;font-size:13px;font-weight:600;padding:11px 16px;border-radius:16px 16px 0 0;margin-bottom:0;}
+.coffee-title + .revenue-card,
+.coffee-title + #token-card .token-balance-card{border-radius:0 0 16px 16px;}
 .redemption-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6b4c30;padding:8px 0;border-bottom:0.5px solid #f0e9df;}
 .redemption-status{font-size:11px;padding:2px 8px;border-radius:10px;background:#fff4ec;color:#c26b3a;}
 .redemption-status.approved{background:#e1f5ee;color:#0f6e56;}
@@ -456,7 +459,7 @@ function renderWorkshopPills(s) {
   list.forEach(function(w) {
     var opt = document.createElement("option");
     opt.value = w.id;
-    opt.textContent = workshopIcon(w.name) + "  " + (w.name || w.id);
+    opt.textContent = (w.name || w.id);
     if (w.id === activeWorkshop) opt.selected = true;
     sel.appendChild(opt);
   });
