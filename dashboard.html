@@ -629,12 +629,15 @@ function renderCadenceList(s, cadence, containerId) {
   var capped = isPool && doneKeys.length >= cap;
   var isSpecial = (cadence === "special");
 
+  var shown = 0;
   tasks.forEach(function(t) {
     var on = doneKeys.indexOf(t.key) > -1;
+    if (on) return;  // 已打卡的卡片直接消失，只留下還沒做的
     var dimName = (DIMS[t.dim] || {name:"—"}).name;
     var locked = !!t.locked;
+    shown++;
 
-    var row = mk("div", "tcard" + (on ? " done" : "") + (isSpecial ? " special" : "") + (locked ? " locked-task" : ""));
+    var row = mk("div", "tcard" + (isSpecial ? " special" : "") + (locked ? " locked-task" : ""));
     row.style.cursor = "pointer";
     row.onclick = function() { openTaskDetail(t, s, dimName, on, capped); };
     var img = mk("div","tcard-img", locked ? "🔒" : (t.icon || "✅"));
@@ -676,6 +679,15 @@ function renderCadenceList(s, cadence, containerId) {
     row.appendChild(right);
     box.appendChild(row);
   });
+
+  /* 全部做完（卡片都消失了）時給個收尾提示，別留空白面板 */
+  if (shown === 0) {
+    var msg = isPool ? "🎉 這裡的任務都完成囉，" + (cadence === "daily" ? "明天中午" : "下週") + "再來"
+                     : "🎉 這個課程的任務都完成囉";
+    var doneHint = mk("div", null, msg);
+    doneHint.style.cssText = "font-size:12.5px;color:#a08060;padding:20px 4px;text-align:center;";
+    box.appendChild(doneHint);
+  }
 }
 
 /* ── 任務詳情彈窗：點卡片空白處開啟，看說明/複習技巧；打卡按鈕在列表上仍可一鍵直接打，互不影響 ── */
