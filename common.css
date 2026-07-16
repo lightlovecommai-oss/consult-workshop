@@ -5,94 +5,94 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 /* ── 共用元件 ── */
 .card{background:#fdf8f3;border-radius:20px;padding:1.25rem;border:0.5px solid #e8ddd2;margin-bottom:.75rem;}
 .hdiv{height:0.5px;background:#e8ddd2;margin:10px 0;}
-.btitle{font-size:12px;color:#a08060;margin-bottom:6px;}
-.bub{background:#fff;border:0.5px solid #e8ddd2;border-radius:0 14px 14px 14px;padding:10px 12px;font-size:13px;color:#4a3220;line-height:1.7;flex:1;}
+.btitle{font-size:15px;color:#7a5636;margin-bottom:6px;}
+.bub{background:#fff;border:0.5px solid #e8ddd2;border-radius:0 14px 14px 14px;padding:10px 12px;font-size:15px;color:#4a3220;line-height:1.7;flex:1;}
 .bub strong{color:#e8734a;font-weight:500;}
 .blist{list-style:none;margin-bottom:1.25rem;}
-.blist li{font-size:13.5px;color:#4a3220;padding:4px 0 4px 1.3rem;position:relative;line-height:1.6;}
+.blist li{font-size:15px;color:#4a3220;padding:4px 0 4px 1.3rem;position:relative;line-height:1.6;}
 .blist li::before{content:"✓";position:absolute;left:0;color:#e8734a;}
 .blist li strong{color:#2d1f0f;font-weight:500;}
-.copybox{background:#fff;border-left:3px solid #e8734a;border-radius:0 12px 12px 0;padding:1rem;font-size:13px;color:#6b4c30;line-height:1.8;margin-bottom:1rem;}
+.copybox{background:#fff;border-left:3px solid #e8734a;border-radius:0 12px 12px 0;padding:1rem;font-size:15px;color:#6b4c30;line-height:1.8;margin-bottom:1rem;}
 .copybox strong{color:#e8734a;font-weight:500;}
-.btnO{display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:24px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:8px;}
-.btnN{display:block;width:100%;background:#2d1f0f;color:#fff;border:none;border-radius:24px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;margin-top:1.25rem;opacity:.25;text-align:center;}
+.btnO{display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:24px;padding:14px;font-size:17px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:8px;}
+.btnN{display:block;width:100%;background:#2d1f0f;color:#fff;border:none;border-radius:24px;padding:14px;font-size:17px;font-weight:500;cursor:pointer;margin-top:1.25rem;opacity:.25;text-align:center;}
 .btnN.ready{opacity:1;}
 
 /* ── 排行榜 ── */
 .lbrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:0.5px solid #e8ddd2;}
 .lbrow:last-child{border-bottom:none;}
-.lbrank{width:24px;text-align:center;font-size:13px;font-weight:600;color:#a08060;}
+.lbrank{width:24px;text-align:center;font-size:15px;font-weight:600;color:#7a5636;}
 .lbrow.top .lbrank{color:#e8734a;}
-.lbrank.medal{font-size:18px;line-height:1;}
+.lbrank.medal{font-size:20px;line-height:1;}
 .lbrow.me{background:#fff4ec;border-radius:12px;box-shadow:inset 0 0 0 1.5px #f0c9b0;}
 .lbrow.pin{margin-top:2px;border-bottom:none;}
-.lbname{flex:1;font-size:13.5px;font-weight:600;color:#2d1f0f;min-width:0;}
+.lbname{flex:1;font-size:15px;font-weight:600;color:#2d1f0f;min-width:0;}
 .lbsub{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;}
-.lbtitle{font-size:10.5px;font-weight:700;color:#c26b3a;background:#fbe6d8;border-radius:8px;padding:1px 7px;}
-.lbteam{font-size:11px;font-weight:400;color:#a08060;}
-.lbscore{font-size:14px;font-weight:700;color:#e8734a;white-space:nowrap;}
+.lbtitle{font-size:14px;font-weight:700;color:#c26b3a;background:#fbe6d8;border-radius:8px;padding:1px 7px;}
+.lbteam{font-size:14px;font-weight:400;color:#7a5636;}
+.lbscore{font-size:16px;font-weight:700;color:#e8734a;white-space:nowrap;}
 
 /* ── 儀表板：頂部 bar ── */
 .dash-topbar{background:#2d1f0f;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:20px 20px 0 0;margin:-1.25rem -1.25rem 1rem -1.25rem;}
-.dash-topbar-title{font-size:14px;font-weight:500;color:#f0e8dc;letter-spacing:.04em;}
-.dash-topbar-name{font-size:12px;color:#a08060;}
+.dash-topbar-title{font-size:16px;font-weight:500;color:#f0e8dc;letter-spacing:.04em;}
+.dash-topbar-name{font-size:15px;color:#7a5636;}
 
 /* ── 儀表板：角色主卡 ── */
 .charcard{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:16px;padding:14px 16px;margin-bottom:12px;}
 .charcard-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .char-avatar{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#e8734a,#c85830);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
 .char-info{flex:1;}
-.char-role-pill{font-size:10px;color:#9a6b3e;background:#f0e4d4;border-radius:8px;padding:2px 8px;display:inline-block;margin-bottom:4px;}
-.char-name{font-size:18px;font-weight:600;color:#2d1f0f;}
-.char-lv{display:inline-flex;align-items:center;gap:3px;background:#fff;border:0.5px solid #e8ddd2;border-radius:8px;padding:3px 10px;font-size:12px;color:#e8734a;font-weight:600;margin-top:4px;}
-.char-lv-max{color:#c8b09a;font-weight:400;}
+.char-role-pill{font-size:14px;color:#9a6b3e;background:#f0e4d4;border-radius:8px;padding:2px 8px;display:inline-block;margin-bottom:4px;}
+.char-name{font-size:20px;font-weight:600;color:#2d1f0f;}
+.char-lv{display:inline-flex;align-items:center;gap:3px;background:#fff;border:0.5px solid #e8ddd2;border-radius:8px;padding:3px 10px;font-size:15px;color:#e8734a;font-weight:600;margin-top:4px;}
+.char-lv-max{color:#8a6f52;font-weight:400;}
 .hp-row{display:flex;align-items:center;gap:8px;}
-.hp-label{font-size:11px;color:#c84040;width:22px;}
+.hp-label{font-size:14px;color:#c84040;width:22px;}
 .hp-bar-wrap{flex:1;height:8px;background:#ede4da;border-radius:4px;overflow:hidden;}
 .hp-bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#e03030 0%,#e87010 40%,#d4b020 70%,#50b830 100%);}
-.hp-num{font-size:11px;color:#a08060;min-width:52px;text-align:right;}
+.hp-num{font-size:14px;color:#7a5636;min-width:52px;text-align:right;}
 
 /* ── 儀表板：積分統計 ── */
 .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
 .stat-cell{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:10px 12px;}
-.stat-lbl{font-size:10px;color:#a08060;margin-bottom:3px;}
-.stat-val{font-size:20px;font-weight:600;color:#e8734a;}
-.stat-sub{font-size:10px;color:#c8b09a;margin-top:1px;}
+.stat-lbl{font-size:14px;color:#7a5636;margin-bottom:3px;}
+.stat-val{font-size:22px;font-weight:600;color:#e8734a;}
+.stat-sub{font-size:14px;color:#8a6f52;margin-top:1px;}
 .stat-val.blue{color:#378ADD;}
 .stat-val.green{color:#3a9a60;}
 
 /* ── 儀表板：雷達圖 ── */
 .radar-wrap{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:1rem;margin-bottom:12px;}
-.radar-label{font-size:11px;color:#a08060;margin-bottom:8px;}
+.radar-label{font-size:14px;color:#7a5636;margin-bottom:8px;}
 .dimgrid2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;}
 .dimc2{background:#fdf8f3;border:0.5px solid #e8ddd2;border-radius:8px;padding:8px 6px;text-align:center;}
-.dimn2{font-size:10px;color:#a08060;margin-bottom:2px;}
-.dimv2{font-size:15px;font-weight:600;}
+.dimn2{font-size:14px;color:#7a5636;margin-bottom:2px;}
+.dimv2{font-size:17px;font-weight:600;}
 
 /* ── 儀表板：變現流程甜蜜點 ── */
 .strcard{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:1rem;margin-bottom:12px;}
-.strlbl{font-size:11px;color:#a08060;margin-bottom:4px;}
-.strname{font-size:15px;font-weight:500;color:#2d1f0f;margin-bottom:6px;}
-.strdesc{font-size:13px;color:#6b4c30;line-height:1.7;white-space:pre-line;}
+.strlbl{font-size:14px;color:#7a5636;margin-bottom:4px;}
+.strname{font-size:17px;font-weight:500;color:#2d1f0f;margin-bottom:6px;}
+.strdesc{font-size:15px;color:#6b4c30;line-height:1.7;white-space:pre-line;}
 .combo-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.combo-badge{color:#fff;font-size:12px;font-weight:600;border-radius:20px;padding:3px 12px;}
+.combo-badge{color:#fff;font-size:15px;font-weight:600;border-radius:20px;padding:3px 12px;}
 
 /* ── 儀表板：任務區塊 ── */
 .section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.section-icon{font-size:16px;}
-.section-title{font-size:14px;font-weight:600;color:#2d1f0f;flex:1;}
-.date-pill{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:20px;padding:3px 10px;font-size:11px;color:#e8734a;}
-.need-review-badge{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:3px 10px;font-size:10px;color:#b07040;}
+.section-icon{font-size:18px;}
+.section-title{font-size:16px;font-weight:600;color:#2d1f0f;flex:1;}
+.date-pill{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:20px;padding:3px 10px;font-size:14px;color:#e8734a;}
+.need-review-badge{background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:12px;padding:3px 10px;font-size:14px;color:#b07040;}
 
 /* ── 儀表板：任務滑動分頁 ── */
 .task-tabs{display:flex;gap:6px;margin-bottom:10px;}
-.task-tab{flex:1;white-space:nowrap;background:#fff;border:0.5px solid #e8ddd2;border-radius:10px;padding:8px 4px;font-size:12px;color:#a08060;cursor:pointer;line-height:1.3;font-family:inherit;}
+.task-tab{flex:1;white-space:nowrap;background:#fff;border:0.5px solid #e8ddd2;border-radius:10px;padding:8px 4px;font-size:15px;color:#7a5636;cursor:pointer;line-height:1.3;font-family:inherit;}
 .task-tab.active{background:#e8734a;color:#fff;border-color:#e8734a;font-weight:600;}
 .task-slider{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;align-items:flex-start;margin-bottom:14px;transition:height .2s;}
 .task-slider::-webkit-scrollbar{display:none;}
 .task-panel{flex:0 0 100%;scroll-snap-align:start;box-sizing:border-box;}
 .task-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;min-height:22px;}
-.task-panel-cap{font-size:11px;color:#a08060;}
+.task-panel-cap{font-size:14px;color:#7a5636;}
 
 /* ── 儀表板：任務卡 ── */
 .tcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
@@ -101,20 +101,20 @@ html,body{background:#f5ede3;font-family:-apple-system,sans-serif;min-height:100
 .tcard.locked-task{background:#f4f1ec;opacity:.6;filter:grayscale(.6);}
 .tcard-img{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
 .tcard-body{flex:1;min-width:0;}
-.tcard-name{font-size:14px;font-weight:500;color:#2d1f0f;margin-bottom:2px;}
-.tcard-desc{font-size:11px;color:#a08060;line-height:1.5;}
+.tcard-name{font-size:16px;font-weight:500;color:#2d1f0f;margin-bottom:2px;}
+.tcard-desc{font-size:14px;color:#7a5636;line-height:1.5;}
 .tcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
-.tcard-pts{font-size:14px;font-weight:700;color:#e8734a;}
+.tcard-pts{font-size:16px;font-weight:700;color:#e8734a;}
 .tcard-pts.special{color:#9a6b3e;}
-.btn-go{background:#e8734a;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-go{background:#e8734a;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .btn-go.special{background:#c8902a;}
-.btn-done{background:#e8f4ec;color:#3a9a60;border:none;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:500;}
-.tcard-need-review{display:inline-flex;align-items:center;gap:3px;background:#fff8f4;border-radius:6px;padding:2px 6px;font-size:10px;color:#b07040;margin-top:2px;}
+.btn-done{background:#e8f4ec;color:#3a9a60;border:none;border-radius:8px;padding:5px 10px;font-size:15px;font-weight:500;}
+.tcard-need-review{display:inline-flex;align-items:center;gap:3px;background:#fff8f4;border-radius:6px;padding:2px 6px;font-size:14px;color:#b07040;margin-top:2px;}
 
 /* ── 儀表板：徽章牆 ── */
 .badgegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
 .badge{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px;text-align:center;}
 .badge.locked{opacity:.35;}
 .badge .bicon{font-size:26px;margin-bottom:4px;}
-.badge .bname{font-size:12px;font-weight:500;color:#2d1f0f;}
-.badge .bscore{font-size:11px;color:#a08060;margin-top:2px;}
+.badge .bname{font-size:15px;font-weight:500;color:#2d1f0f;}
+.badge .bscore{font-size:14px;color:#7a5636;margin-top:2px;}

@@ -10,17 +10,17 @@
 <div class="wrap">
 
   <div style="text-align:center;margin-bottom:1.25rem;padding-top:.5rem;">
-    <div style="display:inline-block;font-size:11px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
-    <div style="font-size:19px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
-    <div style="font-size:12px;color:#a08060;line-height:1.7;">每完成一個任務，能力就往前一步<br>這是他們正在走的路</div>
+    <div style="display:inline-block;font-size:14px;color:#9a6b3e;background:#f0e4d4;border-radius:12px;padding:3px 12px;margin-bottom:8px;">變現型顧問實戰營</div>
+    <div style="font-size:21px;font-weight:600;color:#2d1f0f;margin-bottom:4px;">學員「變現四力」成長地圖</div>
+    <div style="font-size:15px;color:#7a5636;line-height:1.7;">每完成一個任務，能力就往前一步<br>這是他們正在走的路</div>
   </div>
 
   <div id="showcase-list"></div>
 
   <div class="card" style="text-align:center;padding:1.5rem 1.25rem;margin-top:.25rem;">
-    <div style="font-size:14px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">想讓你的變現四力也成長起來？</div>
-    <div style="font-size:12px;color:#a08060;line-height:1.7;margin-bottom:1rem;">加入變現型顧問實戰營<br>每週任務累積四力，收入跟著成長</div>
-    <a href="https://lightlovecommai-oss.github.io/lightlovecomm-landing/" style="display:block;background:#e8734a;color:#fff;border-radius:24px;padding:14px;font-size:15px;font-weight:500;text-decoration:none;text-align:center;">了解課程，開始成長 →</a>
+    <div style="font-size:16px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">想讓你的變現四力也成長起來？</div>
+    <div style="font-size:15px;color:#7a5636;line-height:1.7;margin-bottom:1rem;">加入變現型顧問實戰營<br>每週任務累積四力，收入跟著成長</div>
+    <a href="https://lightlovecommai-oss.github.io/lightlovecomm-landing/" style="display:block;background:#e8734a;color:#fff;border-radius:24px;padding:14px;font-size:17px;font-weight:500;text-decoration:none;text-align:center;">了解課程，開始成長 →</a>
   </div>
 
 </div>
@@ -53,12 +53,12 @@ function renderShowcase() {
   c1.className = "card";
   c1.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">'
-   + '<div><div style="font-size:15px;font-weight:600;color:#2d1f0f;">徐哲彥</div>'
-   + '<div style="font-size:11px;color:#a08060;">講師・教練・1.5 年創業實錄</div></div>'
-   + '<div style="background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:10px;padding:3px 10px;font-size:11px;color:#e8734a;">信任力最強</div>'
+   + '<div><div style="font-size:17px;font-weight:600;color:#2d1f0f;">徐哲彥</div>'
+   + '<div style="font-size:14px;color:#7a5636;">講師・教練・1.5 年創業實錄</div></div>'
+   + '<div style="background:#fff8f4;border:0.5px solid #f0c8b0;border-radius:10px;padding:3px 10px;font-size:14px;color:#e8734a;">信任力最強</div>'
    + '</div>'
    + '<div class="hdiv"></div>'
-   + '<div style="font-size:12px;color:#6b4c30;line-height:1.7;">從月收 0 到年收破 250 萬，四力每往前一步，收入就跟著動——這就是變現公式在真實生活裡的樣子。</div>';
+   + '<div style="font-size:15px;color:#6b4c30;line-height:1.7;">從月收 0 到年收破 250 萬，四力每往前一步，收入就跟著動——這就是變現公式在真實生活裡的樣子。</div>';
   box.appendChild(c1);
 
   /* 卡片2：折線圖（共用渲染函式，見 atpi-core.js） */
@@ -84,20 +84,20 @@ function renderShowcase() {
   var pillsHtml = g.sorted.map(function(k) {
     var d = DIMS[k];
     if (strongDims.indexOf(k) > -1) {
-      return '<span style="display:inline-block;font-size:13px;font-weight:600;color:'+d.color+';background:'+d.color+'1a;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+'</span>';
+      return '<span style="display:inline-block;font-size:15px;font-weight:600;color:'+d.color+';background:'+d.color+'1a;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+'</span>';
     }
-    return '<span style="display:inline-block;font-size:13px;color:#a89880;background:#f0e9df;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+' 待提升</span>';
+    return '<span style="display:inline-block;font-size:15px;color:#a89880;background:#f0e9df;border-radius:16px;padding:6px 14px;margin:0 6px 6px 0;">'+d.name+' 待提升</span>';
   }).join("");
 
   cCombo.innerHTML =
-      '<div style="font-size:12px;color:#a08060;margin-bottom:10px;">他的強項組合 × 最省力變現路徑</div>'
+      '<div style="font-size:15px;color:#7a5636;margin-bottom:10px;">他的強項組合 × 最省力變現路徑</div>'
     + pillsHtml
-    + '<div style="font-size:17px;font-weight:600;color:#2d1f0f;margin:14px 0 4px;">' + g.combo.title + '</div>'
-    + '<div style="font-size:11px;color:#a08060;margin-bottom:10px;">他的溝通變現甜蜜路徑</div>'
-    + '<div style="font-size:13px;color:#4a3220;line-height:1.9;white-space:pre-line;">' + g.combo.flow + '</div>'
+    + '<div style="font-size:19px;font-weight:600;color:#2d1f0f;margin:14px 0 4px;">' + g.combo.title + '</div>'
+    + '<div style="font-size:14px;color:#7a5636;margin-bottom:10px;">他的溝通變現甜蜜路徑</div>'
+    + '<div style="font-size:15px;color:#4a3220;line-height:1.9;white-space:pre-line;">' + g.combo.flow + '</div>'
     + '<div class="hdiv"></div>'
-    + '<div style="font-size:11px;color:#a08060;margin-bottom:8px;">弱項不用補，用這個替代</div>'
-    + '<div style="font-size:13px;color:#4a3220;line-height:1.9;white-space:pre-line;">' + g.combo.tips + '</div>';
+    + '<div style="font-size:14px;color:#7a5636;margin-bottom:8px;">弱項不用補，用這個替代</div>'
+    + '<div style="font-size:15px;color:#4a3220;line-height:1.9;white-space:pre-line;">' + g.combo.tips + '</div>';
   box.appendChild(cCombo);
 
   /* 卡片2.6：CP 值最高的能力槓桿（排名最後的維度） */
@@ -105,9 +105,9 @@ function renderShowcase() {
   cLever.className = "card";
   var ld = DIMS[g.wk];
   cLever.innerHTML =
-      '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">掌握這個能力，CP 值最高</div>'
-    + '<div style="font-size:15px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">' + ld.name + '（讓人覺得你真的懂）' + LEVER.title + '</div>'
-    + '<div style="font-size:13px;color:#6b4c30;line-height:1.7;">' + LEVER.desc + '</div>';
+      '<div style="font-size:15px;color:#7a5636;margin-bottom:8px;">掌握這個能力，CP 值最高</div>'
+    + '<div style="font-size:17px;font-weight:600;color:#2d1f0f;margin-bottom:8px;">' + ld.name + '（讓人覺得你真的懂）' + LEVER.title + '</div>'
+    + '<div style="font-size:15px;color:#6b4c30;line-height:1.7;">' + LEVER.desc + '</div>';
   box.appendChild(cLever);
 }
 

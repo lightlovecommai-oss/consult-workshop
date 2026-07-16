@@ -9,13 +9,13 @@
 .tabpanel{display:none;}
 .tabpanel.active{display:block;}
 .botnav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e8ddd2;padding:7px 0 max(10px,env(safe-area-inset-bottom));}
-.botnav button{flex:1;background:none;border:0;color:#b4b2a9;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;}
-.botnav button .ic{font-size:19px;line-height:1;}
+.botnav button{flex:1;background:none;border:0;color:#b4b2a9;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;}
+.botnav button .ic{font-size:21px;line-height:1;}
 .botnav button.active{color:#e8734a;}
 details.foldcard{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;margin-bottom:12px;}
-details.foldcard>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;color:#6b4c30;font-weight:500;display:flex;justify-content:space-between;align-items:center;}
+details.foldcard>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:15px;color:#6b4c30;font-weight:500;display:flex;justify-content:space-between;align-items:center;}
 details.foldcard>summary::-webkit-details-marker{display:none;}
-details.foldcard>summary::after{content:"▾";color:#a08060;font-size:12px;}
+details.foldcard>summary::after{content:"▾";color:#7a5636;font-size:15px;}
 details.foldcard[open]>summary::after{content:"▴";}
 details.foldcard .foldbody{padding:0 14px 14px;}
 #loading-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#fdfaf6;}
@@ -24,52 +24,52 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
 /* ── 課程切換下拉選單（放在頂部深色 bar 裡，取代品牌標題）── */
 .topbar-ws-wrap{position:relative;display:flex;align-items:center;gap:5px;min-width:0;}
-.topbar-ws-icon{font-size:14px;line-height:1;flex-shrink:0;}
-.topbar-ws-select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:#f0e8dc;font-size:14px;font-weight:500;letter-spacing:.02em;padding:0 16px 0 0;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-ws-icon{font-size:16px;line-height:1;flex-shrink:0;}
+.topbar-ws-select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:#f0e8dc;font-size:16px;font-weight:500;letter-spacing:.02em;padding:0 16px 0 0;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .topbar-ws-select:focus{outline:none;}
 .topbar-ws-select option{color:#2d1f0f;}
-.topbar-ws-arrow{position:absolute;right:0;color:#a08060;font-size:10px;pointer-events:none;}
+.topbar-ws-arrow{position:absolute;right:0;color:#7a5636;font-size:14px;pointer-events:none;}
 
 /* ── 代幣兌換 ── */
 .token-balance-card{background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:16px;padding:16px 18px;color:#fff;margin-bottom:12px;}
 .token-balance-num{font-size:28px;font-weight:700;color:#f6d68a;line-height:1;}
-.token-balance-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:6px;}
+.token-balance-sub{font-size:14px;color:rgba(255,255,255,.6);margin-top:6px;}
 .reward-card{background:#fff;border:0.5px solid #e8ddd2;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-.reward-icon{width:44px;height:44px;border-radius:12px;background:#fff8f4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.reward-icon{width:44px;height:44px;border-radius:12px;background:#fff8f4;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .reward-body{flex:1;min-width:0;}
-.reward-name{font-size:13.5px;font-weight:600;color:#2d1f0f;}
-.reward-desc{font-size:11px;color:#a08060;margin-top:2px;}
-.reward-cost{font-size:12px;color:#e8734a;font-weight:700;margin-top:3px;}
-.reward-btn{background:#e8734a;color:#fff;border:0;border-radius:14px;padding:8px 14px;font-size:12.5px;font-weight:600;flex-shrink:0;cursor:pointer;}
-.reward-btn[disabled]{background:#f0e9df;color:#a08060;cursor:default;}
+.reward-name{font-size:15px;font-weight:600;color:#2d1f0f;}
+.reward-desc{font-size:14px;color:#7a5636;margin-top:2px;}
+.reward-cost{font-size:15px;color:#e8734a;font-weight:700;margin-top:3px;}
+.reward-btn{background:#e8734a;color:#fff;border:0;border-radius:14px;padding:8px 14px;font-size:15px;font-weight:600;flex-shrink:0;cursor:pointer;}
+.reward-btn[disabled]{background:#f0e9df;color:#7a5636;cursor:default;}
 /* ── 回報成交（沿用代幣咖啡色卡，highlight 並跟能力/任務白卡區隔）── */
 .revenue-card{background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:16px;padding:16px 18px;color:#fff;margin-bottom:14px;}
-.revenue-card .rv-input{box-sizing:border-box;background:rgba(255,255,255,.08);border:0.5px solid rgba(246,214,138,.35);border-radius:8px;padding:9px 11px;font-size:13px;color:#fff;}
+.revenue-card .rv-input{box-sizing:border-box;background:rgba(255,255,255,.08);border:0.5px solid rgba(246,214,138,.35);border-radius:8px;padding:9px 11px;font-size:15px;color:#fff;}
 .revenue-card .rv-input::placeholder{color:rgba(255,255,255,.45);}
 .revenue-card .rv-input:focus{outline:none;border-color:#f6d68a;background:rgba(255,255,255,.12);}
-.revenue-card .rv-foot{font-size:12px;color:rgba(255,255,255,.7);}
+.revenue-card .rv-foot{font-size:15px;color:rgba(255,255,255,.7);}
 .revenue-card .rv-foot strong{color:#f6d68a;}
-.rv-btn{background:#e8734a;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;}
+.rv-btn{background:#e8734a;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:15px;font-weight:600;flex-shrink:0;cursor:pointer;}
 /* ── 咖啡色標題框（回報成交／愛的貨幣兌換等要 highlight 的區塊標題）── */
 /* 標題框與下方咖啡卡連成一整塊：標題只圓上緣、下緣切平且無間距；下方卡只圓下緣 */
-.coffee-title{background:linear-gradient(135deg,#2d1f0f,#3d2a16);color:#fff;font-size:13px;font-weight:600;padding:11px 16px;border-radius:16px 16px 0 0;margin-bottom:0;}
+.coffee-title{background:linear-gradient(135deg,#2d1f0f,#3d2a16);color:#fff;font-size:15px;font-weight:600;padding:11px 16px;border-radius:16px 16px 0 0;margin-bottom:0;}
 .coffee-title + .revenue-card,
 .coffee-title + #token-card .token-balance-card{border-radius:0 0 16px 16px;}
-.redemption-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6b4c30;padding:8px 0;border-bottom:0.5px solid #f0e9df;}
-.redemption-status{font-size:11px;padding:2px 8px;border-radius:10px;background:#fff4ec;color:#c26b3a;}
+.redemption-row{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:#6b4c30;padding:8px 0;border-bottom:0.5px solid #f0e9df;}
+.redemption-status{font-size:14px;padding:2px 8px;border-radius:10px;background:#fff4ec;color:#c26b3a;}
 .redemption-status.approved{background:#e1f5ee;color:#0f6e56;}
 
 /* ── 榮譽系統 ── */
 .honor-banner{background:linear-gradient(160deg,#2d1f0f,#5a3d1c);border-radius:16px;padding:18px 16px;text-align:center;color:#fff;margin-bottom:14px;box-shadow:0 4px 18px rgba(90,61,28,.25);}
 .honor-banner .hb-crown{font-size:30px;line-height:1;margin-bottom:2px;}
-.honor-banner .hb-title{font-size:20px;font-weight:800;color:#f6d68a;letter-spacing:1px;}
-.honor-banner .hb-sub{font-size:12px;color:rgba(255,255,255,.72);margin-top:5px;}
+.honor-banner .hb-title{font-size:22px;font-weight:800;color:#f6d68a;letter-spacing:1px;}
+.honor-banner .hb-sub{font-size:15px;color:rgba(255,255,255,.72);margin-top:5px;}
 
 .honor-next-card{background:#fff4ec;border:1px solid #f0c9b0;border-radius:14px;padding:12px 14px;margin-bottom:16px;}
-.honor-next-card .hn-title{font-size:12px;font-weight:700;color:#c26b3a;margin-bottom:8px;}
+.honor-next-card .hn-title{font-size:15px;font-weight:700;color:#c26b3a;margin-bottom:8px;}
 .hn-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
 .hn-row:last-child{margin-bottom:0;}
-.hn-name{font-size:12px;color:#2d1f0f;flex:0 0 46%;}
+.hn-name{font-size:15px;color:#2d1f0f;flex:0 0 46%;}
 .hn-bar{flex:1;height:6px;background:#f0dccb;border-radius:3px;overflow:hidden;}
 .hn-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,#e8734a,#c8a84b);}
 
@@ -77,16 +77,16 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .honor{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px 10px;text-align:center;}
 .honor.locked{opacity:.42;filter:grayscale(.55);}
 .honor .hicon{font-size:26px;margin-bottom:4px;line-height:1;}
-.honor .hname{font-size:12px;font-weight:600;color:#2d1f0f;}
-.honor .hdesc{font-size:10.5px;color:#a08060;margin-top:3px;line-height:1.35;}
+.honor .hname{font-size:15px;font-weight:600;color:#2d1f0f;}
+.honor .hdesc{font-size:14px;color:#7a5636;margin-top:3px;line-height:1.35;}
 .honor.rare{border-color:#e8b23a;background:linear-gradient(160deg,#fffdf6,#fff4dd);}
 .honor.legend{border:0;background:linear-gradient(160deg,#3a2a12,#6b4a1e);box-shadow:0 4px 16px rgba(200,140,40,.28);}
 .honor.legend .hname{color:#f6d68a;}
 .honor.legend .hdesc{color:rgba(255,255,255,.62);}
 .honor.rare.locked,.honor.legend.locked{background:#fff;box-shadow:none;}
 .honor.legend.locked .hname{color:#2d1f0f;}
-.honor.legend.locked .hdesc{color:#a08060;}
-.honor .hws{font-size:9.5px;color:#a08060;margin-top:5px;padding-top:5px;border-top:0.5px solid rgba(160,128,96,.18);letter-spacing:.5px;}
+.honor.legend.locked .hdesc{color:#7a5636;}
+.honor .hws{font-size:14px;color:#7a5636;margin-top:5px;padding-top:5px;border-top:0.5px solid rgba(160,128,96,.18);letter-spacing:.5px;}
 .honor.legend .hws{color:rgba(246,214,138,.6);border-top-color:rgba(246,214,138,.2);}
 
 .dimbadgewrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
@@ -98,11 +98,11 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .dimbadge-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .dimbadge-medal{font-size:24px;line-height:1;}
 .dimbadge-info{min-width:0;}
-.dimbadge-name{font-size:13px;font-weight:700;}
-.dimbadge-tier{font-size:10.5px;color:#a08060;margin-top:1px;}
+.dimbadge-name{font-size:15px;font-weight:700;}
+.dimbadge-tier{font-size:14px;color:#7a5636;margin-top:1px;}
 .dimbadge-bar{height:5px;background:#ede4da;border-radius:3px;overflow:hidden;margin-bottom:5px;}
 .dimbadge-fill{height:5px;border-radius:3px;}
-.dimbadge-hint{font-size:10px;color:#a08060;}
+.dimbadge-hint{font-size:14px;color:#7a5636;}
 
 /* ── 解鎖慶祝彈窗 ── */
 .celebrate-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(20,12,4,.72);padding:24px;}
@@ -112,39 +112,39 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .taskdetail-card{background:#fdfaf6;border-radius:20px;padding:20px;width:100%;max-width:420px;max-height:calc(100vh - 48px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:popin .25s ease-out;}
 @keyframes popin{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
 .td-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.td-icon{width:44px;height:44px;border-radius:12px;background:#fff8f4;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.td-close{width:26px;height:26px;border-radius:50%;background:#f0e9df;display:flex;align-items:center;justify-content:center;color:#a08060;font-size:13px;cursor:pointer;border:0;}
-.td-name{font-size:16px;font-weight:600;color:#2d1f0f;margin-bottom:4px;}
-.td-meta{font-size:11px;color:#e8734a;font-weight:500;margin-bottom:14px;}
+.td-icon{width:44px;height:44px;border-radius:12px;background:#fff8f4;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.td-close{width:26px;height:26px;border-radius:50%;background:#f0e9df;display:flex;align-items:center;justify-content:center;color:#7a5636;font-size:15px;cursor:pointer;border:0;}
+.td-name{font-size:18px;font-weight:600;color:#2d1f0f;margin-bottom:4px;}
+.td-meta{font-size:14px;color:#e8734a;font-weight:500;margin-bottom:14px;}
 .td-tip{background:#fff;border:0.5px solid #e8ddd2;border-radius:12px;padding:12px 14px;margin-bottom:16px;}
-.td-tip-label{font-size:11px;color:#a08060;font-weight:600;margin-bottom:6px;}
-.td-tip-body{font-size:12.5px;color:#6b4c30;line-height:1.6;}
-.td-confirm{width:100%;background:#e8734a;color:#fff;border:0;border-radius:14px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;}
-.td-confirm[disabled]{background:#f0e9df;color:#a08060;cursor:default;}
+.td-tip-label{font-size:14px;color:#7a5636;font-weight:600;margin-bottom:6px;}
+.td-tip-body{font-size:15px;color:#6b4c30;line-height:1.6;}
+.td-confirm{width:100%;background:#e8734a;color:#fff;border:0;border-radius:14px;padding:13px;font-size:16px;font-weight:600;cursor:pointer;}
+.td-confirm[disabled]{background:#f0e9df;color:#7a5636;cursor:default;}
 .celebrate-card{position:relative;background:linear-gradient(165deg,#2d1f0f,#5a3d1c);border-radius:22px;padding:34px 26px 26px;text-align:center;color:#fff;max-width:300px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden;animation:pop .4s cubic-bezier(.2,1.3,.5,1);}
 @keyframes pop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
 .cc-glow{position:absolute;top:-38%;left:50%;width:200px;height:200px;transform:translateX(-50%);background:radial-gradient(circle,rgba(246,214,138,.5),transparent 65%);animation:spin 6s linear infinite;}
 .cc-glow.big{width:270px;height:270px;background:radial-gradient(circle,rgba(246,214,138,.78),transparent 62%);}
 .cc-icon{position:relative;font-size:60px;line-height:1;margin-bottom:8px;animation:pop .5s .15s both cubic-bezier(.2,1.5,.5,1);}
-.cc-label{position:relative;font-size:12px;letter-spacing:3px;color:#f6d68a;font-weight:600;}
+.cc-label{position:relative;font-size:15px;letter-spacing:3px;color:#f6d68a;font-weight:600;}
 .cc-name{position:relative;font-size:23px;font-weight:800;color:#fff;margin:4px 0 6px;}
-.cc-desc{position:relative;font-size:12.5px;color:rgba(255,255,255,.72);margin-bottom:20px;line-height:1.5;}
-.cc-btn{position:relative;background:linear-gradient(90deg,#e8734a,#c8a84b);color:#fff;border:0;border-radius:22px;padding:11px 30px;font-size:14px;font-weight:700;cursor:pointer;}
+.cc-desc{position:relative;font-size:15px;color:rgba(255,255,255,.72);margin-bottom:20px;line-height:1.5;}
+.cc-btn{position:relative;background:linear-gradient(90deg,#e8734a,#c8a84b);color:#fff;border:0;border-radius:22px;padding:11px 30px;font-size:16px;font-weight:700;cursor:pointer;}
 
 /* ── 首頁：他人榮譽快閃（文雅版，3 秒淡出）── */
 .honor-toast{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:12px;pointer-events:none;opacity:0;transform:translateY(-130%);transition:transform .55s cubic-bezier(.2,.85,.3,1),opacity .55s ease;}
 .honor-toast.show{opacity:1;transform:translateY(0);}
 .honor-toast-inner{max-width:452px;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(45,31,15,.95),rgba(90,61,28,.95));border:1px solid rgba(246,214,138,.32);border-radius:14px;padding:10px 15px;box-shadow:0 8px 26px rgba(45,31,15,.32);}
 .honor-toast .ht-badge{font-size:22px;line-height:1;flex-shrink:0;}
-.honor-toast .ht-tag{font-size:9.5px;letter-spacing:2px;color:rgba(246,214,138,.72);margin-bottom:2px;}
-.honor-toast .ht-text{font-size:12.5px;color:rgba(255,255,255,.9);line-height:1.35;}
+.honor-toast .ht-tag{font-size:14px;letter-spacing:2px;color:rgba(246,214,138,.72);margin-bottom:2px;}
+.honor-toast .ht-text{font-size:15px;color:rgba(255,255,255,.9);line-height:1.35;}
 .honor-toast .ht-name{color:#f6d68a;font-weight:700;}
 </style>
 </head>
 <body>
 <div id="loading-overlay">
   <div class="spinner"></div>
-  <div style="font-size:13px;color:#a08060;">載入你的成長數據…</div>
+  <div style="font-size:15px;color:#7a5636;">載入你的成長數據…</div>
 </div>
 <div class="wrap">
   <div class="card" style="padding:1.25rem 1.25rem 90px;">
@@ -166,7 +166,7 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         <div class="charcard-top">
           <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
             <div class="char-avatar" id="r-avatar" style="overflow:hidden;background:none;"></div>
-            <div id="r-persona" style="font-size:10px;font-weight:600;color:#a08060;text-align:center;white-space:nowrap;"></div>
+            <div id="r-persona" style="font-size:14px;font-weight:600;color:#7a5636;text-align:center;white-space:nowrap;"></div>
           </div>
           <div class="char-info">
             <div class="char-role-pill" id="r-role"></div>
@@ -208,21 +208,21 @@ details.foldcard .foldbody{padding:0 14px 14px;}
       <details class="foldcard">
         <summary>更多分析：甜蜜點・補強・走勢</summary>
         <div class="foldbody">
-          <div style="font-size:12px;color:#a08060;font-weight:600;margin:2px 0 8px;">變現流程甜蜜點</div>
+          <div style="font-size:15px;color:#7a5636;font-weight:600;margin:2px 0 8px;">變現流程甜蜜點</div>
           <div class="combo-badges" id="r-combo-badges" style="margin-bottom:8px;"></div>
           <div class="strname" id="r-combo-title"></div>
           <div class="strdesc" id="r-combo-flow"></div>
 
-          <div style="font-size:12px;color:#a08060;font-weight:600;margin:18px 0 8px;">最需補強 & 下一步</div>
+          <div style="font-size:15px;color:#7a5636;font-weight:600;margin:18px 0 8px;">最需補強 & 下一步</div>
           <div style="background:linear-gradient(135deg,#2d1f0f,#4a3220);border-radius:14px;padding:1rem 1.25rem;color:#fff;">
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">下一階段目標</div>
-            <div style="font-size:14px;color:rgba(255,255,255,0.9);margin-bottom:10px;" id="r-next"></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;">最需補強</div>
-            <div style="font-size:14px;font-weight:500;color:#f0c882;" id="r-weak"></div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:3px;">下一階段目標</div>
+            <div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:10px;" id="r-next"></div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:3px;">最需補強</div>
+            <div style="font-size:16px;font-weight:500;color:#f0c882;" id="r-weak"></div>
           </div>
 
           <div id="fold-trend">
-            <div style="font-size:12px;color:#a08060;font-weight:600;margin:18px 0 8px;">潛力值 × 金額走勢</div>
+            <div style="font-size:15px;color:#7a5636;font-weight:600;margin:18px 0 8px;">潛力值 × 金額走勢</div>
             <div id="r-trend-card"></div>
           </div>
         </div>
@@ -282,8 +282,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
       <!-- 說明中心（4 個收合區塊：計分／QA／愛的貨幣／ATPI）-->
       <!-- ① 計分規則說明 -->
       <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">📖 計分規則說明（你的分數怎麼算）</summary>
-        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">📖 計分規則說明（你的分數怎麼算）</summary>
+        <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">能力分數怎麼算？</div>
           <div style="margin-bottom:10px;">每一維能力＝ <strong>投入% × 市場驗證係數</strong>。<br>・投入%：任務打卡累積（跨所有課程合併），走「飽和曲線」——越後面越難加，永遠逼近 100 不爆表。<br>・市場驗證係數：你回報的成交（金額＋筆數），0.5～1.0。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼做了任務、分數還不高？</div>
@@ -305,8 +305,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- ② QA 疑難問題 -->
       <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">❓ QA 疑難問題說明</summary>
-        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">❓ QA 疑難問題說明</summary>
+        <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">任務卡片是灰色的、打不開？</div>
           <div style="margin-bottom:10px;">代表這項任務<strong>尚未開放</strong>（例如還沒上到那堂課的作業）。等導師開放後就能打卡，不用重新整理或找客服。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">我打過卡的任務怎麼不見了？</div>
@@ -324,8 +324,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- ③ 愛的貨幣說明 -->
       <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">💛 愛的貨幣說明</summary>
-        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">💛 愛的貨幣說明</summary>
+        <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">愛的貨幣是什麼？</div>
           <div style="margin-bottom:10px;">一套「<strong>可以花掉</strong>」的獎勵點數，跟四維能力分數<strong>各自獨立、互不影響</strong>。能力是拿來看成長的，愛的貨幣是拿來換真實獎勵的。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">怎麼賺？</div>
@@ -341,15 +341,15 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- ④ ATPI 說明（精簡自使用手冊） -->
       <details style="margin-bottom:1rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
-        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:#a08060;user-select:none;">🧭 ATPI 溝通變現框架（精簡手冊）</summary>
-        <div style="padding:0 16px 16px;font-size:12.5px;color:#6b4c30;line-height:1.85;">
-          <div style="margin:10px 0;padding:10px 12px;background:#fff4ec;border-radius:10px;font-weight:600;color:#2d1f0f;text-align:center;">溝通變現潛力 ＝ A × T × P × I<br><span style="font-weight:400;font-size:11.5px;color:#a08060;">缺任何一個維度，整體就會被拖垮（相乘・缺一即零）</span></div>
+        <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">🧭 ATPI 溝通變現框架（精簡手冊）</summary>
+        <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
+          <div style="margin:10px 0;padding:10px 12px;background:#fff4ec;border-radius:10px;font-weight:600;color:#2d1f0f;text-align:center;">溝通變現潛力 ＝ A × T × P × I<br><span style="font-weight:400;font-size:15px;color:#7a5636;">缺任何一個維度，整體就會被拖垮（相乘・缺一即零）</span></div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">成交需要四個環節，缺一個就卡住</div>
-          <div style="margin-bottom:4px;"><strong style="color:#e8734a;">A 吸引力</strong>：讓人想靠近你、想繼續聽你說。<br><span style="color:#a08060;">不夠 → 說了很多，對方點頭就走。</span></div>
-          <div style="margin-bottom:4px;"><strong style="color:#5DCAA5;">T 信任力</strong>：讓人覺得你懂他、願意說真心話。<br><span style="color:#a08060;">不夠 → 喜歡你，但還不願掏錢。</span></div>
-          <div style="margin-bottom:4px;"><strong style="color:#378ADD;">P 專業力</strong>：把專業說到對方聽懂，知道你能解決他的問題。<br><span style="color:#a08060;">不夠 → 覺得不錯，但不確定有沒有用。</span></div>
-          <div style="margin-bottom:10px;"><strong style="color:#c8a84b;">I 推進力</strong>：讓人願意現在就行動。<br><span style="color:#a08060;">不夠 → 前三關都過，最後一句「我再想想」。</span></div>
-          <div style="text-align:center;color:#a08060;margin:8px 0 10px;">A 吸引力 → T 信任力 → P 專業力 → I 推進力</div>
+          <div style="margin-bottom:4px;"><strong style="color:#e8734a;">A 吸引力</strong>：讓人想靠近你、想繼續聽你說。<br><span style="color:#7a5636;">不夠 → 說了很多，對方點頭就走。</span></div>
+          <div style="margin-bottom:4px;"><strong style="color:#5DCAA5;">T 信任力</strong>：讓人覺得你懂他、願意說真心話。<br><span style="color:#7a5636;">不夠 → 喜歡你，但還不願掏錢。</span></div>
+          <div style="margin-bottom:4px;"><strong style="color:#378ADD;">P 專業力</strong>：把專業說到對方聽懂，知道你能解決他的問題。<br><span style="color:#7a5636;">不夠 → 覺得不錯，但不確定有沒有用。</span></div>
+          <div style="margin-bottom:10px;"><strong style="color:#c8a84b;">I 推進力</strong>：讓人願意現在就行動。<br><span style="color:#7a5636;">不夠 → 前三關都過，最後一句「我再想想」。</span></div>
+          <div style="text-align:center;color:#7a5636;margin:8px 0 10px;">A 吸引力 → T 信任力 → P 專業力 → I 推進力</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">六種強項組合 × 最省力變現路徑</div>
           <div style="margin-bottom:2px;">每個人天生擅長兩個維度，順著強項走、不用硬補弱：</div>
           <div style="margin-bottom:10px;">
@@ -592,16 +592,16 @@ function renderResult(s) {
   /* 潛力值卡（pot 已在上方算好，直接沿用）*/
   var potPct = Math.round(pot.unlocked / 10);
   document.getElementById("r-potential-card").innerHTML =
-    '<div style="font-size:11px;color:#a08060;margin-bottom:8px;">你的變現潛力</div>'
+    '<div style="font-size:14px;color:#7a5636;margin-bottom:8px;">你的變現潛力</div>'
    + '<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:10px;">'
    + '<div style="font-size:28px;font-weight:700;color:#e8734a;line-height:1;">' + pot.unlocked + '</div>'
-   + '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">/ 1000 已解鎖</div>'
-   + '<div style="margin-left:auto;font-size:12px;color:#c8a84b;">尚未解鎖 <strong style="color:#c8a84b;">' + pot.locked + '</strong></div>'
+   + '<div style="font-size:15px;color:#7a5636;margin-bottom:4px;">/ 1000 已解鎖</div>'
+   + '<div style="margin-left:auto;font-size:15px;color:#c8a84b;">尚未解鎖 <strong style="color:#c8a84b;">' + pot.locked + '</strong></div>'
    + '</div>'
    + '<div style="height:8px;background:#ede4da;border-radius:4px;overflow:hidden;margin-bottom:8px;">'
    + '<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#c8a84b);width:' + potPct + '%;transition:width .6s;"></div>'
    + '</div>'
-   + '<div style="font-size:11px;color:#a08060;">四力相乘算出潛力，靠你回報的每一筆成交把它一格格解鎖</div>';
+   + '<div style="font-size:14px;color:#7a5636;">四力相乘算出潛力，靠你回報的每一筆成交把它一格格解鎖</div>';
 
   /* 日期 */
   var now = new Date();
@@ -701,7 +701,7 @@ function renderCadenceList(s, cadence, containerId) {
   }
   if (!tasks.length) {
     var hint = mk("div", null, "這個課程目前沒有這類任務");
-    hint.style.cssText = "font-size:12px;color:#a08060;padding:16px 4px;text-align:center;";
+    hint.style.cssText = "font-size:15px;color:#7a5636;padding:16px 4px;text-align:center;";
     box.appendChild(hint);
     return;
   }
@@ -769,7 +769,7 @@ function renderCadenceList(s, cadence, containerId) {
     var msg = isPool ? "🎉 這裡的任務都完成囉，" + (cadence === "daily" ? "明天中午" : "下週") + "再來"
                      : "🎉 這個課程的任務都完成囉";
     var doneHint = mk("div", null, msg);
-    doneHint.style.cssText = "font-size:12.5px;color:#a08060;padding:20px 4px;text-align:center;";
+    doneHint.style.cssText = "font-size:15px;color:#7a5636;padding:20px 4px;text-align:center;";
     box.appendChild(doneHint);
   }
 }
@@ -831,11 +831,11 @@ async function refreshLeaderboard(s) {
   var box = document.getElementById("leaderboard");
   box.innerHTML = "";
   var cap = mk("div", null, "依本課程任務累計分");
-  cap.style.cssText = "font-size:10.5px;color:#a08060;padding:2px 4px 6px;";
+  cap.style.cssText = "font-size:14px;color:#7a5636;padding:2px 4px 6px;";
   box.appendChild(cap);
   if (!rows.length) {
     var empty = mk("div", null, "這個課程還沒有人打卡");
-    empty.style.cssText = "font-size:12px;color:#a08060;padding:10px 4px;";
+    empty.style.cssText = "font-size:15px;color:#7a5636;padding:10px 4px;";
     box.appendChild(empty);
     return;
   }
@@ -860,7 +860,7 @@ async function refreshLeaderboard(s) {
   /* 自己不在前 8：釘一列在底部，永遠看得到自己在第幾名、差前一名多少 */
   if (myIdx >= 8) {
     var div = mk("div", null, "⋯");
-    div.style.cssText = "text-align:center;color:#c9bcae;font-size:12px;padding:2px 0;";
+    div.style.cssText = "text-align:center;color:#c9bcae;font-size:15px;padding:2px 0;";
     box.appendChild(div);
     box.appendChild(lbRow(rows[myIdx], myRank, true, true));
   }
@@ -877,11 +877,11 @@ function nudge(btn) {
 
 async function refreshTeam(s) {
   var box = document.getElementById("team-card");
-  box.innerHTML = '<div style="font-size:12px;color:#a08060;padding:8px 4px;">載入中…</div>';
+  box.innerHTML = '<div style="font-size:15px;color:#7a5636;padding:8px 4px;">載入中…</div>';
   var members = TEAM_CACHE[activeWorkshop];
   if (!members) { members = await loadTeam(activeWorkshop); TEAM_CACHE[activeWorkshop] = members; }
   if (!members.length) {
-    box.innerHTML = '<div class="card" style="padding:1rem;font-size:12px;color:#a08060;">這個課程還沒有夥伴資料（需要學員報名並在「團隊」欄分組）</div>';
+    box.innerHTML = '<div class="card" style="padding:1rem;font-size:15px;color:#7a5636;">這個課程還沒有夥伴資料（需要學員報名並在「團隊」欄分組）</div>';
     return;
   }
   /* 自適應：人少／沒真的分小隊（不同組別 < 2）就整塊收起，只留乾淨的個人榜。
@@ -912,28 +912,28 @@ async function refreshTeam(s) {
   var ok = mine.filter(function(m){ return m.weekPct >= weekAvg; }).sort(function(a,b){ return b.weekPct - a.weekPct; });
 
   function row(m, boostFlag) {
-    var you = m.lineId === s.lineId ? '<span style="color:#a08060;font-size:11px;font-weight:400;">（你）</span>' : '';
-    var btn = boostFlag ? '<button class="btn-go" style="padding:5px 12px;font-size:12px;flex-shrink:0;" onclick="nudge(this)">👊 加油</button>' : '';
+    var you = m.lineId === s.lineId ? '<span style="color:#7a5636;font-size:14px;font-weight:400;">（你）</span>' : '';
+    var btn = boostFlag ? '<button class="btn-go" style="padding:5px 12px;font-size:15px;flex-shrink:0;" onclick="nudge(this)">👊 加油</button>' : '';
     return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0e9df;">'
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-size:13px;color:#2d1f0f;' + (m.lineId === s.lineId ? 'font-weight:600;' : '') + '">' + esc(m.name) + you + '</div>'
-      + '<div style="font-size:11px;color:' + (boostFlag ? '#c26b3a' : '#a08060') + ';">連 ' + m.streak + ' 天　本週 ' + m.weekPct + '%　投入 ' + m.invest + '</div>'
+      + '<div style="font-size:15px;color:#2d1f0f;' + (m.lineId === s.lineId ? 'font-weight:600;' : '') + '">' + esc(m.name) + you + '</div>'
+      + '<div style="font-size:14px;color:' + (boostFlag ? '#c26b3a' : '#a08060') + ';">連 ' + m.streak + ' 天　本週 ' + m.weekPct + '%　投入 ' + m.invest + '</div>'
       + '</div>' + btn + '</div>';
   }
 
-  var html = '<div style="font-size:15px;font-weight:700;color:#2d1f0f;">我的小組・' + esc(myGroup || "未分組") + '</div>'
-    + '<div style="font-size:12px;color:#a08060;margin:2px 0 12px;">組平均 <strong style="color:#e8734a;">' + myAvg + ' 分</strong>　全班第 <strong style="color:#e8734a;">' + myRank + '</strong> / ' + groupRows.length + ' 組</div>'
+  var html = '<div style="font-size:17px;font-weight:700;color:#2d1f0f;">我的小組・' + esc(myGroup || "未分組") + '</div>'
+    + '<div style="font-size:15px;color:#7a5636;margin:2px 0 12px;">組平均 <strong style="color:#e8734a;">' + myAvg + ' 分</strong>　全班第 <strong style="color:#e8734a;">' + myRank + '</strong> / ' + groupRows.length + ' 組</div>'
     + '<div class="card" style="padding:0 12px;margin-bottom:12px;">' + ok.map(function(m){ return row(m, false); }).join("") + '</div>';
 
   if (boost.length) {
-    html += '<div style="font-size:11px;color:#c26b3a;font-weight:600;margin-bottom:6px;">⚡ 待進步空間（本週完成率低於組平均，去拉他一把）</div>'
+    html += '<div style="font-size:14px;color:#c26b3a;font-weight:600;margin-bottom:6px;">⚡ 待進步空間（本週完成率低於組平均，去拉他一把）</div>'
       + '<div style="background:#fff4ec;border:1px solid #f0c9b0;border-radius:14px;padding:0 12px;margin-bottom:12px;">' + boost.map(function(m){ return row(m, true); }).join("") + '</div>';
   }
 
-  html += '<div style="font-size:12px;color:#a08060;font-weight:600;margin-bottom:6px;">組別榜（比平均投入分）</div>'
+  html += '<div style="font-size:15px;color:#7a5636;font-weight:600;margin-bottom:6px;">組別榜（比平均投入分）</div>'
     + '<div class="card" style="padding:2px 12px;">' + groupRows.map(function(g, i){
       var me = g.group === myGroup;
-      return '<div style="display:flex;gap:8px;padding:7px 0;font-size:12px;' + (me ? "font-weight:600;" : "") + 'border-bottom:1px solid #f0e9df;">'
+      return '<div style="display:flex;gap:8px;padding:7px 0;font-size:15px;' + (me ? "font-weight:600;" : "") + 'border-bottom:1px solid #f0e9df;">'
         + '<span style="width:18px;color:' + (i === 0 ? "#c8a84b" : me ? "#e8734a" : "#a08060") + ';font-weight:700;">' + (i+1) + '</span>'
         + '<span style="flex:1;color:#2d1f0f;">' + esc(g.group) + (me ? " ★" : "") + '</span>'
         + '<span style="color:' + (me ? "#e8734a" : "#a08060") + ';">' + g.avg + '</span></div>';
@@ -1013,7 +1013,7 @@ function renderTokenCard(s) {
 
   var bal = s.tokenBalance || { ceiling: 0, earned: 0, spent: 0, balance: 0 };
   var html = '<div class="token-balance-card">'
-    + '<div style="font-size:11px;color:rgba(255,255,255,.6);">目前愛的貨幣</div>'
+    + '<div style="font-size:14px;color:rgba(255,255,255,.6);">目前愛的貨幣</div>'
     + '<div class="token-balance-num">💛 ' + bal.balance + '</div>'
     + '<div class="token-balance-sub">已賺 ' + bal.earned + ' ／ 已花 ' + bal.spent + ' ／ 天花板 ' + bal.ceiling + '（跨所有課程共用）</div>'
     + '</div>';
@@ -1034,7 +1034,7 @@ function renderTokenCard(s) {
 
   var redemptions = s.redemptions || [];
   if (redemptions.length) {
-    html += '<div style="font-size:12px;color:#a08060;font-weight:600;margin:10px 0 4px;">我的兌換紀錄</div><div class="card" style="padding:0 12px;">';
+    html += '<div style="font-size:15px;color:#7a5636;font-weight:600;margin:10px 0 4px;">我的兌換紀錄</div><div class="card" style="padding:0 12px;">';
     redemptions.forEach(function(r) {
       var approved = (r.status === "已核准" || r.status === "已完成");
       html += '<div class="redemption-row"><span>' + esc(r.name) + '（💛' + r.cost + '）</span>'
