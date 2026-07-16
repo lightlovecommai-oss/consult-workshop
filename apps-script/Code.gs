@@ -213,6 +213,20 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
+/* 測驗完自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
+   已存在同 userId 就不動，避免重複。 */
+function ensureRosterRow_(lineId, name) {
+  if (!lineId) return;
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return;
+  var existing = rows_(TABS.students);
+  for (var i = 0; i < existing.length; i++) {
+    if (String(pick_(existing[i], COLS.students.lineId)) === lineId) return;  // 已在名單，不重複
+  }
+  appendMapped_(TABS.students, { lineId: COLS.students.lineId, name: COLS.students.name },
+                { lineId: lineId, name: name || "" });
+}
+
 function truthy_(v) {
   if (v === "" || v === undefined || v === null) return false;
   if (v === true || v === 1) return true;
@@ -568,6 +582,7 @@ function doPost(e) {
       var qraw = String(body.rawAnswers || "").split(",");  // "2,3,2,..." → Q1..Q12
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
       appendMapped_(TABS.quiz, COLS.quizWrite, qvals);
+      ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）
       return json_({ status: "ok" });
     }
     return json_({ status: "error", message: "unknown action" });
