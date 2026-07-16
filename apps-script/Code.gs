@@ -119,6 +119,31 @@ function mergeRoster() {
   Logger.log("完成。記得重新部署課程 Code.gs（TABS 已指向開通名單）。");
 }
 
+/* ── 全清資料：清掉每個分頁的資料列（保留標題列），含漏斗名單與機器人紀錄。
+   ⚠️ 預設保護 (設定)* 四張（課程/任務/榮譽品項/兌換品項）——那是遊戲設定檔，清了 dashboard 會壞。
+   用 clearContent 保留標題與核取方塊格式。跑前先整份備份。在編輯器選 resetAllData → 執行。 */
+function resetAllData() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd-HHmm");
+  var backup = ss.copy("溝通變現資料 備份(清空前) " + stamp);
+  Logger.log("✅ 已備份：%s", backup.getUrl());
+  Logger.log("─────────────────────────────");
+  var protectTabs = ["(設定)課程", "(設定)任務", "(設定)榮譽品項", "(設定)兌換品項"];
+  ss.getSheets().forEach(function(sh) {
+    var name = sh.getName();
+    if (protectTabs.indexOf(name) > -1) { Logger.log("🛡️ 保留(設定表)：%s", name); return; }
+    var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+    if (lastRow > 1 && lastCol > 0) {
+      sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+      Logger.log("🧹 清空【%s】%s 列（保留標題）", name, lastRow - 1);
+    } else {
+      Logger.log("－【%s】本來就沒資料", name);
+    }
+  });
+  Logger.log("─────────────────────────────");
+  Logger.log("完成。設定表已保留；漏斗/機器人/遊戲紀錄全清，標題與核取方塊保留。");
+}
+
 /* ── 一次改名 + 重排 16 個分頁。在編輯器選 reorderRenameTabs → 執行。
    ⚠️ 跑之前務必已把 5 支 bot 的分頁名常數改好、並準備好重新部署，
       否則舊版 bot 找不到新名分頁時會用舊名重建一個空分頁。 */
