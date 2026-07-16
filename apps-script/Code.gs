@@ -12,16 +12,16 @@ var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是
 
 var TABS = {
   students:    "(遊戲)學員名單",       // LINE userId | 姓名 | 團隊
-  workshops:   "(遊戲)課程",           // workshopId | name | active（跑 setup() 自動建立/覆蓋，不用手動匯入 CSV）
-  tasks:       "(遊戲)任務",           // workshopId | taskKey | cadence | dim | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
-  honors:      "(遊戲)榮譽",           // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
+  workshops:   "(設定)課程",           // workshopId | name | active（跑 setup() 自動建立/覆蓋，不用手動匯入 CSV）
+  tasks:       "(設定)任務",           // workshopId | taskKey | cadence | dim | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
+  honors:      "(設定)榮譽品項",       // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
   enrollments: "(遊戲)開通名單",       // 一人一列，每門課一欄；格子打勾＝開通。欄名＝workshopId
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
-  quiz:        "(引流.A)能力測驗",     // 自評來源（暫定，待確認）：LINE userId + ATPI 分數
-  rewards:     "(遊戲)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
-  redemptions: "(遊戲)代幣兌換紀錄"    // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
+  quiz:        "(漏斗)能力測驗",       // 自評來源（comconverttest 寫入）：LINE userId + ATPI 分數
+  rewards:     "(設定)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
+  redemptions: "(遊戲)兌換紀錄"        // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。 */
@@ -79,8 +79,8 @@ function cleanupDeadColumns() {
   Logger.log("   備份網址：%s", backup.getUrl());
   Logger.log("─────────────────────────────");
   deleteColsByHeader_(ss, "(遊戲)學員名單", ["出席", "社群分享", "作業", "團隊賽"]);
-  deleteTrailingEmptyCols_(ss, "(引流.A)機器人對話紀錄");
-  deleteTrailingEmptyCols_(ss, "(引流.A)能力測驗");
+  deleteTrailingEmptyCols_(ss, "(漏斗)對話紀錄");
+  deleteTrailingEmptyCols_(ss, "(漏斗)能力測驗");
   Logger.log("─────────────────────────────");
   Logger.log("完成。請開 dashboard 與各 bot 確認正常；有問題就用上面的備份還原。");
 }
@@ -94,6 +94,46 @@ function deleteColsByHeader_(ss, tab, names) {
   names.forEach(function(n){ var i = headers.indexOf(n); if (i > -1) idxs.push(i + 1); });
   idxs.sort(function(a, b){ return b - a; }).forEach(function(c){ sh.deleteColumn(c); });
   Logger.log("【%s】刪除欄：%s（實刪 %s 欄）", tab, names.join("/"), idxs.length);
+}
+
+/* ── 一次改名 + 重排 16 個分頁。在編輯器選 reorderRenameTabs → 執行。
+   ⚠️ 跑之前務必已把 5 支 bot 的分頁名常數改好、並準備好重新部署，
+      否則舊版 bot 找不到新名分頁時會用舊名重建一個空分頁。 */
+function reorderRenameTabs() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var renames = [
+    ["(引流.A)能力測驗", "(漏斗)能力測驗"],
+    ["(引流.T)變現診斷總表", "(漏斗)變現診斷"],
+    ["(引流.A)Line OA 5題分流", "(漏斗)OA五題分流"],
+    ["(引流.T)課程報名紀錄", "(漏斗)課程報名"],
+    ["(引流.A)OA內行為記錄", "(漏斗)OA行為"],
+    ["(引流.A)機器人對話紀錄", "(漏斗)對話紀錄"],
+    ["(遊戲)代幣兌換紀錄", "(遊戲)兌換紀錄"],
+    ["(遊戲)課程", "(設定)課程"],
+    ["(遊戲)任務", "(設定)任務"],
+    ["(遊戲)榮譽", "(設定)榮譽品項"],
+    ["(遊戲)兌換品項", "(設定)兌換品項"]
+  ];
+  renames.forEach(function(pair) {
+    var oldName = pair[0], newName = pair[1];
+    var sh = ss.getSheetByName(oldName);
+    if (!sh) { Logger.log("跳過(找不到)：%s", oldName); return; }
+    if (ss.getSheetByName(newName)) { Logger.log("⚠️ 目標已存在，跳過：%s → %s", oldName, newName); return; }
+    sh.setName(newName);
+    Logger.log("改名：%s → %s", oldName, newName);
+  });
+  var order = [
+    "(漏斗)能力測驗", "(漏斗)變現診斷", "(漏斗)OA五題分流", "(漏斗)課程報名", "(漏斗)OA行為", "(漏斗)對話紀錄",
+    "(遊戲)學員名單", "(遊戲)打卡紀錄", "(遊戲)成交紀錄", "(遊戲)榮譽事件", "(遊戲)兌換紀錄", "(遊戲)開通名單",
+    "(設定)課程", "(設定)任務", "(設定)榮譽品項", "(設定)兌換品項"
+  ];
+  order.forEach(function(name, i) {
+    var sh = ss.getSheetByName(name);
+    if (sh) { ss.setActiveSheet(sh); ss.moveActiveSheet(i + 1); }
+    else Logger.log("排序時找不到：%s", name);
+  });
+  Logger.log("─────────────────────────────");
+  Logger.log("完成改名+重排。接著：重新部署課程 Code.gs，並重啟/重部署 5 支 bot。");
 }
 
 /* 從最右往左，刪掉「標題為空」的欄，遇到有標題的欄就停。 */
