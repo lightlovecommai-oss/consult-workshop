@@ -34,10 +34,78 @@ var COLS = {
               date:["日期","date"], note:["備註","note"],
               A:["吸引力","A"], T:["信任力","T"], P:["專業力","P"], I:["推進力","I"] },
   quiz:     { lineId:["LINE userId","userId","lineId"], A:["吸引力","scoreA","A"], T:["信任力","scoreT","T"],
-              P:["專業力","scoreP","P"], I:["影響力","推進力","scoreI","I"] }
+              P:["專業力","scoreP","P"], I:["影響力","推進力","scoreI","I"] },
+  /* 寫入用（comconverttest 測驗送來）：對齊「(引流.A)能力測驗」分頁的所有欄位 */
+  quizWrite:{ time:["時間","timestamp"], lineId:["LINE userId","userId","lineId"], displayName:["LINE名稱","displayName"],
+              pictureUrl:["頭像","pictureUrl"], name:["姓名","name"], email:["Email","email"], job:["職業","job"],
+              A:["吸引力","scoreA","A"], T:["信任力","scoreT","T"], P:["專業力","scoreP","P"],
+              I:["影響力","推進力","scoreI","I"], income:["收入等級","incomeLevel"],
+              mainAbility:["主能力"], subAbility:["副能力"],
+              Q1:["Q1"], Q2:["Q2"], Q3:["Q3"], Q4:["Q4"], Q5:["Q5"], Q6:["Q6"],
+              Q7:["Q7"], Q8:["Q8"], Q9:["Q9"], Q10:["Q10"], Q11:["Q11"], Q12:["Q12"] }
 };
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
+
+/* ── 稽核：唯讀。列出每個分頁的標題列 / 列數 / 欄數，印到執行記錄。
+   在編輯器選 auditTabs → 執行，把「執行記錄」內容貼回來即可（不會改任何資料）。 */
+function auditTabs() {
+  var ss = ss_();
+  var sheets = ss.getSheets();
+  Logger.log("試算表：%s（共 %s 個分頁）", ss.getName(), sheets.length);
+  Logger.log("─────────────────────────────────────────");
+  sheets.forEach(function(sh) {
+    var lastRow = sh.getLastRow();
+    var lastCol = sh.getLastColumn();
+    var dataRows = Math.max(0, lastRow - 1);  // 扣掉標題列
+    var headers = lastCol > 0 && lastRow > 0
+      ? sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); })
+      : [];
+    Logger.log("【%s】資料列數=%s，欄數=%s\n  標題：%s", sh.getName(), dataRows, lastCol, headers.join(" | "));
+  });
+}
+
+/* ── 廢欄清理：執行前先自動複製「整份備份」到雲端硬碟，再刪指定廢欄。
+   在編輯器選 cleanupDeadColumns → 執行。備份網址會印在執行記錄，出事可還原。
+   清理內容：
+     ①(遊戲)學員名單：刪 出席/社群分享/作業/團隊賽（已不計分）
+     ②(引流.A)機器人對話紀錄：刪尾端空標題欄（bot 只寫前 5 欄）
+     ③(引流.A)能力測驗：刪尾端空標題欄 */
+function cleanupDeadColumns() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd-HHmm");
+  var backup = ss.copy("溝通變現資料 備份 " + stamp);
+  Logger.log("✅ 已建立整份備份：%s", backup.getName());
+  Logger.log("   備份網址：%s", backup.getUrl());
+  Logger.log("─────────────────────────────");
+  deleteColsByHeader_(ss, "(遊戲)學員名單", ["出席", "社群分享", "作業", "團隊賽"]);
+  deleteTrailingEmptyCols_(ss, "(引流.A)機器人對話紀錄");
+  deleteTrailingEmptyCols_(ss, "(引流.A)能力測驗");
+  Logger.log("─────────────────────────────");
+  Logger.log("完成。請開 dashboard 與各 bot 確認正常；有問題就用上面的備份還原。");
+}
+
+/* 依標題名刪欄（由右往左刪避免索引位移；找不到的標題略過）。 */
+function deleteColsByHeader_(ss, tab, names) {
+  var sh = ss.getSheetByName(tab);
+  if (!sh) { Logger.log("跳過(找不到分頁)：%s", tab); return; }
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idxs = [];
+  names.forEach(function(n){ var i = headers.indexOf(n); if (i > -1) idxs.push(i + 1); });
+  idxs.sort(function(a, b){ return b - a; }).forEach(function(c){ sh.deleteColumn(c); });
+  Logger.log("【%s】刪除欄：%s（實刪 %s 欄）", tab, names.join("/"), idxs.length);
+}
+
+/* 從最右往左，刪掉「標題為空」的欄，遇到有標題的欄就停。 */
+function deleteTrailingEmptyCols_(ss, tab) {
+  var sh = ss.getSheetByName(tab);
+  if (!sh) { Logger.log("跳過(找不到分頁)：%s", tab); return; }
+  var last = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, last).getValues()[0];
+  var c = last, removed = 0;
+  while (c >= 1 && String(headers[c - 1]).trim() === "") { sh.deleteColumn(c); c--; removed++; }
+  Logger.log("【%s】刪除尾端空欄 %s 個（保留至第 %s 欄）", tab, removed, c);
+}
 
 /* 讀某分頁成物件陣列（用第一列標題當 key，欄位順序可任意）。分頁不存在回空陣列。 */
 function rows_(tab) {
@@ -417,6 +485,22 @@ function doPost(e) {
         uid, (rst ? rst.name : uid), rid, reward.name, reward.cost,
         Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"), "待審核"
       ]);
+      return json_({ status: "ok" });
+    }
+    if (body.action === "quiz") {  // 測驗結果寫入（comconverttest 送來）：附加一列到「(引流.A)能力測驗」分頁
+      var quid = String(body.userId || body.lineId || "");
+      if (!quid) return json_({ status: "error", message: "missing userId" });
+      var qvals = {
+        time: body.timestamp || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        lineId: quid, displayName: body.displayName || "", pictureUrl: body.pictureUrl || "",
+        name: body.name || "", email: body.email || "", job: body.job || "",
+        A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0,
+        income: body.incomeLevel || "",
+        mainAbility: body.mainAbility || "", subAbility: body.subAbility || ""
+      };
+      var qraw = String(body.rawAnswers || "").split(",");  // "2,3,2,..." → Q1..Q12
+      for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
+      appendMapped_(TABS.quiz, COLS.quizWrite, qvals);
       return json_({ status: "ok" });
     }
     return json_({ status: "error", message: "unknown action" });
