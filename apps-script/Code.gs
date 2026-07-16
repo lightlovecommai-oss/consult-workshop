@@ -234,6 +234,33 @@ function appendMapped_(tab, colmap, values) {
   sh.appendRow(line);
 }
 
+/* 同 appendMapped_，但依 keyField 找既有列：找到就更新那一列、找不到才新增。用於一人一列（測驗可重送不重複）。 */
+function upsertMapped_(tab, colmap, keyField, values) {
+  var sh = ss_().getSheetByName(tab);
+  if (!sh) throw new Error("找不到分頁：" + tab);
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var line = headers.map(function(h) {
+    for (var f in values) if (colmap[f] && colmap[f].indexOf(h) > -1) return values[f];
+    return "";
+  });
+  var keyAliases = colmap[keyField] || [];
+  var keyCol = -1;
+  for (var c = 0; c < headers.length; c++) if (keyAliases.indexOf(headers[c]) > -1) { keyCol = c; break; }
+  var keyVal = values[keyField];
+  if (keyCol > -1 && lastRow > 1 && keyVal !== undefined && keyVal !== "") {
+    var colVals = sh.getRange(2, keyCol + 1, lastRow - 1, 1).getValues();
+    for (var i = 0; i < colVals.length; i++) {
+      if (String(colVals[i][0]) === String(keyVal)) {
+        sh.getRange(i + 2, 1, 1, line.length).setValues([line]);
+        return "updated";
+      }
+    }
+  }
+  sh.appendRow(line);
+  return "appended";
+}
+
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -606,7 +633,7 @@ function doPost(e) {
       };
       var qraw = String(body.rawAnswers || "").split(",");  // "2,3,2,..." → Q1..Q12
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
-      appendMapped_(TABS.quiz, COLS.quizWrite, qvals);
+      upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals);  // 同 userId 更新那列，重測/重開不重複
       ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）
       return json_({ status: "ok" });
     }
