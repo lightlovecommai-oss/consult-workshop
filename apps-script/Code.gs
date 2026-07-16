@@ -11,12 +11,12 @@
 var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是獨立的，填試算表 ID
 
 var TABS = {
-  students:    "(遊戲)學員名單",       // LINE userId | 姓名 | 團隊
+  students:    "(遊戲)開通名單",       // 人主檔（含身份+開通）：LINE userId | 姓名 | 團隊 | 各課開通欄
   workshops:   "(設定)課程",           // workshopId | name | active（跑 setup() 自動建立/覆蓋，不用手動匯入 CSV）
   tasks:       "(設定)任務",           // workshopId | taskKey | cadence | dim | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
   honors:      "(設定)榮譽品項",       // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
-  enrollments: "(遊戲)開通名單",       // 一人一列，每門課一欄；格子打勾＝開通。欄名＝workshopId
+  enrollments: "(遊戲)開通名單",       // 與學員名單合併為同一張：每門課一欄，欄名＝workshopId，格子打勾＝開通
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
   quiz:        "(漏斗)能力測驗",       // 自評來源（comconverttest 寫入）：LINE userId + ATPI 分數
@@ -96,6 +96,29 @@ function deleteColsByHeader_(ss, tab, names) {
   Logger.log("【%s】刪除欄：%s（實刪 %s 欄）", tab, names.join("/"), idxs.length);
 }
 
+/* ── 合併「學員名單」進「開通名單」成單一人主檔（設計B：留開通名單、刪學員名單）。
+   因現有為假資料，直接清空重建表頭、不搬資料。跑前先整份備份；跑完刪掉「(遊戲)學員名單」。
+   之後 TABS.students / TABS.enrollments 都指向 (遊戲)開通名單。在編輯器選 mergeRoster → 執行。 */
+function mergeRoster() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd-HHmm");
+  var backup = ss.copy("溝通變現資料 備份 " + stamp);
+  Logger.log("✅ 已備份：%s", backup.getUrl());
+
+  var roster = ss.getSheetByName("(遊戲)開通名單");
+  if (!roster) { Logger.log("中止：找不到 (遊戲)開通名單"); return; }
+  // 補上原本只在學員名單的「團隊」欄，成為單一人主檔（身份+開通）
+  var headers = ["LINE userId", "姓名", "團隊", "一階", "二階", "三階", "1v1顧問實戰", "主持人實戰", "短影音實戰"];
+  roster.clear();
+  roster.getRange(1, 1, 1, headers.length).setValues([headers]);
+  Logger.log("已清空假資料並重建表頭（%s 欄）：%s", headers.length, headers.join(" | "));
+
+  var stu = ss.getSheetByName("(遊戲)學員名單");
+  if (stu) { ss.deleteSheet(stu); Logger.log("已刪除 (遊戲)學員名單（已併入開通名單）"); }
+  else Logger.log("（找不到 (遊戲)學員名單，略過刪除）");
+  Logger.log("完成。記得重新部署課程 Code.gs（TABS 已指向開通名單）。");
+}
+
 /* ── 一次改名 + 重排 16 個分頁。在編輯器選 reorderRenameTabs → 執行。
    ⚠️ 跑之前務必已把 5 支 bot 的分頁名常數改好、並準備好重新部署，
       否則舊版 bot 找不到新名分頁時會用舊名重建一個空分頁。 */
@@ -124,7 +147,7 @@ function reorderRenameTabs() {
   });
   var order = [
     "(漏斗)能力測驗", "(漏斗)變現診斷", "(漏斗)OA五題分流", "(漏斗)課程報名", "(漏斗)OA行為", "(漏斗)對話紀錄",
-    "(遊戲)學員名單", "(遊戲)打卡紀錄", "(遊戲)成交紀錄", "(遊戲)榮譽事件", "(遊戲)兌換紀錄", "(遊戲)開通名單",
+    "(遊戲)開通名單", "(遊戲)打卡紀錄", "(遊戲)成交紀錄", "(遊戲)榮譽事件", "(遊戲)兌換紀錄",
     "(設定)課程", "(設定)任務", "(設定)榮譽品項", "(設定)兌換品項"
   ];
   order.forEach(function(name, i) {
@@ -425,8 +448,12 @@ function doGet(e) {
     var action = p.action || "";
 
     if (action === "students") {
+      // enrolled = 該 userId 至少開通一門課（進遊戲的閘門）；由合併後學員名單的課程欄判斷
+      var enrolledSet = {};
+      computeConfig_().enrollments.forEach(function(en){ enrolledSet[en.lineId] = true; });
       var students = rows_(TABS.students).map(function(r) {
-        return { lineId: String(pick_(r, COLS.students.lineId)), name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)) };
+        var id = String(pick_(r, COLS.students.lineId));
+        return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)), enrolled: !!enrolledSet[id] };
       }).filter(function(s){ return s.lineId; });
       return json_({ status: "ok", students: students });
     }

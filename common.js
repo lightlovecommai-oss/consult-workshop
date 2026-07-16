@@ -453,6 +453,7 @@ async function loadStudents() {
         lineId: s.lineId || s["LINE userId"],
         name:   s.name   || s["姓名"],
         team:   s.team   || s["團隊"],
+        enrolled: !!s.enrolled,
         checkinLog: [], revenueLog: [], selfEval: null
       };
     });

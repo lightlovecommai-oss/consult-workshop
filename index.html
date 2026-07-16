@@ -27,7 +27,7 @@ async function init() {
     await loadStudents();
 
     if (urlId) {
-      var matched = STUDENTS.find(function(s) { return s.lineId === urlId; });
+      var matched = STUDENTS.find(function(s) { return s.lineId === urlId && s.enrolled; });
       if (matched) {
         window.location.href = "dashboard.html?id=" + encodeURIComponent(urlId);
         return;
@@ -42,7 +42,7 @@ async function init() {
 
     if (liff.isLoggedIn()) {
       var p = await liff.getProfile();
-      var matched2 = STUDENTS.find(function(s) { return s.lineId === p.userId; });
+      var matched2 = STUDENTS.find(function(s) { return s.lineId === p.userId && s.enrolled; });
       if (matched2) {
         window.location.href = "dashboard.html?id=" + encodeURIComponent(p.userId);
         return;
