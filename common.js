@@ -1,4 +1,4 @@
-var LIFF_ID = "2010316474-UovQ1zhe";
+var LIFF_ID = "2010316474-wmb1ODe0";
 var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
 /* ── 四維度定義 ──
