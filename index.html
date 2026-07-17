@@ -61,6 +61,12 @@ async function init() {
     console.log("init error:", e);
   }
 
+  /* 桌面捷徑若沒帶 id，用上次記住的 id 直接進儀表板 */
+  try {
+    var savedId = localStorage.getItem("cw_uid");
+    if (savedId) { window.location.href = "dashboard.html?id=" + encodeURIComponent(savedId); return; }
+  } catch (e) {}
+
   /* 找不到學員 → 展示頁 */
   window.location.href = "showcase.html";
 }

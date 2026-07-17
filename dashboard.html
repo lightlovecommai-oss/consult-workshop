@@ -1275,7 +1275,9 @@ document.getElementById("rv-submit").addEventListener("click", function() {
 async function init() {
   var params = new URLSearchParams(window.location.search);
   var userId = params.get("id");
+  if (!userId) { try { userId = localStorage.getItem("cw_uid") || ""; } catch (e) {} }  // 書籤沒帶 id 時，用上次記住的
   if (!userId) { window.location.href = "index.html"; return; }
+  try { localStorage.setItem("cw_uid", userId); } catch (e) {}                            // 記住供下次還原
   var w = params.get("w") || "";           // 入口帶進來的課程（只切畫面，不給權限）
   var key = "boot_" + userId;
 
