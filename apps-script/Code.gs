@@ -47,6 +47,45 @@ var COLS = {
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
 
+/* ── 把所有 TRUE/FALSE 欄轉成核取方塊(checkbox)，並把開通名單課程欄也設成 checkbox。
+   在編輯器選 checkboxifyBooleans → 執行。之後打勾＝TRUE、沒打勾＝FALSE，程式判斷不受影響。 */
+function checkboxifyBooleans() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+  ss.getSheets().forEach(function(sh) {
+    var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+    if (lastRow < 2 || lastCol < 1) return;
+    var vals = sh.getRange(1, 1, lastRow, lastCol).getValues();
+    for (var c = 0; c < lastCol; c++) {
+      var hasBool = false, ok = true;
+      for (var r = 1; r < lastRow; r++) {
+        var v = vals[r][c];
+        if (v === "" || v === null) continue;
+        if (v === true || v === false) { hasBool = true; }
+        else { var u = String(v).trim().toUpperCase(); if (u === "TRUE" || u === "FALSE") hasBool = true; else { ok = false; break; } }
+      }
+      if (hasBool && ok) { applyCheckbox_(sh, 2, c + 1, lastRow - 1, rule); Logger.log("☑ %s 第%s欄（%s）", sh.getName(), c + 1, vals[0][c]); }
+    }
+  });
+  // 開通名單：課程欄（第4欄「一階」起）即使空白也設成 checkbox，方便打勾開通
+  var roster = ss.getSheetByName(TABS.students);
+  if (roster && roster.getLastRow() >= 2 && roster.getLastColumn() > 3) {
+    applyCheckbox_(roster, 2, 4, roster.getLastRow() - 1, rule);
+    Logger.log("☑ %s 課程欄(第4欄起)設為 checkbox", TABS.students);
+  }
+  Logger.log("完成。");
+}
+function applyCheckbox_(sh, row, col, numRows, rule) {
+  var rng = sh.getRange(row, col, numRows, 1);
+  rng.setDataValidation(rule);
+  var cur = rng.getValues(), changed = false;
+  for (var i = 0; i < cur.length; i++) {
+    var cv = cur[i][0];
+    if (typeof cv === "string") { var u = cv.trim().toUpperCase(); if (u === "TRUE") { cur[i][0] = true; changed = true; } else if (u === "FALSE") { cur[i][0] = false; changed = true; } }
+  }
+  if (changed) rng.setValues(cur);
+}
+
 /* ── 稽核：唯讀。列出每個分頁的標題列 / 列數 / 欄數，印到執行記錄。
    在編輯器選 auditTabs → 執行，把「執行記錄」內容貼回來即可（不會改任何資料）。 */
 function auditTabs() {
