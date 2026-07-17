@@ -465,6 +465,7 @@ function applyBootstrap(d, userId) {
   current.rewards = d.rewards || [];
   current.tokenBalance = d.tokenBalance || { ceiling: 0, earned: 0, spent: 0, balance: 0 };
   current.redemptions = d.redemptions || [];
+  current.pending = d.pending || [];  // 待審核中的作業 [{workshopId, taskKey}]
 }
 
 function mk(tag, cls, txt) {
@@ -708,6 +709,13 @@ function renderResult(s) {
   if (lo) lo.style.display = "none";
 }
 
+/* 這個作業是否已繳交、正在待審核 */
+function isPendingTask(t) {
+  return (current.pending || []).some(function(p) {
+    return p.taskKey === t.key && p.workshopId === activeWorkshop;
+  });
+}
+
 /* ── 任務清單（四種節奏共用；daily/weekly 有每期上限，needReview 走待審核不可自打）── */
 function renderCadenceList(s, cadence, containerId) {
   var box = document.getElementById(containerId);
@@ -752,7 +760,7 @@ function renderCadenceList(s, cadence, containerId) {
     body.appendChild(mk("div","tcard-name", t.name));
     var desc = mk("div","tcard-desc", locked ? "尚未開放，敬請期待" : (dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分"));
     if (t.needReview && !on && !locked) {
-      var rv = mk("div","tcard-need-review","⏱ 繳交後等待導師審核計分");
+      var rv = mk("div","tcard-need-review", isPendingTask(t) ? "✅ 已繳交，等待導師審核計分" : "⏱ 點卡片上傳作業，交後等導師審核");
       desc.appendChild(document.createElement("br"));
       desc.appendChild(rv);
     }
@@ -768,8 +776,9 @@ function renderCadenceList(s, cadence, containerId) {
     } else if (on) {
       right.appendChild(mk("div","btn-done","✓ 完成"));
     } else if (t.needReview) {
-      var pend = mk("div","btn-done","待審核");
-      pend.style.color = "#a08060"; pend.style.background = "#f0e9df";
+      var pd = isPendingTask(t);
+      var pend = mk("div","btn-done", pd ? "已繳交" : "去繳交");
+      pend.style.color = pd ? "#3a9a60" : "#e8734a"; pend.style.background = pd ? "#eafaf3" : "#fff4ec";
       right.appendChild(pend);
     } else if (capped) {
       var lockedTag = mk("div","btn-done","已達上限");
@@ -804,7 +813,15 @@ function openTaskDetail(t, s, dimName, done, capped) {
   var btnHtml;
   if (locked) btnHtml = '<button class="td-confirm" disabled>🔒 尚未開放，敬請期待</button>';
   else if (done) btnHtml = '<button class="td-confirm" disabled>✓ 已完成</button>';
-  else if (t.needReview) btnHtml = '<button class="td-confirm" disabled>待審核，請依課程指示繳交作業</button>';
+  else if (t.needReview) {
+    if (isPendingTask(t)) btnHtml = '<button class="td-confirm" disabled>✅ 已繳交，等導師審核</button>';
+    else btnHtml = '<div style="margin-top:4px;text-align:left;">'
+      + '<div style="font-size:15px;color:#7a5636;margin-bottom:8px;">上傳作業（照片 / PDF / Word）：</div>'
+      + '<input type="file" id="td-file" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:15px;margin-bottom:12px;">'
+      + '<button class="td-confirm" id="td-submit-btn">繳交作業</button>'
+      + '<div id="td-submit-msg" style="font-size:14px;color:#7a5636;margin-top:10px;text-align:center;"></div>'
+      + '</div>';
+  }
   else if (capped) btnHtml = '<button class="td-confirm" disabled>今日／本週已達上限</button>';
   else btnHtml = '<button class="td-confirm" id="td-confirm-btn">確認打卡</button>';
 
@@ -818,6 +835,43 @@ function openTaskDetail(t, s, dimName, done, capped) {
   ov.onclick = function(e) { if (e.target === ov) closeTaskDetail(); };
   var confirmBtn = document.getElementById("td-confirm-btn");
   if (confirmBtn) confirmBtn.onclick = function() { doCheckin(s, t, activeWorkshop); closeTaskDetail(); renderResult(s); };
+  var submitBtn = document.getElementById("td-submit-btn");
+  if (submitBtn) submitBtn.onclick = function() { submitHomework(t, s); };
+}
+
+/* 作業繳交：讀檔 → base64 → POST submit（存 Drive + 待審核分頁），導師打勾通過才計分 */
+async function submitHomework(t, s) {
+  var fileEl = document.getElementById("td-file");
+  var msg = document.getElementById("td-submit-msg");
+  var file = fileEl && fileEl.files && fileEl.files[0];
+  if (!file) { msg.style.color = "#c0392b"; msg.textContent = "請先選一個檔案"; return; }
+  if (file.size > 12 * 1024 * 1024) { msg.style.color = "#c0392b"; msg.textContent = "檔案太大（超過 12MB），請壓縮或改用拍照"; return; }
+  var btn = document.getElementById("td-submit-btn");
+  if (btn) btn.disabled = true;
+  msg.style.color = "#7a5636"; msg.textContent = "上傳中…請稍候（大檔案需要一點時間）";
+  try {
+    var b64 = await fileToBase64(file);
+    var payload = { action: "submit", userId: s.lineId, workshopId: activeWorkshop,
+      taskKey: t.key, taskName: t.name, dim: t.dim, pts: t.pts,
+      filename: file.name, mimeType: file.type || "application/octet-stream", fileData: b64 };
+    var r = await fetch(SHEET_API, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+    var d = await r.json().catch(function(){ return {}; });
+    if (d.status !== "ok") throw new Error(d.message || "fail");
+    (current.pending = current.pending || []).push({ taskKey: t.key, workshopId: activeWorkshop });
+    msg.style.color = "#3a9a60"; msg.textContent = "✅ 繳交成功！導師審核通過後就會計分";
+    setTimeout(function() { closeTaskDetail(); renderResult(s); }, 1300);
+  } catch (e) {
+    msg.style.color = "#c0392b"; msg.textContent = "繳交失敗，請稍後再試 🙏";
+    if (btn) btn.disabled = false;
+  }
+}
+function fileToBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function() { var s = String(reader.result); resolve(s.substring(s.indexOf(",") + 1)); };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 function closeTaskDetail() {
   document.getElementById("taskdetail-overlay").style.display = "none";

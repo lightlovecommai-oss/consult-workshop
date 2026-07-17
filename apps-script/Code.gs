@@ -21,7 +21,8 @@ var TABS = {
   revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
   quiz:        "(漏斗)能力測驗",       // 自評來源（comconverttest 寫入）：LINE userId + ATPI 分數
   rewards:     "(設定)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
-  redemptions: "(遊戲)兌換紀錄"        // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
+  redemptions: "(遊戲)兌換紀錄",       // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
+  pending:     "(遊戲)待審核"          // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。 */
@@ -582,7 +583,8 @@ function doGet(e) {
                      checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
                      defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
                      honorFeed: computeHonorFeed_(30),
-                     rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid) });
+                     rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
+                     pending: computePending_(buid) });
     }
 
     if (action === "logs") {
@@ -612,6 +614,56 @@ function doGet(e) {
   } catch (err) {
     return json_({ status: "error", message: String(err) });
   }
+}
+
+/* 某學員「待審核中」的作業（給前端顯示「已繳交」）。 */
+function computePending_(uid) {
+  var sh = ss_().getSheetByName(TABS.pending);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return rows_(TABS.pending).filter(function(r) {
+    return String(r["LINE userId"]) === uid && String(r["狀態"] || "").trim() !== "已通過";
+  }).map(function(r) {
+    return { workshopId: String(r["課程"] || ""), taskKey: String(r["任務key"] || "") };
+  });
+}
+
+/* 待審核分頁：不存在就建、補標題與「通過」核取方塊。 */
+function ensurePendingSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.pending);
+  var headers = ["繳交時間", "LINE userId", "姓名", "課程", "任務key", "任務名", "維度", "分數", "檔案連結", "通過", "狀態"];
+  if (!sh) {
+    sh = ss.insertSheet(TABS.pending);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+  return sh;
+}
+
+/* 作業繳交檔案的 Drive 資料夾（不存在就建）。 */
+function getSubmitFolder_() {
+  var name = "作業繳交";
+  var it = DriveApp.getFoldersByName(name);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(name);
+}
+
+/* 一次性：把缺說明的任務文案填進 (設定)任務 的 desc 欄（之後你在試算表細修即可）。 */
+function fillMissingDescs() {
+  var fills = {
+    "二階|wk1": "主動開發一位新名單、或建立一個新連結。變現的活水來自源源不絕的新關係——每週先讓池子有新的人進來，後面才有得成交。",
+    "二階|wk2": "找一位客戶或準客戶深聊一次，先別急著成交，把關係聊深。信任是深聊堆出來的，不是話術堆出來的。"
+  };
+  var sh = ss_().getSheetByName(TABS.tasks);
+  if (!sh) { Logger.log("找不到 " + TABS.tasks); return; }
+  var vals = sh.getDataRange().getValues();
+  var headers = vals[0].map(function(h){ return String(h).trim(); });
+  var cW = headers.indexOf("workshopId"), cK = headers.indexOf("taskKey"), cD = headers.indexOf("desc");
+  if (cD < 0) { Logger.log("找不到 desc 欄"); return; }
+  var n = 0;
+  for (var i = 1; i < vals.length; i++) {
+    var key = String(vals[i][cW]).trim() + "|" + String(vals[i][cK]).trim();
+    if (fills[key] && !String(vals[i][cD]).trim()) { sh.getRange(i + 1, cD + 1).setValue(fills[key]); n++; Logger.log("填 " + key); }
+  }
+  Logger.log("完成，填了 " + n + " 筆");
 }
 
 function doPost(e) {
@@ -659,6 +711,27 @@ function doPost(e) {
       ]);
       return json_({ status: "ok" });
     }
+    if (body.action === "submit") {  // 作業繳交：可帶檔案(base64)，存 Drive、寫待審核分頁，等導師打勾通過
+      var suid = String(body.userId || body.lineId || "");
+      if (!suid) return json_({ status: "error", message: "missing userId" });
+      var fileUrl = "";
+      if (body.fileData) {
+        try {
+          var bytes = Utilities.base64Decode(body.fileData);
+          var blob = Utilities.newBlob(bytes, body.mimeType || "application/octet-stream", body.filename || ("繳交_" + Date.now()));
+          var f = getSubmitFolder_().createFile(blob);
+          try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (se) {}
+          fileUrl = f.getUrl();
+        } catch (fe) { fileUrl = "(上傳失敗)"; }
+      }
+      var sst = computeStudent_(suid);
+      ensurePendingSheet_().appendRow([
+        Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"),
+        suid, (sst ? sst.name : suid), String(body.workshopId || ""), String(body.taskKey || ""),
+        String(body.taskName || ""), String(body.dim || ""), Number(body.pts) || 0, fileUrl, false, "待審核"
+      ]);
+      return json_({ status: "ok", fileUrl: fileUrl });
+    }
     if (body.action === "quiz") {  // 測驗結果寫入（comconverttest 送來）：附加一列到「(引流.A)能力測驗」分頁
       var quid = String(body.userId || body.lineId || "");
       if (!quid) return json_({ status: "error", message: "missing userId" });
@@ -687,6 +760,30 @@ function doPost(e) {
    會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (遊戲)課程 / (遊戲)任務並填資料。
    第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
    ═══════════════════════════════════════════════════════════ */
+/* 簡易觸發器：導師在「(遊戲)待審核」把某列「通過」打勾 → 自動寫進打卡紀錄給分、狀態改已通過。
+   不用手動安裝，存檔即生效（由編輯的人＝擁有者觸發）。 */
+function onEdit(e) {
+  try {
+    var sh = e.range.getSheet();
+    if (sh.getName() !== TABS.pending) return;
+    var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+    var passCol = headers.indexOf("通過") + 1;
+    if (passCol < 1 || e.range.getColumn() !== passCol) return;
+    if (e.range.getValue() !== true) return;  // 只在打勾(TRUE)時處理
+    var row = e.range.getRow();
+    var data = {};
+    headers.forEach(function(h, i){ data[h] = sh.getRange(row, i + 1).getValue(); });
+    if (String(data["狀態"]).trim() === "已通過") return;  // 已處理過就跳過
+    appendMapped_(TABS.checkins, COLS.checkins, {
+      lineId: data["LINE userId"], workshopId: data["課程"], taskKey: data["任務key"],
+      cadence: "special", dim: data["維度"], pts: Number(data["分數"]) || 0,
+      date: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd")
+    });
+    var stCol = headers.indexOf("狀態") + 1;
+    if (stCol > 0) sh.getRange(row, stCol).setValue("已通過");
+  } catch (err) { /* onEdit 內錯誤靜默，避免卡住編輯 */ }
+}
+
 function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
