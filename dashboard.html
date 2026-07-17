@@ -476,15 +476,10 @@ function mk(tag, cls, txt) {
 
 /* ── 底部分頁切換 ── */
 function addToHomeGuide() {
-  // 按鈕在儀表板裡按，已知使用者 id → 直接帶 id 開 Safari，免 LINE 登入、直達本人儀表板
+  // 按鈕在儀表板裡按，已知使用者 id → 帶 id 開 Safari；?addhome=1 讓 Safari 那頁自動跳出圖解箭頭
   var myId = new URLSearchParams(location.search).get("id") || "";
   var base = "https://lightlovecommai-oss.github.io/consult-workshop/";
-  var url = myId ? (base + "dashboard.html?id=" + encodeURIComponent(myId)) : (base + "?app=1");
-  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  var steps = isIOS
-    ? "【iPhone】\n1. 接下來會用 Safari 打開你的儀表板\n2. 按最下方中間的「分享」鈕（方框＋向上箭頭）\n3. 往下找「加入主畫面」並點它\n4. 按右上角「加入」就完成"
-    : "【Android】\n1. 接下來會用瀏覽器打開你的儀表板\n2. 按右上角「⋮」（三個點）\n3. 選「加到主畫面」\n4. 確認就完成";
-  alert("把儀表板變成手機桌面圖示，以後一點就進、免登入 👇\n\n" + steps);
+  var url = myId ? (base + "dashboard.html?id=" + encodeURIComponent(myId) + "&addhome=1") : (base + "?app=1&addhome=1");
   try {
     if (window.liff && liff.openWindow) { liff.openWindow({ url: url, external: true }); }
     else { window.open(url, "_blank"); }
@@ -1303,6 +1298,35 @@ async function init() {
 
 setupTaskSlider();
 init();
+</script>
+<!-- 加到手機桌面：圖解指引浮層（帶 ?addhome=1 且非 App 模式時顯示）-->
+<div id="addhome-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(20,12,4,.74);">
+  <div style="position:absolute;left:0;right:0;top:14%;padding:0 22px;text-align:center;">
+    <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:14px;">把它變成手機 App，只要 2 步 📲</div>
+    <div style="background:#fff;color:#2d1f0f;border-radius:16px;padding:20px 18px;text-align:left;line-height:2;font-size:17px;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:360px;margin:0 auto;">
+      <div style="margin-bottom:10px;"><b style="color:#e8734a;font-size:19px;">①</b> 按下面的「分享」鍵
+        <span style="display:inline-flex;vertical-align:middle;margin:0 3px;width:28px;height:28px;align-items:center;justify-content:center;background:#f0e4d4;border-radius:7px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>
+      </div>
+      <div><b style="color:#e8734a;font-size:19px;">②</b> 往下找「<b>加入主畫面</b>」→ 按「加入」</div>
+    </div>
+    <button id="addhome-close" style="margin-top:18px;background:#e8734a;color:#fff;border:none;border-radius:24px;padding:13px 30px;font-size:16px;font-weight:600;">知道了，開始 →</button>
+  </div>
+  <div id="addhome-arrow" style="position:absolute;left:50%;bottom:6px;transform:translateX(-50%);color:#fff;font-size:46px;text-shadow:0 2px 8px rgba(0,0,0,.4);animation:ahbounce 1s infinite;">⬇︎</div>
+</div>
+<style>@keyframes ahbounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(9px)}}</style>
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var standalone=('standalone' in navigator && navigator.standalone)||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+  if(!p.get('addhome')||standalone) return;
+  var ov=document.getElementById('addhome-overlay'); if(!ov) return;
+  if(!/iPhone|iPad|iPod/i.test(navigator.userAgent)){  // Android：選單在右上角
+    var ar=document.getElementById('addhome-arrow');
+    ar.textContent='⬆︎'; ar.style.cssText='position:absolute;right:12px;top:4px;color:#fff;font-size:46px;text-shadow:0 2px 8px rgba(0,0,0,.4);';
+  }
+  ov.style.display='block';
+  document.getElementById('addhome-close').onclick=function(){ov.style.display='none';};
+})();
 </script>
 </body>
 </html>
