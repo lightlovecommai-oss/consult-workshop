@@ -87,6 +87,20 @@ function applyCheckbox_(sh, row, col, numRows, rule) {
   if (changed) rng.setValues(cur);
 }
 
+/* ── 診斷：唯讀。看「能力測驗」分頁有沒有 userId 空白的列（＝在 LINE 外做測驗、抓不到身份）。 */
+function auditQuizRows() {
+  var rs = rows_(TABS.quiz);
+  var empty = 0, ok = 0, samples = [];
+  rs.forEach(function(r) {
+    var uid = String(pick_(r, COLS.quiz.lineId) || "").trim();
+    if (uid) ok++; else empty++;
+    if (samples.length < 12) samples.push((uid ? "有id" : "❌空") + " | " + String(r["時間"] || "") + " | " + String(r["姓名"] || "") + " | " + String(r["職業"] || ""));
+  });
+  Logger.log("能力測驗共 %s 列：有 userId %s、空白 userId %s", rs.length, ok, empty);
+  Logger.log("─────────────");
+  samples.forEach(function(s){ Logger.log(s); });
+}
+
 /* ── 稽核：唯讀。列出每個分頁的標題列 / 列數 / 欄數，印到執行記錄。
    在編輯器選 auditTabs → 執行，把「執行記錄」內容貼回來即可（不會改任何資料）。 */
 function auditTabs() {
