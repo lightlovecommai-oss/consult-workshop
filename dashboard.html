@@ -333,6 +333,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
       <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
         <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">❓ QA 疑難問題說明</summary>
         <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
+          <button onclick="addToHomeGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;margin:12px 0 4px;">📲 把儀表板加到手機桌面</button>
+          <div style="font-size:14px;color:#7a5636;margin-bottom:12px;">點了會用瀏覽器打開這頁，照跳出的步驟做，就能在桌面建一個圖示，之後一點就進、不用再開 LINE 找。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">任務卡片是灰色的、打不開？</div>
           <div style="margin-bottom:10px;">代表這項任務<strong>尚未開放</strong>（例如還沒上到那堂課的作業）。等導師開放後就能打卡，不用重新整理或找客服。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">我打過卡的任務怎麼不見了？</div>
@@ -466,6 +468,19 @@ function mk(tag, cls, txt) {
 }
 
 /* ── 底部分頁切換 ── */
+function addToHomeGuide() {
+  var url = "https://liff.line.me/2010316474-wmb1ODe0";
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var steps = isIOS
+    ? "【iPhone】\n1. 接下來會用 Safari 打開這一頁\n2. 按最下方中間的「分享」鈕（方框＋向上箭頭）\n3. 往下找「加入主畫面」並點它\n4. 按右上角「加入」就完成"
+    : "【Android】\n1. 接下來會用瀏覽器打開這一頁\n2. 按右上角「⋮」（三個點）\n3. 選「加到主畫面」\n4. 確認就完成";
+  alert("把儀表板變成手機桌面圖示，以後一點就進 👇\n\n" + steps + "\n\n（現在幫你用瀏覽器打開）");
+  try {
+    if (window.liff && liff.openWindow) { liff.openWindow({ url: url, external: true }); }
+    else { window.open(url, "_blank"); }
+  } catch (e) { window.open(url, "_blank"); }
+}
+
 function switchTab(name) {
   Array.prototype.forEach.call(document.querySelectorAll(".tabpanel"), function(p) {
     p.classList.toggle("active", p.getAttribute("data-tab") === name);
