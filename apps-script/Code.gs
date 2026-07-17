@@ -639,6 +639,12 @@ function ensurePendingSheet_() {
   return sh;
 }
 
+/* 一次性：在編輯器選 authorizeDrive → 執行 → 允許，授權 Drive 權限（作業上傳才會成功）。 */
+function authorizeDrive() {
+  var f = getSubmitFolder_();
+  Logger.log("✅ Drive 已授權。作業繳交資料夾：" + f.getUrl());
+}
+
 /* 作業繳交檔案的 Drive 資料夾（不存在就建）。 */
 function getSubmitFolder_() {
   var name = "作業繳交";
