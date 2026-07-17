@@ -471,12 +471,12 @@ function mk(tag, cls, txt) {
 
 /* ── 底部分頁切換 ── */
 function addToHomeGuide() {
-  var url = "https://liff.line.me/2010316474-wmb1ODe0";
+  var url = "https://lightlovecommai-oss.github.io/consult-workshop/?app=1";  // 原始網址才會真的跳外部瀏覽器；?app=1 讓外部瀏覽器也會走 LINE 登入認出身份
   var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   var steps = isIOS
     ? "【iPhone】\n1. 接下來會用 Safari 打開這一頁\n2. 按最下方中間的「分享」鈕（方框＋向上箭頭）\n3. 往下找「加入主畫面」並點它\n4. 按右上角「加入」就完成"
     : "【Android】\n1. 接下來會用瀏覽器打開這一頁\n2. 按右上角「⋮」（三個點）\n3. 選「加到主畫面」\n4. 確認就完成";
-  alert("把儀表板變成手機桌面圖示，以後一點就進 👇\n\n" + steps + "\n\n（現在幫你用瀏覽器打開）");
+  alert("把儀表板變成手機桌面圖示，以後一點就進 👇\n\n" + steps + "\n\n（現在幫你用瀏覽器打開；若請你用 LINE 登入，登入一次即可，之後照上面步驟加桌面）");
   try {
     if (window.liff && liff.openWindow) { liff.openWindow({ url: url, external: true }); }
     else { window.open(url, "_blank"); }

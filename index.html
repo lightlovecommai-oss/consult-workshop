@@ -47,7 +47,8 @@ async function init() {
         window.location.href = "dashboard.html?id=" + encodeURIComponent(p.userId);
         return;
       }
-    } else if (liff.isInClient()) {
+    } else if (liff.isInClient() || params.get("app")) {
+      // 在 LINE 內、或從桌面捷徑/按鈕帶 ?app=1 進來 → 走 LINE 登入認出身份（登入後回同網址再比對）
       liff.login();
       return;
     }
