@@ -731,9 +731,12 @@ function doPost(e) {
       ]);
       return json_({ status: "ok" });
     }
-    if (body.action === "submit") {  // 作業繳交：可帶檔案(base64)，存 Drive、寫待審核分頁，等導師打勾通過
+    if (body.action === "submit") {  // 作業繳交：三題文字（線上學習單）＋可帶檔案(base64)存 Drive，寫待審核分頁，等導師打勾通過
       var suid = String(body.userId || body.lineId || "");
       if (!suid) return json_({ status: "error", message: "missing userId" });
+      var sq1 = String(body.q1 || "").trim(), sq2s = String(body.q2scene || "").trim(),
+          sq2h = String(body.q2how || "").trim(), sq3 = String(body.q3 || "").trim();
+      if (sq1 && sq1.replace(/\s/g, "").length < 150) return json_({ status: "error", message: "Q1 心得需至少 150 字" });
       var fileUrl = "";
       if (body.fileData) {
         try {
@@ -745,11 +748,21 @@ function doPost(e) {
         } catch (fe) { fileUrl = "(上傳失敗)"; }
       }
       var sst = computeStudent_(suid);
-      ensurePendingSheet_().appendRow([
+      var psh = ensurePendingSheet_();
+      ["Q1 心得", "Q2 場景", "Q2 做法", "Q3 專屬題"].forEach(function(h){ ensureColumn_(TABS.pending, h); });
+      psh.appendRow([
         Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"),
         suid, (sst ? sst.name : suid), String(body.workshopId || ""), String(body.taskKey || ""),
         String(body.taskName || ""), String(body.dim || ""), Number(body.pts) || 0, fileUrl, false, "待審核"
       ]);
+      /* 三題文字寫進對應標題欄（欄位可能被移動過，依標題找，不靠位置） */
+      var pHeaders = psh.getRange(1, 1, 1, psh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+      var pRow = psh.getLastRow();
+      var pQ = { "Q1 心得": sq1, "Q2 場景": sq2s, "Q2 做法": sq2h, "Q3 專屬題": sq3 };
+      for (var ph in pQ) {
+        var pc = pHeaders.indexOf(ph);
+        if (pc > -1 && pQ[ph]) psh.getRange(pRow, pc + 1).setValue(pQ[ph]);
+      }
       return json_({ status: "ok", fileUrl: fileUrl });
     }
     if (body.action === "quiz") {  // 測驗結果寫入（comconverttest 送來）：附加一列到「(引流.A)能力測驗」分頁

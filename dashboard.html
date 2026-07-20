@@ -126,6 +126,15 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 .td-tip-body{font-size:15px;color:#6b4c30;line-height:1.6;}
 .td-confirm{width:100%;background:#e8734a;color:#fff;border:0;border-radius:14px;padding:13px;font-size:16px;font-weight:600;cursor:pointer;}
 .td-confirm[disabled]{background:#f0e9df;color:#7a5636;cursor:default;}
+/* ── 線上學習單（作業三題）── */
+.hw-q{margin-bottom:14px;text-align:left;}
+.hw-label{font-size:15px;font-weight:700;color:#2d1f0f;margin-bottom:3px;}
+.hw-hint{font-size:13.5px;color:#7a5636;line-height:1.55;margin-bottom:6px;}
+.hw-q textarea,.hw-q input[type=text]{width:100%;box-sizing:border-box;background:#fff;border:1px solid #e8ddd2;border-radius:12px;padding:10px 12px;font-size:16px;color:#2d1f0f;font-family:inherit;line-height:1.6;}
+.hw-q textarea{min-height:96px;resize:vertical;}
+.hw-q textarea:focus,.hw-q input[type=text]:focus{outline:none;border-color:#e8734a;}
+.hw-count{font-size:13px;color:#7a5636;text-align:right;margin-top:3px;}
+.hw-count.ok{color:#3a9a60;font-weight:600;}
 .celebrate-card{position:relative;background:linear-gradient(165deg,#2d1f0f,#5a3d1c);border-radius:22px;padding:34px 26px 26px;text-align:center;color:#fff;max-width:300px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden;animation:pop .4s cubic-bezier(.2,1.3,.5,1);}
 @keyframes pop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
 .cc-glow{position:absolute;top:-38%;left:50%;width:200px;height:200px;transform:translateX(-50%);background:radial-gradient(circle,rgba(246,214,138,.5),transparent 65%);animation:spin 6s linear infinite;}
@@ -716,6 +725,18 @@ function isPendingTask(t) {
   });
 }
 
+/* 維度標籤：單維「A」→「吸引力」；多維「A,T,P」→「吸引力・信任力・專業力」。 */
+function dimLabel(dimStr) {
+  var ds = taskDims_(dimStr);
+  if (!ds.length) return "—";
+  return ds.map(function(k){ return (DIMS[k] || {name:k}).name; }).join("・");
+}
+/* 把說明裡的網址變成可點連結（管理端自填內容，例如先修課的溝通健身房 LIFF）。 */
+function linkify_(t) {
+  return String(t).replace(/(https?:\/\/[^\s，。、）)]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" style="color:#e8734a;text-decoration:underline;word-break:break-all;">$1</a>');
+}
+
 /* ── 任務清單（四種節奏共用；daily/weekly 有每期上限，needReview 走待審核不可自打）── */
 function renderCadenceList(s, cadence, containerId) {
   var box = document.getElementById(containerId);
@@ -745,7 +766,7 @@ function renderCadenceList(s, cadence, containerId) {
   tasks.forEach(function(t) {
     var on = doneKeys.indexOf(t.key) > -1;
     if (on) return;  // 已打卡的卡片直接消失，只留下還沒做的
-    var dimName = (DIMS[t.dim] || {name:"—"}).name;
+    var dimName = dimLabel(t.dim);  // 支援多維：A,T,P → 吸引力・信任力・專業力
     var locked = !!t.locked;
     shown++;
 
@@ -760,7 +781,7 @@ function renderCadenceList(s, cadence, containerId) {
     body.appendChild(mk("div","tcard-name", t.name));
     var desc = mk("div","tcard-desc", locked ? "尚未開放，敬請期待" : (dimName + " ・ " + (on ? "已完成 +" : "+") + t.pts + " 分"));
     if (t.needReview && !on && !locked) {
-      var rv = mk("div","tcard-need-review", isPendingTask(t) ? "✅ 已繳交，等待導師審核計分" : "⏱ 點卡片上傳作業，交後等導師審核");
+      var rv = mk("div","tcard-need-review", isPendingTask(t) ? "✅ 已繳交，等待導師審核計分" : "✍️ 點卡片寫作業，交後等導師審核");
       desc.appendChild(document.createElement("br"));
       desc.appendChild(rv);
     }
@@ -777,7 +798,7 @@ function renderCadenceList(s, cadence, containerId) {
       right.appendChild(mk("div","btn-done","✓ 完成"));
     } else if (t.needReview) {
       var pd = isPendingTask(t);
-      var pend = mk("div","btn-done", pd ? "已繳交" : "去繳交");
+      var pend = mk("div","btn-done", pd ? "已繳交" : "寫作業");
       pend.style.color = pd ? "#3a9a60" : "#e8734a"; pend.style.background = pd ? "#eafaf3" : "#fff4ec";
       right.appendChild(pend);
     } else if (capped) {
@@ -808,7 +829,7 @@ function openTaskDetail(t, s, dimName, done, capped) {
   var ov = document.getElementById("taskdetail-overlay");
   var card = document.getElementById("taskdetail-card");
   var locked = !!t.locked;
-  var tip = (t.desc && !locked) ? '<div class="td-tip"><div class="td-tip-label">💡 複習一下這個技巧</div><div class="td-tip-body">' + t.desc + '</div></div>' : "";
+  var tip = (t.desc && !locked) ? '<div class="td-tip"><div class="td-tip-label">' + (t.needReview ? "📌 本課作業題目（Q3 專屬題）" : "💡 複習一下這個技巧") + '</div><div class="td-tip-body">' + linkify_(t.desc) + '</div></div>' : "";
 
   var btnHtml;
   if (locked) btnHtml = '<button class="td-confirm" disabled>🔒 尚未開放，敬請期待</button>';
@@ -816,8 +837,19 @@ function openTaskDetail(t, s, dimName, done, capped) {
   else if (t.needReview) {
     if (isPendingTask(t)) btnHtml = '<button class="td-confirm" disabled>✅ 已繳交，等導師審核</button>';
     else btnHtml = '<div style="margin-top:4px;text-align:left;">'
-      + '<div style="font-size:15px;color:#7a5636;margin-bottom:8px;">上傳作業（照片 / PDF / Word）：</div>'
-      + '<input type="file" id="td-file" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:15px;margin-bottom:12px;">'
+      + '<div class="hw-q"><div class="hw-label">Q1｜這堂課我的心得與收穫（150 字以上）</div>'
+      +   '<div class="hw-hint">寫不出來就從這句開始：「我以前以為⋯⋯，上完課我發現⋯⋯」</div>'
+      +   '<textarea id="hw-q1" placeholder="最打中你的觀念是什麼？哪裡跟你原本想的不一樣？"></textarea>'
+      +   '<div class="hw-count" id="hw-q1-count">0 / 150 字</div></div>'
+      + '<div class="hw-q"><div class="hw-label">Q2｜可以使用在哪裡？你會怎麼使用？</div>'
+      +   '<div class="hw-hint">選一個 7 天內就會遇到的真實場景（家人／朋友／客戶／貼文⋯⋯）</div>'
+      +   '<input type="text" id="hw-q2s" placeholder="我會用在這個場景：" style="margin-bottom:6px;">'
+      +   '<textarea id="hw-q2h" placeholder="我具體會這樣使用：" style="min-height:64px;"></textarea></div>'
+      + '<div class="hw-q"><div class="hw-label">Q3｜本課專屬題（題目見上方 📌）</div>'
+      +   '<textarea id="hw-q3" placeholder="在這裡作答"></textarea></div>'
+      + '<div class="hw-q"><div class="hw-label">附件（選填）</div>'
+      +   '<div class="hw-hint">手寫拍照、簡報或文件都可以附上（照片 / PDF / Word）</div>'
+      +   '<input type="file" id="td-file" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:15px;"></div>'
       + '<button class="td-confirm" id="td-submit-btn">繳交作業</button>'
       + '<div id="td-submit-msg" style="font-size:14px;color:#7a5636;margin-top:10px;text-align:center;"></div>'
       + '</div>';
@@ -837,23 +869,39 @@ function openTaskDetail(t, s, dimName, done, capped) {
   if (confirmBtn) confirmBtn.onclick = function() { doCheckin(s, t, activeWorkshop); closeTaskDetail(); renderResult(s); };
   var submitBtn = document.getElementById("td-submit-btn");
   if (submitBtn) submitBtn.onclick = function() { submitHomework(t, s); };
+  /* Q1 即時字數（滿 150 變綠），空白不計 */
+  var hwQ1 = document.getElementById("hw-q1"), hwCnt = document.getElementById("hw-q1-count");
+  if (hwQ1 && hwCnt) {
+    var updCnt = function() {
+      var n = hwQ1.value.replace(/\s/g, "").length;
+      hwCnt.textContent = n + " / 150 字";
+      hwCnt.className = "hw-count" + (n >= 150 ? " ok" : "");
+    };
+    hwQ1.oninput = updCnt; updCnt();
+  }
 }
 
-/* 作業繳交：讀檔 → base64 → POST submit（存 Drive + 待審核分頁），導師打勾通過才計分 */
+/* 作業繳交（線上學習單）：三題必填＋附件選填 → POST submit（寫待審核分頁，附件存 Drive），導師打勾通過才計分 */
 async function submitHomework(t, s) {
   var fileEl = document.getElementById("td-file");
   var msg = document.getElementById("td-submit-msg");
+  var q1 = (document.getElementById("hw-q1") || {}).value || "";
+  var q2s = (document.getElementById("hw-q2s") || {}).value || "";
+  var q2h = (document.getElementById("hw-q2h") || {}).value || "";
+  var q3 = (document.getElementById("hw-q3") || {}).value || "";
+  if (q1.replace(/\s/g, "").length < 150) { msg.style.color = "#c0392b"; msg.textContent = "Q1 心得需至少 150 字，再多寫一點～"; return; }
+  if (!q2s.trim() || !q2h.trim() || !q3.trim()) { msg.style.color = "#c0392b"; msg.textContent = "Q2、Q3 每一題都要填喔"; return; }
   var file = fileEl && fileEl.files && fileEl.files[0];
-  if (!file) { msg.style.color = "#c0392b"; msg.textContent = "請先選一個檔案"; return; }
-  if (file.size > 12 * 1024 * 1024) { msg.style.color = "#c0392b"; msg.textContent = "檔案太大（超過 12MB），請壓縮或改用拍照"; return; }
+  if (file && file.size > 12 * 1024 * 1024) { msg.style.color = "#c0392b"; msg.textContent = "附件太大（超過 12MB），請壓縮或改用拍照"; return; }
   var btn = document.getElementById("td-submit-btn");
   if (btn) btn.disabled = true;
-  msg.style.color = "#7a5636"; msg.textContent = "上傳中…請稍候（大檔案需要一點時間）";
+  msg.style.color = "#7a5636"; msg.textContent = file ? "上傳中…請稍候（大檔案需要一點時間）" : "送出中…";
   try {
-    var b64 = await fileToBase64(file);
+    var b64 = file ? await fileToBase64(file) : "";
     var payload = { action: "submit", userId: s.lineId, workshopId: activeWorkshop,
       taskKey: t.key, taskName: t.name, dim: t.dim, pts: t.pts,
-      filename: file.name, mimeType: file.type || "application/octet-stream", fileData: b64 };
+      q1: q1.trim(), q2scene: q2s.trim(), q2how: q2h.trim(), q3: q3.trim() };
+    if (file) { payload.filename = file.name; payload.mimeType = file.type || "application/octet-stream"; payload.fileData = b64; }
     var r = await fetch(SHEET_API, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
     var d = await r.json().catch(function(){ return {}; });
     if (d.status !== "ok") throw new Error(d.message || "fail");
