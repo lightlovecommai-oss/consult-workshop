@@ -128,9 +128,16 @@ function taskWeekStr() { return weekStr(taskCycleNow_()); }
    能力用 dim 加總、跨所有 workshop——別的 workshop 的任務不在本專案定義也算得到。
    ═══════════════════════════════════════════════════════════ */
 
-/* 該維累積投入分（跨所有 workshop、所有節奏） */
+/* 把 dim 欄拆成維度陣列：支援單維「A」或多維「A,T,P」(逗號/頓號/點/斜線/空白皆可分隔)。 */
+function taskDims_(dimStr) {
+  return String(dimStr || "").split(/[,.、\/\s]+/).filter(function(x){ return DORD.indexOf(x) > -1; });
+}
+/* 該維累積投入分（跨所有 workshop、所有節奏）。多維任務的 pts 平均分攤到各維（3分×A,T,P＝各+1）。 */
 function investDim(s, dim) {
-  return s.checkinLog.reduce(function(sum, e){ return sum + (e.dim === dim ? e.pts : 0); }, 0);
+  return s.checkinLog.reduce(function(sum, e){
+    var ds = taskDims_(e.dim);
+    return ds.indexOf(dim) > -1 ? sum + e.pts / ds.length : sum;
+  }, 0);
 }
 
 /* 每維「市場驗證能力」＝ 投入%（飽和曲線）× 市場驗證係數。
