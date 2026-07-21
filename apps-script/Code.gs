@@ -934,6 +934,41 @@ function openLevel1() {
   return wsMsg + "；一階任務新增 " + toAdd.length + " 列（已存在的已跳過）";
 }
 
+/* ═══════════════════════════════════════════════════════════
+   一次性：把 TASKS_SEED 裡「一階」任務同步進任務分頁——依 taskKey 更新已存在列、
+   新增沒有的列，並**保留該列現有的 locked 值**（不蓋掉手動開放過的週次）。
+   改完 name/desc/dim/pts 後跑這支即可；不影響二階。
+   在 Apps Script 選 updateLevel1Tasks → 執行。
+   ═══════════════════════════════════════════════════════════ */
+function updateLevel1Tasks() {
+  var wid = "一階";
+  var tsh = ss_().getSheetByName(TABS.tasks);
+  if (!tsh) return "找不到任務分頁";
+  var th = tsh.getRange(1, 1, 1, tsh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var wC = th.indexOf("workshopId"), kC = th.indexOf("taskKey"), lC = th.indexOf("locked");
+  if (wC < 0 || kC < 0) return "任務分頁缺 workshopId/taskKey 欄";
+  var data = tsh.getDataRange().getValues();
+  var rowOf = {};
+  for (var i = 1; i < data.length; i++) { if (String(data[i][wC]).trim() === wid) rowOf[String(data[i][kC]).trim()] = i + 1; }
+  var header = TASKS_SEED[0];
+  var updated = 0, added = 0;
+  for (var s = 1; s < TASKS_SEED.length; s++) {
+    var row = TASKS_SEED[s];
+    if (row[0] !== wid) continue;
+    var key = row[1];
+    var line = th.map(function(h){ var ci = header.indexOf(h); return ci > -1 ? row[ci] : ""; });
+    if (rowOf[key]) {
+      if (lC > -1) line[lC] = data[rowOf[key] - 1][lC];  // 保留現有 locked
+      tsh.getRange(rowOf[key], 1, 1, th.length).setValues([line]);
+      updated++;
+    } else {
+      tsh.getRange(tsh.getLastRow() + 1, 1, 1, th.length).setValues([line]);
+      added++;
+    }
+  }
+  return "一階任務同步：更新 " + updated + " 列、新增 " + added + " 列（locked 保留現值）。";
+}
+
 /* 建「兌換品項」表（代幣可換的獎勵，跨所有 workshop 共用）。已存在就不覆蓋，
    避免洗掉你之後手動加/改的獎勵（例如之後要補上 Podcast）。 */
 /* 兌換品項種子：cost 一律等比例換算＝原價 ÷ 200 元/愛的貨幣（5000→25、2000→10、3600→18、7800→39）。
@@ -1194,14 +1229,17 @@ var TASKS_SEED = [
      daily/weekly 特意跟二階不同：切到日常人際場景(家庭/朋友/社群/貼文)，用一階自己的技法，變化性才夠。*/
 
   /* 社群分享（once，A，同二階）*/
-  ["一階", "social1", "once", "A", 3, "社群分享：自己故事", "📣", false, "分享一則你自己的故事，讓大家更認識真實的你。", false],
-  ["一階", "social2", "once", "A", 3, "社群分享：導師故事", "📖", false, "分享一則跟導師學到的故事或啟發。", false],
-  ["一階", "social3", "once", "A", 3, "社群分享：培訓心得", "✨", false, "分享一則這次培訓給你的心得或轉變。", false],
+  ["一階", "social1", "once", "A,T,P", 3, "社群賣自己", "📣", false, "分享一則你自己的人生故事，用「低點→轉折→高點」的方法說，讓大家更認識真實的你。(e.g. FB / IG / Thread……)", false],
+  ["一階", "social2", "once", "A,T,P", 3, "社群推薦光頭", "📖", false, "分享真實的上課心得——你的突破、喜悅、看見……，最後自然把光頭推薦出去（不用為了硬推而寫，因為感動而寫）。", false],
+  ["一階", "social3", "once", "A,T,P", 3, "讓愛流動", "💗", false, "講出你的內心OS：找你的爸／媽／家人（擇一），說出你心中藏了很久想跟他說的話（道謝・道歉・道愛）。", false],
+  ["一階", "sp_beef",   "once", "A", 3, "打造你的牛肉庫", "🥩", false, "寫下事業／財富／感情／家庭／身體 5 個面向，各一句你的核心價值（牛肉），之後開口就能隨時端出來。", false],
+  ["一階", "sp_dig",    "once", "T", 3, "深挖一個人的故事", "🔍", false, "找一個人，用 Whyyyy＋問句深聊一次，聽出他表面底下真正在意的事，讓他覺得「你真的懂我」。", false],
+  ["一階", "sp_invite", "once", "I", 3, "勇敢邀請一次", "🚀", false, "對一個已經聊過的人，發出一次明確的下一步邀請（見面／體驗／合作），練習臨門一腳、不逃避推進。", false],
 
   /* 先修課（special，開課即開放，看完影片自行打卡）*/
-  ["一階", "pre_method",  "special", "P", 2, "先修課｜2隻學習方法影片", "🎬", false, "看完 2 隻「學習方法」先修影片後打卡，先建立正確的學習節奏。", false],
-  ["一階", "pre_skill",   "special", "A", 2, "先修課｜2隻技巧影片",     "🎬", false, "看完 2 隻「溝通技巧」先修影片後打卡。", false],
-  ["一階", "pre_mindset", "special", "T", 2, "先修課｜2隻心法影片",     "🎬", false, "看完 2 隻「心法」先修影片後打卡，先對齊內在再練技巧。", false],
+  ["一階", "pre_method",  "special", "P", 2, "先修課｜L1.L2影片", "🎬", false, "看完 2 隻「學習方法」先修影片後，到『溝通健身房』打卡 https://liff.line.me/2010316474-wmb1ODe0", false],
+  ["一階", "pre_skill",   "special", "T", 2, "先修課｜L3.L4影片", "🎬", false, "看完 2 隻「問問題」的技法＋心法影片後打卡，並實際落地用一次。", false],
+  ["一階", "pre_mindset", "special", "T", 2, "先修課｜L5.L6影片", "🎬", false, "看完 2 隻「講故事」的技法＋心法影片後打卡，並實際落地用一次。", false],
 
   /* 課程（special，每週乾貨課+討論課+作業，維度＝該週維度）*/
   ["一階", "w1a", "special", "A", 2, "第1週｜乾貨課出席", "📅", false, "完成第1週乾貨課出席打卡。本週 A吸引力：Core1 吸引式溝通4核心・Core2 5大黃金選擇・Core3 秀肌肉・Core4 萬能關鍵問句。", false],
