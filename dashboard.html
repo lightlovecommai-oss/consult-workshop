@@ -380,13 +380,13 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         </div>
       </details>
 
-      <!-- 加到手機桌面（獨立按鈕，置於說明中心最下方）-->
-      <button onclick="addToHomeGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:.3rem;">📲 把變現任務加到手機桌面</button>
-      <div style="font-size:14px;color:#7a5636;margin-bottom:.6rem;padding:0 2px;">點了用瀏覽器打開這頁，照步驟做就能在桌面建圖示，之後一點就進、不用再開 LINE 找。</div>
-
-      <!-- 在電腦上開啟（自助拿個人連結）-->
-      <button onclick="openOnDesktopGuide()" style="display:block;width:100%;background:#fff;color:#e8734a;border:1.5px solid #e8734a;border-radius:12px;padding:13px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:.3rem;">🖥 在電腦上開啟</button>
-      <div style="font-size:14px;color:#7a5636;margin-bottom:.6rem;padding:0 2px;">想在電腦大螢幕看？一鍵複製你的專屬連結，用 LINE 傳給自己、在電腦貼上就能開。</div>
+      <!-- 隨時隨地打開（一組一致的入口鈕；裝成 App 或已在電腦上時整組隱藏）-->
+      <div id="open-anywhere-card" style="background:#fff8f4;border:0.5px solid #f0ddcb;border-radius:14px;padding:12px 14px;margin-top:4px;">
+        <div style="font-size:13px;font-weight:600;color:#9a6b3e;margin-bottom:10px;">📌 隨時隨地打開溝通健身房</div>
+        <button id="btn-addhome" onclick="addToHomeGuide()" style="display:block;width:100%;background:#fff;color:#e8734a;border:1.5px solid #e8734a;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;">📲 把溝通健身房加到手機桌面</button>
+        <button id="btn-desktop" onclick="openOnDesktopGuide()" style="display:block;width:100%;background:#fff;color:#e8734a;border:1.5px solid #e8734a;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;">🖥 在電腦上開啟</button>
+        <div style="font-size:13px;color:#9a8a76;margin-top:9px;line-height:1.6;">加到桌面：一點就進、不用再開 LINE 找。電腦：複製專屬連結貼上就能開。</div>
+      </div>
 
     </div>
 
@@ -1531,6 +1531,23 @@ function openOnDesktopGuide(){
   ov.style.display="block";
   document.getElementById("desktop-close").onclick=function(){ov.style.display="none";};
 }
+
+/* 偵測「已完成」就把對應入口鈕收起來，整組空了就隱藏卡片：
+   - 已裝成 App（standalone 模式從桌面圖示開）→ 兩顆都完成
+   - 已在電腦上（非手機）→「加到手機桌面」不適用、「在電腦開啟」已達成
+   iOS 桌面 App 與 LINE 瀏覽器儲存隔離，無法跨情境得知「是否加過桌面」，
+   因此只用當前可靠訊號（standalone／裝置類型），不靠記憶旗標。 */
+(function(){
+  var ua=navigator.userAgent;
+  var standalone=('standalone' in navigator && navigator.standalone)||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+  var isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  var hideAddhome=standalone||!isMobile;   // 已是 App、或在電腦（桌面鈕本就是給手機的）
+  var hideDesktop=standalone||!isMobile;   // 已是 App、或人已經在電腦上
+  var a=document.getElementById("btn-addhome"), d=document.getElementById("btn-desktop"), card=document.getElementById("open-anywhere-card");
+  if(a&&hideAddhome) a.style.display="none";
+  if(d&&hideDesktop) d.style.display="none";
+  if(card&&hideAddhome&&hideDesktop) card.style.display="none";  // 整組沒東西就整張收起
+})();
 </script>
 </body>
 </html>
