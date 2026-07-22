@@ -384,6 +384,10 @@ details.foldcard .foldbody{padding:0 14px 14px;}
       <button onclick="addToHomeGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:.3rem;">📲 把變現任務加到手機桌面</button>
       <div style="font-size:14px;color:#7a5636;margin-bottom:.6rem;padding:0 2px;">點了用瀏覽器打開這頁，照步驟做就能在桌面建圖示，之後一點就進、不用再開 LINE 找。</div>
 
+      <!-- 在電腦上開啟（自助拿個人連結）-->
+      <button onclick="openOnDesktopGuide()" style="display:block;width:100%;background:#fff;color:#e8734a;border:1.5px solid #e8734a;border-radius:12px;padding:13px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:.3rem;">🖥 在電腦上開啟</button>
+      <div style="font-size:14px;color:#7a5636;margin-bottom:.6rem;padding:0 2px;">想在電腦大螢幕看？一鍵複製你的專屬連結，用 LINE 傳給自己、在電腦貼上就能開。</div>
+
     </div>
 
     <!-- ═══ 分頁 2：成就 ═══ -->
@@ -1477,6 +1481,56 @@ init();
   ov.style.display='block';
   document.getElementById('addhome-close').onclick=function(){ov.style.display='none';};
 })();
+</script>
+
+<!-- 在電腦上開啟：自助拿個人連結（點按鈕才顯示）-->
+<div id="desktop-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(20,12,4,.74);">
+  <div style="position:absolute;left:0;right:0;top:12%;padding:0 22px;text-align:center;">
+    <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:14px;">在電腦上打開你的儀表板 🖥</div>
+    <div style="background:#fff;color:#2d1f0f;border-radius:16px;padding:20px 18px;text-align:left;line-height:1.85;font-size:16px;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:360px;margin:0 auto;">
+      <div style="margin-bottom:6px;">這是你的<b>專屬連結</b>（認得你本人，別公開分享）：</div>
+      <div id="desktop-link" style="word-break:break-all;background:#f7efe4;border-radius:10px;padding:10px 12px;font-size:13px;color:#5a4632;margin-bottom:12px;"></div>
+      <button id="desktop-copy" style="width:100%;background:#e8734a;color:#fff;border:none;border-radius:10px;padding:12px;font-size:16px;font-weight:600;">📋 複製連結</button>
+      <button id="desktop-share" style="display:none;width:100%;margin-top:8px;background:#fff;color:#e8734a;border:1.5px solid #e8734a;border-radius:10px;padding:11px;font-size:15px;font-weight:600;">📨 用 LINE 傳給自己</button>
+      <div style="margin-top:14px;border-top:1px solid #eee2d3;padding-top:12px;">
+        <div style="margin-bottom:6px;"><b style="color:#e8734a;">①</b> 複製連結（或用 LINE 傳給自己）</div>
+        <div style="margin-bottom:6px;"><b style="color:#e8734a;">②</b> 在<b>電腦</b>打開 LINE 或瀏覽器，貼上連結</div>
+        <div><b style="color:#e8734a;">③</b> 開一次之後，那台電腦就會記住你，下次直接開即可 🎉</div>
+      </div>
+    </div>
+    <button id="desktop-close" style="margin-top:18px;background:#e8734a;color:#fff;border:none;border-radius:24px;padding:13px 30px;font-size:16px;font-weight:600;">知道了</button>
+  </div>
+</div>
+<script>
+function openOnDesktopGuide(){
+  var id=new URLSearchParams(location.search).get("id")||"";
+  if(!id){ try{ id=localStorage.getItem("cw_uid")||""; }catch(e){} }
+  var url="https://lightlovecommai-oss.github.io/consult-workshop/?id="+encodeURIComponent(id);
+  var ov=document.getElementById("desktop-overlay"); if(!ov) return;
+  document.getElementById("desktop-link").textContent=url;
+
+  var cp=document.getElementById("desktop-copy");
+  cp.textContent="📋 複製連結";
+  cp.onclick=function(){
+    var done=function(){cp.textContent="✅ 已複製，去電腦貼上";};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done,function(){prompt("複製這個連結，到電腦打開：",url);});}
+    else{prompt("複製這個連結，到電腦打開：",url);}
+  };
+
+  // 若 LINE 分享選單可用，多給一顆「傳給自己」（可傳到 Keep / 任一聊天）
+  var sh=document.getElementById("desktop-share");
+  try{
+    if(window.liff&&liff.isApiAvailable&&liff.isApiAvailable("shareTargetPicker")){
+      sh.style.display="block";
+      sh.onclick=function(){
+        liff.shareTargetPicker([{type:"text",text:"我的溝通健身房儀表板（在電腦打開）：\n"+url}]).catch(function(e){console.log("share error:",e);});
+      };
+    } else { sh.style.display="none"; }
+  }catch(e){ sh.style.display="none"; }
+
+  ov.style.display="block";
+  document.getElementById("desktop-close").onclick=function(){ov.style.display="none";};
+}
 </script>
 </body>
 </html>
