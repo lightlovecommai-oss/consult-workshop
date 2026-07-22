@@ -3,8 +3,6 @@
   "short_name": "溝通健身房",
   "description": "溝通健身房：用任務打卡鍛鍊 ATPI 四力、畫出你的成長與變現軌跡。",
   "lang": "zh-TW",
-  "start_url": "./",
-  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fdfaf6",
