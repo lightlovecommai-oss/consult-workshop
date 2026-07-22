@@ -1,7 +1,7 @@
 {
-  "name": "溝通變現・變現任務儀表板",
-  "short_name": "溝通變現",
-  "description": "變現型顧問實戰營學員儀表板：任務打卡累積 ATPI 四力、畫成長軌跡。",
+  "name": "溝通健身房",
+  "short_name": "溝通健身房",
+  "description": "溝通健身房：用任務打卡鍛鍊 ATPI 四力、畫出你的成長與變現軌跡。",
   "lang": "zh-TW",
   "start_url": "./",
   "scope": "./",

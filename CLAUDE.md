@@ -1,4 +1,4 @@
-# consult-workshop — 變現型顧問實戰營・學員儀表板
+# 溝通健身房（consult-workshop）— 變現型顧問實戰營・學員儀表板
 
 LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫成長圖。
 純 HTML + CSS + 原生 JS，無框架，資料來自 Google Sheet（Apps Script API）。
