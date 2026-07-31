@@ -6,6 +6,9 @@
 
    分頁名稱在 TABS；欄位標題（中文/英文）對照在 COLS，讀寫都吃這張表，
    所以你的分頁維持中文欄名也能用。
+
+   ── 天麗共訓營 (tenlead-1) 在檔尾自成一區「██ 天麗變現共訓營 ██」，
+      單一真相＝TENLEAD_TASKS / TENLEAD_HONORS / TENLEAD_TEAMS。
    ═══════════════════════════════════════════════════════════ */
 
 var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是獨立的，填試算表 ID
@@ -788,11 +791,6 @@ function doPost(e) {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   一鍵初始化：在 Apps Script 編輯器選這個 setup 函式 → 按「執行」一次即可。
-   會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (遊戲)課程 / (遊戲)任務並填資料。
-   第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
-   ═══════════════════════════════════════════════════════════ */
 /* 簡易觸發器：導師在「(遊戲)待審核」把某列「通過」打勾 → 自動寫進打卡紀錄給分、狀態改已通過。
    不用手動安裝，存檔即生效（由編輯的人＝擁有者觸發）。 */
 function onEdit(e) {
@@ -817,6 +815,11 @@ function onEdit(e) {
   } catch (err) { /* onEdit 內錯誤靜默，避免卡住編輯 */ }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   一鍵初始化：在 Apps Script 編輯器選 setup → 按「執行」一次即可。
+   會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (設定)課程 / (設定)任務並填資料。
+   第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
+   ═══════════════════════════════════════════════════════════ */
 function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
@@ -1283,3 +1286,254 @@ var TASKS_SEED = [
   ["一階", "wk5", "weekly", "I", 2, "在一次對話中自然推進一段關係到下一步", "🚀", false,
     "在一次對話中主動推進一段關係到下一步（約下次見面/合作/延續話題）。", false]
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ██ 天麗變現共訓營 (tenlead-1) ██  —— 同一 Sheet 的一個 workshop（不 fork）
+   單一真相：TENLEAD_TASKS（14 任務）／TENLEAD_HONORS（6 徽章）／TENLEAD_TEAMS（15 隊）。
+   第一次上線的操作順序：
+     1) setupTenlead()        建課程 + 任務 + 徽章 + 開通名單加 tenlead-1 欄（一鍵到底）
+     2) 到「(遊戲)開通名單」勾選天麗夥伴的 tenlead-1 欄開通
+     3) assignTenleadTeams()  依姓名批次填「團隊」欄分隊（回報未對到的名字→手動補）
+   之後細修：改 TENLEAD_TASKS 內容 → updateTenleadTasks()（整組覆蓋，安全可重跑）。
+   測試清空：removeTenlead()（連測試打卡/成交一起清，正式上線後勿隨手跑）。
+   ═══════════════════════════════════════════════════════════════════════════ */
+var TENLEAD_WID = "tenlead-1";
+
+/* 任務（14 支・點數 1–5 制）。來源＝productkit 5-逐字稿-raw/直銷團隊共訓營 三堂萃取 CSV 的
+   「練習任務」原子 ＋ 操作/檔期任務。欄位對齊 (設定)任務：
+   workshopId | taskKey | cadence | dim | pts | name | icon | needReview | desc */
+var TENLEAD_TASKS = [
+  ["workshopId","taskKey","cadence","dim","pts","name","icon","needReview","desc"],
+  // ── 每日（4）──
+  ["tenlead-1","tl_praise", "daily","A",1,"稱讚+問句切入 1 人","💬","","遇到人先真心稱讚一個優點，再用開放問句問下去，先不講產品（啟動-05）。"],
+  ["tenlead-1","tl_os",     "daily","T",1,"講出心裡OS：說一句真心話","🫶","","褪去客套，把最不敢講的真心話說出來（秘招2／開發-13）。"],
+  ["tenlead-1","tl_feel",   "daily","I",1,"詢問對方感受：問「你願意聽嗎」","🌸","","開發時至少問一次對方的感受，當顧問不當推銷員（秘招3／開發-14）。"],
+  ["tenlead-1","tl_newlead","daily","I",1,"開發/加 1 位新名單","➕","","每天開發或加 1 位新名單。"],
+  // ── 每週（4）──
+  ["tenlead-1","tl_story",     "weekly","T",2,"先講故事再講產品","📖","","介紹前先講自己的故事（不相信→體驗→有結果），不要一開口就講產品（啟動-07）。"],
+  ["tenlead-1","tl_softline",  "weekly","T",2,"五面向軟線聊 1 人","🧵","","挑一位名單，用 家庭／休閒／經濟／健康／夢想 其中一面向去軟線聊天（列名單-16）。"],
+  ["tenlead-1","tl_call_mentor","weekly","P",2,"跟上線老師通電話一次","📞","","每週跟上線老師通一次電話，請益、對齊、借力。"],
+  ["tenlead-1","tl_run3",      "weekly","I",3,"三秘招跑名單","🎯","","用開發新人三秘招去跑上次列的名單，不能解決的跟上線討論（開發-15）。"],
+  // ── 里程碑（4・需審核）──
+  ["tenlead-1","tl_selfeval","once","T",2,"四維自評密碼","🔢",true,"四種能力各給自己打 0–10 分，用「名字:7657」格式丟大群組（啟動-03）。"],
+  ["tenlead-1","tl_abcd",    "once","A",3,"ABCD 名單盤點","📋",true,"依 A最熟／B一般熟／C半生不熟／D陌生 四級把身邊名單分級列出（列名單-15）。"],
+  ["tenlead-1","tl_asklist", "once","T",2,"帶名單求上線討論","🗣️",true,"拿 3–5 個想幫助的名單跟上線老師討論怎麼幫他（列名單-17）。"],
+  ["tenlead-1","tl_result",  "once","P",3,"寫具體結果","✨",true,"寫下你能帶給別人的具體結果，用名詞/數據不用形容詞（秘招1／開發-12）。"],
+  // ── 挑戰營（2・需審核）──
+  ["tenlead-1","tl_camp1","special","I",5,"挑戰營第一次上課（8/2 實戰工作坊1）","🏫",true,"完成 8/2(日) 8:00-9:30 挑戰業績・變現實戰工作坊1。"],
+  ["tenlead-1","tl_camp2","special","I",5,"挑戰營第二次上課（8/16 實戰工作坊2）","🏫",true,"完成 8/16(日) 8:00-9:30 挑戰業績・變現實戰工作坊2。"]
+];
+
+/* 徽章（scope=workshop 用天麗打卡/成交過濾）。解鎖判定＝該人 metric >= value。
+   欄位對齊 (設定)榮譽品項：honorId | workshopId | metric | value | icon | name | desc | tier | celebrate | scope */
+var TENLEAD_HONORS = [
+  ["honorId","workshopId","metric","value","icon","name","desc","tier","celebrate","scope"],
+  ["tl_firstdeal","tenlead-1","dealCount",    1,      "🎉","天麗開紅盤","課程期間簽下第一單",       "銅",true,"workshop"],
+  ["tl_deal5",    "tenlead-1","dealCount",    5,      "🔥","連續開單手","累積簽下 5 單，證明可複製", "銀",true,"workshop"],
+  ["tl_rev10w",   "tenlead-1","revenueTotal", 100000, "💎","十萬戰將",  "課程期間做出 10 萬營業額",  "金",true,"workshop"],
+  ["tl_streak7",  "tenlead-1","streak",       7,      "🌟","七日不斷",  "連續 7 天完成打卡",         "銀",true,"workshop"],
+  ["tl_trust",    "tenlead-1","investPct.T",  50,     "🤝","信賴達人",  "信任力投入衝到 50%",        "銀",true,"workshop"],
+  ["tl_push",     "tenlead-1","investPct.I",  50,     "🚀","推進高手",  "推進力投入衝到 50%",        "銀",true,"workshop"]
+];
+
+/* 分隊：同隊名自動成組（≥2 隊才顯示戰隊區）。隊名先用「1隊…15隊」，改第二欄即可改名。
+   靠「姓名」與開通名單比對（互為包含即命中），未對到會回報→手動補。 */
+var TENLEAD_TEAMS = [
+  ["若鳳","1隊"],["秀蘭","1隊"],["美惠","1隊"],
+  ["惠青","2隊"],["琦淇","2隊"],["家家","2隊"],
+  ["小蔓","3隊"],["朵朵","3隊"],["雅芬","3隊"],
+  ["小米","4隊"],["玟慧","4隊"],["麗嘉瑩","4隊"],
+  ["張妤蘭","5隊"],["何冠忻","5隊"],
+  ["張芸芸","6隊"],["朝玲","6隊"],
+  ["惠怡","7隊"],["吳宥溱","7隊"],
+  ["佩燕","8隊"],["慧敏","8隊"],
+  ["美琴","9隊"],["碧勳","9隊"],
+  ["秀蓁","10隊"],["瑞娥","10隊"],
+  ["覃靖涵","11隊"],["孔祥田","11隊"],["心柔","11隊"],
+  ["豫臻","12隊"],["黃麗星","12隊"],
+  ["啟英","13隊"],["愛花","13隊"],["李素靜","13隊"],
+  ["幸伶","14隊"],["Sherene","14隊"],["Yes","14隊"],
+  ["Vivi","15隊"],["小庭","15隊"]
+];
+
+/* 一鍵：建課程 + 任務 + 徽章 + 開通欄。安全可重跑（任務整組覆蓋、其餘已存在就跳過）。 */
+function setupTenlead() {
+  var a = tl_ensureWorkshop_();
+  var b = updateTenleadTasks();
+  var c = tl_appendSeed_(TABS.honors, TENLEAD_HONORS, "honorId", null);
+  var d = addTenleadEnrollColumn();
+  return [a, b, c, d].join("；");
+}
+
+/* 確保 (設定)課程 有 tenlead-1 列：存在就設 active/team=TRUE，不存在就 append。 */
+function tl_ensureWorkshop_() {
+  var sh = ss_().getSheetByName(TABS.workshops);
+  if (!sh) return "找不到 " + TABS.workshops;
+  var h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(x){ return String(x).trim(); });
+  var idC = h.indexOf("workshopId"), aC = h.indexOf("active"), tC = h.indexOf("team");
+  if (idC < 0) return TABS.workshops + " 缺 workshopId 欄";
+  var data = sh.getDataRange().getValues();
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][idC]).trim() === TENLEAD_WID) {
+      if (aC > -1) sh.getRange(r + 1, aC + 1).setValue(true);
+      if (tC > -1) sh.getRange(r + 1, tC + 1).setValue(true);
+      return "課程 tenlead-1 已存在，設 active/team=TRUE";
+    }
+  }
+  var line = h.map(function(col){
+    if (col === "workshopId") return TENLEAD_WID;
+    if (col === "name")       return "天麗變現共訓營";
+    if (col === "active")     return true;
+    if (col === "team")       return true;
+    return "";
+  });
+  sh.appendRow(line);
+  return "已新增課程 tenlead-1";
+}
+
+/* 天麗任務整組覆蓋：把 tenlead-1 舊列全濾掉，依 TENLEAD_TASKS 重寫。
+   一次清空+一次寫回（不逐列 deleteRow，避免 GAS「發生不明錯誤」）。其餘課程原順序保留。 */
+function updateTenleadTasks() {
+  var sh = ss_().getSheetByName(TABS.tasks);
+  if (!sh) return "找不到任務分頁";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
+  var wC = h.indexOf("workshopId");
+  if (wC < 0) return "任務分頁缺 workshopId 欄";
+  var all = lastRow > 1 ? sh.getRange(2, 1, lastRow - 1, lastCol).getValues() : [];
+  var kept = all.filter(function(r){ return String(r[wC]).trim() !== TENLEAD_WID; });
+  var removed = all.length - kept.length;
+  var header = TENLEAD_TASKS[0];
+  var seedRows = [];
+  for (var s = 1; s < TENLEAD_TASKS.length; s++) {
+    var row = TENLEAD_TASKS[s];
+    seedRows.push(h.map(function(col){ var ci = header.indexOf(col); return ci > -1 ? row[ci] : ""; }));
+  }
+  var body = kept.concat(seedRows);
+  if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+  if (body.length) sh.getRange(2, 1, body.length, lastCol).setValues(body);
+  return "天麗任務：移除舊 " + removed + " 列、寫入 " + seedRows.length + " 列";
+}
+
+/* 依表頭把 seed（第一列＝欄名）append 進分頁；同 keyCol 值已存在就跳過（給徽章用）。
+   scopeWid 有值時只在該 workshop 範圍內判重；分頁不存在會自動建表頭。 */
+function tl_appendSeed_(tab, seed, keyCol, scopeWid) {
+  var sh = ss_().getSheetByName(tab);
+  if (!sh) { sh = ss_().insertSheet(tab); sh.getRange(1, 1, 1, seed[0].length).setValues([seed[0]]); }
+  var h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(x){ return String(x).trim(); });
+  var header = seed[0];
+  var kSeed = header.indexOf(keyCol);
+  var shKC = h.indexOf(keyCol), shWC = h.indexOf("workshopId");
+  var existing = {};
+  var data = sh.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (scopeWid && shWC > -1 && String(data[i][shWC]).trim() !== scopeWid) continue;
+    if (shKC > -1) existing[String(data[i][shKC]).trim()] = true;
+  }
+  var toAdd = [];
+  for (var s = 1; s < seed.length; s++) {
+    var row = seed[s];
+    if (existing[String(row[kSeed]).trim()]) continue;
+    toAdd.push(h.map(function(col){ var ci = header.indexOf(col); return ci > -1 ? row[ci] : ""; }));
+  }
+  if (toAdd.length) sh.getRange(sh.getLastRow() + 1, 1, toAdd.length, h.length).setValues(toAdd);
+  return tab + " 新增 " + toAdd.length + " 列（已存在的已跳過）";
+}
+
+/* 在 (遊戲)開通名單 加一欄「tenlead-1」並套核取方塊（欄名必須＝workshopId，程式才讀得到）。
+   已存在就只補套核取方塊，不重複加欄。 */
+function addTenleadEnrollColumn() {
+  var sh = ss_().getSheetByName(TABS.enrollments);
+  if (!sh) return "找不到 " + TABS.enrollments;
+  var lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var col = headers.indexOf(TENLEAD_WID) + 1;
+  var added = false;
+  if (col < 1) { col = lastCol + 1; sh.getRange(1, col).setValue(TENLEAD_WID); added = true; }
+  var lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    var rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+    var rng = sh.getRange(2, col, lastRow - 1, 1);
+    rng.setDataValidation(rule);
+    var cur = rng.getValues(), changed = false;
+    for (var i = 0; i < cur.length; i++) { if (cur[i][0] === "" || cur[i][0] === null) { cur[i][0] = false; changed = true; } }
+    if (changed) rng.setValues(cur);
+  }
+  return "開通名單 " + (added ? "已新增" : "已存在") + " 「" + TENLEAD_WID + "」欄（第 " + col + " 欄），已套核取方塊";
+}
+
+/* 依姓名批次填「團隊」欄分隊。只覆蓋對到的天麗夥伴列，其他人不動；未對到會回報。
+   前提：該夥伴已在開通名單有列、姓名對得上 LINE 顯示名。 */
+function assignTenleadTeams() {
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return "找不到開通名單";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2) return "開通名單沒有學員列";
+  var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
+  var nameC = -1, teamC = -1;
+  for (var c = 0; c < h.length; c++) {
+    if (nameC < 0 && ["姓名","LINE名稱","name"].indexOf(h[c]) > -1) nameC = c;
+    if (teamC < 0 && ["團隊","team"].indexOf(h[c]) > -1) teamC = c;
+  }
+  if (nameC < 0) return "找不到「姓名」欄";
+  if (teamC < 0) { teamC = lastCol; sh.getRange(1, teamC + 1).setValue("團隊"); }
+  var names = sh.getRange(2, nameC + 1, lastRow - 1, 1).getValues();
+  var out = sh.getRange(2, teamC + 1, lastRow - 1, 1).getValues();
+  var matched = {}, count = 0;
+  for (var i = 0; i < names.length; i++) {
+    var nm = String(names[i][0]).trim();
+    if (!nm) continue;
+    for (var t = 0; t < TENLEAD_TEAMS.length; t++) {
+      var key = TENLEAD_TEAMS[t][0];
+      if (nm === key || nm.indexOf(key) > -1 || key.indexOf(nm) > -1) {
+        out[i][0] = TENLEAD_TEAMS[t][1]; matched[key] = 1; count++; break;
+      }
+    }
+  }
+  sh.getRange(2, teamC + 1, lastRow - 1, 1).setValues(out);
+  var missing = TENLEAD_TEAMS.filter(function(x){ return !matched[x[0]]; }).map(function(x){ return x[0] + "(" + x[1] + ")"; });
+  return "已分隊 " + count + " 人；未對到（需手動填）：" + (missing.join("、") || "無");
+}
+
+/* 測試用：完全移除天麗——刪 (設定)任務/榮譽品項/課程 的 tenlead-1 列、
+   (遊戲)打卡紀錄/成交紀錄 課程=tenlead-1 的列、(遊戲)開通名單 的 tenlead-1 欄。別的課不動。 */
+function removeTenlead() {
+  var msgs = [];
+  msgs.push(tl_deleteRowsByWid_(TABS.tasks,     ["workshopId"]));
+  msgs.push(tl_deleteRowsByWid_(TABS.honors,    ["workshopId"]));
+  msgs.push(tl_deleteRowsByWid_(TABS.workshops, ["workshopId"]));
+  msgs.push(tl_deleteRowsByWid_(TABS.checkins,  ["課程", "workshopId"]));
+  msgs.push(tl_deleteRowsByWid_(TABS.revenue,   ["課程", "workshopId"]));
+  msgs.push(tl_removeEnrollColumn_());
+  return msgs.join("；");
+}
+
+/* 刪某分頁裡「課程欄＝tenlead-1」的所有列（由下往上刪才不會位移）。 */
+function tl_deleteRowsByWid_(tab, aliases) {
+  var sh = ss_().getSheetByName(tab);
+  if (!sh) return tab + " 不存在";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2 || lastCol < 1) return tab + " 無資料";
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var wc = -1;
+  for (var a = 0; a < aliases.length; a++) { var idx = headers.indexOf(aliases[a]); if (idx > -1) { wc = idx; break; } }
+  if (wc < 0) return tab + " 找不到課程欄";
+  var vals = sh.getRange(2, wc + 1, lastRow - 1, 1).getValues();
+  var deleted = 0;
+  for (var r = vals.length - 1; r >= 0; r--) {
+    if (String(vals[r][0]).trim() === TENLEAD_WID) { sh.deleteRow(r + 2); deleted++; }
+  }
+  return tab + " 刪 " + deleted + " 列";
+}
+
+/* 刪 (遊戲)開通名單 的 tenlead-1 欄。 */
+function tl_removeEnrollColumn_() {
+  var sh = ss_().getSheetByName(TABS.enrollments);
+  if (!sh) return "開通名單不存在";
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+  var col = headers.indexOf(TENLEAD_WID) + 1;
+  if (col < 1) return "開通名單無 tenlead-1 欄";
+  sh.deleteColumn(col);
+  return "開通名單刪 tenlead-1 欄";
+}
