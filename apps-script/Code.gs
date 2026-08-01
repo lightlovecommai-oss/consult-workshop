@@ -322,6 +322,49 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
+/* ── Kit (ConvertKit) 電子報串接 ──────────────────────────────
+   把測驗名單（有 email 的）同步進 Kit：先 upsert 訂閱者（帶姓名＋ATPI 自訂欄），
+   再打上一個 tag（＝進哪份電子報／區隔）。任何失敗只記 log，不影響寫入 Sheet。
+
+   設定：Apps Script →「專案設定 → 指令碼屬性」新增兩把：
+     KIT_API_KEY = 你的 Kit v4 API Key（Kit 後台 Settings → Advanced → API）
+     KIT_TAG_ID  = 要打的 tag id（Kit 後台 Grow → Tags；沒填就只建訂閱者不分區）
+   沒設 KIT_API_KEY 時整段直接跳過（本地/未上線不會噴錯）。 */
+function addToKit_(email, firstName, fields) {
+  try {
+    email = String(email || "").trim();
+    if (!email || email.indexOf("@") < 0) return;                    // 沒 email（純 LINE 用戶）就跳過
+    var props = PropertiesService.getScriptProperties();
+    var apiKey = props.getProperty("KIT_API_KEY");
+    if (!apiKey) return;                                             // 未設定＝不串
+    var tagId = props.getProperty("KIT_TAG_ID");
+    var headers = { "X-Kit-Api-Key": apiKey };
+
+    // 1) upsert 訂閱者（同 email 會更新，不會重複）
+    var subBody = { email_address: email };
+    if (firstName) subBody.first_name = String(firstName);
+    if (fields && Object.keys(fields).length) subBody.fields = fields;
+    var r1 = UrlFetchApp.fetch("https://api.kit.com/v4/subscribers", {
+      method: "post", contentType: "application/json",
+      headers: headers, payload: JSON.stringify(subBody), muteHttpExceptions: true
+    });
+    if (r1.getResponseCode() >= 300)
+      Logger.log("Kit subscriber 失敗 " + r1.getResponseCode() + ": " + r1.getContentText());
+
+    // 2) 打 tag（＝訂閱到某份電子報／區隔）
+    if (tagId) {
+      var r2 = UrlFetchApp.fetch("https://api.kit.com/v4/tags/" + tagId + "/subscribers", {
+        method: "post", contentType: "application/json",
+        headers: headers, payload: JSON.stringify({ email_address: email }), muteHttpExceptions: true
+      });
+      if (r2.getResponseCode() >= 300)
+        Logger.log("Kit tag 失敗 " + r2.getResponseCode() + ": " + r2.getContentText());
+    }
+  } catch (kerr) {
+    Logger.log("Kit 串接例外: " + kerr);                            // 絕不讓 Kit 影響主流程
+  }
+}
+
 /* 測驗完自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
    已存在同 userId 就不動，避免重複。 */
 function ensureRosterRow_(lineId, name) {
@@ -783,6 +826,10 @@ function doPost(e) {
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
       upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals);  // 同 userId 更新那列，重測/重開不重複
       ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）
+      addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
+        atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
+        main_ability: body.mainAbility || "", income_level: body.incomeLevel || "", job: body.job || ""
+      });
       return json_({ status: "ok" });
     }
     return json_({ status: "error", message: "unknown action" });
@@ -1290,7 +1337,7 @@ var TASKS_SEED = [
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ██ 天麗變現共訓營 (tenlead-1) ██  —— 同一 Sheet 的一個 workshop（不 fork）
-   單一真相：TENLEAD_TASKS（14 任務）／TENLEAD_HONORS（6 徽章）／TENLEAD_TEAMS（15 隊）。
+   單一真相：TENLEAD_TASKS（25 任務）／TENLEAD_HONORS（6 徽章）／TENLEAD_TEAMS（15 隊）。
    第一次上線的操作順序：
      1) setupTenlead()        建課程 + 任務 + 徽章 + 開通名單加 tenlead-1 欄（一鍵到底）
      2) 到「(遊戲)開通名單」勾選天麗夥伴的 tenlead-1 欄開通
@@ -1300,29 +1347,39 @@ var TASKS_SEED = [
    ═══════════════════════════════════════════════════════════════════════════ */
 var TENLEAD_WID = "tenlead-1";
 
-/* 任務（14 支・點數 1–5 制）。來源＝productkit 5-逐字稿-raw/直銷團隊共訓營 三堂萃取 CSV 的
+/* 任務（25 支・每日8選3／每週5選2／里程碑6／課程6・全自打卡）。來源＝productkit 5-逐字稿-raw/直銷團隊共訓營 三堂萃取 CSV 的
    「練習任務」原子 ＋ 操作/檔期任務。欄位對齊 (設定)任務：
    workshopId | taskKey | cadence | dim | pts | name | icon | needReview | desc */
 var TENLEAD_TASKS = [
   ["workshopId","taskKey","cadence","dim","pts","name","icon","needReview","desc"],
-  // ── 每日（4）──
-  ["tenlead-1","tl_praise", "daily","A",1,"稱讚+問句切入 1 人","💬","","遇到人先真心稱讚一個優點，再用開放問句問下去，先不講產品（啟動-05）。"],
-  ["tenlead-1","tl_os",     "daily","T",1,"講出心裡OS：說一句真心話","🫶","","褪去客套，把最不敢講的真心話說出來（秘招2／開發-13）。"],
-  ["tenlead-1","tl_feel",   "daily","I",1,"詢問對方感受：問「你願意聽嗎」","🌸","","開發時至少問一次對方的感受，當顧問不當推銷員（秘招3／開發-14）。"],
-  ["tenlead-1","tl_newlead","daily","I",1,"開發/加 1 位新名單","➕","","每天開發或加 1 位新名單。"],
-  // ── 每週（4）──
-  ["tenlead-1","tl_story",     "weekly","T",2,"先講故事再講產品","📖","","介紹前先講自己的故事（不相信→體驗→有結果），不要一開口就講產品（啟動-07）。"],
-  ["tenlead-1","tl_softline",  "weekly","T",2,"五面向軟線聊 1 人","🧵","","挑一位名單，用 家庭／休閒／經濟／健康／夢想 其中一面向去軟線聊天（列名單-16）。"],
+  // ── 每日池 7 支（每天做 3；A1／T2／P2／I2）──
+  ["tenlead-1","tl_praise",    "daily","A",1,"練習「稱讚+問句」跟客戶對話","💬","","用「先真心稱讚一個優點，再用開放問句往下問」跟一位客戶對話練習，先不講產品（啟動-05）。"],
+  ["tenlead-1","tl_care",      "daily","T",1,"發一則關心訊息給客戶/夥伴","💌","","主動發一則關心訊息給客戶或夥伴，維繫關係。"],
+  ["tenlead-1","tl_os",        "daily","T",1,"講出心裡OS：對任何人說一句本來不敢說的心話","🫶","","褪去客套，對任何人說出一句你本來不敢說的真心話（秘招2／開發-13）。"],
+  ["tenlead-1","tl_sellresult","daily","P",1,"不賣產品賣結果：分享一次你的天麗故事","✨","","不賣產品賣結果——分享一次你自己的天麗故事或使用後的具體轉變（秘招1）。"],
+  ["tenlead-1","tl_feel",      "daily","I",1,"詢問對方感受：問「你願意聽嗎」","🌸","","開發時至少問一次對方的感受，當顧問不當推銷員（秘招3／開發-14）。"],
+  ["tenlead-1","tl_newlead",   "daily","I",1,"開接觸 1 位新名單","➕","","每天主動接觸/開發 1 位新名單。"],
+  ["tenlead-1","tl_learn",     "daily","P",1,"精進 1 次專業知識","📚","","學一個產品或專業知識點，並記錄下來。"],
+  // ── 每週池 5 支（每週做 2）──
+  ["tenlead-1","tl_post",       "weekly","A",2,"社群發一則貼文（見證/故事）吸引人","📱","","用見證或故事的結構發一則貼文/限動，吸引人來詢問。"],
   ["tenlead-1","tl_call_mentor","weekly","P",2,"跟上線老師通電話一次","📞","","每週跟上線老師通一次電話，請益、對齊、借力。"],
-  ["tenlead-1","tl_run3",      "weekly","I",3,"三秘招跑名單","🎯","","用開發新人三秘招去跑上次列的名單，不能解決的跟上線討論（開發-15）。"],
-  // ── 里程碑（4・需審核）──
-  ["tenlead-1","tl_selfeval","once","T",2,"四維自評密碼","🔢",true,"四種能力各給自己打 0–10 分，用「名字:7657」格式丟大群組（啟動-03）。"],
-  ["tenlead-1","tl_abcd",    "once","A",3,"ABCD 名單盤點","📋",true,"依 A最熟／B一般熟／C半生不熟／D陌生 四級把身邊名單分級列出（列名單-15）。"],
-  ["tenlead-1","tl_asklist", "once","T",2,"帶名單求上線討論","🗣️",true,"拿 3–5 個想幫助的名單跟上線老師討論怎麼幫他（列名單-17）。"],
-  ["tenlead-1","tl_result",  "once","P",3,"寫具體結果","✨",true,"寫下你能帶給別人的具體結果，用名詞/數據不用形容詞（秘招1／開發-12）。"],
-  // ── 挑戰營（2・需審核）──
-  ["tenlead-1","tl_camp1","special","I",5,"挑戰營第一次上課（8/2 實戰工作坊1）","🏫",true,"完成 8/2(日) 8:00-9:30 挑戰業績・變現實戰工作坊1。"],
-  ["tenlead-1","tl_camp2","special","I",5,"挑戰營第二次上課（8/16 實戰工作坊2）","🏫",true,"完成 8/16(日) 8:00-9:30 挑戰業績・變現實戰工作坊2。"]
+  ["tenlead-1","tl_story",      "weekly","T",2,"做到先講故事再講產品","📖","","介紹前先講自己的故事（不相信→體驗→有結果），不要一開口就講產品（啟動-07）。"],
+  ["tenlead-1","tl_understand", "weekly","T",2,"做到不急著講產品，先了解對方","👂","","這週至少一次，忍住不推產品，先用問句了解對方的需求與煩惱，讓他覺得你真的懂他。"],
+  ["tenlead-1","tl_updatelist", "weekly","I",2,"名單內更新自己的客戶狀況","🗂️","","更新名單裡客戶的最新狀況/溫度（誰進到哪一步），讓名單保持是活的。"],
+  // ── 里程碑・一次性 6 支（行動/結果型，自打卡免審核）──
+  ["tenlead-1","tl_goal",   "once","I",2,"寫下你的九月業績目標","🎯","","寫下你九月要創造的業績/收入目標數字（啟動-16）。"],
+  ["tenlead-1","tl_abcd",   "once","A",3,"寫下你的名單","📋","","把身邊的名單完整寫下來（可依 A最熟／B一般熟／C半生不熟／D陌生 分級）（列名單-15）。"],
+  ["tenlead-1","tl_comm5",  "once","T",3,"用盡全力溝通 5 個名單（無論結果）","🗣️","","對 5 個名單用盡全力真誠溝通，不論成交與否都算完成。"],
+  ["tenlead-1","tl_comm10", "once","T",5,"用盡全力溝通 10 個名單（無論結果）","🗣️","","對 10 個名單用盡全力真誠溝通，不論成交與否都算完成。"],
+  ["tenlead-1","tl_firstsale",   "once","I",5,"成功成交一筆訂單","💰","","成功賣出產品、做出一筆業績（賣貨）。"],
+  ["tenlead-1","tl_signdownline","once","I",5,"成功簽下一位下線夥伴","🤝","","成功邀請並簽下第一位下線夥伴加入團隊（拉人）。"],
+  // ── 課程打卡 6 堂（special，自打卡免審核）──
+  ["tenlead-1","tl_micro1","special","A",3,"微課堂｜列名單是給出愛（7/19）","🎓","","參加 7/19(日) 8:00-9:00「列名單是給出愛」微課堂。"],
+  ["tenlead-1","tl_micro2","special","T",3,"微課堂｜開發新人3秘招（7/26）","🎓","","參加 7/26(日) 8:00-9:00「開發新人3秘招」微課堂。"],
+  ["tenlead-1","tl_micro3","special","P",3,"微課堂｜上下合作10倍勝秘訣（8/2）","🎓","","參加 8/2(日) 8:00-9:30「上下合作10倍勝秘訣」微課堂。"],
+  ["tenlead-1","tl_ws1","special","I",5,"挑戰工作坊｜變現實戰1（8/9）","🏆","","參加 8/9(日) 8:00-9:30「變現實戰工作坊1・挑戰業績」。"],
+  ["tenlead-1","tl_ws2","special","I",5,"挑戰工作坊｜小單變大單（8/16）","🏆","","參加 8/16(日) 8:00-9:00「小單變大單方法」。"],
+  ["tenlead-1","tl_ws3","special","I",5,"挑戰工作坊｜變現實戰2（8/23）","🏆","","參加 8/23(日) 8:00-9:30「變現實戰工作坊2・挑戰業績」。"]
 ];
 
 /* 徽章（scope=workshop 用天麗打卡/成交過濾）。解鎖判定＝該人 metric >= value。
