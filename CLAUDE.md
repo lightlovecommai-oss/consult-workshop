@@ -1,5 +1,7 @@
 # 溝通健身房（consult-workshop）— 變現型顧問實戰營・學員儀表板
 
+> ↔ **企劃大腦**：本專案是產品「溝通健身房（1+1 陪跑引擎）」的執行。產品定義／商業模式見 `../../5-企劃與產品手冊/productkit`（核心概念真相＝`1-手冊（內部）/01-核心定義字典.md`）。
+
 LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫成長圖。
 純 HTML + CSS + 原生 JS，無框架，資料來自 Google Sheet（Apps Script API）。
 
@@ -50,6 +52,7 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 - 尚待後端：`checkins` 加 `workshopId`、`workshops`/`tasks`/`enrollments` 分頁、資料驅動任務、各 workshop 分榜 UI。全貌見專案記憶 multi-workshop-architecture。
 
 ## 已知待處理
+- **一階大改版・子肌群層**（產品定義見 productkit 04「L1 一週迴路」）：①打卡計分要細到子肌群 A1/A2/A3 各自累積（現行只算 A/T/P/I 四維），健檢報告畫三條子進度條。②每日打卡順手做子肌群自評 1–5（列健身房代辦·實驗中，效果待觀察）。任務仍走 `tasks` 分頁 schema（cadence/dim/pts），dim 仍是 A，子肌群用 taskKey 區分。
 - 計分口徑：每維能力 = 投入%（**飽和曲線** `100 × 累積分 /(累積分 + DIMS[k].k)`，累積到 `k` 分＝50%，永遠逼近 100 不爆表）× 市場驗證係數（`validationFactor`，見計分常數 `TARGET_AMOUNT`/`TARGET_COUNT`/`VALID_FLOOR`）。`DIMS[k].k`（半滿點，取代舊的固定滿分 `max`）與 `TARGET_*` 都是軟旋鈕，待真實數據微調。設計全貌見專案記憶 scoring-model-design。
 - 等級門檻 `LEVELS`（0/10/18/24/29）是舊「29 滿分」模型留下的；`totalScore` 現含每日/每週會無限累積，血條已改 `levelProgress()` 走「到下一級的進度」不爆表，但門檻本身要不要納入每日/每週、重新設計，待定。
 - 打卡與成交**都已接 Google Sheet 持久化**：載入用 `loadLogs()`（GET `?action=logs`）讀回、`postCheckin()`/`postRevenue()`（POST）寫入「打卡紀錄」/「成交紀錄」分頁；成交會存下當下四維分數快照供走勢圖用。自評起點用 `loadSelfEval()`（GET `?userId=`）讀同一試算表的測驗結果，只顯示不計分。
