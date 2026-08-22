@@ -155,8 +155,39 @@ function daysAgoStr(n) {
   return todayStr(d);
 }
 
+/* demo 模式（?demo=1）：後端還沒部署時試畫面用，假資料全在前端、校準不寫 Sheet。 */
+var DEMO = false;
+function demoStudents() {
+  function ago(i){ var d = new Date(Date.now() - i * 86400000); return todayStr(d); }
+  function ck(mk, i){ return { workshopId:"一階", taskKey:"m_" + mk.toLowerCase(), cadence:"daily",
+                               dim:mk.charAt(0), muscle:mk, pts:1, date:ago(i) }; }
+  function ev(mk, sc, src, i){ return { muscle:mk, score:sc, source:src || "self", date:ago(i == null ? 6 : i), week:"" }; }
+  return {
+    DEMO1: { lineId:"DEMO1", name:"王小明（示範）", team:"關",
+      checkinLog: Array.from({length:12}, function(_, i){ return ck("A2", i + 1); })
+        .concat([ck("A1", 2), ck("A1", 5), ck("P2", 3)]),
+      revenueLog: [],
+      evalLog: [ev("A1",3,"quiz",20), ev("A2",2), ev("A3",4), ev("T1",4), ev("T2",3,"coach"),
+                ev("T3",5), ev("P1",3), ev("P2",1), ev("P3",3)] },
+    DEMO2: { lineId:"DEMO2", name:"李美華（示範・全新）", team:"關",
+      checkinLog: [], revenueLog: [], evalLog: [] }
+  };
+}
+
 async function boot() {
   SINCE = daysAgoStr(30);
+  if (new URLSearchParams(location.search).get("demo") === "1") {
+    DEMO = true;
+    postToSheet = function(){ return Promise.resolve(); };
+    var ds = demoStudents();
+    STUDENTS = Object.keys(ds).map(function(k){ return { lineId:k, name:ds[k].name }; });
+    var dp = el("pick");
+    dp.innerHTML = '<option value="">選一位學員…</option>' + STUDENTS.map(function(s){
+      return '<option value="' + esc_(s.lineId) + '">' + esc_(s.name) + '</option>'; }).join("");
+    dp.onchange = function(){ if (dp.value) { S = ds[dp.value]; CAL = {}; render(); } };
+    dp.value = "DEMO1"; S = ds.DEMO1; render();
+    return;
+  }
   try {
     await Promise.all([loadConfig(), loadStudents()]);
   } catch (e) {

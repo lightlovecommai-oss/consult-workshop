@@ -217,9 +217,48 @@ function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(
 function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
 function pct5(v){ return Math.max(0, Math.min(100, (v - 1) / 4 * 100)); }
 
+/* ── demo 模式（?demo=1）──
+   給「還沒接後端」時試互動用：假資料全在前端，開練不寫 Sheet。
+   線上後端部署完成後就不需要它，但留著也能當招生示範。 */
+var DEMO = false;
+function demoState() {
+  function ago(i){ var d = new Date(Date.now() - i * 86400000); return todayStr(d); }
+  function ck(mk, i, target, rel, reaction) {
+    return { workshopId:"", taskKey:"m_" + mk.toLowerCase(), cadence:"daily", dim:mk.charAt(0),
+             muscle:mk, pts:1, date:ago(i), week:weekStr(new Date(ago(i))),
+             target:target || "", rel:rel || "", reaction:reaction || "", note:"" };
+  }
+  return {
+    lineId:"DEMO", name:"Amy", team:"",
+    checkinLog:[ ck("A1",1,"陳大哥","工作","明顯有"), ck("T2",2,"陳大哥","工作","超乎預期"),
+                 ck("P1",3,"陳大哥","工作","有一點"), ck("A2",3,"林小姐","客戶","沒特別"),
+                 ck("A1",4,"妹妹","家人","明顯有"), ck("T2",5,"妹妹","家人","超乎預期"),
+                 ck("A3",6,"妹妹","家人","有一點"), ck("A1",7,"陳大哥","工作","有一點") ],
+    revenueLog:[],
+    evalLog:[ {muscle:"A1",score:3,source:"quiz",date:ago(20),week:""},
+              {muscle:"A2",score:2,source:"self",date:ago(6),week:""},
+              {muscle:"A3",score:2,source:"self",date:ago(6),week:""},
+              {muscle:"T1",score:4,source:"self",date:ago(6),week:""},
+              {muscle:"T2",score:3,source:"self",date:ago(6),week:""},
+              {muscle:"T3",score:5,source:"self",date:ago(6),week:""},
+              {muscle:"P1",score:3,source:"self",date:ago(6),week:""},
+              {muscle:"P2",score:1,source:"coach",date:ago(6),week:""},
+              {muscle:"P3",score:3,source:"self",date:ago(6),week:""} ]
+  };
+}
+
 /* ── 開機 ── */
 async function boot() {
-  var uid = new URLSearchParams(location.search).get("id");
+  var qs = new URLSearchParams(location.search);
+  if (qs.get("demo") === "1") {
+    DEMO = true;
+    postToSheet = function(){ return Promise.resolve(); };   // demo 不寫 Sheet
+    TASKS = []; S = demoState(); WID = "";
+    el("nav").classList.remove("hide");
+    render();
+    return;
+  }
+  var uid = qs.get("id");
   if (!uid) {
     try {
       await liff.init({ liffId: LIFF_ID });
@@ -251,7 +290,7 @@ function go(p){
 }
 
 function render(){
-  el("joinday").textContent = "入館第 " + daysSinceJoin(S) + " 天";
+  el("joinday").textContent = (DEMO ? "示範・" : "") + "入館第 " + daysSinceJoin(S) + " 天";
   if (REC) { el("bd").innerHTML = recHTML(); bindRec(); return; }
   var h = PANE === "today" ? todayHTML()
         : PANE === "body" ? bodyHTML()
