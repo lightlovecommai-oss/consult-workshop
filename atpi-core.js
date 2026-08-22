@@ -1,11 +1,81 @@
 /* ═══════════════════════════════════════════════════════════
    ATPI 核心共用檔（跨專案共用，改這裡兩個專案會一起生效）
    使用專案：consult-workshop（任務儀表板）、comconverttest（測驗結果頁）
-   內容：四維度順序、潛力值公式、變現路徑文案庫
+   內容：4 大肌肉順序、潛力值公式、變現路徑文案庫
    不放這裡：各專案自己的計分方式、題庫/任務庫、LIFF/Sheet 設定
    ═══════════════════════════════════════════════════════════ */
 
 var DORD = ["A", "T", "P", "I"];
+
+/* ═══════════════════════════════════════════════════════════
+   12 小肌群（唯一真相＝productkit《01-核心定義字典》ATPI 條）
+   每個大肌肉拆 3 個「可週測」的行為小肌群，共 12 項（數量鎖定，不增減）。
+   name＝小肌群名｜tech＝代表技巧｜ask＝週測問法（看有無具體事例，不憑感覺）
+   result＝會員模式的結果句（字典「兩種語言」條：會員看結果、學員看框架）
+   ⚠️ 改名字前先改字典，這裡跟著改；comconverttest 也吃這份定義。
+   ═══════════════════════════════════════════════════════════ */
+var MUSCLES = {
+  A1: {dim:"A", name:"主動破冰",   tech:"真誠稱讚",                  ask:"陌生情境有沒有主動開口、用真誠稱讚讓對方接話不尬"},
+  A2: {dim:"A", name:"勾起好奇",   tech:"端牛肉／萬能關鍵句",        ask:"有沒有用端牛肉（端出結果）或關鍵句讓對方想聽下去、追問你"},
+  A3: {dim:"A", name:"建記憶點",   tech:"低轉高故事·英雄之旅",       ask:"有沒有用低→轉→高的故事讓對方記得住、想再聊"},
+  T1: {dim:"T", name:"傾聽同理",   tech:"皮肉骨 3 層提問",           ask:"有沒有聽懂並說回對方在意的點（不是只挖需求）"},
+  T2: {dim:"T", name:"真誠表達",   tech:"講出心裡 OS／邀請對方講 OS", ask:"有沒有適度講出內心話、不裝，也邀對方講，換到卸下防備"},
+  T3: {dim:"T", name:"言行一致",   tech:"言行一致／7-11-4 信任累積",  ask:"答應的有沒有兌現、能不能用結果或歷程佐證說到做到"},
+  P1: {dim:"P", name:"問題診斷",   tech:"Whyyyy／Whooo／A→B",        ask:"有沒有用諮詢式提問挖出對方沒說出口的需求或缺口"},
+  P2: {dim:"P", name:"創造專業感", tech:"大絕招 3 步驟",             ask:"有沒有用大絕招或體驗讓對方秒懂你很懂"},
+  P3: {dim:"P", name:"解問題框架", tech:"視覺化 Demo／打造知識體系",  ask:"有沒有給出一套能解決對方問題的框架或步驟，而非只丟結論"},
+  I1: {dim:"I", name:"結果思維",   tech:"賣結果非產品",              ask:"有沒有聊「他要的結果」而不是聊產品規格"},
+  I2: {dim:"I", name:"疑慮詢問",   tech:"讀水溫／測試成交",          ask:"有沒有主動讀意願、問出並回應抗點，而不是等對方自己說"},
+  I3: {dim:"I", name:"真誠下一步", tech:"真誠收單／被動跟進／感召成交", ask:"有沒有自然給出下一步、不逃避邀約收單"}
+};
+/* 固定順序（A1→I3）。所有迴圈用它，別用 Object.keys（順序不保證）。 */
+var MORD = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+
+/* 大肌肉的「結果句」——會員模式用（字典「兩種語言」條）。
+   ⚠️ 不是別名：正式維度名仍只有 DIMS[k].name（〇〇肌肉），結果句只能用在會員模式的敘述文案。 */
+var DIM_RESULT = { A:"讓他想靠近", T:"讓他願意說", P:"讓他覺得你懂", I:"讓他願意動" };
+
+/* 週測 1–5 錨點（字典 ATPI 條）。評分看「本週有無具體事例」，不憑感覺。 */
+var EVAL_ANCHORS = [
+  {v:1, label:"沒做到"},
+  {v:2, label:"偶爾且生硬"},
+  {v:3, label:"想到才做、時好時壞"},
+  {v:4, label:"多數情境做得到"},
+  {v:5, label:"穩定到自動化"}
+];
+
+/* 某大肌肉底下的 3 個小肌群 key */
+function musclesOfDim(dim) {
+  return MORD.filter(function(k){ return MUSCLES[k].dim === dim; });
+}
+/* 小肌群 key → 所屬大肌肉（吃不認得的 key 回 null，呼叫端自行忽略） */
+function dimOfMuscle(mk) {
+  return (MUSCLES[mk] || {}).dim || null;
+}
+/* 大肌肉分 ＝ 該維 3 小肌群平均（字典 ATPI 條的計分規則）。
+   scores＝{A1:..,A2:..}；缺的小肌群不計入平均（分母只算有值的），全缺回 0。 */
+function dimFromMuscles(muscleScores) {
+  var out = {};
+  DORD.forEach(function(d) {
+    var vals = musclesOfDim(d)
+      .map(function(k){ return muscleScores[k]; })
+      .filter(function(v){ return typeof v === "number" && !isNaN(v); });
+    out[d] = vals.length ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : 0;
+  });
+  return out;
+}
+/* 最弱 n 塊小肌群（解盤層 1「指出最低三塊」＋ 自動派課表都用這個）。
+   只排有分數的；同分時照 MORD 順序穩定排序，避免每次重整順序亂跳。 */
+function weakestMuscles(muscleScores, n) {
+  n = n || 3;
+  return MORD
+    .filter(function(k){ var v = muscleScores[k]; return typeof v === "number" && !isNaN(v); })
+    .sort(function(a, b) {
+      var d = muscleScores[a] - muscleScores[b];
+      return d !== 0 ? d : (MORD.indexOf(a) - MORD.indexOf(b));
+    })
+    .slice(0, n);
+}
 
 /* ── 潛力值公式（改這裡就全部生效）── */
 function calcPotential(scores) {
@@ -78,7 +148,7 @@ function getCombo(scores) {
    綁定了固定版面，只在「大部分專案都會長一樣」的部分才共用。
    ═══════════════════════════════════════════════════════════ */
 
-/* ── 四維能力雷達圖（SVG 向量版，取代舊的 canvas 畫法）
+/* ── 4 大肌肉雷達圖（SVG 向量版，取代舊的 canvas 畫法）
       svgEl：一個 <svg> DOM 元素；scores：{A,T,P,I} 0-100 分數 ── */
 function drawRadarSVG(svgEl, scores) {
   svgEl.innerHTML = "";
@@ -248,7 +318,7 @@ function renderTrendChart(points, incomeUnit) {
    投入/成交類自然點不亮（顯示未解鎖）。
    ═══════════════════════════════════════════════════════════ */
 
-/* 四維分級徽章的階梯：門檻綁「投入%」，各維 k 不同也公平（跟計分同一把尺）。 */
+/* 4 大肌肉分級徽章的階梯：門檻綁「投入%」，各維 k 不同也公平（跟計分同一把尺）。 */
 var HONOR_TIERS = [
   {tier:"bronze",  label:"銅", pct:30, icon:"🥉"},
   {tier:"silver",  label:"銀", pct:50, icon:"🥈"},
@@ -262,7 +332,7 @@ var HONORS_EFFORT = [
   {id:"streak30",  cat:"effort", icon:"🔥", name:"連三十",   desc:"連續打卡 30 天",   metric:"streak",          value:30,  celebrate:true},
   {id:"streak100", cat:"effort", icon:"🏔️", name:"連百",     desc:"連續打卡 100 天",  metric:"streak",          value:100, celebrate:true},
   {id:"allweek",   cat:"effort", icon:"📅", name:"全勤週",   desc:"一週天天都打卡",   metric:"bestWeekDays",    value:7,   celebrate:true},
-  {id:"balanced",  cat:"effort", icon:"🌈", name:"四維並進", desc:"四維都有投入不偏科", metric:"dimsCovered",   value:4},
+  {id:"balanced",  cat:"effort", icon:"🌈", name:"4 大肌肉並進", desc:"4 大肌肉都有投入不偏科", metric:"dimsCovered",   value:4},
   {id:"crossws",   cat:"effort", icon:"🎓", name:"跨界學員", desc:"在 2 門以上課都打卡", metric:"workshopsActive", value:2, celebrate:true},
   {id:"check100",  cat:"effort", icon:"💯", name:"百次打卡", desc:"累積打卡 100 次",  metric:"checkinCount",    value:100},
   {id:"check500",  cat:"effort", icon:"🏅", name:"五百次打卡", desc:"累積打卡 500 次", metric:"checkinCount",    value:500, celebrate:true}
@@ -287,7 +357,7 @@ var HONORS_REVENUE = [
      }, celebrate:true}
 ];
 
-/* 🏅 四維分級徽章：DORD × 四階自動展開（名稱由呼叫端用自己的維度名合成）。 */
+/* 🏅 4 大肌肉分級徽章：DORD × 四階自動展開（名稱由呼叫端用自己的維度名合成）。 */
 var HONORS_DIM = [];
 DORD.forEach(function(k) {
   HONOR_TIERS.forEach(function(t) {

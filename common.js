@@ -1,15 +1,18 @@
 var LIFF_ID = "2010316474-wmb1ODe0";
 var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
-/* ── 四維度定義 ──
+/* ── 4 大肌肉定義 ──
    k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
    不是硬性滿分——投入% 永遠逼近 100 不爆表，所以可跨多 workshop 無限加總、加 workshop 免校準。
    k 是軟旋鈕，待真實數據微調，抓錯只影響曲線胖瘦不會頂死。 */
+/* name＝正式維度名。productkit 字典 2026-08-16 定案一律叫「〇〇肌肉」不叫「〇〇力」
+   （「力」是天賦語氣＝有或沒有，「肌肉」是可練語氣＝練了就長，扣品牌命門「停練就萎縮」）。
+   result＝會員模式的結果句（字典「兩種語言」條），真相在 atpi-core.js 的 DIM_RESULT。 */
 var DIMS = {
-  A: {name:"吸引力", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
-  T: {name:"信任力", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     k:6,  inner:"真誠・心口合一"},
-  P: {name:"專業力", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
-  I: {name:"推進力", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
+  A: {name:"吸引肌肉", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
+  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     k:6,  inner:"真誠・心口合一"},
+  P: {name:"專業肌肉", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
+  I: {name:"推進肌肉", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
 };
 /* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
@@ -27,7 +30,7 @@ var CADENCE_CFG = {
 };
 
 
-/* 徽章已升級成榮譽系統（四維分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
+/* 徽章已升級成榮譽系統（4 大肌肉分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
 
 /* ── 稱號階梯（綁「變現潛力 0-1000」，不是投入分）──
    角色卡的稱號＝真本事：靠 calcPotential(A×T×P×I) 決定，努力有 0.5 保底所以新學員也非零、稱號會慢慢動，成交後乘到滿。
@@ -153,6 +156,136 @@ function calcDims(s) {
   return sc;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   12 小肌群層（v2）
+   ⚠️ 小肌群有「兩個數字」，刻意不混：
+     ① 體格分 1–5 ＝ 能力（測驗基線／週測自評／教練校準）→ 解盤念的是這個
+     ② 投入分     ＝ 努力（打卡累積）              → 看他有沒有在練
+   兩個交叉才判讀得出來：低分+沒練→給標準功課；低分+練很多→要客製 debug（升單訊號）。
+   定義來源＝productkit 字典 ATPI 條；判讀規則見 productkit 27§8.7。
+   ═══════════════════════════════════════════════════════════ */
+
+/* muscle 欄拆成小肌群陣列：支援單一「A1」或多個「A1,T2」(逗號/頓號/點/斜線/空白皆可)。 */
+function taskMuscles_(muscleStr) {
+  return String(muscleStr || "").toUpperCase().split(/[,.、\/\s]+/)
+    .filter(function(x){ return MORD.indexOf(x) > -1; });
+}
+/* 一筆打卡紀錄帶到的小肌群：優先用紀錄自己的 muscle 欄；
+   舊資料沒有這欄時，回查任務池的定義（跟 calcDims 對舊資料的處理同一個路子）。 */
+function logMuscles_(e) {
+  var ms = taskMuscles_(e.muscle);
+  if (ms.length) return ms;
+  var t = taskDef(e.workshopId, e.taskKey);
+  return t ? taskMuscles_(t.muscle) : [];
+}
+
+/* ── ② 投入分：某小肌群的累積投入（跨所有 workshop）──
+   多小肌群任務的 pts 平均分攤，跟 investDim 同一個規則。 */
+function investMuscle(s, mk) {
+  return s.checkinLog.reduce(function(sum, e){
+    var ms = logMuscles_(e);
+    return ms.indexOf(mk) > -1 ? sum + e.pts / ms.length : sum;
+  }, 0);
+}
+/* 小肌群投入%（飽和曲線，同 calcDims 的公式）。
+   半滿點 k ＝ 該大肌肉的 k ÷ 3——這樣「三塊各投入 x」時，小肌群% 會跟大肌肉% 對得起來，
+   不是另外拍一組數字（DIMS[].k 之後校準，這裡自動跟著動）。 */
+function muscleHalfPoint_(mk) {
+  var d = dimOfMuscle(mk);
+  return d ? DIMS[d].k / 3 : 3;
+}
+function calcMuscleInvest(s) {
+  var out = {};
+  MORD.forEach(function(mk) {
+    var v = investMuscle(s, mk), k = muscleHalfPoint_(mk);
+    out[mk] = { pts: Math.round(v * 10) / 10, pct: Math.round(100 * v / (v + k)) };
+  });
+  return out;
+}
+/* 這個月（或任一區間）某小肌群練了幾次——判讀「低分但練很多」要用。 */
+function muscleTrainCount(s, mk, sinceDateStr) {
+  return s.checkinLog.filter(function(e){
+    if (sinceDateStr && normDate(e.date) < sinceDateStr) return false;
+    return logMuscles_(e).indexOf(mk) > -1;
+  }).length;
+}
+
+/* ── ① 體格分 1–5：取每塊小肌群「最新一筆」評分 ──
+   evalLog 每筆：{muscle, score, source, date, week}
+   source＝quiz（測驗基線）｜self（週測自評）｜coach（教練校準）
+   同一天有多筆時 coach 覆蓋 self 覆蓋 quiz（字典：健檢報告以校準分為準）。 */
+var EVAL_SOURCE_RANK = { quiz: 0, self: 1, coach: 2 };
+function calcMuscleScores(s) {
+  var best = {};
+  (s.evalLog || []).forEach(function(e) {
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0) return;
+    var sc = Number(e.score);
+    if (!(sc >= 1 && sc <= 5)) return;
+    var d = normDate(e.date), rank = EVAL_SOURCE_RANK[e.source] || 0;
+    var cur = best[mk];
+    if (!cur || d > cur.d || (d === cur.d && rank >= cur.rank)) {
+      best[mk] = { score: sc, d: d, rank: rank, source: e.source || "self" };
+    }
+  });
+  var out = {};
+  MORD.forEach(function(mk){ if (best[mk]) out[mk] = best[mk].score; });
+  return out;   // 沒量過的小肌群不給預設值——「還沒量」和「量出來很低」是兩件事
+}
+/* 體格分的來源標記（要在 UI 上標「教練校準」還是「自評」時用） */
+function muscleScoreMeta(s) {
+  var meta = {}, seen = {};
+  (s.evalLog || []).forEach(function(e) {
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0) return;
+    var d = normDate(e.date), rank = EVAL_SOURCE_RANK[e.source] || 0, cur = seen[mk];
+    if (!cur || d > cur.d || (d === cur.d && rank >= cur.rank)) {
+      seen[mk] = { d: d, rank: rank };
+      meta[mk] = { source: e.source || "self", date: d };
+    }
+  });
+  return meta;
+}
+/* 大肌肉的體格分（1–5）＝該維 3 小肌群平均（字典規則），跟 calcDims 的 0–100 投入分是兩把尺。 */
+function calcDimScores5(s) { return dimFromMuscles(calcMuscleScores(s)); }
+
+/* 最弱三塊（解盤層 1「指出最低三塊」／自動派這一組都用它）。
+   還沒量過的小肌群不會被選中——沒量到不等於很弱。 */
+function weakestThree(s) { return weakestMuscles(calcMuscleScores(s), 3); }
+
+/* 判讀提示（27§8.7 層 2 的程式面）：低分 + 有沒有在練 → 兩種完全不同的處置。
+   回傳 [{muscle, score, count, verdict}]，verdict＝"untrained"（給標準功課）｜"plateau"（要客製 debug＝升單訊號）。
+   PLATEAU_MIN_COUNT 是軟旋鈕，待真實數據校準。 */
+var PLATEAU_MIN_COUNT = 8;
+function readWeakest(s, sinceDateStr) {
+  var scores = calcMuscleScores(s);
+  return weakestThree(s).map(function(mk) {
+    var c = muscleTrainCount(s, mk, sinceDateStr);
+    return { muscle: mk, name: MUSCLES[mk].name, score: scores[mk], count: c,
+             verdict: c >= PLATEAU_MIN_COUNT ? "plateau" : "untrained" };
+  });
+}
+
+/* ── 目前連續天數（v2）──
+   規則＝**開練一個動作就算今天有練**（不看做滿幾個、不看是哪個 workshop）。
+   從今天往回數；今天還沒練不算斷（給他一天的緩衝，斷在昨天才歸零）。
+   跟 bestStreakDays（歷史最佳）不同，這是「現在連幾天」。 */
+function currentStreak(s) {
+  var days = {};
+  s.checkinLog.forEach(function(e){ days[normDate(e.date)] = true; });
+  var cur = new Date(), n = 0;
+  if (!days[todayStr(cur)]) cur = new Date(cur.getTime() - 86400000);  // 今天沒練 → 從昨天起算
+  while (days[todayStr(cur)]) { n++; cur = new Date(cur.getTime() - 86400000); }
+  return n;
+}
+/* 入館第 N 天＝第一筆打卡至今（沒有紀錄就是第 1 天） */
+function daysSinceJoin(s) {
+  if (!s.checkinLog.length) return 1;
+  var first = s.checkinLog.map(function(e){ return normDate(e.date); }).sort()[0];
+  var d = Math.floor((new Date(todayStr()) - new Date(first)) / 86400000);
+  return Math.max(1, d + 1);
+}
+
 /* 個人總分（所有 workshop、所有節奏的打卡分加總）——驅動等級／血條 */
 function totalScore(s) {
   return s.checkinLog.reduce(function(sum, e){ return sum + e.pts; }, 0);
@@ -189,14 +322,17 @@ function onceDoneMap(s, workshopId) {
 /* ── 打卡：樂觀更新 checkinLog，同時寫進 Sheet ──
    每日／每週任務存的日期要跟 dailyDoneToday/weeklyDoneThisWeek 比對的基準一致，
    所以也用 taskDayStr()（中午換日）；一次性任務用真實日期即可，不影響完成判斷。 */
-function doCheckin(s, task, workshopId) {
+function doCheckin(s, task, workshopId, extra) {
   var isPool = (task.cadence === "daily" || task.cadence === "weekly");
   var d = isPool ? taskDayStr() : todayStr();
+  extra = extra || {};
   s.checkinLog.push({
     workshopId: workshopId, taskKey: task.key, cadence: task.cadence,
-    dim: task.dim, pts: task.pts, date: d, week: weekStr(new Date(d))
+    dim: task.dim, muscle: task.muscle || "", pts: task.pts,
+    date: d, week: weekStr(new Date(d)),
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || ""
   });
-  postCheckin(s.lineId, task, workshopId, d);
+  postCheckin(s.lineId, task, workshopId, d, extra);
 }
 
 /* ── 回報成交（金額 + 當下四維快照，供走勢圖）── */
@@ -224,11 +360,45 @@ function postToSheet(payload) {
     body: JSON.stringify(payload)
   }).catch(function(e){ console.log("postToSheet error:", e); });
 }
-function postCheckin(lineId, task, workshopId, dateStr) {
+function postCheckin(lineId, task, workshopId, dateStr, extra) {
+  extra = extra || {};
   return postToSheet({
     action: "checkin", lineId: lineId, workshopId: workshopId || "",
-    taskKey: task.key, cadence: task.cadence, dim: task.dim, pts: task.pts, date: dateStr || todayStr()
+    taskKey: task.key, cadence: task.cadence, dim: task.dim, muscle: task.muscle || "",
+    pts: task.pts, date: dateStr || todayStr(),
+    /* v2 會員模式：開練記的是「對方的反應」而不只是打勾（低摩擦守則：這三欄都可空） */
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || ""
   });
+}
+/* ── 體測：寫一筆小肌群評分（1–5）──
+   source＝self（會員週測）｜coach（教練校準）｜quiz（測驗基線，由 comconverttest 寫）
+   一次可送多筆：evals＝[{muscle:"A1", score:3}, ...] */
+function postMuscleEval(lineId, evals, source) {
+  var list = (evals || []).filter(function(e){
+    return MORD.indexOf(String(e.muscle || "").toUpperCase()) > -1 && e.score >= 1 && e.score <= 5;
+  }).map(function(e){
+    return { muscle: String(e.muscle).toUpperCase(), score: Number(e.score) };
+  });
+  if (!list.length) return Promise.resolve();
+  return postToSheet({
+    action: "eval", lineId: lineId, source: source || "self",
+    date: todayStr(), week: weekStr(), evals: list
+  });
+}
+/* 樂觀更新本地 evalLog，讓畫面立刻反映（下次載入以 Sheet 為準） */
+function applyMuscleEval(s, evals, source) {
+  var d = todayStr(), w = weekStr();
+  s.evalLog = s.evalLog || [];
+  (evals || []).forEach(function(e){
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0 || !(e.score >= 1 && e.score <= 5)) return;
+    s.evalLog.push({ muscle: mk, score: Number(e.score), source: source || "self", date: d, week: w });
+  });
+}
+/* 這一週體測過了沒（決定第一頁要不要把主行動換成「今天量體格」） */
+function evaledThisWeek(s) {
+  var w = weekStr();
+  return (s.evalLog || []).some(function(e){ return e.source !== "quiz" && String(e.week) === w; });
 }
 function postRevenue(lineId, amount, note, scores, workshopId) {
   return postToSheet({
@@ -293,8 +463,15 @@ async function loadBootstrap(userId, w) {
     if (d.status !== "ok") return null;
     d.checkins = (d.checkins || []).map(function(c){
       return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
-               dim: String(c.dim || ""), pts: Number(c.pts) || 0, date: normDate(c.date), week: weekStr(new Date(c.date)) };
+               dim: String(c.dim || ""), muscle: String(c.muscle || ""), pts: Number(c.pts) || 0,
+               date: normDate(c.date), week: weekStr(new Date(c.date)),
+               reaction: String(c.reaction || ""), target: String(c.target || ""), rel: String(c.rel || ""), note: String(c.note || "") };
     });
+    /* v2 體測紀錄（12 小肌群 1–5）。舊後端還沒部署時會是 undefined → 給空陣列，畫面顯示「還沒量」。 */
+    d.evals = (d.evals || []).map(function(e){
+      return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) || 0,
+               source: String(e.source || "self"), date: normDate(e.date), week: String(e.week || "") };
+    }).filter(function(e){ return MORD.indexOf(e.muscle) > -1 && e.score >= 1 && e.score <= 5; });
     d.revenue = (d.revenue || []).map(function(e){
       return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
                A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
@@ -407,7 +584,9 @@ function subStudent(s, wid) {
   return {
     lineId: s.lineId,
     checkinLog: s.checkinLog.filter(function(e){ return e.workshopId === wid; }),
-    revenueLog: s.revenueLog.filter(function(e){ return (e.workshopId || "") === wid; })
+    revenueLog: s.revenueLog.filter(function(e){ return (e.workshopId || "") === wid; }),
+    /* 體格是「人」的屬性、不綁 workshop（同 ATPI），所以不過濾、原樣帶過去 */
+    evalLog: s.evalLog || []
   };
 }
 /* 評估各 workshop 專屬榮譽：scope=workshop 用該課過濾 ctx，否則用全域 ctx。
@@ -427,7 +606,7 @@ function wsHonorById(id) {
   for (var i = 0; i < WS_HONORS.length; i++) if (WS_HONORS[i].id === id) return WS_HONORS[i];
   return null;
 }
-/* 榮譽顯示名：四維分級徽章要合成「吸引力・銀徽」，其餘用 name。 */
+/* 榮譽顯示名：4 大肌肉分級徽章要合成「吸引力・銀徽」，其餘用 name。 */
 function honorLabel(h) {
   return h.cat === "dim" ? (DIMS[h.dim].name + "・" + h.tierLabel + "徽") : h.name;
 }
@@ -461,7 +640,7 @@ async function loadStudents() {
         name:   s.name   || s["姓名"],
         team:   s.team   || s["團隊"],
         enrolled: !!s.enrolled,
-        checkinLog: [], revenueLog: [], selfEval: null
+        checkinLog: [], revenueLog: [], evalLog: [], selfEval: null
       };
     });
   }

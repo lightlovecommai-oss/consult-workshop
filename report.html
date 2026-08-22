@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATPI 健檢報告・解盤工作台</title>
+<meta name="theme-color" content="#2d1f0f">
+<link rel="icon" type="image/png" href="icon2-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f5f1ea;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif;color:#2d1f0f;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:960px;margin:0 auto;padding:0 14px 60px;}
+
+/* 頂 bar */
+.top{background:#2d1f0f;margin:0 -14px 16px;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20;}
+.top-t{color:#f0e8dc;font-size:16px;font-weight:600;letter-spacing:.02em;}
+.top-sub{color:rgba(240,232,220,.5);font-size:12px;}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+select,input,button,textarea{font-family:inherit;}
+.sel{appearance:none;-webkit-appearance:none;background:rgba(240,232,220,.12);border:1px solid rgba(240,232,220,.2);color:#f0e8dc;font-size:14px;padding:7px 30px 7px 12px;border-radius:8px;min-width:170px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23f0e8dc'/></svg>");background-repeat:no-repeat;background-position:right 11px center;}
+.sel:focus{outline:none;border-color:#e8734a;}
+.sel option{color:#2d1f0f;}
+
+.card{background:#fff;border:0.5px solid #e2d8cc;border-radius:14px;padding:16px 18px;margin-bottom:14px;}
+.ct{font-size:12px;color:#8a7266;font-weight:600;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.ct .layer{background:#f0e9df;color:#8a7266;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;letter-spacing:0;}
+.ct .r{margin-left:auto;font-weight:400;letter-spacing:0;font-size:12px;color:#a08c78;}
+
+/* 人頭 */
+.who{display:flex;align-items:center;gap:13px;}
+.who-av{width:44px;height:44px;border-radius:12px;background:#2d1f0f;color:#f6d68a;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex-shrink:0;}
+.who-n{font-size:19px;font-weight:600;}
+.who-m{font-size:12.5px;color:#8a7266;margin-top:2px;}
+.who-r{margin-left:auto;text-align:right;}
+.who-r-v{font-size:22px;font-weight:700;color:#e8734a;line-height:1;}
+.who-r-l{font-size:11px;color:#8a7266;margin-top:3px;}
+
+/* 4 大肌肉 */
+.dims{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:560px){.dims{grid-template-columns:repeat(2,1fr);}}
+.dc{border-radius:11px;padding:11px 12px;}
+.dc-n{font-size:12px;font-weight:600;margin-bottom:6px;}
+.dc-v{font-size:21px;font-weight:700;line-height:1;}
+.dc-s{font-size:11px;margin-top:4px;opacity:.75;}
+
+/* 12 小肌群格 */
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media(max-width:640px){.mg{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.mg{grid-template-columns:1fr;}}
+.mc{border:1px solid #ece3d8;border-radius:11px;padding:10px 11px;background:#fff;position:relative;}
+.mc.weak{border-color:#e8734a;border-width:1.5px;background:#fffaf7;}
+.mc.plateau{border-color:#c0392b;background:#fff6f4;}
+.mc.none{background:#faf8f4;border-style:dashed;}
+.mc-top{display:flex;align-items:baseline;gap:6px;margin-bottom:5px;}
+.mc-k{font-size:11px;font-weight:700;letter-spacing:.04em;}
+.mc-n{font-size:12.5px;font-weight:500;color:#2d1f0f;}
+.mc-v{margin-left:auto;font-size:17px;font-weight:700;line-height:1;}
+.mc-v.na{font-size:12px;font-weight:500;color:#b4a695;}
+.mc-bar{height:4px;background:#efe7dc;border-radius:2px;overflow:hidden;margin-bottom:5px;}
+.mc-fill{height:4px;border-radius:2px;}
+.mc-meta{font-size:11px;color:#8a7266;display:flex;gap:8px;}
+.mc-src{font-size:10px;padding:1px 6px;border-radius:20px;background:#f0e9df;color:#8a7266;}
+.mc-src.coach{background:#e1f5ee;color:#0f6e56;}
+.mc-src.quiz{background:#e6f1fb;color:#185fa5;}
+.mc-rank{position:absolute;top:-7px;right:9px;background:#e8734a;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;}
+.mc-rank.plateau{background:#c0392b;}
+
+/* 判讀卡 */
+.jd{border:1px solid #ece3d8;border-radius:13px;margin-bottom:11px;overflow:hidden;}
+.jd-h{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fdfaf6;border-bottom:1px solid #f0e9df;flex-wrap:wrap;}
+.jd-i{width:26px;height:26px;border-radius:50%;background:#e8734a;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.jd-n{font-size:14.5px;font-weight:600;}
+.jd-sc{font-size:13px;color:#8a7266;}
+.jd-v{margin-left:auto;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.jd-v.neutral{background:#f0e9df;color:#8a7266;}
+.jd-v.signal{background:#fdecea;color:#c0392b;}
+.jd-b{padding:12px 14px;}
+.jd-lead{font-size:13px;line-height:1.65;margin-bottom:11px;padding:9px 11px;border-radius:9px;}
+.jd-lead.neutral{background:#faf8f4;color:#6b4c30;}
+.jd-lead.signal{background:#fdecea;color:#a33227;}
+.row{display:flex;gap:10px;margin-bottom:9px;font-size:13px;line-height:1.6;}
+.row:last-child{margin-bottom:0;}
+.rk{width:52px;flex-shrink:0;font-size:11.5px;color:#8a7266;font-weight:600;padding-top:1px;}
+.rv{flex:1;min-width:0;color:#2d1f0f;}
+.rv.say{color:#1d5c94;}
+.rv.say::before{content:"「";}
+.rv.say::after{content:"」";}
+.esc{background:#2d1f0f;color:#f6d68a;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.6;margin-top:10px;}
+
+/* 腳本 */
+.script{background:#2d1f0f;border-radius:11px;padding:14px 15px;color:#f0e8dc;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow-y:auto;font-family:ui-monospace,"SF Mono",Menlo,monospace;}
+.btn{background:#e8734a;color:#fff;border:0;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:600;cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn.ghost{background:#f0e9df;color:#6b4c30;}
+.btn[disabled]{background:#efe7dc;color:#b4a695;cursor:default;}
+
+/* 校準 */
+.cal{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+@media(max-width:600px){.cal{grid-template-columns:1fr;}}
+.cr{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid #ece3d8;border-radius:10px;}
+.cr-n{font-size:12.5px;min-width:0;flex:1;}
+.cr-k{font-size:11px;font-weight:700;color:#8a7266;}
+.cr-o{font-size:11px;color:#b4a695;}
+.dots{display:flex;gap:4px;flex-shrink:0;}
+.dot{width:23px;height:23px;border-radius:50%;border:1.5px solid #e2d8cc;background:#fff;font-size:11px;color:#b4a695;cursor:pointer;padding:0;line-height:1;}
+.dot.on{color:#fff;font-weight:700;}
+.hint{font-size:12px;color:#8a7266;line-height:1.65;margin-bottom:11px;}
+.hint b{color:#2d1f0f;}
+.anchors{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.an{font-size:11px;color:#8a7266;background:#f5f1ea;padding:3px 9px;border-radius:20px;}
+.msg{font-size:12.5px;margin-top:11px;min-height:17px;}
+.msg.ok{color:#0f6e56;}
+.msg.err{color:#c0392b;}
+.empty{text-align:center;padding:44px 20px;color:#8a7266;font-size:14px;line-height:1.8;}
+.loading{text-align:center;padding:34px;color:#8a7266;font-size:13.5px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <div class="top-t">ATPI 健檢報告</div>
+    <div class="top-sub">解盤工作台・內部使用</div>
+  </div>
+  <div class="top-right">
+    <select class="sel" id="pick"><option value="">載入中…</option></select>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="body">
+    <div class="empty">從右上角選一位學員開始解盤。</div>
+  </div>
+</div>
+
+<script src="atpi-core.js"></script>
+<script src="common.js"></script>
+<script src="judgement.js"></script>
+<script>
+var S = null;          // 目前這位學員的完整狀態
+var CAL = {};          // 校準暫存 {A1:4,...}
+var SINCE = null;      // 「這個月」的起算日（判讀 plateau 用）
+
+function el(id) { return document.getElementById(id); }
+function esc_(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+/* 判讀規則表的 **粗體** 標記 → <b>（內容先 escape 過，安全） */
+function md_(t) { return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function initials(n) { return String(n || "?").trim().slice(0, 2); }
+/* 1–5 分 → 0–100% 條寬 */
+function pct5(v) { return Math.max(0, Math.min(100, (v - 1) / 4 * 100)); }
+
+function daysAgoStr(n) {
+  var d = new Date(Date.now() - n * 86400000);
+  return todayStr(d);
+}
+
+async function boot() {
+  SINCE = daysAgoStr(30);
+  try {
+    await Promise.all([loadConfig(), loadStudents()]);
+  } catch (e) {
+    el("body").innerHTML = '<div class="empty">載入失敗，請重新整理。<br><span style="font-size:12px;">' + esc_(e.message || e) + '</span></div>';
+    return;
+  }
+  var p = el("pick");
+  p.innerHTML = '<option value="">選一位學員…</option>' + STUDENTS.map(function(s){
+    return '<option value="' + esc_(s.lineId) + '">' + esc_(s.name || s.lineId) + '</option>';
+  }).join("");
+  p.onchange = function() { if (p.value) pickStudent(p.value); };
+  /* 網址帶 ?id= 就直接開那個人（暖暖包從名單點進來的用法） */
+  var q = new URLSearchParams(location.search).get("id");
+  if (q) { p.value = q; if (p.value) pickStudent(q); }
+}
+
+async function pickStudent(uid) {
+  el("body").innerHTML = '<div class="loading">讀取體格資料…</div>';
+  var d = await loadBootstrap(uid, "");
+  if (!d) { el("body").innerHTML = '<div class="empty">讀不到這位學員的資料。</div>'; return; }
+  var st = d.student || {};
+  /* 任務池要灌進全域，logMuscles_ 才回查得到舊打卡列的小肌群 */
+  if (d.tasks) TASKS = d.tasks;
+  S = { lineId: st.lineId || uid, name: st.name || uid, team: st.team || "",
+        checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
+  CAL = {};
+  render();
+}
+
+function render() {
+  var scores = calcMuscleScores(S);
+  var meta = muscleScoreMeta(S);
+  var dim5 = calcDimScores5(S);
+  var rows = readWeakest(S, SINCE);
+  var measured = MORD.filter(function(k){ return scores[k] != null; }).length;
+  var weakSet = {};
+  rows.forEach(function(r, i){ weakSet[r.muscle] = { rank: i + 1, verdict: r.verdict }; });
+
+  var html = "";
+
+  /* ── 人頭 ── */
+  html += '<div class="card"><div class="who">'
+    + '<div class="who-av">' + esc_(initials(S.name)) + '</div>'
+    + '<div><div class="who-n">' + esc_(S.name) + '</div>'
+    + '<div class="who-m">' + (S.team ? esc_(S.team) + '・' : '') + '打卡 ' + S.checkinLog.length + ' 次・體測 ' + measured + ' / 12 塊</div></div>'
+    + '<div class="who-r"><div class="who-r-v">' + measured + '<span style="font-size:13px;color:#8a7266;font-weight:400;"> / 12</span></div>'
+    + '<div class="who-r-l">已量到的小肌群</div></div>'
+    + '</div></div>';
+
+  if (!measured) {
+    html += '<div class="card"><div class="empty">這位學員還沒有任何體測紀錄。<br>'
+      + '請他先做 ATPI 測驗（基線），或用下方「教練校準」直接量一次。</div></div>'
+      + calibrateHTML(scores, meta);
+    el("body").innerHTML = html;
+    bindCalibrate();
+    return;
+  }
+
+  /* ── 層 1：讀數據 ── */
+  html += '<div class="card"><div class="ct">體格總覽<span class="layer">層 1・讀數據</span>'
+    + '<span class="r">1–5 分・大肌肉＝該維 3 塊平均</span></div>';
+  html += '<div class="dims">' + DORD.map(function(k){
+    var d = DIMS[k], v = dim5[k];
+    var has = musclesOfDim(k).some(function(m){ return scores[m] != null; });
+    return '<div class="dc" style="background:' + d.color + '14;">'
+      + '<div class="dc-n" style="color:' + d.color + ';">' + esc_(d.name) + '</div>'
+      + '<div class="dc-v" style="color:' + d.color + ';">' + (has ? fmtScore(v) : '—') + '</div>'
+      + '<div class="dc-s" style="color:' + d.color + ';">' + musclesOfDim(k).map(function(m){
+          return scores[m] != null ? fmtScore(scores[m]) : '·'; }).join(' / ') + '</div>'
+      + '</div>';
+  }).join("") + '</div>';
+
+  html += '<div style="height:14px;"></div><div class="mg">' + MORD.map(function(mk){
+    var m = MUSCLES[mk], c = DIMS[m.dim].color, v = scores[mk], w = weakSet[mk];
+    var cnt = muscleTrainCount(S, mk, SINCE);
+    var cls = v == null ? "none" : (w ? (w.verdict === "plateau" ? "weak plateau" : "weak") : "");
+    var src = meta[mk] ? meta[mk].source : null;
+    var srcLabel = {coach:"教練校準", self:"自評", quiz:"測驗基線"}[src] || "";
+    return '<div class="mc ' + cls + '">'
+      + (w ? '<div class="mc-rank' + (w.verdict === "plateau" ? " plateau" : "") + '">最低 ' + w.rank + '</div>' : '')
+      + '<div class="mc-top"><span class="mc-k" style="color:' + c + ';">' + mk + '</span>'
+      +   '<span class="mc-n">' + esc_(m.name) + '</span>'
+      +   (v == null ? '<span class="mc-v na">未量</span>'
+                     : '<span class="mc-v" style="color:' + c + ';">' + fmtScore(v) + '</span>')
+      + '</div>'
+      + '<div class="mc-bar"><div class="mc-fill" style="width:' + (v == null ? 0 : pct5(v)) + '%;background:' + c + ';"></div></div>'
+      + '<div class="mc-meta">' + (srcLabel ? '<span class="mc-src ' + src + '">' + srcLabel + '</span>' : '')
+      +   '<span>近 30 天練 ' + cnt + ' 次</span></div>'
+      + '</div>';
+  }).join("") + '</div></div>';
+
+  /* ── 層 2：標準判讀 ── */
+  html += '<div class="card"><div class="ct">最低三塊・標準判讀<span class="layer">層 2・照表做</span>'
+    + '<span class="r">不准即興——層 3 客製 debug 是顧問的工作</span></div>';
+  html += rows.map(function(r, i){
+    var m = MUSCLES[r.muscle], j = JUDGEMENT[r.muscle], v = VERDICT[r.verdict];
+    return '<div class="jd">'
+      + '<div class="jd-h"><div class="jd-i">' + (i + 1) + '</div>'
+      +   '<div class="jd-n">' + r.muscle + ' ' + esc_(m.name) + '</div>'
+      +   '<div class="jd-sc">' + fmtScore(r.score) + ' 分・近 30 天練 ' + r.count + ' 次</div>'
+      +   '<div class="jd-v ' + v.tone + '">' + esc_(v.label) + '</div></div>'
+      + '<div class="jd-b">'
+      +   '<div class="jd-lead ' + v.tone + '">' + md_(v.lead) + '</div>'
+      +   '<div class="row"><div class="rk">開場</div><div class="rv say">' + esc_(j.opener) + '</div></div>'
+      +   '<div class="row"><div class="rk">追問</div><div class="rv say">' + esc_(j.evidence) + '</div></div>'
+      +   '<div class="row"><div class="rk">對答案</div><div class="rv">' + esc_(j.symptom) + '</div></div>'
+      +   (r.verdict === "plateau"
+            ? '<div class="esc">⚠️ ' + md_(v.action) + '</div>'
+            : '<div class="row"><div class="rk">派功課</div><div class="rv">' + md_(j.homework) + '</div></div>')
+      + '</div></div>';
+  }).join("") + '</div>';
+
+  /* ── 逐字腳本 ── */
+  html += '<div class="card"><div class="ct">解盤腳本<span class="r">照著念即可，含層 1→2</span></div>'
+    + '<div class="script" id="script">' + esc_(buildScript(S.name, scores, rows)) + '</div>'
+    + '<div style="margin-top:11px;display:flex;gap:8px;">'
+    +   '<button class="btn ghost" onclick="copyScript()">複製腳本</button>'
+    +   '<span class="msg" id="copymsg"></span></div></div>';
+
+  /* ── 校準 ── */
+  html += calibrateHTML(scores, meta);
+
+  el("body").innerHTML = html;
+  bindCalibrate();
+}
+
+/* ── 教練校準：12 塊各給 1–5，只送有動過的 ── */
+function calibrateHTML(scores, meta) {
+  var h = '<div class="card"><div class="ct">教練校準<span class="layer">月度</span>'
+    + '<span class="r">健檢報告以校準分為準</span></div>'
+    + '<div class="hint">抓自評盲點用。<b>只送你有動過的</b>——沒點的維持原分數，不會被覆蓋。'
+    + '評分看<b>他有沒有講出具體事例</b>（可指認的行為或對方反應），不憑感覺。</div>'
+    + '<div class="anchors">' + EVAL_ANCHORS.map(function(a){
+        return '<span class="an">' + a.v + '　' + esc_(a.label) + '</span>'; }).join("") + '</div>'
+    + '<div class="cal">' + MORD.map(function(mk){
+        var m = MUSCLES[mk], c = DIMS[m.dim].color, cur = scores[mk];
+        var srcLabel = meta[mk] ? ({coach:"校準", self:"自評", quiz:"測驗"}[meta[mk].source] || "") : "";
+        return '<div class="cr">'
+          + '<div class="cr-n"><span class="cr-k" style="color:' + c + ';">' + mk + '</span> ' + esc_(m.name)
+          +   '<div class="cr-o">' + (cur == null ? "未量" : "現在 " + fmtScore(cur) + "（" + srcLabel + "）") + '</div></div>'
+          + '<div class="dots" data-m="' + mk + '">' + [1,2,3,4,5].map(function(v){
+              return '<button class="dot" data-v="' + v + '" style="--c:' + c + ';">' + v + '</button>'; }).join("")
+          + '</div></div>';
+      }).join("") + '</div>'
+    + '<div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+    +   '<button class="btn" id="calsave" disabled>送出校準</button>'
+    +   '<button class="btn ghost" id="calclear">清除</button>'
+    +   '<span class="msg" id="calmsg"></span></div>'
+    + '</div>';
+  return h;
+}
+
+function bindCalibrate() {
+  Array.prototype.forEach.call(document.querySelectorAll(".dots"), function(box) {
+    var mk = box.getAttribute("data-m");
+    Array.prototype.forEach.call(box.querySelectorAll(".dot"), function(b) {
+      b.onclick = function() {
+        var v = Number(b.getAttribute("data-v"));
+        if (CAL[mk] === v) delete CAL[mk]; else CAL[mk] = v;   // 再點一次＝取消
+        paintDots(box, mk);
+        refreshCalBtn();
+      };
+    });
+    paintDots(box, mk);
+  });
+  var save = el("calsave"), clr = el("calclear");
+  if (save) save.onclick = saveCalibrate;
+  if (clr) clr.onclick = function() {
+    CAL = {};
+    Array.prototype.forEach.call(document.querySelectorAll(".dots"), function(b){ paintDots(b, b.getAttribute("data-m")); });
+    refreshCalBtn();
+    setMsg("calmsg", "", "");
+  };
+  refreshCalBtn();
+}
+function paintDots(box, mk) {
+  Array.prototype.forEach.call(box.querySelectorAll(".dot"), function(b) {
+    var on = CAL[mk] === Number(b.getAttribute("data-v"));
+    b.classList.toggle("on", on);
+    var c = b.style.getPropertyValue("--c") || "#e8734a";
+    b.style.background = on ? c : "#fff";
+    b.style.borderColor = on ? c : "#e2d8cc";
+  });
+}
+function refreshCalBtn() {
+  var n = Object.keys(CAL).length, b = el("calsave");
+  if (!b) return;
+  b.disabled = !n;
+  b.textContent = n ? "送出校準（" + n + " 塊）" : "送出校準";
+}
+function setMsg(id, text, cls) {
+  var m = el(id); if (!m) return;
+  m.textContent = text; m.className = "msg " + (cls || "");
+}
+
+async function saveCalibrate() {
+  var evals = Object.keys(CAL).map(function(mk){ return { muscle: mk, score: CAL[mk] }; });
+  if (!evals.length) return;
+  var b = el("calsave"); b.disabled = true; b.textContent = "送出中…";
+  try {
+    await postMuscleEval(S.lineId, evals, "coach");
+    applyMuscleEval(S, evals, "coach");   // 樂觀更新，畫面立刻反映
+    CAL = {};
+    render();
+    setMsg("calmsg", "✓ 已寫入 " + evals.length + " 塊校準分", "ok");
+  } catch (e) {
+    b.disabled = false; refreshCalBtn();
+    setMsg("calmsg", "寫入失敗：" + (e.message || e), "err");
+  }
+}
+
+function copyScript() {
+  var t = el("script").textContent;
+  function done() { setMsg("copymsg", "✓ 已複製", "ok"); setTimeout(function(){ setMsg("copymsg", "", ""); }, 2200); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else fallback();
+  function fallback() {
+    var ta = document.createElement("textarea");
+    ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { setMsg("copymsg", "複製失敗，請手動選取", "err"); }
+    document.body.removeChild(ta);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

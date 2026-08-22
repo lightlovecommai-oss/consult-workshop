@@ -16,7 +16,8 @@ var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是
 var TABS = {
   students:    "(遊戲)開通名單",       // 人主檔（含身份+開通）：LINE userId | 姓名 | 團隊 | 各課開通欄
   workshops:   "(設定)課程",           // workshopId | name | active（跑 setup() 自動建立/覆蓋，不用手動匯入 CSV）
-  tasks:       "(設定)任務",           // workshopId | taskKey | cadence | dim | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
+  tasks:       "(設定)任務",           // workshopId | taskKey | cadence | dim | muscle | pts | name | icon | needReview（跑 setup() 自動建立/覆蓋）
+  evals:       "(遊戲)體測紀錄",       // v2 小肌群 1–5：LINE userId | 小肌群 | 分數 | 來源 | 日期 | 週次（程式自動建立）
   honors:      "(設定)榮譽品項",       // 各 workshop 專屬榮譽：workshopId | honorId | metric | value | icon | name | desc | tier | celebrate | scope
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
   enrollments: "(遊戲)開通名單",       // 與學員名單合併為同一張：每門課一欄，欄名＝workshopId，格子打勾＝開通
@@ -33,7 +34,13 @@ var COLS = {
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
   checkins: { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], taskKey:["任務key","taskKey"],
-              cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"] },
+              cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],
+              /* v2：小肌群層＋會員模式的開練紀錄（都可空，舊列不受影響） */
+              muscle:["小肌群","muscle"], reaction:["對方反應","reaction"],
+              target:["對象","target"], rel:["關係","rel"], note:["發生什麼","note"] },
+  /* v2 體測：小肌群 1–5 評分。source＝quiz(測驗基線)／self(週測自評)／coach(教練校準) */
+  evals:    { lineId:["LINE userId","lineId"], muscle:["小肌群","muscle"], score:["分數","score"],
+              source:["來源","source"], date:["日期","date"], week:["週次","week"] },
   revenue:  { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], amount:["金額","amount"],
               date:["日期","date"], note:["備註","note"],
               A:["吸引力","A"], T:["信任力","T"], P:["專業力","P"], I:["推進力","I"] },
@@ -437,7 +444,8 @@ function computeConfig_() {
     }).filter(function(w){ return w.id; });
   var tasks = rows_(TABS.tasks).map(function(r){
     return { workshopId: String(r.workshopId || ""), key: String(r.taskKey || r.key || ""), cadence: String(r.cadence || "once"),
-             dim: String(r.dim || ""), pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""),
+             dim: String(r.dim || ""), muscle: String(r.muscle || r["小肌群"] || ""),
+             pts: Number(r.pts) || 0, name: String(r.name || ""), icon: String(r.icon || ""),
              needReview: truthy_(r.needReview), desc: String(r.desc || ""), locked: truthy_(r.locked) };
   }).filter(function(t){ return t.workshopId && t.key; });
   /* 開通名單是寬表：一人一列，每門課一欄(欄名＝workshopId)，格子打勾＝開通。 */
@@ -536,7 +544,12 @@ function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
              cadence: String(pick_(r, COLS.checkins.cadence) || "daily"), dim: String(pick_(r, COLS.checkins.dim)),
-             pts: Number(pick_(r, COLS.checkins.pts)) || 0, date: pick_(r, COLS.checkins.date) };
+             muscle: String(pick_(r, COLS.checkins.muscle) || ""),
+             pts: Number(pick_(r, COLS.checkins.pts)) || 0, date: pick_(r, COLS.checkins.date),
+             reaction: String(pick_(r, COLS.checkins.reaction) || ""),
+             target: String(pick_(r, COLS.checkins.target) || ""),
+             rel: String(pick_(r, COLS.checkins.rel) || ""),
+             note: String(pick_(r, COLS.checkins.note) || "") };
   });
   var revenue = rows_(TABS.revenue).filter(function(r){ return String(pick_(r, COLS.revenue.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.revenue.workshopId)), amount: Number(pick_(r, COLS.revenue.amount)) || 0,
@@ -544,7 +557,28 @@ function computeLogs_(uid) {
              A: Number(pick_(r, COLS.revenue.A)) || 0, T: Number(pick_(r, COLS.revenue.T)) || 0,
              P: Number(pick_(r, COLS.revenue.P)) || 0, I: Number(pick_(r, COLS.revenue.I)) || 0 };
   });
-  return { checkins: checkins, revenue: revenue };
+  return { checkins: checkins, revenue: revenue, evals: computeEvals_(uid) };
+}
+/* v2 體測紀錄（小肌群 1–5）。分頁不存在就回空陣列——舊試算表不跑 migrate 也不會壞。 */
+function computeEvals_(uid) {
+  var ss = ss_();
+  if (!ss.getSheetByName(TABS.evals)) return [];
+  return rows_(TABS.evals).filter(function(r){ return String(pick_(r, COLS.evals.lineId)) === uid; }).map(function(r){
+    return { muscle: String(pick_(r, COLS.evals.muscle) || "").toUpperCase(),
+             score: Number(pick_(r, COLS.evals.score)) || 0,
+             source: String(pick_(r, COLS.evals.source) || "self"),
+             date: normDateStr_(pick_(r, COLS.evals.date)),
+             week: String(pick_(r, COLS.evals.week) || "") };
+  }).filter(function(e){ return e.muscle && e.score >= 1 && e.score <= 5; });
+}
+/* 體測分頁：不存在就建（標題對齊 COLS.evals 的中文欄名）。 */
+function evalSheet_() {
+  var ss = ss_(), sh = ss.getSheetByName(TABS.evals);
+  if (!sh) {
+    sh = ss.insertSheet(TABS.evals);
+    sh.getRange(1, 1, 1, 6).setValues([["LINE userId", "小肌群", "分數", "來源", "日期", "週次"]]);
+  }
+  return sh;
 }
 function computeSelfEval_(uid) {
   var row = rows_(TABS.quiz).filter(function(r){ return String(pick_(r, COLS.quiz.lineId)) === uid; }).pop();
@@ -640,7 +674,7 @@ function doGet(e) {
       else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
       return json_({ status: "ok", student: computeStudent_(buid),
                      workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
-                     checkins: blogs.checkins, revenue: blogs.revenue, selfEval: computeSelfEval_(buid),
+                     checkins: blogs.checkins, revenue: blogs.revenue, evals: blogs.evals, selfEval: computeSelfEval_(buid),
                      defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
                      honorFeed: computeHonorFeed_(30),
                      rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
@@ -649,7 +683,7 @@ function doGet(e) {
 
     if (action === "logs") {
       var logs = computeLogs_(String(p.userId || ""));
-      return json_({ status: "ok", checkins: logs.checkins, revenue: logs.revenue });
+      return json_({ status: "ok", checkins: logs.checkins, revenue: logs.revenue, evals: logs.evals });
     }
 
     if (action === "leaderboard") {
@@ -739,9 +773,29 @@ function doPost(e) {
     if (body.action === "checkin") {
       appendMapped_(TABS.checkins, COLS.checkins, {
         lineId: body.lineId, workshopId: body.workshopId || "", taskKey: body.taskKey,
-        cadence: body.cadence || body.taskType || "daily", dim: body.dim || "", pts: body.pts || 0, date: body.date || today
+        cadence: body.cadence || body.taskType || "daily", dim: body.dim || "",
+        muscle: String(body.muscle || "").toUpperCase(), pts: body.pts || 0, date: body.date || today,
+        /* v2 會員模式：低摩擦守則——這三欄全部可空，不擋打卡 */
+        reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || ""
       });
       return json_({ status: "ok" });
+    }
+    /* v2 體測：一次寫多筆小肌群評分。evals＝[{muscle:"A1", score:3}, ...]
+       用 appendRows 一次寫，別逐列 append（大量寫入會卡「發生不明錯誤」）。 */
+    if (body.action === "eval") {
+      var evUid = String(body.lineId || "");
+      var evList = (body.evals || []).map(function(e){
+        return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) };
+      }).filter(function(e){ return e.muscle && e.score >= 1 && e.score <= 5; });
+      if (!evUid || !evList.length) return json_({ status: "error", message: "缺少 lineId 或有效的 evals" });
+      var evSrc = String(body.source || "self");
+      if (["quiz", "self", "coach"].indexOf(evSrc) < 0) evSrc = "self";
+      var evSh = evalSheet_();
+      var evDate = body.date || today, evWeek = String(body.week || "");
+      evSh.getRange(evSh.getLastRow() + 1, 1, evList.length, 6).setValues(
+        evList.map(function(e){ return [evUid, e.muscle, e.score, evSrc, evDate, evWeek]; })
+      );
+      return json_({ status: "ok", written: evList.length });
     }
     if (body.action === "revenue") {
       appendMapped_(TABS.revenue, COLS.revenue, {
@@ -863,6 +917,21 @@ function onEdit(e) {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   v2 遷移：12 小肌群層。可重複執行（ensureColumn_ 已存在就跳過）。
+   ① 任務分頁補「小肌群」欄（A1–I3，可留空＝只算大肌肉，舊任務不受影響）
+   ② 打卡紀錄補「小肌群 / 對方反應 / 對象 / 發生什麼」四欄
+   ③ 建 (遊戲)體測紀錄 分頁
+   舊資料完全不用回填：沒有 muscle 的打卡列仍照 dim 計進大肌肉（前端 logMuscles_ 會回查任務池）。
+   ═══════════════════════════════════════════════════════════ */
+function migrateV2_() {
+  ensureColumn_(TABS.tasks, "muscle");
+  ["小肌群", "對方反應", "對象", "關係", "發生什麼"].forEach(function(h){ ensureColumn_(TABS.checkins, h); });
+  evalSheet_();
+}
+/* 單獨跑遷移（不想整個 setup 重跑時用這支） */
+function migrateV2() { migrateV2_(); }
+
+/* ═══════════════════════════════════════════════════════════
    一鍵初始化：在 Apps Script 編輯器選 setup → 按「執行」一次即可。
    會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (設定)課程 / (設定)任務並填資料。
    第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
@@ -870,6 +939,7 @@ function onEdit(e) {
 function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
+  migrateV2_();
   /* team 欄：階課程(一/二/三階)＝FALSE（中間格改顯示「愛的貨幣」、隱藏夥伴小組頁）；
      工作坊＝TRUE（戰隊才是重點）。空白視為 TRUE。 */
   writeSheet_(TABS.workshops, [
