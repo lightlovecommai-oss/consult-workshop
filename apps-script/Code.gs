@@ -22,14 +22,18 @@ var TABS = {
   honorEvents: "(遊戲)榮譽事件",       // 榮譽解鎖事件流（首頁他人快閃用；程式自動建立/去重）：lineId | 姓名 | honorId | 榮譽名 | icon | 時間 | ts
   enrollments: "(遊戲)開通名單",       // 與學員名單合併為同一張：每門課一欄，欄名＝workshopId，格子打勾＝開通
   checkins:    "(遊戲)打卡紀錄",       // LINE userId | 任務key | 類型 | 維度 | 分數 | 日期（+ 課程）
-  revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引力 | 信任力 | 專業力 | 推進力（+ 課程）
+  revenue:     "(遊戲)成交紀錄",       // LINE userId | 金額 | 日期 | 備註 | 吸引/信任/專業/推進肌肉（+ 課程）
   quiz:        "(漏斗)能力測驗",       // 自評來源（comconverttest 寫入）：LINE userId + ATPI 分數
   rewards:     "(設定)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
   redemptions: "(遊戲)兌換紀錄",       // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
   pending:     "(遊戲)待審核"          // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
 };
 
-/* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。 */
+/* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。
+   ⚠️ 2026-08-28 正典：四維正式名＝「吸引／信任／專業／推進肌肉」，「〇〇力」作廢。
+      但這張表比對的是「試算表分頁的實際標題」——線上分頁目前仍是舊標題，
+      所以是「新名擺前面、舊名保留在後」的加法，兩種標題都讀得到、也寫得進去。
+      等分頁標題改成肌肉版之後，才可以把「〇〇力」／「影響力」從別名裡拿掉。 */
 var COLS = {
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
@@ -43,14 +47,17 @@ var COLS = {
               source:["來源","source"], date:["日期","date"], week:["週次","week"] },
   revenue:  { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], amount:["金額","amount"],
               date:["日期","date"], note:["備註","note"],
-              A:["吸引力","A"], T:["信任力","T"], P:["專業力","P"], I:["推進力","I"] },
-  quiz:     { lineId:["LINE userId","userId","lineId"], A:["吸引力","scoreA","A"], T:["信任力","scoreT","T"],
-              P:["專業力","scoreP","P"], I:["影響力","推進力","scoreI","I"] },
+              A:["吸引肌肉","吸引力","A"], T:["信任肌肉","信任力","T"],
+              P:["專業肌肉","專業力","P"], I:["推進肌肉","推進力","I"] },
+  quiz:     { lineId:["LINE userId","userId","lineId"],
+              A:["吸引肌肉","吸引力","scoreA","A"], T:["信任肌肉","信任力","scoreT","T"],
+              P:["專業肌肉","專業力","scoreP","P"], I:["推進肌肉","推進力","影響力","scoreI","I"] },
   /* 寫入用（comconverttest 測驗送來）：對齊「(引流.A)能力測驗」分頁的所有欄位 */
   quizWrite:{ time:["時間","timestamp"], lineId:["LINE userId","userId","lineId"], displayName:["LINE名稱","displayName"],
               pictureUrl:["頭像","pictureUrl"], name:["姓名","name"], email:["Email","email"], job:["職業","job"],
-              A:["吸引力","scoreA","A"], T:["信任力","scoreT","T"], P:["專業力","scoreP","P"],
-              I:["影響力","推進力","scoreI","I"], income:["收入等級","incomeLevel"],
+              A:["吸引肌肉","吸引力","scoreA","A"], T:["信任肌肉","信任力","scoreT","T"],
+              P:["專業肌肉","專業力","scoreP","P"], I:["推進肌肉","推進力","影響力","scoreI","I"],
+              income:["收入等級","incomeLevel"],
               mainAbility:["主能力"], subAbility:["副能力"],
               Q1:["Q1"], Q2:["Q2"], Q3:["Q3"], Q4:["Q4"], Q5:["Q5"], Q6:["Q6"],
               Q7:["Q7"], Q8:["Q8"], Q9:["Q9"], Q10:["Q10"], Q11:["Q11"], Q12:["Q12"] }
@@ -78,7 +85,7 @@ function checkboxifyBooleans() {
       if (hasBool && ok) { applyCheckbox_(sh, 2, c + 1, lastRow - 1, rule); Logger.log("☑ %s 第%s欄（%s）", sh.getName(), c + 1, vals[0][c]); }
     }
   });
-  // 開通名單：課程欄（第4欄「一階」起）即使空白也設成 checkbox，方便打勾開通
+  // 開通名單：課程欄（第4欄 workshopId「一階」＝鍛鍊段 L1–L4 起）即使空白也設成 checkbox，方便打勾開通
   var roster = ss.getSheetByName(TABS.students);
   if (roster && roster.getLastRow() >= 2 && roster.getLastColumn() > 3) {
     applyCheckbox_(roster, 2, 4, roster.getLastRow() - 1, rule);
@@ -940,13 +947,17 @@ function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
   migrateV2_();
-  /* team 欄：階課程(一/二/三階)＝FALSE（中間格改顯示「愛的貨幣」、隱藏夥伴小組頁）；
+  /* ⚠️ workshopId 的「一階／二階／三階」是 Google Sheet 既有資料鍵，不能改；
+        2026-08-28 正典只換「顯示名 name」，對照如下：
+          一階＝鍛鍊段 L1–L4｜二階＝放大段 L5–L8｜三階＝演說段 L9–L13
+        SKU：L1–L8＝超引力顧問課(3.28萬)／L1–L13＝超引力公眾演說課(10.8萬)，系列名＝超引力成交學。
+     team 欄：段課程(一/二/三階)＝FALSE（中間格改顯示「愛的貨幣」、隱藏夥伴小組頁）；
      工作坊＝TRUE（戰隊才是重點）。空白視為 TRUE。 */
   writeSheet_(TABS.workshops, [
     ["workshopId", "name", "active", "team"],
-    ["二階", "2階-吸引式1v1顧問成交", true, false],  // ← 目前定錨的正式課程，排第一＝預設落點
-    ["一階", "1階-吸引式聊天變現課", true, false],   // 已開課（跑 openLevel1() 安全上線，不必重跑 setup）
-    ["三階", "3階-吸引式1vN公眾演說", true, false],
+    ["二階", "放大段 L5–L8", true, false],    // ← 目前定錨的正式課程，排第一＝預設落點
+    ["一階", "鍛鍊段 L1–L4", true, false],    // 已開課（跑 openLevel1() 安全上線，不必重跑 setup）
+    ["三階", "演說段 L9–L13", true, false],
     ["1v1顧問實戰", "工作坊-1v1顧問實戰", true, true],
     ["主持人實戰", "工作坊-1VN主持人實戰", true, true],
     ["短影音實戰", "工作坊-短影音實戰", true, true]
@@ -964,9 +975,9 @@ function setup() {
    ═══════════════════════════════════════════════════════════ */
 function updateWorkshopNames() {
   var names = {
-    "一階": "1階-吸引式聊天變現課",
-    "二階": "2階-吸引式1v1顧問成交",
-    "三階": "3階-吸引式1vN公眾演說",
+    "一階": "鍛鍊段 L1–L4",
+    "二階": "放大段 L5–L8",
+    "三階": "演說段 L9–L13",
     "1v1顧問實戰": "工作坊-1v1顧問實戰",
     "主持人實戰": "工作坊-1VN主持人實戰",
     "短影音實戰": "工作坊-短影音實戰"
@@ -987,8 +998,8 @@ function updateWorkshopNames() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   一次性：把「戰隊」在階課程換成「愛的貨幣」——安全，不重跑 setup。
-   在 workshops 分頁確保有 team 欄，並設：一/二/三階＝FALSE、工作坊＝TRUE。
+   一次性：把「戰隊」在段課程換成「愛的貨幣」——安全，不重跑 setup。
+   在 workshops 分頁確保有 team 欄，並設：workshopId 一/二/三階（＝鍛鍊/放大/演說段）＝FALSE、工作坊＝TRUE。
    前端會據此把中間 stat 格改成💛愛的貨幣、並隱藏夥伴小組頁。
    在 Apps Script 選 applyCourseTeamOff → 執行 一次即可。
    ═══════════════════════════════════════════════════════════ */
@@ -1005,15 +1016,17 @@ function applyCourseTeamOff() {
   for (var r = 2; r <= sh.getLastRow(); r++) {
     var wid = String(sh.getRange(r, idCol).getValue()).trim();
     if (!wid) continue;
-    var v = courseOff.hasOwnProperty(wid) ? false : true;  // 階課程 FALSE、其餘 TRUE
+    var v = courseOff.hasOwnProperty(wid) ? false : true;  // 段課程 FALSE、其餘 TRUE
     sh.getRange(r, teamCol).setValue(v);
     updated++;
   }
-  return "已設定 team 欄：階課程 FALSE／工作坊 TRUE，共 " + updated + " 列";
+  return "已設定 team 欄：段課程 FALSE／工作坊 TRUE，共 " + updated + " 列";
 }
 
 /* ═══════════════════════════════════════════════════════════
-   一次性：安全開通「一階」——不重跑 setup（那會蓋掉你手動改過的 active／locked）。
+   （下文的「一階／二階／三階」都是 workshopId 資料鍵，不是課名；
+      段名對照：一階＝鍛鍊段 L1–L4／二階＝放大段 L5–L8／三階＝演說段 L9–L13）
+   一次性：安全開通「一階」（鍛鍊段 L1–L4）——不重跑 setup（那會蓋掉你手動改過的 active／locked）。
    做兩件事：
    (1) workshops 分頁把「一階」那列 active 設為 TRUE（其他課完全不動）；
    (2) tasks 分頁把 TASKS_SEED 裡「一階」的任務列 append 進去（已存在同 taskKey 就跳過，可重複執行）。
@@ -1055,9 +1068,9 @@ function openLevel1() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   一次性：把 TASKS_SEED 裡「一階」任務同步進任務分頁——依 taskKey 更新已存在列、
+   一次性：把 TASKS_SEED 裡「一階」（鍛鍊段 L1–L4）任務同步進任務分頁——依 taskKey 更新已存在列、
    新增沒有的列，並**保留該列現有的 locked 值**（不蓋掉手動開放過的週次）。
-   改完 name/desc/dim/pts 後跑這支即可；不影響二階。
+   改完 name/desc/dim/pts 後跑這支即可；不影響二階（放大段 L5–L8）。
    在 Apps Script 選 updateLevel1Tasks → 執行。
    ═══════════════════════════════════════════════════════════ */
 function updateLevel1Tasks() {
@@ -1237,7 +1250,7 @@ function readSheetObjs_(sh) {
 
 /* ═══════════════════════════════════════════════════════════
    一次性：把舊的「一階」測試打卡／成交紀錄清掉（過往資料是測試資料，覆蓋掉沒關係）。
-   只清資料列、保留標題列；之後這個專案就乾淨地以「二階」為主繼續跑。
+   只清資料列、保留標題列；之後這個專案就乾淨地以「二階」（放大段 L5–L8）為主繼續跑。
    在 Apps Script 選 clearOldTestData → 執行 一次即可，之後不用再跑。
    ═══════════════════════════════════════════════════════════ */
 function clearOldTestData() {
@@ -1255,7 +1268,7 @@ function clearSheetRows_(tab) {
   return n;
 }
 
-/* 建「開通名單」寬表：一人一列、每門課一欄(核取方塊)，預設把第一門課(目前是二階)開通。
+/* 建「開通名單」寬表：一人一列、每門課一欄(核取方塊)，預設把第一門課(目前是二階＝放大段 L5–L8)開通。
    已存在就「不覆蓋」，避免洗掉你手動的開通設定。 */
 function ensureEnrollmentSheet_() {
   var ss = ss_();
@@ -1324,13 +1337,13 @@ var TASKS_SEED = [
     "對齊內心——用 ATPI（A吸引/T信任/P專業/I推進）當鏡子，回想今天一次溝通，寫下你喜歡或不喜歡的地方。", false],
   ["二階", "d3", "daily", "T", 1, "同理心：今天主動跟一個人要一次反饋，理解「你在客戶內心樣貌」", "🤝", false,
     "同理心——今天主動找一個人要一句真實反饋，聽完先不解釋、不辯解，單純接住，理解「你在客戶內心的樣貌」。", false],
-  ["二階", "d4", "daily", "A", 1, "提升吸引力，讓開口更吸引人", "🥩", false,
+  ["二階", "d4", "daily", "A", 1, "提升吸引肌肉，讓開口更吸引人", "🥩", false,
     "今天任選一個技巧練習：①端牛肉（說出核心價值一句話）②講故事 ③吸引Combo技（牛肉+故事+啟示）④關鍵問句。", false],
-  ["二階", "d5", "daily", "T", 1, "提升信任力，讓對方更願意說真話", "❓", false,
+  ["二階", "d5", "daily", "T", 1, "提升信任肌肉，讓對方更願意說真話", "❓", false,
     "今天任選一個技巧練習：①Whyyyy（深挖問題，問一次為什麼）②Whoooo（想清楚利害關係人）③A→B消費者歷程 ④接收回饋（請對方打0-10分）。", false],
-  ["二階", "d6", "daily", "P", 1, "提升專業力，讓對方覺得你真的懂", "💡", false,
+  ["二階", "d6", "daily", "P", 1, "提升專業肌肉，讓對方覺得你真的懂", "💡", false,
     "今天任選一個技巧練習：①創造對比（讓對方自己做做看）②帶入情境（想好應用場景）③乾貨佐證（用邏輯或數據佐證）。", false],
-  ["二階", "d7", "daily", "I", 1, "提升推進力，讓對方更願意馬上行動", "🎯", false,
+  ["二階", "d7", "daily", "I", 1, "提升推進肌肉，讓對方更願意馬上行動", "🎯", false,
     "塑造價值——今天跟一個人說一句「這樣做對你的好處」。", false],
 
   /* 每週（cadence=weekly，2025-07 改版：A×1／T×2／P×1／I×1，每週上限算 2 項）*/
@@ -1343,12 +1356,12 @@ var TASKS_SEED = [
   ["二階", "wk5", "weekly", "I", 2, "本週主動推進一位已經聊過的準客戶，問一次下一步", "🚀", false,
     "找一位已經聊過的準客戶，主動問一次「我們可以往下一步了嗎」，練習不逃避推進的時刻。", false],
 
-  /* ═══════ 一階｜1階-吸引式聊天變現課（4 週，每週對應一個 ATPI 維度）═══════
-     出席維度＝該週維度（W1=A吸引 / W2=T信任 / W3=P專業 / W4=I推進），上完四週四維均勻點亮。
+  /* ═══════ workshopId「一階」＝鍛鍊段 L1–L4（4 週，每週對應一塊大肌肉）═══════
+     出席維度＝該週大肌肉（W1=A吸引 / W2=T信任 / W3=P專業 / W4=I推進），上完四週 4 大肌肉均勻點亮。
      只有第1週開放，W2 起(出席+作業)預設 locked=true，邊教邊在(遊戲)任務分頁把該列 locked 改 FALSE。
-     daily/weekly 特意跟二階不同：切到日常人際場景(家庭/朋友/社群/貼文)，用一階自己的技法，變化性才夠。*/
+     daily/weekly 特意跟放大段(二階)不同：切到日常人際場景(家庭/朋友/社群/貼文)，用鍛鍊段自己的技法，變化性才夠。*/
 
-  /* 社群分享（once，A，同二階）*/
+  /* 社群分享（once，A，同放大段/二階）*/
   ["一階", "social1", "once", "A,T,P", 3, "社群賣自己", "📣", false, "分享一則你自己的人生故事，用「低點→轉折→高點」的方法說，讓大家更認識真實的你。(e.g. FB / IG / Thread……)", false],
   ["一階", "social2", "once", "A,T,P", 3, "社群推薦光頭", "📖", false, "分享真實的上課心得——你的突破、喜悅、看見……，最後自然把光頭推薦出去（不用為了硬推而寫，因為感動而寫）。", false],
   ["一階", "social3", "once", "A,T,P", 3, "讓愛流動", "💗", false, "講出你的內心OS：找你的爸／媽／家人（擇一），說出你心中藏了很久想跟他說的話（道謝・道歉・道愛）。", false],
@@ -1362,20 +1375,20 @@ var TASKS_SEED = [
   ["一階", "pre_mindset", "special", "T", 2, "先修課｜L5.L6影片", "🎬", false, "看完 2 隻「講故事」的技法＋心法影片後打卡，並實際落地用一次。", false],
 
   /* 課程（special，每週乾貨課+討論課+作業，維度＝該週維度）*/
-  ["一階", "w1a", "special", "A", 2, "第1週｜乾貨課出席", "📅", false, "完成第1週乾貨課出席打卡。本週 A吸引力：Core1 吸引式溝通4核心・Core2 5大黃金選擇・Core3 秀肌肉・Core4 萬能關鍵問句。", false],
+  ["一階", "w1a", "special", "A", 2, "第1週｜乾貨課出席", "📅", false, "完成第1週乾貨課出席打卡。本週 A吸引肌肉：Core1 吸引式溝通4核心・Core2 5大黃金選擇・Core3 秀肌肉・Core4 萬能關鍵問句。", false],
   ["一階", "w1b", "special", "A", 2, "第1週｜討論課出席", "🗣️", false, "完成第1週討論課出席打卡，一起討論你的「秀肌肉」怎麼說更吸引。", false],
   ["一階", "hw1", "special", "A", 5, "作業：練你的「秀肌肉」一句話", "✍️", true, "寫出一句能讓人眼睛一亮的核心亮點（秀肌肉），下次討論課分享。", false],
-  ["一階", "w2a", "special", "T", 2, "第2週｜乾貨課出席", "📅", false, "完成第2週乾貨課出席打卡。本週 T信任力：英雄之旅・Whyyyy深挖信任・句號還是問號。", true],
+  ["一階", "w2a", "special", "T", 2, "第2週｜乾貨課出席", "📅", false, "完成第2週乾貨課出席打卡。本週 T信任肌肉：英雄之旅・Whyyyy深挖信任・句號還是問號。", true],
   ["一階", "w2b", "special", "T", 2, "第2週｜討論課出席", "🗣️", false, "完成第2週討論課出席打卡。", true],
   ["一階", "hw2", "special", "T", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
-  ["一階", "w3a", "special", "P", 2, "第3週｜乾貨課出席", "📅", false, "完成第3週乾貨課出席打卡。本週 P專業力：乾貨 vs 乾貨感・5感體驗法・打造專屬影響技巧。", true],
+  ["一階", "w3a", "special", "P", 2, "第3週｜乾貨課出席", "📅", false, "完成第3週乾貨課出席打卡。本週 P專業肌肉：乾貨 vs 乾貨感・5感體驗法・打造專屬影響技巧。", true],
   ["一階", "w3b", "special", "P", 2, "第3週｜討論課出席", "🗣️", false, "完成第3週討論課出席打卡。", true],
   ["一階", "hw3", "special", "P", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
-  ["一階", "w4a", "special", "I", 2, "第4週｜乾貨課出席", "📅", false, "完成第4週乾貨課出席打卡。本週 I推進力：家庭/朋友/社群三大場景整合・不銷而銷・讓人主動行動。", true],
+  ["一階", "w4a", "special", "I", 2, "第4週｜乾貨課出席", "📅", false, "完成第4週乾貨課出席打卡。本週 I推進肌肉：家庭/朋友/社群三大場景整合・不銷而銷・讓人主動行動。", true],
   ["一階", "w4b", "special", "I", 2, "第4週｜討論課出席", "🗣️", false, "完成第4週討論課出席打卡。", true],
   ["一階", "hw4", "special", "I", 5, "作業：(待公布)", "✍️", true, "(待出作業，開課後在此堂課公布)", true],
 
-  /* 每日（daily，7項，每天上限3）— 一階技法 × 日常對話 */
+  /* 每日（daily，7項，每天上限3）— 鍛鍊段技法 × 日常對話 */
   ["一階", "d1", "daily", "A", 1, "秀肌肉：今天用一句話說出你的核心亮點", "💪", false,
     "用一句話「秀肌肉」——說出讓人眼睛一亮的核心亮點/結果，今天找一次對話或貼文用出來。", false],
   ["一階", "d2", "daily", "A", 1, "關鍵問句：今天用一個會勾到對方需求的問句，抓住對方焦點", "❓", false,
@@ -1460,8 +1473,8 @@ var TENLEAD_HONORS = [
   ["tl_deal5",    "tenlead-1","dealCount",    5,      "🔥","連續開單手","累積簽下 5 單，證明可複製", "銀",true,"workshop"],
   ["tl_rev10w",   "tenlead-1","revenueTotal", 100000, "💎","十萬戰將",  "課程期間做出 10 萬營業額",  "金",true,"workshop"],
   ["tl_streak7",  "tenlead-1","streak",       7,      "🌟","七日不斷",  "連續 7 天完成打卡",         "銀",true,"workshop"],
-  ["tl_trust",    "tenlead-1","investPct.T",  50,     "🤝","信賴達人",  "信任力投入衝到 50%",        "銀",true,"workshop"],
-  ["tl_push",     "tenlead-1","investPct.I",  50,     "🚀","推進高手",  "推進力投入衝到 50%",        "銀",true,"workshop"]
+  ["tl_trust",    "tenlead-1","investPct.T",  50,     "🤝","信賴達人",  "信任肌肉投入衝到 50%",        "銀",true,"workshop"],
+  ["tl_push",     "tenlead-1","investPct.I",  50,     "🚀","推進高手",  "推進肌肉投入衝到 50%",        "銀",true,"workshop"]
 ];
 
 /* 分隊：同隊名自動成組（≥2 隊才顯示戰隊區）。隊名先用「1隊…15隊」，改第二欄即可改名。

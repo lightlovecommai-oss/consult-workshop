@@ -84,7 +84,9 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 - **會員模式的社群區塊是 mock**：「今天 N 位夥伴在練」「館裡熱議」是寫死的示意（畫面上標了「示意」）。要真的接 Skool，還有 27§8.6 的硬規則「**開練紀錄自動流一份進 Skool**」——那是環境柱與社群柱的量測前提，目前完全沒做。
 - **dashboard（學員模式）用語尚未跟上語彙表**：仍寫「打卡／任務」，字典已定為「開練／動作」（器材＝App、館＝Skool、一組＝3 動作封頂）。member.html 已用新語彙。
 - **`atpi-core.js` 的長篇文案仍是「〇〇力」**（`STRONG_PATH`／`COMBO_PATH`／`WEAK_DESC`），**改動會同時影響 comconverttest**，需另開一輪處理。結構化維度名 `DIMS[].name` 已改為「〇〇肌肉」。
-- 計分口徑：每維能力 = 投入%（**飽和曲線** `100 × 累積分 /(累積分 + DIMS[k].k)`，累積到 `k` 分＝50%，永遠逼近 100 不爆表）× 市場驗證係數（`validationFactor`，見計分常數 `TARGET_AMOUNT`/`TARGET_COUNT`/`VALID_FLOOR`）。`DIMS[k].k`（半滿點，取代舊的固定滿分 `max`）與 `TARGET_*` 都是軟旋鈕，待真實數據微調。設計全貌見專案記憶 scoring-model-design。
+- 計分口徑（**2026-08-28 裁決 D5A 改版**）：每維能力 = 投入%（**飽和曲線** `100 × 累積分 /(累積分 + DIMS[k].k)`，累積到 `k` 分＝50%，永遠逼近 100 不爆表），**只吃行為證據（打卡／練習紀錄），沒有第二個乘數**。`DIMS[k].k`（半滿點，取代舊的固定滿分 `max`）是軟旋鈕，待真實數據微調。設計全貌見專案記憶 scoring-model-design。
+  - ⚠️ **舊口徑已作廢**：`calcDims` 曾經再乘上 `validationFactor`（由成交金額×筆數算出）＝「用成交回推能力、再用能力預測變現」的循環論證。該函式已改名 `marketValidation(s)`、改用途成**獨立顯示的外部驗證欄位**（回傳 `{amount,count,amtAchieve,cntAchieve,index,pct,legacyFactor}`），**不乘進任何分數**。常數 `TARGET_AMOUNT`/`TARGET_COUNT` 現在只當市場驗證的分母；`VALID_FLOOR` 只剩 `legacyFactor` 用來對照舊快照，**禁止再乘進能力分**。
+  - 成交紀錄分頁的 `A|T|P|I` 快照欄語意同步換了：2026-08-28 之後存的是「當下練出來的投入分」，之前的舊列是「投入×驗證係數」且**不回頭改寫**（歷史保留原樣），走勢圖跨那條線比較時要知道。
 - 等級門檻 `LEVELS`（0/10/18/24/29）是舊「29 滿分」模型留下的；`totalScore` 現含每日/每週會無限累積，血條已改 `levelProgress()` 走「到下一級的進度」不爆表，但門檻本身要不要納入每日/每週、重新設計，待定。
 - 打卡與成交**都已接 Google Sheet 持久化**：載入用 `loadLogs()`（GET `?action=logs`）讀回、`postCheckin()`/`postRevenue()`（POST）寫入「打卡紀錄」/「成交紀錄」分頁；成交會存下當下四維分數快照供走勢圖用。自評起點用 `loadSelfEval()`（GET `?userId=`）讀同一試算表的測驗結果，只顯示不計分。
 

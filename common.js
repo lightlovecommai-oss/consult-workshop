@@ -17,11 +17,13 @@ var DIMS = {
 /* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
 /* ── 計分校準常數（要調就改這裡，等真實數據累積後再校準）──
-   核心哲學：能力由「市場」驗證，不是做多少功課就算數。
-   每維能力 = 投入%（飽和曲線）× 驗證係數；驗證係數 = 保底 + (1-保底) ×（金額達成 × 簽單數達成）。 */
-var TARGET_AMOUNT = 3000000; // 目標累計成交金額（元）＝ 300 萬（驗證係數的金額分母）
-var TARGET_COUNT  = 5;       // 目標累計簽單數（防一張大單灌水，要反覆簽得下來）
-var VALID_FLOOR   = 0.5;     // 保底驗證係數：完全沒成交時，投入至少兌現一半
+   核心哲學（2026-08-28 裁決 D5A）：**能力分數只由行為證據算**——打卡動作、練習紀錄。
+   成交結果不得回饋進分數：拿成交回推 A/T/P/I、再用 A/T/P/I 去預測「變現潛力」是循環論證。
+   每維能力 ＝ 投入%（飽和曲線），沒有第二個乘數。
+   成交改走 marketValidation()，當「市場驗證」**獨立顯示**，是外部驗證欄位，不乘進任何分數。 */
+var TARGET_AMOUNT = 3000000; // 市場驗證的金額分母＝累計成交 300 萬（對齊畢業錨點）
+var TARGET_COUNT  = 5;       // 市場驗證的筆數分母（防一張大單灌水，要反覆簽得下來）
+var VALID_FLOOR   = 0.5;     // ⚠️ 舊「保底驗證係數」：只剩 legacyFactor 用來重算/對照歷史快照，禁止再乘進能力分
 
 /* ── 每日／每週的完成上限（跨所有 workshop 每種節奏的每期上限）── */
 var CADENCE_CFG = {
@@ -32,8 +34,9 @@ var CADENCE_CFG = {
 
 /* 徽章已升級成榮譽系統（4 大肌肉分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
 
-/* ── 稱號階梯（綁「變現潛力 0-1000」，不是投入分）──
-   角色卡的稱號＝真本事：靠 calcPotential(A×T×P×I) 決定，努力有 0.5 保底所以新學員也非零、稱號會慢慢動，成交後乘到滿。
+/* ── 稱號階梯（綁「變現潛力 0-1000」，不是個人積分）──
+   角色卡的稱號靠 calcPotential(A×T×P×I) 決定，四塊都是「練出來的」投入分——
+   所以稱號跟著練動、不跟著成交動（D5A：成交不回饋進分數）。四塊越均衡，潛力抬得越快。
    門檻是軟旋鈕，待真實潛力分佈再校準。 */
 var POTENTIAL_TIERS = [
   {min:0,   icon:"🌱", title:"初露鋒芒", next:"衝到變現潛力 120，晉升「嶄露頭角」"},
@@ -143,15 +146,18 @@ function investDim(s, dim) {
   }, 0);
 }
 
-/* 每維「市場驗證能力」＝ 投入%（飽和曲線）× 市場驗證係數。
+/* 每維能力＝ 投入%（飽和曲線），**只吃行為證據**（打卡／練習紀錄），不乘任何成交項。
    投入% = 100 × 累積分 /(累積分 + k)：k 分＝50%、3k＝75%，永遠逼近 100 不爆表——
-   跨多 workshop 無限加總也不頂死。做很多功課但沒變現，能力仍被驗證係數壓在天花板下（刻意設計）。 */
+   跨多 workshop 無限加總也不頂死。
+
+   ⚠️ 2026-08-28 裁決 D5A：這裡曾經乘上 validationFactor（由成交金額×筆數算出）。
+   那等於「用成交回推能力、再用能力預測變現」＝循環論證，已拆除。
+   成交現在只走 marketValidation()，在畫面上獨立顯示，不回饋進分數。 */
 function calcDims(s) {
-  var factor = validationFactor(s);
   var sc = {};
   DORD.forEach(function(k) {
     var invest = investDim(s, k);
-    sc[k] = Math.round(100 * invest / (invest + DIMS[k].k) * factor);
+    sc[k] = Math.round(100 * invest / (invest + DIMS[k].k));
   });
   return sc;
 }
@@ -291,11 +297,23 @@ function totalScore(s) {
   return s.checkinLog.reduce(function(sum, e){ return sum + e.pts; }, 0);
 }
 
-/* 市場驗證係數：0~1。沒成交時＝保底值，隨累計金額與簽單數往 1.0 靠（兩者相乘，擋一張大單灌水）。 */
-function validationFactor(s) {
-  var amtAchieve = Math.min(1, revenueTotal(s) / TARGET_AMOUNT);
-  var cntAchieve = Math.min(1, s.revenueLog.length / TARGET_COUNT);
-  return VALID_FLOOR + (1 - VALID_FLOOR) * (amtAchieve * cntAchieve);
+/* ── 市場驗證（外部驗證欄位・獨立顯示，不進能力分數）──
+   原本叫 validationFactor，被 calcDims 乘進 A/T/P/I ＝ 循環論證；2026-08-28 D5A 改名並改用途。
+   算法本身原封不動保留（金額達成 × 筆數達成，相乘擋一張大單灌水），只是不再回饋進分數。
+   回傳 {amount, count, amtAchieve, cntAchieve, index, pct, legacyFactor}：
+     index/pct ＝ 現行對外口徑的市場驗證度 0~1 / 0~100（沒成交就是 0，不再有保底 50%）
+     legacyFactor ＝ 舊係數（含 VALID_FLOOR 保底），只留給重算／對照舊快照，禁止乘進分數。 */
+function marketValidation(s) {
+  var amount = revenueTotal(s), count = (s.revenueLog || []).length;
+  var amtAchieve = Math.min(1, amount / TARGET_AMOUNT);
+  var cntAchieve = Math.min(1, count / TARGET_COUNT);
+  var index = amtAchieve * cntAchieve;
+  return {
+    amount: amount, count: count,
+    amtAchieve: amtAchieve, cntAchieve: cntAchieve,
+    index: index, pct: Math.round(index * 100),
+    legacyFactor: VALID_FLOOR + (1 - VALID_FLOOR) * index
+  };
 }
 
 /* ── 某 workshop 內：今天／本週已完成的每日／每週任務 key、已完成的一次性任務 ──
@@ -335,7 +353,10 @@ function doCheckin(s, task, workshopId, extra) {
   postCheckin(s.lineId, task, workshopId, d, extra);
 }
 
-/* ── 回報成交（金額 + 當下四維快照，供走勢圖）── */
+/* ── 回報成交（金額 + 當下四維快照，供走勢圖）──
+   ⚠️ 快照語意在 2026-08-28（D5A）換了：欄位還是 A/T/P/I，但存的是「當下練出來的投入分」，
+   不再是舊的「投入×驗證係數」。2026-08-28 以前寫進 Sheet 的舊列不動、不回頭改寫（歷史就是歷史），
+   所以走勢圖前段是舊口徑、後段是新口徑，跨那條線比較時要知道這件事。 */
 function addRevenue(s, amount, note, workshopId) {
   var scores = calcDims(s);
   s.revenueLog.push({
@@ -542,8 +563,11 @@ function bestWeekDays(s) {
 /* 組出榮譽評估用 ctx（全域合併，跨所有 workshop）。 */
 function buildHonorCtx(s) {
   var scores = calcDims(s);
+  /* D5A 之後能力分＝投入%，兩者同一把尺，所以 investPct 直接沿用 scores（別再各算一次會漂移）。
+     investPct.* 這個 metric 名字保留：Sheet 的專屬榮譽設定（如 tl_trust）是照名字對的。 */
   var invPct = {};
-  DORD.forEach(function(k){ var iv = investDim(s, k); invPct[k] = iv > 0 ? Math.round(100 * iv / (iv + DIMS[k].k)) : 0; });
+  DORD.forEach(function(k){ invPct[k] = scores[k]; });
+  var mv = marketValidation(s);
   var wsSet = {};
   s.checkinLog.forEach(function(e){ if (e.workshopId) wsSet[e.workshopId] = 1; });
   return {
@@ -551,6 +575,7 @@ function buildHonorCtx(s) {
     potential: calcPotential(scores).unlocked,
     revenueTotal: revenueTotal(s),
     dealCount: s.revenueLog.length,
+    marketValidationPct: mv.pct,   // 外部驗證，獨立欄位——不進 scores/potential
     checkinCount: s.checkinLog.length,
     investPct: invPct,
     dimsCovered: DORD.filter(function(k){ return investDim(s, k) > 0; }).length,

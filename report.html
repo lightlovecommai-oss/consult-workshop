@@ -159,6 +159,9 @@ function daysAgoStr(n) {
 var DEMO = false;
 function demoStudents() {
   function ago(i){ var d = new Date(Date.now() - i * 86400000); return todayStr(d); }
+  /* ⚠️ workshopId 的 "一階" 是 Google Sheet 既有資料鍵，不能改（改了線上資料對不上）。
+     2026-08-28 正典對照：一階＝鍛鍊段 L1–L4／二階＝放大段 L5–L8／三階＝演說段 L9–L13。
+     兩者都屬「超引力成交學」：L1–L8＝超引力顧問課、L1–L13＝超引力公眾演說課。 */
   function ck(mk, i){ return { workshopId:"一階", taskKey:"m_" + mk.toLowerCase(), cadence:"daily",
                                dim:mk.charAt(0), muscle:mk, pts:1, date:ago(i) }; }
   function ev(mk, sc, src, i){ return { muscle:mk, score:sc, source:src || "self", date:ago(i == null ? 6 : i), week:"" }; }

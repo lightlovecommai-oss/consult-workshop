@@ -539,7 +539,7 @@ function bodyHTML(){
   return h;
 }
 
-/* 關係軌跡＝會員版的產品說明書（缺的那幾步正好是二階賣的） */
+/* 關係軌跡＝會員版的產品說明書（缺的那幾步正好是「超引力顧問課」賣的：放大段 L5–L8）*/
 function arcHTML(){
   var byTarget = {};
   S.checkinLog.forEach(function(e){
@@ -582,7 +582,7 @@ function arcHTML(){
   var hasBiz = names.some(function(n){ return SOFT_REL.indexOf(byTarget[n].rel) < 0; });
   if (names.length && hasBiz) {
     h += '<div class="up"><div class="up-t srf">單塊你練得起來了</div>'
-      + '<div class="up-s">難的是<b>把四塊串成一條路、在對的時機走完</b>——那就是一次完整的變現對話。<br>二階教的就是這件事。</div></div>';
+      + '<div class="up-s">難的是<b>把四塊串成一條路、在對的時機走完</b>——那就是一次完整的變現對話。<br>超引力顧問課教的就是這件事。</div></div>';
   }
   return h;
 }

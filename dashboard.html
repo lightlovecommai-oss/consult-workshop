@@ -216,7 +216,7 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         <div class="dimgrid2" id="dim-grid2"></div>
       </div>
 
-      <!-- 自評起點 × 市場驗證（有測驗資料才顯示） -->
+      <!-- 自評起點 × 練出來的（有測驗資料才顯示） -->
       <div class="card" style="padding:1rem;margin-bottom:12px;display:none;" id="selfeval-card"></div>
 
       <!-- 更多分析（三段收合成一張卡） -->
@@ -253,6 +253,18 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           </div>
           <input id="rv-note" type="text" placeholder="備註（選填，例如成交項目）" class="rv-input" style="width:100%;margin-bottom:8px;">
           <div class="rv-foot">累計回報 <strong id="rv-total"></strong>，共 <strong id="rv-count"></strong> 筆（成交採計全部課程合併）</div>
+          <!-- 市場驗證：外部驗證欄位，獨立顯示，不進能力分數（2026-08-28 D5A）-->
+          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid rgba(246,214,138,.25);">
+            <div class="rv-foot" style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
+              <span>市場驗證</span>
+              <strong id="rv-mv-pct"></strong>
+              <span style="margin-left:auto;font-size:13px;opacity:.75;">金額 <span id="rv-mv-amt"></span>％・筆數 <span id="rv-mv-cnt"></span>％</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;">
+              <div id="rv-mv-bar" style="height:6px;border-radius:3px;background:linear-gradient(90deg,#f6d68a,#e8a84a);width:0%;transition:width .6s;"></div>
+            </div>
+            <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px;">外部驗證欄位，看你練出來的東西在外面兌現了多少。<strong style="color:#f6d68a;">不會加進、也不會扣掉肌肉分數</strong>——分數只看你做過的動作。</div>
+          </div>
         </div>
       </div>
 
@@ -292,14 +304,14 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         </div>
       </div>
 
-      <div class="copybox">任務幫你累積投入、把 4 大肌肉撐起來；真正把能力一格格解鎖的，是你<strong>回報的每一筆成交</strong>——市場買單，才算真本事。</div>
+      <div class="copybox">4 大肌肉靠<strong>你做過的動作</strong>長出來——任務打卡、練習紀錄，練了就長。成交不算進肌肉分數，它另外記在「市場驗證」，讓你看見練出來的東西有沒有在外面兌現。</div>
 
       <!-- 說明中心（4 個收合區塊：計分／QA／愛的貨幣／ATPI）-->
       <!-- ① ATPI 溝通變現框架（精簡自使用手冊）-->
       <details style="margin-bottom:.6rem;border:0.5px solid #e8ddd2;border-radius:12px;background:#fdfaf6;">
         <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">🧭 ATPI 溝通變現框架（精簡手冊）</summary>
         <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
-          <div style="margin:10px 0;padding:10px 12px;background:#fff4ec;border-radius:10px;font-weight:600;color:#2d1f0f;text-align:center;">溝通變現潛力 ＝ A × T × P × I<br><span style="font-weight:400;font-size:15px;color:#7a5636;">缺任何一個維度，整體就會被拖垮（相乘・缺一即零）</span></div>
+          <div style="margin:10px 0;padding:10px 12px;background:#fff4ec;border-radius:10px;font-weight:600;color:#2d1f0f;text-align:center;">溝通變現潛力 ＝ A × T × P × I<br><span style="font-weight:400;font-size:15px;color:#7a5636;">相乘：任何一塊趨近零，整體就被嚴重折損</span></div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">成交需要四個環節，缺一個就卡住</div>
           <div style="margin-bottom:4px;"><strong style="color:#e8734a;">A 吸引肌肉</strong>：讓人想靠近你、想繼續聽你說。<br><span style="color:#7a5636;">不夠 → 說了很多，對方點頭就走。</span></div>
           <div style="margin-bottom:4px;"><strong style="color:#5DCAA5;">T 信任肌肉</strong>：讓人覺得你懂他、願意說真心話。<br><span style="color:#7a5636;">不夠 → 喜歡你，但還不願掏錢。</span></div>
@@ -317,7 +329,7 @@ details.foldcard .foldbody{padding:0 14px 14px;}
             ・<strong>P+I 強</strong>：專業提案 × B2B 企業成交
           </div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼是「乘法」不是加總？</div>
-          <div>KLT、AIDA、影響力7原則都是「做什麼策略」；ATPI 講的是「你天生擅長哪一塊」的<strong>個人能力框架</strong>。用乘法是因為4 大肌肉缺一即為零——這是其他框架沒說清楚的護城河。</div>
+          <div>KLT、AIDA、影響力7原則都是「做什麼策略」；ATPI 講的是「你天生擅長哪一塊」的<strong>個人能力框架</strong>。用乘法是因為 4 大肌肉會互相拖累——任何一塊趨近零，整條路就被嚴重折損，補強最弱的那塊回報最大。這是其他框架沒說清楚的護城河。</div>
         </div>
       </details>
 
@@ -326,17 +338,19 @@ details.foldcard .foldbody{padding:0 14px 14px;}
         <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:15px;color:#7a5636;user-select:none;">📖 計分規則說明（你的分數怎麼算）</summary>
         <div style="padding:0 16px 16px;font-size:15px;color:#6b4c30;line-height:1.85;">
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">能力分數怎麼算？</div>
-          <div style="margin-bottom:10px;">每一維能力＝ <strong>投入% × 市場驗證係數</strong>。<br>・投入%：任務打卡累積（跨所有課程合併），走「飽和曲線」——越後面越難加，永遠逼近 100 不爆表。<br>・市場驗證係數：你回報的成交（金額＋筆數），0.5～1.0。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼做了任務、分數還不高？</div>
-          <div style="margin-bottom:10px;">因為能力要「<strong>市場買單</strong>」才算數。還沒成交前，投入只先兌現一半（保底 50%）——這是刻意設計，提醒你把練習變成真的成交，而不是一直做功課。</div>
-          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">怎麼把能力完全解鎖到滿？</div>
-          <div style="margin-bottom:10px;">反覆成交。系統同時看「<strong>累計金額</strong>」和「<strong>簽單數</strong>」，兩個都要到位（相乘），能力才會一格格解鎖到滿——防止一張大單灌水。</div>
+          <div style="margin-bottom:10px;">每一維能力＝ <strong>投入%</strong>，只看你<strong>做過的動作</strong>（任務打卡、練習紀錄，跨所有課程合併）。走「飽和曲線」——越後面越難加，永遠逼近 100 不爆表。<br><strong>成交不算進能力分數</strong>，它另外記在「市場驗證」獨立顯示。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼做了任務、分數還加得慢？</div>
+          <div style="margin-bottom:10px;">因為是飽和曲線：累積到該維的「半滿點」就是 50%，之後每一分推得越來越少。這是刻意設計——讓你<strong>持續練</strong>，而不是衝一波就停。想快一點，練<strong>最弱的那塊</strong>回報最大。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">那我回報的成交去哪了？</div>
+          <div style="margin-bottom:10px;">去「<strong>市場驗證</strong>」——回報成交卡片下方獨立一條。系統同時看「<strong>累計金額</strong>」和「<strong>簽單數</strong>」（相乘，防一張大單灌水）。它是外部驗證，讓你看見練出來的東西有沒有在外面兌現，<strong>不會加進、也不會扣掉肌肉分數</strong>。</div>
+          <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">為什麼成交不算進能力？</div>
+          <div style="margin-bottom:10px;">因為那會變成<strong>循環論證</strong>：用成交回推你的 A/T/P/I，再拿 A/T/P/I 去預測你的變現潛力——等於自己證明自己。能力分數只由行為證據算，潛力才是真的預測，而不是把結果抄一遍。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">變現潛力值是什麼？</div>
-          <div style="margin-bottom:10px;">4 大肌肉<strong>相乘</strong>（A×T×P×I）換算成 0～1000。因為是相乘，<strong>任一維是 0，潛力就是 0</strong>——4 大肌肉要均衡，不能偏科。</div>
+          <div style="margin-bottom:10px;">4 大肌肉<strong>相乘</strong>（A×T×P×I）換算成 0～1000。因為是相乘，<strong>任何一塊趨近零，整體就被嚴重折損</strong>——4 大肌肉要均衡，不能偏科。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">頭像上的稱號怎麼來的？</div>
           <div style="margin-bottom:10px;">稱號＝你的「真本事」，綁<strong>變現潛力</strong>：🌱初露鋒芒 → ✨嶄露頭角 → 🔥獨當一面 → 💎變現高手 → 👑變現大師。潛力越高、稱號越前面。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">「個人積分」跟「變現潛力」差在哪？</div>
-          <div style="margin-bottom:10px;">個人積分＝你<strong>投入的努力總量</strong>（打卡分加總，會一直累積）；變現潛力＝<strong>被市場驗證後的真本事</strong>。一個看努力、一個看結果，各自獨立。</div>
+          <div style="margin-bottom:10px;">個人積分＝你<strong>投入的努力總量</strong>（打卡分加總，只會往上累積）；變現潛力＝把 4 大肌肉<strong>相乘</strong>後的均衡度，看的是「你這四塊配起來能推到多遠」。一個看總量、一個看配比。想看外面的兌現狀況，那是第三個數字：市場驗證。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">排行榜怎麼排？</div>
           <div style="margin-bottom:10px;">每一門課<strong>各一張榜</strong>，依該課的任務投入分排名。能力雷達圖與潛力值則是跨所有課程合併計算。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">每日／每週任務什麼時候重置？</div>
@@ -357,9 +371,9 @@ details.foldcard .foldbody{padding:0 14px 14px;}
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">同時報了不只一門課，怎麼切換？</div>
           <div style="margin-bottom:10px;">畫面最上方（原本顯示課程名稱的地方）會變成<strong>下拉選單</strong>，點開就能切換你已開通的課程；只開通一門課時不會出現。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">「自評分數」是什麼？會算進能力嗎？</div>
-          <div style="margin-bottom:10px;">那是你入營前測驗的<strong>起點快照</strong>，只當對照顯示（你怎麼看自己 × 市場怎麼看你），<strong>不進計分</strong>。能力一律從任務＋成交重新賺。</div>
+          <div style="margin-bottom:10px;">那是你入營前測驗的<strong>起點快照</strong>，只當對照顯示（你怎麼看自己 × 你實際練了什麼），<strong>不進計分</strong>。能力一律從任務打卡與練習紀錄重新賺。</div>
           <div style="font-weight:600;color:#2d1f0f;margin:10px 0 2px;">成交金額打錯了怎麼辦？</div>
-          <div>回報後的紀錄請找導師協助更正，避免影響能力驗證與走勢圖。</div>
+          <div>回報後的紀錄請找導師協助更正。打錯不會影響你的肌肉分數（成交不進計分），但會影響市場驗證與走勢圖。</div>
         </div>
       </details>
 
@@ -614,7 +628,7 @@ function renderResult(s) {
   document.getElementById("r-combo-title").textContent = combo.title;
   document.getElementById("r-combo-flow").textContent = combo.flow;
 
-  /* 自評起點 × 市場驗證 */
+  /* 自評起點 × 練出來的（D5A：右欄是行為證據算的能力，不含成交）*/
   var seCard = document.getElementById("selfeval-card");
   if (s.selfEval) {
     seCard.style.display = "";
@@ -638,7 +652,7 @@ function renderResult(s) {
    + '<div style="height:8px;background:#ede4da;border-radius:4px;overflow:hidden;margin-bottom:8px;">'
    + '<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#c8a84b);width:' + potPct + '%;transition:width .6s;"></div>'
    + '</div>'
-   + '<div style="font-size:14px;color:#7a5636;">4 大肌肉相乘算出潛力，靠你回報的每一筆成交把它一格格解鎖</div>';
+   + '<div style="font-size:14px;color:#7a5636;">4 大肌肉相乘算出潛力，練哪一塊、它就往哪裡長；補最弱的那塊解鎖最快</div>';
 
   /* 日期 */
   var now = new Date();
@@ -675,6 +689,12 @@ function renderResult(s) {
   /* 回報成交 */
   document.getElementById("rv-total").textContent = revenueTotal(s);
   document.getElementById("rv-count").textContent = s.revenueLog.length;
+  /* 市場驗證：獨立顯示的外部驗證欄位，不進 scores / potential（D5A）*/
+  var mv = marketValidation(s);
+  document.getElementById("rv-mv-pct").textContent = mv.pct + "%";
+  document.getElementById("rv-mv-amt").textContent = Math.round(mv.amtAchieve * 100);
+  document.getElementById("rv-mv-cnt").textContent = Math.round(mv.cntAchieve * 100);
+  document.getElementById("rv-mv-bar").style.width = mv.pct + "%";
   document.getElementById("r-trend-card").innerHTML = renderTrendChart(revenueTrendPoints(s));
 
   /* 榮譽系統（稱號 + 變現 + 4 大肌肉分級 + 努力堅持 + 慶祝彈窗） */
