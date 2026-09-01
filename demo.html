@@ -336,6 +336,10 @@ SC.quiz=function(){
   +'<div style="font-size:13px;font-weight:700;color:'+C.mut+';letter-spacing:.04em;margin-bottom:14px;">怎麼算成功</div>'
   +'<div style="font-size:15px;color:'+C.ink+';line-height:2.15;">他也開始講他自己的事：<b>「我也是欸，我最近……」</b>那就是成了。</div>'
   +'<div style="font-size:15px;color:'+C.mut+';line-height:2.1;margin-top:14px;">他只回「加油」，那是安慰，不算——但那不是失敗。<b style="color:'+C.ink+';">換一個人再試一次就好。</b></div>'
+  /* ⭐ A3 補法：秘訣署名，讓他記得是誰教的（老師 2026-09-01） */
+  +'<div style="display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid '+C.line+';">'
+   +logo(30)
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.7;">這是<b style="color:'+C.ink+';">溝通健身房的第一個秘訣</b>。<br>裡面還有兩個。</div></div>'
  +'</div>'
 
  +btnDark("gym","進去看看，今天有誰在練　→","免費，不用填資料。裡面有人跟你練同一塊。")
@@ -387,6 +391,8 @@ SC.gym=function(){
      +'<div style="display:flex;align-items:center;gap:6px;margin-top:11px;color:#E8C89A;font-size:13px;font-weight:600;">去社群 '+ic.ar+'</div></div>'
    : ctaPair())
  +'<div style="background:'+C.card+';border-radius:14px;padding:13px;margin-top:14px;font-size:13px;color:'+C.mut+';line-height:1.85;text-align:center;">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼、對方怎麼回——<b style="color:'+C.ink+';">看不到誰比較強</b>。<br>溝通不是比出來的，是練出來的。</div>'
+ /* ⭐ T3「我兌現」的補法：我們兌現的是「免費、不用留資料、隨時可走」，但那是隱形的——寫出來。 */
+ +(S.member?'':'<div style="border:1px dashed '+C.line+';border-radius:14px;padding:15px;margin-top:10px;font-size:13px;color:'+C.mut+';line-height:1.9;text-align:center;">你到現在<b style="color:'+C.ink+';">一筆資料都沒留過</b>，這是真的。<br>要走隨時可以走，我們不會寄任何東西給你。</div>')
  +'</div>'+navBar();};
 
 SC.today=function(){
@@ -411,6 +417,9 @@ SC.today=function(){
     +'<div style="font-size:17px;color:'+C.ink+';line-height:1.95;font-weight:500;">'+tip.line+'</div></div>'
    +'<div style="font-size:15px;color:'+C.mid+';line-height:2.15;">'+tip.end+'</div>'
    +'<div style="font-size:15px;color:'+C.mut+';line-height:2.05;margin-top:12px;">'+tip.note+'</div>'
+   /* ⭐ A3「讓他記得你這個人」的補法（老師 2026-09-01）：秘訣要署名，不然它是無主的。 */
+   +'<div style="display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid '+C.line+';">'
+    +logo(26)+'<div style="font-size:13px;color:'+C.mut+';">溝通健身房的第 '+n+' 個秘訣</div></div>'
    +(doneToday
      ? '<div style="margin-top:18px;background:'+C.gbg+';color:'+C.gfg+';border-radius:14px;padding:15px;text-align:center;font-size:15px;font-weight:600;">今天已經練過了 ✓</div>'
      : '<div style="margin-top:18px;">'+btnDark("rec1","練溝通")+'</div>'
