@@ -3,3 +3,6 @@
 
 # 本機設定
 .claude/
+
+# 設計畫布的 seeded 輸出（~2MB，可由 Main.dc.html + canvas.json 隨時重生，不進版控）
+design-canvas/quiz-intro-canvas.html
