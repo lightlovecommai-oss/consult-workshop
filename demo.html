@@ -35,14 +35,14 @@ body{margin:0;background:var(--pg);color:var(--pgi);
 
 .dev{width:390px;max-width:100%;border-radius:30px;overflow:hidden;
  box-shadow:0 16px 48px rgba(0,0,0,.28);border:1px solid rgba(0,0,0,.14);}
-#screen{width:100%;height:788px;background:#E6DACF;color:#4A1B0C;
+#screen{width:100%;height:788px;background:#EFE6DE;color:#4A1B0C;
  display:flex;flex-direction:column;position:relative;overflow:hidden;
  font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;}
 #screen *{box-sizing:border-box;}
 .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .nav{position:absolute;left:0;right:0;bottom:0;background:#F7F1EC;border-top:1px solid #E6DAD1;
- display:flex;padding:8px 0 13px;}
-.nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;
+ display:flex;padding:10px 0 15px;}
+.nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;
  background:none;border:0;cursor:pointer;padding:4px 0;color:#B4A695;font-family:inherit;min-height:44px;}
 .nv.on{color:#C6603A;}
 
@@ -57,11 +57,11 @@ body{margin:0;background:var(--pg);color:var(--pgi);
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 @media (max-width:640px){
   body{padding:8px 6px 20px;gap:9px;}
-  .bar-t{font-size:15px;} .bar-s{font-size:11px;}
+  .bar-t{font-size:15px;} .bar-s{font-size:12px;}
   .tb{padding:6px 10px;font-size:12px;min-height:34px;}
   .dev{border-radius:22px;}
   #screen{height:calc(100dvh - 168px);min-height:520px;}
-  .step{font-size:12.5px;}
+  .step{font-size:13px;}
   .step #hint{display:none;}
   .step.open #hint{display:block;}
 }
@@ -89,7 +89,13 @@ body{margin:0;background:var(--pg);color:var(--pgi);
 <script>
 (function(){
 "use strict";
-/* 暖版色票：productkit/2-行銷素材/會員App元件-穩暖版.html ＋ 21-品牌色彩系統 */
+/* ═══ 暖版設計 token ═══
+   真相＝productkit/2-行銷素材/會員App元件-穩暖版.html（逐值照抄）＋ 21-品牌色彩系統
+   色層四階：#E6DACF 頁底 → #EFE6DE 外框 → #F7F1EC 主卡 → #fff 內卡
+   圓角四級：26 外框 / 20 主卡 / 14 內卡·按鈕 / 4 進度條
+   內距四級：24 / 18 / 14 / 13
+   字級四級（參考檔 11/12/15/20 等比放大給 40-60 歲客群）：13 / 15 / 17 / 22（＋28 只給一個 hero）
+   ⚠️ 只准用這些值。多一級字就少一分層次感——參考檔全檔只有 4 種字級。 */
 var C={grd:"#E6DACF",frm:"#EFE6DE",card:"#F7F1EC",w:"#fff",
  ink:"#4A1B0C",mut:"#6E4A3C",mid:"#5A3A2A",warn:"#993C1D",fnt:"#8A7266",
  /* mut 從 #8A7266(4.01:1 不合格) 換成品牌次級色 #6E4A3C；#8A7266 降級成 fnt，只用在 ≥15px 或裝飾 */
@@ -110,9 +116,9 @@ function logo(w){w=w||38;var h=Math.round(w*0.75);
 function head(sub,right){
  return '<div style="padding:16px 16px 13px;flex-shrink:0;background:'+C.grd+';">'
   +'<div style="display:flex;align-items:center;gap:11px;">'+logo(40)
-  +'<div><div style="font-size:16px;font-weight:600;color:'+C.ink+';letter-spacing:.04em;">溝通健身房</div>'
-  +'<div style="font-size:12px;color:'+C.act+';margin-top:3px;letter-spacing:.02em;">練好溝通，你就有影響力</div></div>'
-  +(right?'<div style="margin-left:auto;font-size:14px;color:'+C.mut+';align-self:flex-start;">'+right+'</div>':'')+'</div>'
+  +'<div><div style="font-size:17px;font-weight:700;color:'+C.ink+';letter-spacing:.04em;">溝通健身房</div>'
+  +'<div style="font-size:13px;color:'+C.act+';margin-top:4px;letter-spacing:.02em;">練好溝通，你就有影響力</div></div>'
+  +(right?'<div style="margin-left:auto;font-size:13px;color:'+C.fnt+';align-self:flex-start;">'+right+'</div>':'')+'</div>'
   +(sub?'<div style="font-size:13px;color:'+C.mut+';margin-top:10px;">'+sub+'</div>':'')
   +'</div>';}
 
@@ -132,10 +138,10 @@ reset();
 var el=document.getElementById("screen");
 
 /* ══ 小工具 ══ */
-function card(inner,pad){return '<div style="background:'+C.card+';border-radius:18px;padding:'+(pad||"20px 17px")+';margin-bottom:14px;">'+inner+'</div>';}
-function cw(inner,pad,extra){return '<div style="background:'+C.w+';border-radius:18px;padding:'+(pad||"20px 17px")+';margin-bottom:14px;'+(extra||"")+'">'+inner+'</div>';}
-function lbl(t){return '<div style="font-size:12.5px;font-weight:600;color:'+C.mut+';margin-bottom:11px;letter-spacing:.02em;">'+t+'</div>';}
-function pill(t){return '<span style="font-size:12px;font-weight:600;color:'+C.warn+';background:'+C.trk+';padding:4px 11px;border-radius:20px;">'+t+'</span>';}
+function card(inner,pad){return '<div style="background:'+C.card+';border-radius:20px;padding:'+(pad||"18px 16px")+';margin-bottom:14px;">'+inner+'</div>';}
+function cw(inner,pad,extra){return '<div style="background:'+C.w+';border-radius:14px;padding:'+(pad||"18px 16px")+';margin-bottom:14px;'+(extra||"")+'">'+inner+'</div>';}
+function lbl(t){return '<div style="font-size:13px;font-weight:700;color:'+C.mut+';margin-bottom:13px;letter-spacing:.03em;">'+t+'</div>';}
+function pill(t){return '<span style="font-size:13px;font-weight:600;color:'+C.warn+';background:'+C.trk+';padding:5px 12px;border-radius:20px;">'+t+'</span>';}
 function btnDark(id,t,s){return '<button data-go="'+id+'" style="width:100%;background:'+C.ink+';color:'+C.card+';border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;">'+t+(s?'<div style="font-size:13.5px;font-weight:400;color:rgba(247,241,236,.72);margin-top:4px;">'+s+'</div>':'')+'</button>';}
 function bar4(k,pct,val,name){
  return '<div style="display:flex;align-items:center;gap:9px;">'
@@ -164,21 +170,21 @@ SC.quiz=function(){
 
  /* ① 開場 */
  +'<div style="background:'+C.ink+';border-radius:20px;padding:26px 20px;margin-bottom:16px;color:'+C.card+';">'
-  +'<div style="font-size:23px;font-weight:600;line-height:1.6;margin-bottom:16px;">會不會講話，<br>決定你活得多順。</div>'
+  +'<div style="font-size:22px;font-weight:600;line-height:1.6;margin-bottom:16px;">會不會講話，<br>決定你活得多順。</div>'
   +'<div style="font-size:15px;line-height:2.1;color:rgba(247,241,236,.85);">溝通不是天分，是<b style="color:#E8C89A;">四塊可以練的肌肉</b>。<br>剛才那 16 題，是在量你這四塊現在長什麼樣。</div>'
  +'</div>'
 
  /* ② 四塊肌肉 */
  +'<div style="background:'+C.card+';border-radius:20px;padding:24px 19px;margin-bottom:16px;">'
-  +'<div style="font-size:16px;font-weight:700;color:'+C.ink+';margin-bottom:22px;">你的四塊溝通肌肉</div>'
+  +'<div style="font-size:17px;font-weight:700;color:'+C.ink+';margin-bottom:22px;">你的四塊溝通肌肉</div>'
   +'<div style="display:flex;flex-direction:column;gap:26px;">'
   +d.map(function(x){return '<div>'
     +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">'
-     +'<span style="font-size:16px;font-weight:700;color:'+C.ink+';">'+x[1]+'</span>'
-     +(x[5]?'<span style="margin-left:auto;font-size:12.5px;font-weight:600;color:#fff;background:'+C.fill[x[0]]+';padding:4px 11px;border-radius:20px;">'+x[5]+'</span>':'')+'</div>'
-    +'<div style="height:12px;background:'+C.soft[x[0]]+';border-radius:6px;overflow:hidden;"><div style="height:12px;width:'+x[4]+';background:'+C.fill[x[0]]+';border-radius:6px;"></div></div>'
-    +'<div style="font-size:14px;font-weight:700;color:'+C.text[x[0]]+';margin-top:10px;">'+x[3]+'</div>'
-    +'<div style="font-size:14.5px;color:'+C.mut+';line-height:1.75;margin-top:3px;">'+x[2]+'</div>'
+     +'<span style="font-size:17px;font-weight:700;color:'+C.ink+';">'+x[1]+'</span>'
+     +(x[5]?'<span style="margin-left:auto;font-size:13px;font-weight:600;color:#fff;background:'+C.fill[x[0]]+';padding:4px 11px;border-radius:20px;">'+x[5]+'</span>':'')+'</div>'
+    +'<div style="height:12px;background:'+C.soft[x[0]]+';border-radius:4px;overflow:hidden;"><div style="height:12px;width:'+x[4]+';background:'+C.fill[x[0]]+';border-radius:4px;"></div></div>'
+    +'<div style="font-size:15px;font-weight:700;color:'+C.text[x[0]]+';margin-top:10px;">'+x[3]+'</div>'
+    +'<div style="font-size:15px;color:'+C.mut+';line-height:1.75;margin-top:3px;">'+x[2]+'</div>'
     +'</div>';}).join("")
   +'</div></div>'
 
@@ -197,7 +203,7 @@ SC.quiz=function(){
  /* ④ 帶一招走 */
  +'<div style="background:'+C.w+';border-radius:20px;padding:26px 20px;border:2px solid '+C.act+';margin-bottom:18px;">'
   +'<div style="margin-bottom:18px;">'+pill("帶一招走")+'</div>'
-  +'<div style="font-size:21px;font-weight:600;color:'+C.ink+';margin-bottom:18px;line-height:1.6;">明天先試一句：<br>講一件你還沒做成的事</div>'
+  +'<div style="font-size:22px;font-weight:600;color:'+C.ink+';margin-bottom:18px;line-height:1.6;">明天先試一句：<br>講一件你還沒做成的事</div>'
   +'<div style="font-size:15px;color:'+C.mid+';line-height:2.15;">找一個你明天本來就會講到話的人——家人、老朋友都可以，<b style="color:'+C.ink+';">第一次先不要挑客戶</b>。</div>'
   +'<div style="font-size:15px;color:'+C.mid+';line-height:2.15;margin-top:16px;">他問「最近怎樣」的時候，不要回「還好」。換成這一句：</div>'
   +'<div style="border-left:3px solid '+C.act+';padding-left:15px;margin:16px 0;">'
@@ -206,7 +212,7 @@ SC.quiz=function(){
   +rule
   +'<div style="font-size:13px;font-weight:700;color:'+C.mut+';letter-spacing:.04em;margin-bottom:14px;">怎麼算成功</div>'
   +'<div style="font-size:15px;color:'+C.ink+';line-height:2.15;">他也開始講他自己的事：<b>「我也是欸，我最近……」</b>那就是成了。</div>'
-  +'<div style="font-size:14.5px;color:'+C.mut+';line-height:2.1;margin-top:14px;">他只回「加油」，那是安慰，不算——但那不是失敗。<b style="color:'+C.ink+';">換一個人再試一次就好。</b></div>'
+  +'<div style="font-size:15px;color:'+C.mut+';line-height:2.1;margin-top:14px;">他只回「加油」，那是安慰，不算——但那不是失敗。<b style="color:'+C.ink+';">換一個人再試一次就好。</b></div>'
  +'</div>'
 
  +btnDark("gym","進館，看看今天有誰在練　→","免費，不用填資料。裡面有人跟你練同一塊。")
@@ -224,61 +230,61 @@ SC.gym=function(){
   {id:"f5",n:"婷",i:"婷",c:"#6E8B77",b:"",day:"入館第 31 天",w:"5 天前",m:"信任肌肉",d:"T",typed:false,r:"沒接住"}];
  var items=feed.map(function(f){
   var on=!!S.cheered[f.id];
-  var av='<div style="width:30px;height:30px;border-radius:50%;background:'+f.c+';display:flex;align-items:center;justify-content:center;font-size:13.5px;color:#fff;font-weight:700;flex-shrink:0;">'+f.i+'</div>';
+  var av='<div style="width:30px;height:30px;border-radius:50%;background:'+f.c+';display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:700;flex-shrink:0;">'+f.i+'</div>';
   var top='<div style="display:flex;align-items:center;gap:9px;">'+av
     +'<div style="min-width:0;"><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:13px;font-weight:700;color:'+C.ink+';">'+f.n+'</span>'
     +(f.b?'<span style="font-size:10px;color:'+C.warn+';background:'+C.trk+';padding:1px 7px;border-radius:20px;">'+f.b+'</span>':'')+'</div>'
-    +'<div style="font-size:12.5px;color:'+C.fnt+';margin-top:2px;">'+f.day+' · '+f.w+'</div></div>'
-    +'<div style="margin-left:auto;flex-shrink:0;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:20px;color:'+C.text[f.d]+';background:'+C.soft[f.d]+';">'+f.m+'</div></div>';
+    +'<div style="font-size:13px;color:'+C.fnt+';margin-top:2px;">'+f.day+' · '+f.w+'</div></div>'
+    +'<div style="margin-left:auto;flex-shrink:0;font-size:13px;font-weight:700;padding:3px 9px;border-radius:20px;color:'+C.text[f.d]+';background:'+C.soft[f.d]+';">'+f.m+'</div></div>';
   if(!f.typed) return '<div style="background:'+C.w+';border-radius:14px;padding:11px 13px;margin-bottom:7px;">'+top
-    +'<div style="font-size:13.5px;color:'+C.mut+';margin-top:7px;padding-left:39px;">'+f.r+'</div></div>';
+    +'<div style="font-size:13px;color:'+C.mut+';margin-top:7px;padding-left:39px;">'+f.r+'</div></div>';
   return cw(top
-   +'<div style="font-size:12.5px;color:'+C.ink+';line-height:1.75;margin-top:10px;"><span style="color:'+C.mut+';">我做了什麼 · </span>'+f.t+'</div>'
-   +'<div style="background:'+C.card+';border-radius:11px;padding:10px 11px;margin-top:8px;font-size:12px;color:'+C.ink+';line-height:1.7;"><span style="color:'+C.mut+';">他怎麼回 · </span>'+f.r+'</div>'
+   +'<div style="font-size:13px;color:'+C.ink+';line-height:1.75;margin-top:10px;"><span style="color:'+C.mut+';">我做了什麼 · </span>'+f.t+'</div>'
+   +'<div style="background:'+C.card+';border-radius:14px;padding:10px 11px;margin-top:8px;font-size:13px;color:'+C.ink+';line-height:1.7;"><span style="color:'+C.mut+';">他怎麼回 · </span>'+f.r+'</div>'
    +'<div style="display:flex;align-items:center;margin-top:10px;">'
-   +'<button data-cheer="'+f.id+'" style="display:flex;align-items:center;gap:6px;border:1px solid '+(on?C.act:C.line)+';background:'+(on?C.act:C.w)+';color:'+(on?"#fff":C.mut)+';border-radius:20px;padding:8px 14px;font-size:13.5px;cursor:pointer;font-family:inherit;min-height:40px;">'+ic.thumb+(on?"已鼓勵":"鼓勵他")+'</button></div>','13px 14px');}).join("");
+   +'<button data-cheer="'+f.id+'" style="display:flex;align-items:center;gap:6px;border:1px solid '+(on?C.act:C.line)+';background:'+(on?C.act:C.w)+';color:'+(on?"#fff":C.mut)+';border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;min-height:40px;">'+ic.thumb+(on?"已鼓勵":"鼓勵他")+'</button></div>','13px 14px');}).join("");
 
  return head(S.member?"館裡今天有人":"你正在參觀 · 還沒入會", S.member?"入館第 23 天":"訪客")
  +'<div class="body" style="padding:0 13px 96px;">'
- +card('<div style="font-size:12.5px;color:'+C.ink+';line-height:1.8;">這個月，館裡一起開練了 <span style="font-size:30px;font-weight:700;color:'+C.act+';font-variant-numeric:tabular-nums;vertical-align:-3px;">412</span> 次。'
+ +card('<div style="font-size:13px;color:'+C.ink+';line-height:1.8;">這個月，館裡一起開練了 <span style="font-size:28px;font-weight:700;color:'+C.act+';font-variant-numeric:tabular-nums;vertical-align:-3px;">412</span> 次。'
    +(S.member?'<br>其中有 <b>'+(18+S.done)+'</b> 次是你。':'')+'</div>'
    +'<div style="display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid '+C.line+';">'
    +'<div style="display:flex;flex-shrink:0;">'+[["光","#C6603A"],["凱","#6E8B77"],["A","#6E8CA8"],["哲","#C99A4E"]].map(function(a,i){
       return '<div style="width:26px;height:26px;border-radius:50%;background:'+a[1]+';border:2px solid '+C.card+';'+(i?'margin-left:-8px;':'')+'display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:600;">'+a[0]+'</div>';}).join("")+'</div>'
-   +'<div style="font-size:13.5px;color:'+C.mut+';line-height:1.5;">這個月館裡在練 <b style="color:'+C.ink+';">信任肌肉</b><br>平均每天 13 個人開練</div></div>','16px')
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.5;">這個月館裡在練 <b style="color:'+C.ink+';">信任肌肉</b><br>平均每天 13 個人開練</div></div>','16px')
  +'<div style="font-size:13px;color:'+C.mut+';margin:15px 3px 9px;">館裡最近在練什麼</div>'+items
  +(S.member
-   ? '<div style="background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:15px;margin-top:13px;">'
-     +'<div style="font-size:13.5px;font-weight:700;color:#E8C89A;margin-bottom:7px;">社群裡這週有 7 篇分享</div>'
-     +'<div style="font-size:12px;color:rgba(247,241,236,.82);line-height:1.7;">還有 3 堂免費課在裡面，會員都能看。</div>'
-     +'<div style="display:flex;align-items:center;gap:6px;margin-top:11px;color:#E8C89A;font-size:12px;font-weight:600;">去社群 '+ic.ar+'</div></div>'
+   ? '<div style="background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:14px;padding:15px;margin-top:13px;">'
+     +'<div style="font-size:13px;font-weight:700;color:#E8C89A;margin-bottom:7px;">社群裡這週有 7 篇分享</div>'
+     +'<div style="font-size:13px;color:rgba(247,241,236,.82);line-height:1.7;">還有 3 堂免費課在裡面，會員都能看。</div>'
+     +'<div style="display:flex;align-items:center;gap:6px;margin-top:11px;color:#E8C89A;font-size:13px;font-weight:600;">去社群 '+ic.ar+'</div></div>'
    : '<div style="margin-top:14px;">'+btnDark("join","我也想要有人陪我練","NT$99／月 · 有人陪你看報告、回你話")+'</div>')
- +'<div style="background:'+C.card+';border-radius:14px;padding:13px;margin-top:14px;font-size:13.5px;color:'+C.mut+';line-height:1.85;text-align:center;">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼、對方怎麼回——<b style="color:'+C.ink+';">看不到誰比較強</b>。<br>溝通不是比出來的，是練出來的。</div>'
+ +'<div style="background:'+C.card+';border-radius:14px;padding:13px;margin-top:14px;font-size:13px;color:'+C.mut+';line-height:1.85;text-align:center;">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼、對方怎麼回——<b style="color:'+C.ink+';">看不到誰比較強</b>。<br>溝通不是比出來的，是練出來的。</div>'
  +'</div>'+navBar();};
 
 SC.today=function(){
  var doneToday=S.done>0;
  var days=["一","二","三","四","五","六","日"].map(function(d,i){
   var on=[0,2,3,5].indexOf(i)>-1 || (i===6 && doneToday);
-  return '<div style="flex:1;text-align:center;"><div style="height:36px;border-radius:10px;background:'+(on?C.act:C.trk)+';display:flex;align-items:center;justify-content:center;color:#fff;">'+(on?ic.ok:"")+'</div>'
+  return '<div style="flex:1;text-align:center;"><div style="height:36px;border-radius:14px;background:'+(on?C.act:C.trk)+';display:flex;align-items:center;justify-content:center;color:#fff;">'+(on?ic.ok:"")+'</div>'
    +'<div style="font-size:10px;color:'+C.mut+';margin-top:5px;">'+d+'</div></div>';}).join("");
  return head("你這一季在練的那一塊", S.member?"入館第 23 天":"訪客")
  +'<div class="body" style="padding:0 13px 96px;">'
  +card('<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">'
-   +'<span style="font-size:23px;color:'+C.ink+';">信任肌肉</span>'
+   +'<span style="font-size:22px;color:'+C.ink+';">信任肌肉</span>'
    +'<span style="margin-left:auto;">'+pill("最快有感")+'</span></div>'
-   +'<div style="font-size:12.5px;color:'+C.mut+';line-height:1.85;">這一季只練這一塊就好。<br>其他的先不用管——<b style="color:'+C.ink+';">這一塊練順了，下一塊才練得動</b>。<br>練得下去，比練得齊重要。</div>','16px')
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.85;">這一季只練這一塊就好。<br>其他的先不用管——<b style="color:'+C.ink+';">這一塊練順了，下一塊才練得動</b>。<br>練得下去，比練得齊重要。</div>','16px')
  +cw('<div style="font-size:17px;color:'+C.ink+';margin-bottom:12px;line-height:1.5;">今天這一件：<br>先講一句你心裡沒說的</div>'
-   +'<div style="font-size:12.5px;color:'+C.mid+';line-height:1.9;">找一個你今天本來就會講到話的人。用下面這句，講一件你還在卡、還沒成的事。</div>'
-   +'<div style="background:'+C.soft.T+';border-radius:12px;padding:13px;margin-top:10px;font-size:13.5px;color:'+C.ink+';line-height:1.8;">「我最近有點＿＿，不過我想跟你說。」</div>'
-   +'<div style="font-size:12.5px;color:'+C.mid+';line-height:1.9;margin-top:11px;">一句就好。講完停住，<b style="color:'+C.warn+';">數三秒</b>，把場讓給他。</div>'
-   +'<div style="font-size:13.5px;color:'+C.mut+';line-height:1.75;margin-top:9px;">三秒很久。忍住不補話，他才有空隙接。</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.9;">找一個你今天本來就會講到話的人。用下面這句，講一件你還在卡、還沒成的事。</div>'
+   +'<div style="background:'+C.soft.T+';border-radius:14px;padding:13px;margin-top:10px;font-size:13px;color:'+C.ink+';line-height:1.8;">「我最近有點＿＿，不過我想跟你說。」</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.9;margin-top:11px;">一句就好。講完停住，<b style="color:'+C.warn+';">數三秒</b>，把場讓給他。</div>'
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.75;margin-top:9px;">三秒很久。忍住不補話，他才有空隙接。</div>'
    +(doneToday
-     ? '<div style="margin-top:14px;background:'+C.gbg+';color:'+C.gfg+';border-radius:13px;padding:14px;text-align:center;font-size:13.5px;font-weight:600;">今天已經開練了 ✓</div>'
+     ? '<div style="margin-top:14px;background:'+C.gbg+';color:'+C.gfg+';border-radius:14px;padding:14px;text-align:center;font-size:13px;font-weight:600;">今天已經開練了 ✓</div>'
      : '<div style="margin-top:14px;">'+btnDark("rec1","開練")+'</div>'
        +'<div style="text-align:center;font-size:13px;color:'+C.mut+';margin-top:10px;line-height:1.7;">做完回來點兩下就好：對誰講的 · 他有沒有接<br>不用寫心得，10 秒的事。</div>'),'15px')
  +cw(lbl("這週")+'<div style="display:flex;gap:5px;">'+days+'</div>'
-   +'<div style="font-size:14px;color:'+C.mut+';margin-top:13px;line-height:1.85;">這週開練 <b style="color:'+C.act+';">'+(S.streak+(doneToday?1:0))+'</b> 天。<br>沒開練的那幾天不扣分——<b style="color:'+C.ink+';">溝通要有人才練得起來</b>，沒遇到人本來就正常。<br>這個數字只會往上加。</div>','14px')
+   +'<div style="font-size:15px;color:'+C.mut+';margin-top:13px;line-height:1.85;">這週開練 <b style="color:'+C.act+';">'+(S.streak+(doneToday?1:0))+'</b> 天。<br>沒開練的那幾天不扣分——<b style="color:'+C.ink+';">溝通要有人才練得起來</b>，沒遇到人本來就正常。<br>這個數字只會往上加。</div>','14px')
  +'</div>'+navBar();};
 
 var TARGETS=[["陳大哥","客戶"],["太太","家人"],["阿明","老朋友"],["陌生人",""]];
@@ -288,10 +294,10 @@ SC.rec1=function(){
    +'<button data-go="today" style="background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;">‹</button>'
    +'<div><div style="font-size:15px;font-weight:700;color:'+C.ink+';">講一句你心裡沒說的</div>'
    +'<div style="font-size:13px;color:'+C.mut+';margin-top:2px;">兩下就好，不用打字</div></div></div>'
-   +'<div style="font-size:14px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">跟誰講的？</div>'
+   +'<div style="font-size:15px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">跟誰講的？</div>'
    +'<div style="display:flex;flex-wrap:wrap;gap:8px;">'
-   +TARGETS.map(function(t,i){return '<button data-target="'+i+'" style="font-size:13px;padding:11px 16px;border-radius:22px;border:1px solid '+C.line+';background:'+C.w+';color:'+C.ink+';cursor:pointer;font-family:inherit;min-height:44px;">'+t[0]+(t[1]?'<span style="color:'+C.fnt+';font-size:13px;"> · '+t[1]+'</span>':'')+'</button>';}).join("")
-   +'<button data-target="new" style="font-size:13px;padding:11px 16px;border-radius:22px;border:1px dashed '+C.line+';background:none;color:'+C.mut+';cursor:pointer;font-family:inherit;min-height:44px;">＋ 新的人</button></div>','16px')
+   +TARGETS.map(function(t,i){return '<button data-target="'+i+'" style="font-size:13px;padding:11px 16px;border-radius:20px;border:1px solid '+C.line+';background:'+C.w+';color:'+C.ink+';cursor:pointer;font-family:inherit;min-height:44px;">'+t[0]+(t[1]?'<span style="color:'+C.fnt+';font-size:13px;"> · '+t[1]+'</span>':'')+'</button>';}).join("")
+   +'<button data-target="new" style="font-size:13px;padding:11px 16px;border-radius:20px;border:1px dashed '+C.line+';background:none;color:'+C.mut+';cursor:pointer;font-family:inherit;min-height:44px;">＋ 新的人</button></div>','16px')
  +'</div>';};
 
 var REACT=[["😌","他沒接",0],["🙂","有回一點",1],["😃","他接住了",2],["🤩","他講了更多",3]];
@@ -302,21 +308,21 @@ SC.rec2=function(){
    +'<button data-go="rec1" style="background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;">‹</button>'
    +'<div><div style="font-size:15px;font-weight:700;color:'+C.ink+';">對 '+S.target+'</div>'
    +'<div style="font-size:13px;color:'+C.mut+';margin-top:2px;">最後一下</div></div></div>'
-   +'<div style="font-size:14px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">他有接嗎？</div>'
+   +'<div style="font-size:15px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">他有接嗎？</div>'
    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
    +REACT.map(function(r,i){var on=sel===i;
      return '<button data-react="'+i+'" style="padding:15px 10px;border-radius:14px;border:1px solid '+(on?C.act:C.line)+';background:'+(on?C.soft.A:C.w)+';cursor:pointer;text-align:center;font-family:inherit;min-height:44px;">'
       +'<div style="font-size:22px;line-height:1;margin-bottom:5px;">'+r[0]+'</div>'
-      +'<div style="font-size:12.5px;color:'+C.ink+';font-weight:'+(on?"700":"500")+';">'+r[1]+'</div></button>';}).join("")
+      +'<div style="font-size:13px;color:'+C.ink+';font-weight:'+(on?"700":"500")+';">'+r[1]+'</div></button>';}).join("")
    +'</div>'
    +(sel!==null && sel>=2
      ? '<div style="margin-top:15px;padding-top:14px;border-top:1px solid '+C.trk+';">'
        +'<div style="font-size:13px;font-weight:700;color:'+C.ink+';margin-bottom:3px;">他怎麼回？<span style="font-size:13px;font-weight:400;color:'+C.mut+';">（想寫再寫）</span></div>'
        +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:9px;line-height:1.7;">寫他說的話就好，不用寫心得。趁還記得。</div>'
-       +'<textarea id="note" rows="3" placeholder="「我早就感覺到了。」——後來聊到一點半" style="width:100%;background:'+C.card+';border:1px solid '+C.line+';border-radius:12px;padding:11px;font-size:16px;color:'+C.ink+';font-family:inherit;line-height:1.6;resize:none;">'+S.note+'</textarea>'
-       +'<label style="display:flex;align-items:center;gap:9px;margin-top:11px;font-size:12.5px;color:'+C.ink+';cursor:pointer;">'
+       +'<textarea id="note" rows="3" placeholder="「我早就感覺到了。」——後來聊到一點半" style="width:100%;background:'+C.card+';border:1px solid '+C.line+';border-radius:14px;padding:11px;font-size:17px;color:'+C.ink+';font-family:inherit;line-height:1.6;resize:none;">'+S.note+'</textarea>'
+       +'<label style="display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13px;color:'+C.ink+';cursor:pointer;">'
        +'<input type="checkbox" id="share" checked style="width:19px;height:19px;accent-color:'+C.act+';">貼到館裡，讓夥伴看到</label></div>'
-     : (sel!==null && sel<2 ? '<div style="margin-top:14px;background:'+C.gbg+';border-radius:12px;padding:13px;font-size:12px;color:'+C.gfg+';line-height:1.8;">沒接也要記。這一筆週日回頭看會有用——分得出來是句子的問題，還是對象的問題。</div>' : ''))
+     : (sel!==null && sel<2 ? '<div style="margin-top:14px;background:'+C.gbg+';border-radius:14px;padding:13px;font-size:13px;color:'+C.gfg+';line-height:1.8;">沒接也要記。這一筆週日回頭看會有用——分得出來是句子的問題，還是對象的問題。</div>' : ''))
    +'<button data-go="done" '+(sel===null?'disabled':'')+' style="width:100%;margin-top:15px;background:'+(sel===null?"#D8C9BC":C.ink)+';color:'+C.card+';border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:'+(sel===null?"default":"pointer")+';font-family:inherit;min-height:44px;">'+(sel===null?"先選一個":"記下來")+'</button>','16px')
  +'</div>';};
 
@@ -325,20 +331,20 @@ SC.done=function(){
  return head("")+'<div class="body" style="padding:0 13px 20px;display:flex;flex-direction:column;">'
  +'<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">'
  +cw('<div style="text-align:center;padding:10px 0 4px;">'
-   +'<div style="font-size:46px;line-height:1;margin-bottom:15px;">'+(good?"🌱":"🌾")+'</div>'
-   +'<div style="font-size:25px;color:'+C.ink+';margin-bottom:12px;line-height:1.4;">'+(good?"他接住了。":"你講了。<br>他今天沒接。")+'</div>'
+   +'<div style="font-size:28px;line-height:1;margin-bottom:15px;">'+(good?"🌱":"🌾")+'</div>'
+   +'<div style="font-size:28px;color:'+C.ink+';margin-bottom:12px;line-height:1.4;">'+(good?"他接住了。":"你講了。<br>他今天沒接。")+'</div>'
    +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">'
    +(good?'你先講了一句心裡話，他就講了他的——<br>這就是<b style="color:'+C.ink+';">信任肌肉在動</b>。'
         :'沒接住不代表白講——<br>你做了一件<b style="color:'+C.ink+';">以前不會做的事</b>，那一下就是練到了。')
    +'</div></div>'
-   +'<div style="background:'+C.card+';border-radius:13px;padding:13px;margin-top:17px;font-size:13.5px;color:'+C.mut+';line-height:1.8;text-align:center;">'
+   +'<div style="background:'+C.card+';border-radius:14px;padding:13px;margin-top:17px;font-size:13px;color:'+C.mut+';line-height:1.8;text-align:center;">'
    +(good?'這個月第 <b style="color:'+C.act+';">'+(3+S.done)+'</b> 次了。<b style="color:'+C.ink+';">第三次，就不是運氣。</b>'
         :'這一筆會留著。<br>週日回頭看就分得出來：是句子的問題，還是對象的問題。')
    +'</div>'
-   +(good?'<div style="background:'+C.soft.T+';border-radius:13px;padding:12px;margin-top:9px;font-size:13.5px;color:'+C.gfg+';line-height:1.75;text-align:center;">已經貼到館裡了。等一下回去看，可能有人給你鼓勵。</div>':'')
+   +(good?'<div style="background:'+C.soft.T+';border-radius:14px;padding:12px;margin-top:9px;font-size:13px;color:'+C.gfg+';line-height:1.75;text-align:center;">已經貼到館裡了。等一下回去看，可能有人給你鼓勵。</div>':'')
    ,'18px')
  +'<div style="margin-top:11px;">'+btnDark("gym","回館裡看看")+'</div>'
- +'<button data-go="today" style="width:100%;margin-top:10px;background:none;border:0;color:'+C.mut+';font-size:12.5px;cursor:pointer;font-family:inherit;min-height:44px;">回今天</button>'
+ +'<button data-go="today" style="width:100%;margin-top:10px;background:none;border:0;color:'+C.mut+';font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;">回今天</button>'
  +'</div></div>';};
 
 SC.me=function(){
@@ -350,37 +356,37 @@ SC.me=function(){
  return head("你的體格與這個月", S.member?"入館第 23 天":"訪客")
  +'<div class="body" style="padding:0 13px 96px;">'
  +card('<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">'
-   +'<span style="font-size:13.5px;font-weight:700;color:'+C.ink+';">你的溝通體格</span></div>'
+   +'<span style="font-size:13px;font-weight:700;color:'+C.ink+';">你的溝通體格</span></div>'
    +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:14px;">四塊肌肉，每週都會動。上次量：8 月 12 日</div>'
    +'<div style="display:flex;flex-direction:column;gap:14px;">'
    +ms.map(function(m){
      var na=m[3]==="還沒量";
      return '<div><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;">'
-      +'<span style="font-size:12.5px;font-weight:600;color:'+C.ink+';">'+m[0]+'</span>'
+      +'<span style="font-size:13px;font-weight:600;color:'+C.ink+';">'+m[0]+'</span>'
       +'<span style="font-size:13px;color:'+(na?C.fnt:C.text[m[1]])+';font-weight:600;">'+m[3]+'</span>'
-      +(m[4]?'<span style="margin-left:auto;font-size:13.5px;color:'+C.ink+';font-variant-numeric:tabular-nums;">'+m[4]+'</span>':'<span style="margin-left:auto;font-size:13px;color:'+C.fnt+';">┆</span>')+'</div>'
+      +(m[4]?'<span style="margin-left:auto;font-size:13px;color:'+C.ink+';font-variant-numeric:tabular-nums;">'+m[4]+'</span>':'<span style="margin-left:auto;font-size:13px;color:'+C.fnt+';">┆</span>')+'</div>'
       +'<div style="height:8px;background:'+(na?"transparent":C.soft[m[1]])+';border:'+(na?"1px dashed "+C.line:"0")+';border-radius:4px;overflow:hidden;">'
       +'<div style="height:8px;width:'+m[2]+';background:'+C.fill[m[1]]+';border-radius:4px;"></div></div>'
-      +(m[5]?'<div style="font-size:12.5px;color:'+C.mut+';margin-top:5px;">'+m[5]+'</div>':'')+'</div>';}).join("")
+      +(m[5]?'<div style="font-size:13px;color:'+C.mut+';margin-top:5px;">'+m[5]+'</div>':'')+'</div>';}).join("")
    +'</div>'
-   +'<div style="background:'+C.w+';border-radius:12px;padding:12px;margin-top:15px;font-size:13.5px;color:'+C.mut+';line-height:1.8;">'
+   +'<div style="background:'+C.w+';border-radius:14px;padding:12px;margin-top:15px;font-size:13px;color:'+C.mut+';line-height:1.8;">'
    +'<b style="color:'+C.ink+';">還沒量不等於 0 分</b>，是這塊還沒測過，我們不幫你猜。空的不是零。<br>下一次體測 9/30，那時會量到它。</div>','16px')
  +cw('<div style="display:flex;gap:10px;">'
-   +'<div style="flex:1;background:'+C.card+';border-radius:13px;padding:13px;">'
-    +'<div style="font-size:12.5px;color:'+C.mut+';margin-bottom:7px;">現在的體格</div>'
-    +'<div style="font-size:16px;color:'+C.ink+';line-height:1.2;">正在長</div>'
-    +'<div style="font-size:12.5px;color:'+C.mut+';margin-top:6px;">2.4 / 滿分 5</div></div>'
-   +'<div style="flex:1;background:'+C.card+';border-radius:13px;padding:13px;">'
-    +'<div style="font-size:12.5px;color:'+C.mut+';margin-bottom:7px;">這個月開練</div>'
-    +'<div style="font-size:26px;font-weight:700;color:'+C.act+';line-height:1;font-variant-numeric:tabular-nums;">'+(18+S.done)+'<span style="font-size:13px;color:'+C.fnt+';"> 次</span></div>'
-    +'<div style="font-size:12.5px;color:'+C.mut+';margin-top:6px;">沒練的日子不扣</div></div></div>'
-   +'<div style="font-size:13.5px;color:'+C.mut+';line-height:1.8;margin-top:12px;">左邊會慢慢動，右邊你今天就能動。<b style="color:'+C.ink+';">先看右邊。</b></div>','14px')
+   +'<div style="flex:1;background:'+C.card+';border-radius:14px;padding:13px;">'
+    +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:7px;">現在的體格</div>'
+    +'<div style="font-size:17px;color:'+C.ink+';line-height:1.2;">正在長</div>'
+    +'<div style="font-size:13px;color:'+C.mut+';margin-top:6px;">2.4 / 滿分 5</div></div>'
+   +'<div style="flex:1;background:'+C.card+';border-radius:14px;padding:13px;">'
+    +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:7px;">這個月開練</div>'
+    +'<div style="font-size:28px;font-weight:700;color:'+C.act+';line-height:1;font-variant-numeric:tabular-nums;">'+(18+S.done)+'<span style="font-size:13px;color:'+C.fnt+';"> 次</span></div>'
+    +'<div style="font-size:13px;color:'+C.mut+';margin-top:6px;">沒練的日子不扣</div></div></div>'
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.8;margin-top:12px;">左邊會慢慢動，右邊你今天就能動。<b style="color:'+C.ink+';">先看右邊。</b></div>','14px')
  +(S.member
   ? cw('<div style="margin-bottom:10px;">'+pill("週日才出現")+'</div>'
-     +'<div style="font-size:13.5px;color:'+C.ink+';line-height:1.8;margin-bottom:11px;">週日了。這週有一次他是真的接住了——<b>週三 · 對阿明</b>那一次。<br>要不要貼進館裡？現在有人正在練同一塊，你這一句對他有用。</div>'
-     +'<div style="background:'+C.card+';border-radius:12px;padding:12px;font-size:12px;color:'+C.ink+';line-height:1.85;border-left:2px solid '+C.act+';">我做了什麼：跟阿明講了我還沒談成的那個案子。<br>他怎麼回：「我也是欸，我最近……」——聊了快一小時。</div>'
-     +'<button style="width:100%;background:'+C.actS+';color:#fff;border:0;border-radius:13px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:12px;font-family:inherit;min-height:44px;">貼進館裡</button>'
-     +'<div style="text-align:center;font-size:12.5px;color:'+C.fnt+';margin-top:9px;line-height:1.7;">不用寫長，把原本那兩行貼過去就行</div>','15px','border:1px solid '+C.line+';')
+     +'<div style="font-size:13px;color:'+C.ink+';line-height:1.8;margin-bottom:11px;">週日了。這週有一次他是真的接住了——<b>週三 · 對阿明</b>那一次。<br>要不要貼進館裡？現在有人正在練同一塊，你這一句對他有用。</div>'
+     +'<div style="background:'+C.card+';border-radius:14px;padding:12px;font-size:13px;color:'+C.ink+';line-height:1.85;border-left:2px solid '+C.act+';">我做了什麼：跟阿明講了我還沒談成的那個案子。<br>他怎麼回：「我也是欸，我最近……」——聊了快一小時。</div>'
+     +'<button style="width:100%;background:'+C.actS+';color:#fff;border:0;border-radius:14px;padding:14px;font-size:13px;font-weight:600;cursor:pointer;margin-top:12px;font-family:inherit;min-height:44px;">貼進館裡</button>'
+     +'<div style="text-align:center;font-size:13px;color:'+C.fnt+';margin-top:9px;line-height:1.7;">不用寫長，把原本那兩行貼過去就行</div>','15px','border:1px solid '+C.line+';')
   : '<div style="margin-top:4px;">'+btnDark("join","我也想要有人陪我練","NT$99／月 · 有人陪你看報告、回你話")+'</div>')
  +'</div>'+navBar();};
 
@@ -392,29 +398,29 @@ SC.join=function(){
             ["3 個月複檢","看得到自己有沒有變強"]].map(function(p){
   return '<div style="display:flex;gap:11px;align-items:flex-start;">'
    +'<span style="color:'+C.act+';flex-shrink:0;margin-top:5px;">'+ic.ok+'</span>'
-   +'<div><div style="font-size:13.5px;color:'+C.ink+';font-weight:500;line-height:1.5;">'+p[0]+'</div>'
-   +'<div style="font-size:13.5px;color:'+C.mut+';margin-top:2px;line-height:1.5;">'+p[1]+'</div></div></div>';}).join("");
+   +'<div><div style="font-size:13px;color:'+C.ink+';font-weight:500;line-height:1.5;">'+p[0]+'</div>'
+   +'<div style="font-size:13px;color:'+C.mut+';margin-top:2px;line-height:1.5;">'+p[1]+'</div></div></div>';}).join("");
  return '<div class="body" style="padding:0;">'
  +'<div style="background:'+C.card+';min-height:100%;padding-bottom:26px;">'
  +'<div style="padding:20px 22px 0;display:flex;align-items:center;gap:12px;">'+logo(52)
   +'<div><div style="font-size:17px;font-weight:500;letter-spacing:2px;color:'+C.ink+';">溝通健身房</div>'
   +'<div style="font-size:10px;letter-spacing:2px;color:'+C.mut+';">ATPIFit · 基礎會員</div></div>'
-  +'<button data-go="gym" style="margin-left:auto;background:none;border:0;color:'+C.mut+';font-size:20px;cursor:pointer;font-family:inherit;min-height:44px;">✕</button></div>'
+  +'<button data-go="gym" style="margin-left:auto;background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;font-family:inherit;min-height:44px;">✕</button></div>'
  +'<div style="padding:18px 22px 15px;">'
-  +'<div style="font-size:24px;font-weight:500;line-height:1.45;color:'+C.ink+';">溝通・談判・影響力，<br>是一輩子最值得練的肌肉</div>'
-  +'<div style="font-size:18px;color:'+C.warn+';margin-top:9px;">停練，就會萎縮。</div>'
+  +'<div style="font-size:22px;font-weight:500;line-height:1.45;color:'+C.ink+';">溝通・談判・影響力，<br>是一輩子最值得練的肌肉</div>'
+  +'<div style="font-size:17px;color:'+C.warn+';margin-top:9px;">停練，就會萎縮。</div>'
   +'<div style="font-size:13px;line-height:1.9;color:'+C.mid+';margin-top:13px;">如果你曾經覺得自己嘴巴笨，或想讓聲音更有影響力——用你最真實的聲音，練出影響力。</div></div>'
- +'<div style="margin:0 22px;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;"></div>'
+ +'<div style="margin:0 22px;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:4px;"></div>'
  +'<div style="padding:19px 22px 4px;display:grid;gap:14px;">'+perks+'</div>'
  +'<div style="margin:15px 22px 0;padding:15px;background:'+C.w+';border-radius:14px;">'
-  +'<div style="font-size:12px;font-weight:700;color:'+C.ink+';margin-bottom:12px;">為什麼是現在</div>'
-  +'<div style="display:flex;flex-direction:column;gap:11px;font-size:12px;color:'+C.ink+';line-height:1.8;">'
+  +'<div style="font-size:13px;font-weight:700;color:'+C.ink+';margin-bottom:12px;">為什麼是現在</div>'
+  +'<div style="display:flex;flex-direction:column;gap:11px;font-size:13px;color:'+C.ink+';line-height:1.8;">'
   +["社群裡有<b>免費課</b>，進來就能看——這些平常是課程學員才有的。",
     "課表<b>一個月換一塊肌肉</b>。這個月館裡正在練信任肌肉——剛好是你最卡的那塊，走完就換下一塊。",
     "體格健檢的報告是教練<b>一個一個陪你看</b>的，這個月還剩 6 個名額。"].map(function(x){
     return '<div style="display:flex;gap:9px;"><span style="color:'+C.act+';flex-shrink:0;">·</span><span>'+x+'</span></div>';}).join("")
   +'</div>'
-  +'<div style="margin-top:13px;padding-top:12px;border-top:1px solid '+C.line+';font-size:12px;color:'+C.mid+';line-height:1.85;">NT$99／月買的<b style="color:'+C.ink+';">不是內容</b>——內容你自己查也查得到。<br>買的是這個月<b style="color:'+C.ink+';">有人陪你練、有人回你話</b>。</div></div>'
+  +'<div style="margin-top:13px;padding-top:12px;border-top:1px solid '+C.line+';font-size:13px;color:'+C.mid+';line-height:1.85;">NT$99／月買的<b style="color:'+C.ink+';">不是內容</b>——內容你自己查也查得到。<br>買的是這個月<b style="color:'+C.ink+';">有人陪你練、有人回你話</b>。</div></div>'
  +'<div style="padding:17px 22px 0;">'+btnDark("paid","進來練　NT$99／月　→","一杯飲料的錢。隨時開始，不用等開班——練起來的肌肉是你的。")
   +'<div style="margin-top:11px;text-align:center;font-size:13px;color:'+C.mut+';">信用卡 · 30 秒完成</div></div>'
  +'</div></div>';};
@@ -423,11 +429,11 @@ SC.paid=function(){
  return '<div class="body" style="padding:0 13px 20px;display:flex;flex-direction:column;justify-content:center;">'
  +'<div style="text-align:center;padding:30px 0 20px;">'+logo(64)+'</div>'
  +cw('<div style="text-align:center;">'
-   +'<div style="font-size:23px;color:'+C.ink+';margin-bottom:11px;">歡迎入館</div>'
+   +'<div style="font-size:22px;color:'+C.ink+';margin-bottom:11px;">歡迎入館</div>'
    +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">你的體測結果已經放進來了。<br>接下來三個月，有人會陪你練。</div></div>'
-   +'<div style="background:'+C.card+';border-radius:13px;padding:14px;margin-top:17px;">'
+   +'<div style="background:'+C.card+';border-radius:14px;padding:14px;margin-top:17px;">'
    +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:11px;">接下來會發生的事</div>'
-   +'<div style="display:flex;flex-direction:column;gap:11px;font-size:12.5px;color:'+C.ink+';line-height:1.75;">'
+   +'<div style="display:flex;flex-direction:column;gap:11px;font-size:13px;color:'+C.ink+';line-height:1.75;">'
    +[["48 小時內","教練會私訊你，約一次陪你把報告看一遍"],
      ["看完報告","給你這一季練的那一塊，不是全部"],
      ["每天","館裡會有一件事等你，做完點兩下"],
