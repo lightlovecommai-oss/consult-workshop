@@ -35,7 +35,11 @@ var TABS = {
       所以是「新名擺前面、舊名保留在後」的加法，兩種標題都讀得到、也寫得進去。
       等分頁標題改成肌肉版之後，才可以把「〇〇力」／「影響力」從別名裡拿掉。 */
 var COLS = {
-  students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"] },
+  /* paidMember＝手動勾選欄「溝通健身房會員」（誰付了 99），2026-09-01 起用來區分
+     member.html 的體驗客／會員內容。欄位在「(遊戲)開通名單」姓名跟團隊中間，人工維護，
+     跟課程開通欄（workshopId 那些）是不同性質的旗標，不會被 computeConfig_() 的課程掃描讀到。 */
+  students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"],
+              paidMember:["溝通健身房會員","paidMember"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
   checkins: { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], taskKey:["任務key","taskKey"],
               cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],
@@ -460,7 +464,8 @@ function computeStudent_(uid) {
   var st = null;
   rows_(TABS.students).forEach(function(r) {
     var id = String(pick_(r, COLS.students.lineId));
-    if (id === uid) st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)) };
+    if (id === uid) st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
+                            paidMember: granted_(pick_(r, COLS.students.paidMember)) };
   });
   return st;
 }
@@ -683,7 +688,8 @@ function doGet(e) {
       computeConfig_().enrollments.forEach(function(en){ enrolledSet[en.lineId] = true; });
       var students = rows_(TABS.students).map(function(r) {
         var id = String(pick_(r, COLS.students.lineId));
-        return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)), enrolled: !!enrolledSet[id] };
+        return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)),
+                 enrolled: !!enrolledSet[id], paidMember: granted_(pick_(r, COLS.students.paidMember)) };
       }).filter(function(s){ return s.lineId; });
       return json_({ status: "ok", students: students });
     }
@@ -1629,6 +1635,78 @@ function addTenleadEnrollColumn() {
     if (changed) rng.setValues(cur);
   }
   return "開通名單 " + (added ? "已新增" : "已存在") + " 「" + TENLEAD_WID + "」欄（第 " + col + " 欄），已套核取方塊";
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ██ 超引力 兩門新課（顧問課／公眾演說） ██  —— dashboard.html／私教學員層
+   跟天麗同一套模式（同一張 Sheet 開分頁欄、不 fork），但這兩門課**還沒有課程內容**，
+   這裡只做「登記課程 + 開通名單加欄」兩件事，不像天麗那樣連 TASKS/HONORS 一起造——
+   沒有真實課綱就不亂編任務，等你有內容了再另外設計 tasks（跟 tl_appendSeed_ 同一招）。
+
+   操作順序：
+     1) setupChaoyinli()   建課程 + 開通名單各加一欄（一鍵，安全可重跑）
+     2) 到「(遊戲)開通名單」勾選對應學員的「超引力-顧問課」／「超引力-公眾演說」欄開通
+     3) 開通後這些人打開連結會被 index.html 的 routeFor() 導去 dashboard.html
+        （跟天麗、一階/二階/三階共用同一支介面檔，還沒拆新版）
+   ═══════════════════════════════════════════════════════════════════════════ */
+var CHAOYINLI_WORKSHOPS = [
+  { id: "超引力-顧問課",   name: "超引力-顧問課" },
+  { id: "超引力-公眾演說", name: "超引力-公眾演說" }
+];
+
+/* 通用版 tl_ensureWorkshop_：確保 (設定)課程 有這個 workshopId 的列，存在就設 active=TRUE。
+   跟天麗那支各自獨立，不動天麗已經在跑的東西。 */
+function ensureWorkshop_(wid, name) {
+  var sh = ss_().getSheetByName(TABS.workshops);
+  if (!sh) return "找不到 " + TABS.workshops;
+  var h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function(x){ return String(x).trim(); });
+  var idC = h.indexOf("workshopId"), aC = h.indexOf("active");
+  if (idC < 0) return TABS.workshops + " 缺 workshopId 欄";
+  var data = sh.getDataRange().getValues();
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][idC]).trim() === wid) {
+      if (aC > -1) sh.getRange(r + 1, aC + 1).setValue(true);
+      return "課程「" + wid + "」已存在，設 active=TRUE";
+    }
+  }
+  var line = h.map(function(col){
+    if (col === "workshopId") return wid;
+    if (col === "name")       return name;
+    if (col === "active")     return true;
+    return "";
+  });
+  sh.appendRow(line);
+  return "已新增課程「" + wid + "」";
+}
+
+/* 通用版 addTenleadEnrollColumn：在 (遊戲)開通名單 加一欄（欄名＝workshopId）並套核取方塊。
+   已存在就只補套核取方塊，不重複加欄。 */
+function addEnrollColumn_(wid) {
+  var sh = ss_().getSheetByName(TABS.enrollments);
+  if (!sh) return "找不到 " + TABS.enrollments;
+  var lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var col = headers.indexOf(wid) + 1;
+  var added = false;
+  if (col < 1) { col = lastCol + 1; sh.getRange(1, col).setValue(wid); added = true; }
+  var lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    var rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+    var rng = sh.getRange(2, col, lastRow - 1, 1);
+    rng.setDataValidation(rule);
+    var cur = rng.getValues(), changed = false;
+    for (var i = 0; i < cur.length; i++) { if (cur[i][0] === "" || cur[i][0] === null) { cur[i][0] = false; changed = true; } }
+    if (changed) rng.setValues(cur);
+  }
+  return "開通名單 " + (added ? "已新增" : "已存在") + " 「" + wid + "」欄（第 " + col + " 欄），已套核取方塊";
+}
+
+/* 一鍵：登記「超引力-顧問課」「超引力-公眾演說」兩門課 + 開通名單各加一欄。
+   不建任務／徽章（還沒課綱）。安全可重跑。 */
+function setupChaoyinli() {
+  return CHAOYINLI_WORKSHOPS.map(function(w){
+    return ensureWorkshop_(w.id, w.name) + "；" + addEnrollColumn_(w.id);
+  }).join("\n");
 }
 
 /* 依姓名批次填「團隊」欄分隊。只覆蓋對到的天麗夥伴列，其他人不動；未對到會回報。

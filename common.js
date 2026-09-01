@@ -669,6 +669,7 @@ async function loadStudents() {
         name:   s.name   || s["姓名"],
         team:   s.team   || s["團隊"],
         enrolled: !!s.enrolled,
+        paidMember: !!s.paidMember,  // 「溝通健身房會員」手動勾選欄——member.html 拿這個分體驗客／會員
         checkinLog: [], revenueLog: [], evalLog: [], selfEval: null
       };
     });

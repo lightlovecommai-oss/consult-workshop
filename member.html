@@ -241,6 +241,8 @@ function demoState() {
   }
   return {
     lineId:"DEMO", name:"Amy", team:"",
+    /* ?demo=1 預設當會員（跟改版前行為一致）；加 &member=0 可以看體驗客會少什麼 */
+    member: new URLSearchParams(location.search).get("member") !== "0",
     checkinLog:[ ck("T1",1,"陳大哥","工作","明顯有","「我早就感覺到了」"), ck("T2",2,"陳大哥","工作","超乎預期"),
                  ck("P1",3,"陳大哥","工作","有一點"), ck("A2",3,"林小姐","客戶","沒特別"),
                  ck("A1",4,"妹妹","家人","明顯有"), ck("T2",5,"妹妹","家人","超乎預期"),
@@ -287,7 +289,7 @@ async function boot() {
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
   if (d.tasks) TASKS = d.tasks;
   var st = d.student || {};
-  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "",
+  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "", member: !!st.paidMember,
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   WID = d.defaultWorkshop || "";
   el("nav").classList.remove("hide");
