@@ -170,6 +170,79 @@ function navBar(){
   return '<button class="nv'+(on?" on":"")+'" data-tab="'+t[0]+'">'+ic[t[0]]+t[1]+'</button>';}).join("")+'</div>';}
 
 /* ══ 畫面 ══ */
+
+/* ══════════ 開場輪播（每 3 秒一張，可左右滑） ══════════
+   ⚠️ 見證引言逐字取自 productkit/產品kit/見證庫-共筆.md，**未改一字**。
+   （品牌鐵則：見證以截圖為準，絕不代擬引言。）
+   · 王偉翔・到府按摩師＝📷 截圖原話（check.py「按摩師見證引言」條的 ok 值就是這句）
+   · 學員（匿名）＝📷 截圖 8.JPG，見證庫 C2 段
+   兩則都是**純溝通、無金額**，符合「路人層講溝通、不講變現」的分野。
+   ⚠️ 原本用的雅雯（成交率 4 倍）／阿澤（2 週 50 萬）已換掉——那兩則是變現訴求，
+      路人層第一眼看到會過度承諾。
+   🟡 備選（老師未拍板）：情緒溝通老師「家人說『我變了』、願意聽我說話」——
+      📝 僅口述無截圖，位階低一階，但無數字所以可用。 */
+var HERO=[
+ {k:"say", t:"會不會講話，<br>決定你活得多順。",
+  b:'溝通不是天分，是<b style="color:#E8C89A;">四塊可以練的肌肉</b>。<br>剛才那 16 題，是在量你這四塊現在長什麼樣。'},
+ {k:"say", t:"你會知道<br>自己卡在哪。",
+  b:'四塊肌肉一次看清楚——<br>不用再靠感覺猜「我是不是不太會講話」。'},
+ {k:"say", t:"每天只花<br>十秒鐘。",
+  b:'一件小事、兩下點擊。<br><b style="color:#E8C89A;">不用寫日記、不用背話術。</b>'},
+ {k:"say", t:"你不是一個人<br>在練。",
+  b:'現在有 <b style="color:#E8C89A;">13 個人</b>跟你練同一塊。<br>看得到他們怎麼做、對方怎麼回。'},
+ {k:"quote", who:"王偉翔 ｜ 到府按摩師",
+  q:'如何說話讓自己感覺起來<b style="color:#E8C89A;">有自信</b>，讓顧客<b style="color:#E8C89A;">更信賴我</b>，快速幫我拓展客源。'},
+ {k:"quote", who:"學員 ｜ 一對一實戰",
+  q:'有<b style="color:#E8C89A;">聊到對方的點</b>，比問完該問的問題還重要。'}
+];
+var heroI=0, heroTimer=null, heroX0=null;
+function heroSlide(h){
+ if(h.k==="quote")
+  return '<div style="min-width:100%;padding:26px 20px;">'
+   +'<div style="font-size:13px;color:rgba(247,241,236,.55);letter-spacing:.06em;margin-bottom:14px;">學員真實故事</div>'
+   +'<div style="font-size:17px;line-height:2.05;color:'+C.card+';">'+h.q+'</div>'
+   +'<div style="font-size:13px;color:rgba(247,241,236,.6);margin-top:16px;">'+h.who+'</div></div>';
+ return '<div style="min-width:100%;padding:26px 20px;">'
+  +'<div style="font-size:22px;font-weight:600;line-height:1.6;margin-bottom:16px;color:'+C.card+';">'+h.t+'</div>'
+  +'<div style="font-size:15px;line-height:2.1;color:rgba(247,241,236,.85);">'+h.b+'</div></div>';
+}
+function heroHTML(){
+ return '<div id="hero" style="background:'+C.ink+';border-radius:20px;margin-bottom:16px;overflow:hidden;position:relative;">'
+  +'<div id="heroTrack" style="display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);">'
+  +HERO.map(heroSlide).join("")+'</div>'
+  +'<div style="display:flex;gap:6px;justify-content:center;padding:0 0 16px;">'
+  +HERO.map(function(_,i){return '<button data-hero="'+i+'" aria-label="第 '+(i+1)+' 張" style="width:'+(i===heroI?"18px":"7px")+';height:7px;border-radius:4px;border:0;padding:0;cursor:pointer;background:'+(i===heroI?"#E8C89A":"rgba(247,241,236,.28)")+';transition:width .3s,background .3s;"></button>';}).join("")
+  +'</div></div>';
+}
+function heroGo(i){
+ heroI=(i+HERO.length)%HERO.length;
+ var t=document.getElementById("heroTrack"); if(!t) return;
+ t.style.transform="translateX("+(-heroI*100)+"%)";
+ var dots=document.querySelectorAll("[data-hero]");
+ dots.forEach(function(d,n){
+  d.style.width = n===heroI ? "18px" : "7px";
+  d.style.background = n===heroI ? "#E8C89A" : "rgba(247,241,236,.28)";});
+}
+function heroBind(){
+ if(heroTimer){clearInterval(heroTimer);heroTimer=null;}
+ var box=document.getElementById("hero"); if(!box) return;
+ heroI=0; heroGo(0);
+ var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ if(!reduce) heroTimer=setInterval(function(){heroGo(heroI+1);},3000);
+ function pause(){ if(heroTimer){clearInterval(heroTimer);heroTimer=null;} }
+ box.querySelectorAll("[data-hero]").forEach(function(d){
+  d.onclick=function(){pause();heroGo(+d.getAttribute("data-hero"));};});
+ box.addEventListener("touchstart",function(e){heroX0=e.touches[0].clientX;pause();},{passive:true});
+ box.addEventListener("touchend",function(e){
+  if(heroX0===null) return;
+  var dx=e.changedTouches[0].clientX-heroX0; heroX0=null;
+  if(Math.abs(dx)>36) heroGo(heroI + (dx<0?1:-1));});
+ box.addEventListener("mousedown",function(e){heroX0=e.clientX;pause();});
+ box.addEventListener("mouseup",function(e){
+  if(heroX0===null) return; var dx=e.clientX-heroX0; heroX0=null;
+  if(Math.abs(dx)>36) heroGo(heroI + (dx<0?1:-1));});
+}
+
 var SC={};
 
 SC.quiz=function(){
@@ -182,11 +255,8 @@ SC.quiz=function(){
  var rule = '<div style="height:1px;background:'+C.line+';margin:22px 0;"></div>';
  return head("")+'<div class="body" style="padding:2px 16px 30px;">'
 
- /* ① 開場 */
- +'<div style="background:'+C.ink+';border-radius:20px;padding:26px 20px;margin-bottom:16px;color:'+C.card+';">'
-  +'<div style="font-size:22px;font-weight:600;line-height:1.6;margin-bottom:16px;">會不會講話，<br>決定你活得多順。</div>'
-  +'<div style="font-size:15px;line-height:2.1;color:rgba(247,241,236,.85);">溝通不是天分，是<b style="color:#E8C89A;">四塊可以練的肌肉</b>。<br>剛才那 16 題，是在量你這四塊現在長什麼樣。</div>'
- +'</div>'
+ /* ① 開場輪播 */
+ +heroHTML()
 
  /* ② 四塊肌肉 */
  +'<div style="background:'+C.card+';border-radius:20px;padding:24px 19px;margin-bottom:16px;">'
@@ -472,7 +542,9 @@ var HINTS={
 
 /* ══ 渲染與事件 ══ */
 function render(){
+ if(heroTimer){clearInterval(heroTimer);heroTimer=null;}
  el.innerHTML=(SC[S.sc]||SC.quiz)();
+ heroBind();
  el.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){go(b.getAttribute("data-go"));};});
  el.querySelectorAll("[data-tab]").forEach(function(b){b.onclick=function(){var t=b.getAttribute("data-tab");S.tab=t;S.sc=t;mark();render();};});
  el.querySelectorAll("[data-cheer]").forEach(function(b){b.onclick=function(){var k=b.getAttribute("data-cheer");S.cheered[k]=!S.cheered[k];render();};});
