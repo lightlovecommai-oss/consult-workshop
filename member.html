@@ -243,6 +243,8 @@ function demoState() {
     lineId:"DEMO", name:"Amy", team:"",
     /* ?demo=1 預設當會員（跟改版前行為一致）；加 &member=0 可以看體驗客會少什麼 */
     member: new URLSearchParams(location.search).get("member") !== "0",
+    /* 體驗客的秘訣輪流靠這個；demo 用 &visits=3 之類的直接指定第幾次上線 */
+    visits: Number(new URLSearchParams(location.search).get("visits")) || 1,
     checkinLog:[ ck("T1",1,"陳大哥","工作","明顯有","「我早就感覺到了」"), ck("T2",2,"陳大哥","工作","超乎預期"),
                  ck("P1",3,"陳大哥","工作","有一點"), ck("A2",3,"林小姐","客戶","沒特別"),
                  ck("A1",4,"妹妹","家人","明顯有"), ck("T2",5,"妹妹","家人","超乎預期"),
@@ -292,9 +294,21 @@ async function boot() {
   S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "", member: !!st.paidMember,
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   WID = d.defaultWorkshop || "";
+  S.visits = bumpVisitCount_(S.lineId);
   el("nav").classList.remove("hide");
   render();
   loadHonorFeed(20).then(function(events){ HFEED = events || []; if (PANE === "gym") render(); });
+}
+
+/* 體驗客的「每次上線一個新秘訣」要跨次開站都記得上次給到第幾個——後端沒有這個欄位
+   （純前端偏好，不是需要跨裝置同步的資料），存 localStorage 剛好，記不住就從頭來，不影響正確性。 */
+function bumpVisitCount_(lineId){
+  var key = "cw_visits_" + (lineId || "anon");
+  try {
+    var n = (Number(localStorage.getItem(key)) || 0) + 1;
+    localStorage.setItem(key, String(n));
+    return n;
+  } catch (e) { return 1; }
 }
 
 function go(p){
@@ -345,16 +359,29 @@ function focusPool(){
   var pool = weakestTwoDimMuscles(S);
   return pool.length ? pool : ["A1", "A2", "A3"];
 }
+/* 體驗客的候選池＝最卡「那一塊大肌肉」的 3 個小肌群（模組2規格：不是最弱2塊、是最弱1塊），
+   照 MORD 固定順序（如 T1→T2→T3），輪流靠「上線次數」不是日期——多數人隔幾週才回來，
+   按日期發他一定錯過。這條是模組2文件裡標記「整個模組最漂亮的一條」的機制，
+   同時解掉時間問題、枯竭問題、界線問題，不能省略。 */
+function weakestBigDimMuscles(s){
+  var d5 = calcDimScores5(s), scores = calcMuscleScores(s);
+  var measuredDims = DORD.filter(function(k){ return musclesOfDim(k).some(function(mk){ return scores[mk] != null; }); });
+  var dim = measuredDims.length ? measuredDims.slice().sort(function(a,b){ return d5[a] - d5[b]; })[0] : "A";
+  return musclesOfDim(dim);
+}
 function focusMuscle(){
+  if (!S.member) {
+    var free = weakestBigDimMuscles(S);
+    return free[(S.visits - 1) % free.length];
+  }
   var pool = focusPool();
-  /* 體驗客只練最卡那一塊、不能換——換得到是會員才有的選擇權（模組2／3規格的分野） */
-  if (!S.member) return pool[0];
   return pool[(S.pick || 0) % pool.length];
 }
-/* 體驗客/會員內容差異目前只做這兩塊真的能用真資料撐起來的：
-   ①練習只能練最卡那塊、拿不到「換一個」的選擇權　②看不到教練解盤卡/三個月驗收卡。
-   沒有做的（社群完整內容、按上線次數輪的3個秘訣）是因為沒有真的內容/資料可以撐，
-   硬做會變成編假資料，寧可先不做。 */
+/* 體驗客/會員內容差異：
+   ①練習——體驗客最卡那一塊大肌肉的3個秘訣按上線次數輪流、沒有「換一個」；
+     會員在最弱2塊大肌肉(6個小肌群)裡自己挑、有「換一個」（模組2/3規格的分野，兩邊池子不一樣）
+   ②看不到教練解盤卡/三個月驗收卡
+   社群完整內容沒做，是因為沒有真的內容/資料可以撐，硬做會變成編假資料，寧可先不做。 */
 function ctaCard(t){
   return '<div class="cw" style="border:1px solid #E6DAD1;">'
     + '<div class="pill" style="margin-bottom:12px;">會員才看得到</div>'
@@ -425,6 +452,8 @@ function gymHTML(){
 function todayHTML(){
   var info = focusTaskInfo(), mk = info.muscle, m = MUSCLES[mk], j = JUDGEMENT[mk] || {};
   var c = dimTextColor(m.dim);
+  var freePool = S.member ? null : weakestBigDimMuscles(S);
+  var freeN = freePool ? (((S.visits || 1) - 1) % freePool.length) + 1 : 0;
   var done = doneToday_(mk);
   var dates = weekDates_(), doneDates = {};
   S.checkinLog.forEach(function(e){ doneDates[normDate(e.date)] = true; });
@@ -441,7 +470,7 @@ function todayHTML(){
 
   var h = '<div class="cd"><div style="display:flex;align-items:center;gap:9px;">'
     + '<span style="font-size:22px;font-weight:600;color:#4A1B0C;">' + esc_(m.name) + '</span>'
-    + '<span style="margin-left:auto;" class="pill">這一季先練這塊</span></div>'
+    + '<span style="margin-left:auto;" class="pill">' + (S.member ? "這一季先練這塊" : "第 " + freeN + " 個秘訣") + '</span></div>'
     + '<div class="foc-why" style="margin-top:11px;">' + esc_(DIM_RESULT[m.dim]) + '——先把這一塊練順，其他的先不用管。</div></div>';
 
   h += '<div class="cw"><div class="foc-hd"><span class="pill">' + esc_(m.tech) + '</span>'
@@ -464,7 +493,7 @@ function todayHTML(){
     + '<div class="week">' + days + '</div>'
     + '<div style="font-size:15px;color:#6E4A3C;margin-top:14px;line-height:2.05;">這週練了 <b style="color:#C6603A;">' + weekCount + '</b> 天。<br>沒練的那幾天不扣分——<b style="color:#4A1B0C;">溝通要有人才練得起來</b>。</div></div>';
 
-  if (!S.member) h += ctaCard('現在你只練得到最卡的這一塊。<br>會員可以在最弱兩塊肌肉、六個小肌群裡自己挑，練膩了換一個。');
+  if (!S.member) h += ctaCard('你有 <b style="color:#4A1B0C;">3 個秘訣</b>可以練，每次上線換一個，練完會繞回第一個。<br>會員能在最弱兩塊肌肉、六個小肌群裡自己挑，不用照順序等。');
   return h;
 }
 
