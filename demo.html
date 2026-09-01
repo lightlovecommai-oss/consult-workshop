@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4A1B0C">
+<link rel="apple-touch-icon" href="icon2-180.png">
+<title>溝通健身房 互動原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --pg:#3A2418; --pg2:#4A2E1E; --pgi:#F7F1EC; --pgm:#C9AE9C; --pgl:#5C3B28;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --pg:#EFE6DE; --pg2:#E6DACF; --pgi:#4A1B0C; --pgm:#7A6154; --pgl:#D8C6B8; }
+}
+:root[data-theme="light"]{ --pg:#EFE6DE; --pg2:#E6DACF; --pgi:#4A1B0C; --pgm:#7A6154; --pgl:#D8C6B8; }
+*{box-sizing:border-box;}
+body{margin:0;background:var(--pg);color:var(--pgi);
+ font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;
+ -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;
+ min-height:100vh;padding:22px 14px 40px;gap:16px;}
+.srf{font-family:"Noto Serif TC","Songti TC",Georgia,serif;}
+
+.bar{width:100%;max-width:430px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.bar-t{font-family:"Noto Serif TC",Georgia,serif;font-size:17px;font-weight:700;}
+.bar-s{font-size:11.5px;color:var(--pgm);}
+.btns{margin-left:auto;display:flex;gap:7px;}
+.tb{background:none;border:1px solid var(--pgl);color:var(--pgm);border-radius:20px;
+ padding:7px 13px;font-size:11.5px;cursor:pointer;font-family:inherit;min-height:36px;}
+.tb:hover{border-color:var(--pgi);color:var(--pgi);}
+.tb.on{background:var(--pgi);color:var(--pg);border-color:var(--pgi);font-weight:600;}
+
+.dev{width:390px;max-width:100%;border-radius:30px;overflow:hidden;
+ box-shadow:0 16px 48px rgba(0,0,0,.28);border:1px solid rgba(0,0,0,.14);}
+#screen{width:100%;height:788px;background:#E6DACF;color:#4A1B0C;
+ display:flex;flex-direction:column;position:relative;overflow:hidden;
+ font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;}
+#screen *{box-sizing:border-box;}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.nav{position:absolute;left:0;right:0;bottom:0;background:#F7F1EC;border-top:1px solid #E6DAD1;
+ display:flex;padding:8px 0 13px;}
+.nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;
+ background:none;border:0;cursor:pointer;padding:4px 0;color:#B4A695;font-family:inherit;min-height:44px;}
+.nv.on{color:#C6603A;}
+
+.step{width:100%;max-width:430px;font-size:11.5px;color:var(--pgm);line-height:1.7;}
+.step b{color:var(--pgi);}
+.crumb{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.cb{font-size:10.5px;padding:4px 9px;border-radius:20px;border:1px solid var(--pgl);color:var(--pgm);
+ background:none;cursor:pointer;font-family:inherit;min-height:30px;}
+.cb.on{background:var(--pgi);color:var(--pg);border-color:var(--pgi);}
+.cb.done{border-color:var(--pgi);color:var(--pgi);}
+:focus-visible{outline:2px solid #C6603A;outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+@media (max-width:640px){
+  body{padding:8px 6px 20px;gap:9px;}
+  .bar-t{font-size:15px;} .bar-s{font-size:10.5px;}
+  .tb{padding:6px 10px;font-size:11px;min-height:34px;}
+  .dev{border-radius:22px;}
+  #screen{height:calc(100dvh - 172px);min-height:520px;}
+  .step{font-size:11px;}
+  .step #hint{display:none;}
+  .step.open #hint{display:block;}
+  .crumb{gap:4px;}
+}
+</style>
+
+<div class="bar">
+  <div>
+    <div class="bar-t">溝通健身房 · 互動原型</div>
+    <div class="bar-s" id="mode">訪客模式 · 還沒付 99</div>
+  </div>
+  <div class="btns">
+    <button class="tb" id="btnPay">切換成會員</button>
+    <button class="tb" id="btnReset">重新開始</button>
+  </div>
+</div>
+
+<div class="dev"><div id="screen"></div></div>
+
+<div class="step" id="stepbox">
+  <button class="tb" id="btnHint" style="display:none;margin-bottom:8px;">這一屏在解決什麼？</button>
+  <div id="hint"></div>
+  <div class="crumb" id="crumb"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* 暖版色票：productkit/2-行銷素材/會員App元件-穩暖版.html ＋ 21-品牌色彩系統 */
+var C={grd:"#E6DACF",frm:"#EFE6DE",card:"#F7F1EC",w:"#fff",
+ ink:"#4A1B0C",mut:"#8A7266",mid:"#6E4A3C",warn:"#993C1D",fnt:"#B4A695",
+ act:"#C6603A",actS:"#AF5433",line:"#E6DAD1",trk:"#F0E3DB",gbg:"#DCE7DE",gfg:"#3E5546",
+ fill:{A:"#C6603A",T:"#6E8B77",P:"#6E8CA8",I:"#C99A4E"},
+ text:{A:"#AF5433",T:"#5C7464",P:"#54718D",I:"#8E682B"},
+ soft:{A:"#F3D9CD",T:"#DCE7DE",P:"#DDE6EE",I:"#F1E5CC"}};
+
+function logo(w){w=w||38;var h=Math.round(w*0.75);
+ return '<svg width="'+w+'" height="'+h+'" viewBox="-52 -30 104 72" aria-hidden="true">'
+ +'<g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">'
+ +'<path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/>'
+ +'<path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g>'
+ +'<circle cx="-21" cy="0" r="4.5" fill="#C6603A"/><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"/>'
+ +'<circle cx="7" cy="0" r="4.5" fill="#6E8CA8"/><circle cx="21" cy="0" r="4.5" fill="#C99A4E"/></svg>';}
+
+/* 統一的頭：logo ＋ 標題 ＋ 右側小字。所有畫面都用這個，沒有例外 */
+function head(sub,right){
+ return '<div style="padding:15px 15px 11px;flex-shrink:0;background:'+C.grd+';">'
+  +'<div style="display:flex;align-items:center;gap:10px;">'+logo(38)
+  +'<div class="srf" style="font-size:15px;font-weight:500;color:'+C.ink+';letter-spacing:.04em;">溝通健身房</div>'
+  +(right?'<div style="margin-left:auto;font-size:11px;color:'+C.mut+';">'+right+'</div>':'')+'</div>'
+  +(sub?'<div style="font-size:11.5px;color:'+C.mut+';margin-top:7px;letter-spacing:.03em;">'+sub+'</div>':'')
+  +'</div>';}
+
+var ic={
+ gym:'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9v6M8 6v12M16 6v12M20 9v6M8 12h8"/></svg>',
+ today:'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.9"/></svg>',
+ me:'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a8 8 0 0 1 16 0"/><circle cx="12" cy="8" r="4"/></svg>',
+ ar:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ ok:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+ thumb:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1z"/><path d="M7 11l4.2-7.4a1.6 1.6 0 0 1 3 .8V9h4.6a2 2 0 0 1 1.95 2.45l-1.6 7A2 2 0 0 1 17.2 20H7"/></svg>'};
+
+/* ══ 狀態 ══ */
+var S;
+function reset(){ S={sc:"quiz",member:false,tab:"gym",target:null,rel:null,react:null,note:"",
+  cheered:{},done:0,streak:4,visited:{}}; }
+reset();
+var el=document.getElementById("screen");
+
+/* ══ 小工具 ══ */
+function card(inner,pad){return '<div style="background:'+C.card+';border-radius:16px;padding:'+(pad||"15px")+';margin-bottom:9px;">'+inner+'</div>';}
+function cw(inner,pad,extra){return '<div style="background:'+C.w+';border-radius:16px;padding:'+(pad||"14px")+';margin-bottom:9px;'+(extra||"")+'">'+inner+'</div>';}
+function lbl(t){return '<div style="font-size:11px;color:'+C.mut+';margin-bottom:9px;">'+t+'</div>';}
+function pill(t){return '<span style="font-size:10.5px;color:'+C.warn+';background:'+C.trk+';padding:3px 10px;border-radius:20px;">'+t+'</span>';}
+function btnDark(id,t,s){return '<button data-go="'+id+'" style="width:100%;background:'+C.ink+';color:'+C.card+';border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;min-height:44px;">'+t+(s?'<div style="font-size:11.5px;font-weight:400;color:rgba(247,241,236,.72);margin-top:4px;">'+s+'</div>':'')+'</button>';}
+function bar4(k,pct,val,name){
+ return '<div style="display:flex;align-items:center;gap:9px;">'
+  +'<span style="width:14px;font-size:12px;color:'+C.text[k]+';font-weight:700;">'+k+'</span>'
+  +(name?'<span style="width:56px;font-size:11.5px;color:'+C.ink+';">'+name+'</span>':'')
+  +'<span style="flex:1;height:7px;background:'+C.trk+';border-radius:4px;overflow:hidden;display:block;">'
+  +'<span style="display:block;height:7px;width:'+pct+';background:'+C.fill[k]+';border-radius:4px;"></span></span>'
+  +(val?'<span style="width:30px;text-align:right;font-size:11.5px;font-weight:600;color:'+C.ink+';font-variant-numeric:tabular-nums;">'+val+'</span>':'')+'</div>';}
+function navBar(){
+ return '<div class="nav">'+[["gym","館"],["today","今天"],["me","我"]].map(function(t){
+  var on=S.tab===t[0];
+  return '<button class="nv'+(on?" on":"")+'" data-tab="'+t[0]+'">'+ic[t[0]]+t[1]+'</button>';}).join("")+'</div>';}
+
+/* ══ 畫面 ══ */
+var SC={};
+
+SC.quiz=function(){
+ var d=[["A","吸引肌肉","別人願意跟你講第一句","已經在長","62%","← 最順的一塊"],
+        ["P","專業肌肉","別人相信你解得掉他的問題","正在長","48%",""],
+        ["I","推進肌肉","講完之後，事情真的有動","還沒開始練","30%",""],
+        ["T","信任肌肉","別人願意跟你講真心話","還沒開始練","22%","← 最卡的一塊"]];
+ return head("你的溝通體測結果")+'<div class="body" style="padding:0 13px 20px;">'
+ +card(lbl("你的四塊溝通肌肉，現在長這樣")
+   +'<div style="display:flex;flex-direction:column;gap:15px;">'
+   +d.map(function(x){return '<div>'
+     +'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:7px;">'
+      +'<span style="font-size:13px;font-weight:700;color:'+C.ink+';">'+x[1]+'</span>'
+      +'<span style="font-size:11px;color:'+C.text[x[0]]+';font-weight:600;">'+x[3]+'</span>'
+      +(x[5]?'<span style="margin-left:auto;font-size:10.5px;color:'+C.warn+';">'+x[5]+'</span>':'')+'</div>'
+     +'<div style="height:9px;background:'+C.soft[x[0]]+';border-radius:5px;overflow:hidden;"><div style="height:9px;width:'+x[4]+';background:'+C.fill[x[0]]+';border-radius:5px;"></div></div>'
+     +'<div style="font-size:11.5px;color:'+C.mut+';margin-top:6px;">'+x[2]+'</div></div>';}).join("")
+   +'</div>'
+   +'<div style="background:'+C.w+';border-radius:12px;padding:12px;margin-top:15px;font-size:11.5px;color:'+C.mut+';line-height:1.8;">'
+   +'第一次量先不打分數，也沒有及格線。<br>多數人第一次都是一兩塊在長、其他還沒開始——<b style="color:'+C.ink+';">沒練過的肌肉，本來就不會有</b>。</div>','16px')
+
+ +cw(lbl("你的對話，通常停在哪一步")
+   +'<div class="srf" style="font-size:19px;color:'+C.ink+';line-height:1.5;margin-bottom:11px;">你不缺第一句。</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">走進一個場合、開得了口，對方也接得下去——這件事很多人做不到，你做得到。</div>'
+   +'<div class="srf" style="font-size:19px;color:'+C.ink+';line-height:1.5;margin:16px 0 11px;">卡住的是第二句之後。</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">聊得挺好，但他講的都是<b style="color:'+C.ink+';">「還好啦」「最近還可以」</b>。他真正在煩的那件事，還沒拿出來給你。<br>他沒拿出來，你後面再厲害也接不上——你只能猜。</div>'
+   +'<div style="background:'+C.card+';border-radius:12px;padding:13px;margin-top:14px;font-size:12.5px;color:'+C.ink+';line-height:1.85;">這塊叫<b>信任肌肉</b>，是你現在最卡的一塊。<b style="color:'+C.warn+';">不是你不夠好，是它還沒練過。</b><br>所以這一季先練一件事：讓對方願意跟你講真心話。</div>','15px')
+
+ +cw('<div style="font-size:12.5px;color:'+C.mut+';line-height:1.85;">沒有人天生就會，這也不是個性問題。<br>四塊都是肌肉：沒練過就短，<b style="color:'+C.ink+';">練了會長、停了會縮</b>——跟你在健身房練的那幾塊一樣。<br>今天量到的是起點的樣子，不是你的上限。</div>','15px')
+
+ +cw(lbl("你最順的那條路，跟它會斷在哪")
+   +'<div style="display:flex;align-items:center;gap:3px;margin-bottom:13px;">'
+   +[["A","吸引",1],["T","信任",0],["P","專業",1],["I","推進",0]].map(function(x,i){
+     return (i?'<span style="color:'+C.fnt+';font-size:12px;">›</span>':'')
+      +'<span style="flex:1;text-align:center;font-size:11px;padding:9px 3px;border-radius:9px;'
+      +(x[2]?'background:'+C.fill[x[0]]+';color:#fff;font-weight:600;':'background:'+C.trk+';color:'+C.mut+';')+'">'+x[1]+'</span>';}).join("")
+   +'</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">你現在最順手的走法是：<b style="color:'+C.ink+';">先用氣場把人吸過來，再用專業把事情接下來</b>。<br>這條路沒有錯，也已經幫你帶進不少人。</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;margin-top:12px;">它斷在中間那一段——他還沒把真正的問題講出來，你的專業就沒有東西可以接。<br>所以你常遇到的是：聊得很好，他說「很專業耶」，<b style="color:'+C.ink+';">然後就沒有然後了</b>。</div>'
+   +'<div style="background:'+C.soft.T+';border-radius:12px;padding:12px;margin-top:13px;font-size:12px;color:'+C.gfg+';line-height:1.8;">把中間那段補上，你原本就有的專業才有地方使力。</div>','15px')
+
+ +cw('<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;">'+pill("帶一招走")
+   +'<span style="font-size:10.5px;color:'+C.fnt+';">完整的一招，不是預告片</span></div>'
+   +'<div class="srf" style="font-size:17.5px;color:'+C.ink+';margin-bottom:12px;line-height:1.5;">明天先試一句：<br>講一件你還沒做成的事</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">找一個你明天本來就會講到話的人——家人、老朋友、合作最久的夥伴都可以，<b style="color:'+C.ink+';">第一次先不要挑客戶</b>。</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;margin-top:11px;">他問「最近怎樣」的時候，不要回「還好」。換成這一句：</div>'
+   +'<div style="background:'+C.soft.A+';border-radius:12px;padding:13px;margin-top:9px;font-size:13.5px;color:'+C.ink+';line-height:1.8;">「我最近有點卡，有個案子還沒談成，不過我想跟你說。」</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;margin-top:11px;">一句就好。講完停住，<b style="color:'+C.warn+';">數三秒</b>——不要補話、不要用笑話把氣氛救回來。</div>'
+   +'<div style="background:'+C.card+';border-radius:12px;padding:13px;margin-top:13px;">'
+   +'<div style="font-size:10.5px;color:'+C.mut+';margin-bottom:7px;">怎麼算成功</div>'
+   +'<div style="font-size:12.5px;color:'+C.ink+';line-height:1.85;">不是他稱讚你，是<b>他也開始講他自己的事</b>：「我也是欸，我最近……」，或者他反問你一句。那就是成了。</div>'
+   +'<div style="font-size:12px;color:'+C.mut+';line-height:1.85;margin-top:10px;padding-top:10px;border-top:1px solid '+C.line+';">他只回「嗯」「加油」，那是安慰，不算——但那不是失敗，是今天沒接住。換一個人再試一次就好，<b style="color:'+C.ink+';">這一招大部分人第一次都要試過兩三個人</b>。</div></div>','15px','border:1.5px solid '+C.act+';')
+
+ +'<div style="margin-top:15px;">'+btnDark("gym","進館，看看今天有誰在練　→","免費，不用填資料。裡面有人跟你練同一塊。")+'</div>'
+ +'</div>';};
+
+SC.gym=function(){
+ var feed=[
+  {id:"f1",n:"光頭教練",i:"光",c:"#C6603A",b:"教練",day:"入館第 412 天",w:"2 小時前",m:"信任肌肉",d:"T",typed:true,
+   t:"跟第一次見面的老闆承認，我去年那個案子做不起來。",r:"「其實我現在也卡著。」——後來聊了一個半小時"},
+  {id:"f2",n:"阿凱",i:"凱",c:"#6E8B77",b:"",day:"入館第 12 天",w:"昨天 21:40",m:"信任肌肉",d:"T",typed:true,
+   t:"跟太太講了公司這半年其實在虧，講完我沒解釋。",r:"「我早就感覺到了。」——後來聊到一點半"},
+  {id:"f3",n:"Amy",i:"A",c:"#6E8CA8",b:"",day:"入館第 8 天",w:"2 天前",m:"吸引肌肉",d:"A",typed:false,r:"他接住了"},
+  {id:"f4",n:"阿哲",i:"哲",c:"#C99A4E",b:"共訓營",day:"入館第 96 天",w:"3 天前",m:"專業肌肉",d:"P",typed:true,
+   t:"跟客戶畫了他現在到想去的地方，中間差多少。",r:"他自己講出一個我沒問到的卡點"},
+  {id:"f5",n:"婷",i:"婷",c:"#6E8B77",b:"",day:"入館第 31 天",w:"5 天前",m:"信任肌肉",d:"T",typed:false,r:"沒接住"}];
+ var items=feed.map(function(f){
+  var on=!!S.cheered[f.id];
+  var av='<div style="width:30px;height:30px;border-radius:50%;background:'+f.c+';display:flex;align-items:center;justify-content:center;font-size:11.5px;color:#fff;font-weight:700;flex-shrink:0;">'+f.i+'</div>';
+  var top='<div style="display:flex;align-items:center;gap:9px;">'+av
+    +'<div style="min-width:0;"><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:13px;font-weight:700;color:'+C.ink+';">'+f.n+'</span>'
+    +(f.b?'<span style="font-size:10px;color:'+C.warn+';background:'+C.trk+';padding:1px 7px;border-radius:20px;">'+f.b+'</span>':'')+'</div>'
+    +'<div style="font-size:10.5px;color:'+C.fnt+';margin-top:2px;">'+f.day+' · '+f.w+'</div></div>'
+    +'<div style="margin-left:auto;flex-shrink:0;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;color:'+C.text[f.d]+';background:'+C.soft[f.d]+';">'+f.m+'</div></div>';
+  if(!f.typed) return '<div style="background:'+C.w+';border-radius:14px;padding:11px 13px;margin-bottom:7px;">'+top
+    +'<div style="font-size:11.5px;color:'+C.mut+';margin-top:7px;padding-left:39px;">'+f.r+'</div></div>';
+  return cw(top
+   +'<div style="font-size:12.5px;color:'+C.ink+';line-height:1.75;margin-top:10px;"><span style="color:'+C.mut+';">我做了什麼 · </span>'+f.t+'</div>'
+   +'<div style="background:'+C.card+';border-radius:11px;padding:10px 11px;margin-top:8px;font-size:12px;color:'+C.ink+';line-height:1.7;"><span style="color:'+C.mut+';">他怎麼回 · </span>'+f.r+'</div>'
+   +'<div style="display:flex;align-items:center;margin-top:10px;">'
+   +'<button data-cheer="'+f.id+'" style="display:flex;align-items:center;gap:6px;border:1px solid '+(on?C.act:C.line)+';background:'+(on?C.act:C.w)+';color:'+(on?"#fff":C.mut)+';border-radius:20px;padding:8px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;min-height:40px;">'+ic.thumb+(on?"已鼓勵":"鼓勵他")+'</button></div>','13px 14px');}).join("");
+
+ return head(S.member?"館裡今天有人":"你正在參觀 · 還沒入會", S.member?"入館第 23 天":"訪客")
+ +'<div class="body" style="padding:0 13px 96px;">'
+ +card('<div style="font-size:12.5px;color:'+C.ink+';line-height:1.8;">這個月，館裡一起開練了 <span class="srf" style="font-size:30px;font-weight:700;color:'+C.act+';font-variant-numeric:tabular-nums;vertical-align:-3px;">412</span> 次。'
+   +(S.member?'<br>其中有 <b>'+(18+S.done)+'</b> 次是你。':'')+'</div>'
+   +'<div style="display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid '+C.line+';">'
+   +'<div style="display:flex;flex-shrink:0;">'+[["光","#C6603A"],["凱","#6E8B77"],["A","#6E8CA8"],["哲","#C99A4E"]].map(function(a,i){
+      return '<div style="width:26px;height:26px;border-radius:50%;background:'+a[1]+';border:2px solid '+C.card+';'+(i?'margin-left:-8px;':'')+'display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:600;">'+a[0]+'</div>';}).join("")+'</div>'
+   +'<div style="font-size:11.5px;color:'+C.mut+';line-height:1.5;">這個月館裡在練 <b style="color:'+C.ink+';">信任肌肉</b><br>平均每天 13 個人開練</div></div>','16px')
+ +'<div style="font-size:11px;color:'+C.mut+';margin:15px 3px 9px;">館裡最近在練什麼</div>'+items
+ +(S.member
+   ? '<div style="background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:15px;margin-top:13px;">'
+     +'<div style="font-size:13.5px;font-weight:700;color:#E8C89A;margin-bottom:7px;">社群裡這週有 7 篇分享</div>'
+     +'<div style="font-size:12px;color:rgba(247,241,236,.82);line-height:1.7;">還有 3 堂免費課在裡面，會員都能看。</div>'
+     +'<div style="display:flex;align-items:center;gap:6px;margin-top:11px;color:#E8C89A;font-size:12px;font-weight:600;">去社群 '+ic.ar+'</div></div>'
+   : '<div style="margin-top:14px;">'+btnDark("join","我也想要有人陪我練","NT$99／月 · 有人陪你看報告、回你話")+'</div>')
+ +'<div style="background:'+C.card+';border-radius:14px;padding:13px;margin-top:14px;font-size:11.5px;color:'+C.mut+';line-height:1.85;text-align:center;">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼、對方怎麼回——<b style="color:'+C.ink+';">看不到誰比較強</b>。<br>溝通不是比出來的，是練出來的。</div>'
+ +'</div>'+navBar();};
+
+SC.today=function(){
+ var doneToday=S.done>0;
+ var days=["一","二","三","四","五","六","日"].map(function(d,i){
+  var on=[0,2,3,5].indexOf(i)>-1 || (i===6 && doneToday);
+  return '<div style="flex:1;text-align:center;"><div style="height:36px;border-radius:10px;background:'+(on?C.act:C.trk)+';display:flex;align-items:center;justify-content:center;color:#fff;">'+(on?ic.ok:"")+'</div>'
+   +'<div style="font-size:10px;color:'+C.mut+';margin-top:5px;">'+d+'</div></div>';}).join("");
+ return head("你這一季在練的那一塊", S.member?"入館第 23 天":"訪客")
+ +'<div class="body" style="padding:0 13px 96px;">'
+ +card('<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">'
+   +'<span class="srf" style="font-size:23px;color:'+C.ink+';">信任肌肉</span>'
+   +'<span style="margin-left:auto;">'+pill("最快有感")+'</span></div>'
+   +'<div style="font-size:12.5px;color:'+C.mut+';line-height:1.85;">這一季只練這一塊就好。<br>其他的先不用管——<b style="color:'+C.ink+';">這一塊練順了，下一塊才練得動</b>。<br>練得下去，比練得齊重要。</div>','16px')
+ +cw('<div class="srf" style="font-size:17px;color:'+C.ink+';margin-bottom:12px;line-height:1.5;">今天這一件：<br>先講一句你心裡沒說的</div>'
+   +'<div style="font-size:12.5px;color:'+C.mid+';line-height:1.9;">找一個你今天本來就會講到話的人。用下面這句，講一件你還在卡、還沒成的事。</div>'
+   +'<div style="background:'+C.soft.T+';border-radius:12px;padding:13px;margin-top:10px;font-size:13.5px;color:'+C.ink+';line-height:1.8;">「我最近有點＿＿，不過我想跟你說。」</div>'
+   +'<div style="font-size:12.5px;color:'+C.mid+';line-height:1.9;margin-top:11px;">一句就好。講完停住，<b style="color:'+C.warn+';">數三秒</b>，把場讓給他。</div>'
+   +'<div style="font-size:11.5px;color:'+C.mut+';line-height:1.75;margin-top:9px;">三秒很久。忍住不補話，他才有空隙接。</div>'
+   +(doneToday
+     ? '<div style="margin-top:14px;background:'+C.gbg+';color:'+C.gfg+';border-radius:13px;padding:14px;text-align:center;font-size:13.5px;font-weight:600;">今天已經開練了 ✓</div>'
+     : '<div style="margin-top:14px;">'+btnDark("rec1","開練")+'</div>'
+       +'<div style="text-align:center;font-size:11px;color:'+C.mut+';margin-top:10px;line-height:1.7;">做完回來點兩下就好：對誰講的 · 他有沒有接<br>不用寫心得，10 秒的事。</div>'),'15px')
+ +cw(lbl("這週")+'<div style="display:flex;gap:5px;">'+days+'</div>'
+   +'<div style="font-size:12px;color:'+C.mut+';margin-top:13px;line-height:1.85;">這週開練 <b style="color:'+C.act+';">'+(S.streak+(doneToday?1:0))+'</b> 天。<br>沒開練的那幾天不扣分——<b style="color:'+C.ink+';">溝通要有人才練得起來</b>，沒遇到人本來就正常。<br>這個數字只會往上加。</div>','14px')
+ +'</div>'+navBar();};
+
+var TARGETS=[["陳大哥","客戶"],["太太","家人"],["阿明","老朋友"],["陌生人",""]];
+SC.rec1=function(){
+ return head("開練 · 信任肌肉")+'<div class="body" style="padding:0 13px 20px;">'
+ +cw('<div style="display:flex;align-items:center;gap:10px;margin-bottom:13px;">'
+   +'<button data-go="today" style="background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;">‹</button>'
+   +'<div><div style="font-size:15px;font-weight:700;color:'+C.ink+';">講一句你心裡沒說的</div>'
+   +'<div style="font-size:11px;color:'+C.mut+';margin-top:2px;">兩下就好，不用打字</div></div></div>'
+   +'<div style="font-size:14px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">跟誰講的？</div>'
+   +'<div style="display:flex;flex-wrap:wrap;gap:8px;">'
+   +TARGETS.map(function(t,i){return '<button data-target="'+i+'" style="font-size:13px;padding:11px 16px;border-radius:22px;border:1px solid '+C.line+';background:'+C.w+';color:'+C.ink+';cursor:pointer;font-family:inherit;min-height:44px;">'+t[0]+(t[1]?'<span style="color:'+C.fnt+';font-size:11px;"> · '+t[1]+'</span>':'')+'</button>';}).join("")
+   +'<button data-target="new" style="font-size:13px;padding:11px 16px;border-radius:22px;border:1px dashed '+C.line+';background:none;color:'+C.mut+';cursor:pointer;font-family:inherit;min-height:44px;">＋ 新的人</button></div>','16px')
+ +'</div>';};
+
+var REACT=[["😌","他沒接",0],["🙂","有回一點",1],["😃","他接住了",2],["🤩","他講了更多",3]];
+SC.rec2=function(){
+ var sel=S.react;
+ return head("開練 · 信任肌肉")+'<div class="body" style="padding:0 13px 20px;">'
+ +cw('<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
+   +'<button data-go="rec1" style="background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;">‹</button>'
+   +'<div><div style="font-size:15px;font-weight:700;color:'+C.ink+';">對 '+S.target+'</div>'
+   +'<div style="font-size:11px;color:'+C.mut+';margin-top:2px;">最後一下</div></div></div>'
+   +'<div style="font-size:14px;font-weight:700;color:'+C.ink+';margin-bottom:11px;">他有接嗎？</div>'
+   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+   +REACT.map(function(r,i){var on=sel===i;
+     return '<button data-react="'+i+'" style="padding:15px 10px;border-radius:14px;border:1px solid '+(on?C.act:C.line)+';background:'+(on?C.soft.A:C.w)+';cursor:pointer;text-align:center;font-family:inherit;min-height:44px;">'
+      +'<div style="font-size:22px;line-height:1;margin-bottom:5px;">'+r[0]+'</div>'
+      +'<div style="font-size:12.5px;color:'+C.ink+';font-weight:'+(on?"700":"500")+';">'+r[1]+'</div></button>';}).join("")
+   +'</div>'
+   +(sel!==null && sel>=2
+     ? '<div style="margin-top:15px;padding-top:14px;border-top:1px solid '+C.trk+';">'
+       +'<div style="font-size:13px;font-weight:700;color:'+C.ink+';margin-bottom:3px;">他怎麼回？<span style="font-size:11px;font-weight:400;color:'+C.mut+';">（想寫再寫）</span></div>'
+       +'<div style="font-size:11px;color:'+C.mut+';margin-bottom:9px;line-height:1.7;">寫他說的話就好，不用寫心得。趁還記得。</div>'
+       +'<textarea id="note" rows="3" placeholder="「我早就感覺到了。」——後來聊到一點半" style="width:100%;background:'+C.card+';border:1px solid '+C.line+';border-radius:12px;padding:11px;font-size:16px;color:'+C.ink+';font-family:inherit;line-height:1.6;resize:none;">'+S.note+'</textarea>'
+       +'<label style="display:flex;align-items:center;gap:9px;margin-top:11px;font-size:12.5px;color:'+C.ink+';cursor:pointer;">'
+       +'<input type="checkbox" id="share" checked style="width:19px;height:19px;accent-color:'+C.act+';">貼到館裡，讓夥伴看到</label></div>'
+     : (sel!==null && sel<2 ? '<div style="margin-top:14px;background:'+C.gbg+';border-radius:12px;padding:13px;font-size:12px;color:'+C.gfg+';line-height:1.8;">沒接也要記。這一筆週日回頭看會有用——分得出來是句子的問題，還是對象的問題。</div>' : ''))
+   +'<button data-go="done" '+(sel===null?'disabled':'')+' style="width:100%;margin-top:15px;background:'+(sel===null?"#D8C9BC":C.ink)+';color:'+C.card+';border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:'+(sel===null?"default":"pointer")+';font-family:inherit;min-height:44px;">'+(sel===null?"先選一個":"記下來")+'</button>','16px')
+ +'</div>';};
+
+SC.done=function(){
+ var good=S.react>=2;
+ return head("")+'<div class="body" style="padding:0 13px 20px;display:flex;flex-direction:column;">'
+ +'<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">'
+ +cw('<div style="text-align:center;padding:10px 0 4px;">'
+   +'<div style="font-size:46px;line-height:1;margin-bottom:15px;">'+(good?"🌱":"🌾")+'</div>'
+   +'<div class="srf" style="font-size:25px;color:'+C.ink+';margin-bottom:12px;line-height:1.4;">'+(good?"他接住了。":"你講了。<br>他今天沒接。")+'</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">'
+   +(good?'你先講了一句心裡話，他就講了他的——<br>這就是<b style="color:'+C.ink+';">信任肌肉在動</b>。'
+        :'沒接住不代表白講——<br>你做了一件<b style="color:'+C.ink+';">以前不會做的事</b>，那一下就是練到了。')
+   +'</div></div>'
+   +'<div style="background:'+C.card+';border-radius:13px;padding:13px;margin-top:17px;font-size:11.5px;color:'+C.mut+';line-height:1.8;text-align:center;">'
+   +(good?'這個月第 <b style="color:'+C.act+';">'+(3+S.done)+'</b> 次了。<b style="color:'+C.ink+';">第三次，就不是運氣。</b>'
+        :'這一筆會留著。<br>週日回頭看就分得出來：是句子的問題，還是對象的問題。')
+   +'</div>'
+   +(good?'<div style="background:'+C.soft.T+';border-radius:13px;padding:12px;margin-top:9px;font-size:11.5px;color:'+C.gfg+';line-height:1.75;text-align:center;">已經貼到館裡了。等一下回去看，可能有人給你鼓勵。</div>':'')
+   ,'18px')
+ +'<div style="margin-top:11px;">'+btnDark("gym","回館裡看看")+'</div>'
+ +'<button data-go="today" style="width:100%;margin-top:10px;background:none;border:0;color:'+C.mut+';font-size:12.5px;cursor:pointer;font-family:inherit;min-height:44px;">回今天</button>'
+ +'</div></div>';};
+
+SC.me=function(){
+ var ms=[["信任肌肉","T","44%","正在長","2.4 / 滿分 5","上次 2.1，多了 0.3"],
+         ["吸引肌肉","A","62%","已經在長","3.1 / 滿分 5","上次 3.1，沒有變"],
+         ["專業肌肉","P","0%","還沒量","",""],
+         ["推進肌肉","I","0%","還沒量","",""]];
+ return head("你的體格與這個月", S.member?"入館第 23 天":"訪客")
+ +'<div class="body" style="padding:0 13px 96px;">'
+ +card('<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">'
+   +'<span style="font-size:13.5px;font-weight:700;color:'+C.ink+';">你的溝通體格</span></div>'
+   +'<div style="font-size:11px;color:'+C.mut+';margin-bottom:14px;">四塊肌肉，每週都會動。上次量：8 月 12 日</div>'
+   +'<div style="display:flex;flex-direction:column;gap:14px;">'
+   +ms.map(function(m){
+     var na=m[3]==="還沒量";
+     return '<div><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;">'
+      +'<span style="font-size:12.5px;font-weight:600;color:'+C.ink+';">'+m[0]+'</span>'
+      +'<span style="font-size:11px;color:'+(na?C.fnt:C.text[m[1]])+';font-weight:600;">'+m[3]+'</span>'
+      +(m[4]?'<span style="margin-left:auto;font-size:11.5px;color:'+C.ink+';font-variant-numeric:tabular-nums;">'+m[4]+'</span>':'<span style="margin-left:auto;font-size:11px;color:'+C.fnt+';">┆</span>')+'</div>'
+      +'<div style="height:8px;background:'+(na?"transparent":C.soft[m[1]])+';border:'+(na?"1px dashed "+C.line:"0")+';border-radius:4px;overflow:hidden;">'
+      +'<div style="height:8px;width:'+m[2]+';background:'+C.fill[m[1]]+';border-radius:4px;"></div></div>'
+      +(m[5]?'<div style="font-size:10.5px;color:'+C.mut+';margin-top:5px;">'+m[5]+'</div>':'')+'</div>';}).join("")
+   +'</div>'
+   +'<div style="background:'+C.w+';border-radius:12px;padding:12px;margin-top:15px;font-size:11.5px;color:'+C.mut+';line-height:1.8;">'
+   +'<b style="color:'+C.ink+';">還沒量不等於 0 分</b>，是這塊還沒測過，我們不幫你猜。空的不是零。<br>下一次體測 9/30，那時會量到它。</div>','16px')
+ +cw('<div style="display:flex;gap:10px;">'
+   +'<div style="flex:1;background:'+C.card+';border-radius:13px;padding:13px;">'
+    +'<div style="font-size:10.5px;color:'+C.mut+';margin-bottom:7px;">現在的體格</div>'
+    +'<div class="srf" style="font-size:16px;color:'+C.ink+';line-height:1.2;">正在長</div>'
+    +'<div style="font-size:10.5px;color:'+C.mut+';margin-top:6px;">2.4 / 滿分 5</div></div>'
+   +'<div style="flex:1;background:'+C.card+';border-radius:13px;padding:13px;">'
+    +'<div style="font-size:10.5px;color:'+C.mut+';margin-bottom:7px;">這個月開練</div>'
+    +'<div class="srf" style="font-size:26px;font-weight:700;color:'+C.act+';line-height:1;font-variant-numeric:tabular-nums;">'+(18+S.done)+'<span style="font-size:13px;color:'+C.fnt+';"> 次</span></div>'
+    +'<div style="font-size:10.5px;color:'+C.mut+';margin-top:6px;">沒練的日子不扣</div></div></div>'
+   +'<div style="font-size:11.5px;color:'+C.mut+';line-height:1.8;margin-top:12px;">左邊會慢慢動，右邊你今天就能動。<b style="color:'+C.ink+';">先看右邊。</b></div>','14px')
+ +(S.member
+  ? cw('<div style="margin-bottom:10px;">'+pill("週日才出現")+'</div>'
+     +'<div style="font-size:13.5px;color:'+C.ink+';line-height:1.8;margin-bottom:11px;">週日了。這週有一次他是真的接住了——<b>週三 · 對阿明</b>那一次。<br>要不要貼進館裡？現在有人正在練同一塊，你這一句對他有用。</div>'
+     +'<div style="background:'+C.card+';border-radius:12px;padding:12px;font-size:12px;color:'+C.ink+';line-height:1.85;border-left:2px solid '+C.act+';">我做了什麼：跟阿明講了我還沒談成的那個案子。<br>他怎麼回：「我也是欸，我最近……」——聊了快一小時。</div>'
+     +'<button style="width:100%;background:'+C.actS+';color:#fff;border:0;border-radius:13px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:12px;font-family:inherit;min-height:44px;">貼進館裡</button>'
+     +'<div style="text-align:center;font-size:10.5px;color:'+C.fnt+';margin-top:9px;line-height:1.7;">不用寫長，把原本那兩行貼過去就行</div>','15px','border:1px solid '+C.line+';')
+  : '<div style="margin-top:4px;">'+btnDark("join","我也想要有人陪我練","NT$99／月 · 有人陪你看報告、回你話")+'</div>')
+ +'</div>'+navBar();};
+
+SC.join=function(){
+ var perks=[["入會體格健檢 ×1","教練陪你把報告看一遍"],
+            ["每月 2 堂會員課","直播上，一個月練一塊"],
+            ["會員社群","一群人一起練，你不是一個人"],
+            ["每天一件事","溝通不再靠臨場運氣"],
+            ["3 個月複檢","看得到自己有沒有變強"]].map(function(p){
+  return '<div style="display:flex;gap:11px;align-items:flex-start;">'
+   +'<span style="color:'+C.act+';flex-shrink:0;margin-top:5px;">'+ic.ok+'</span>'
+   +'<div><div style="font-size:13.5px;color:'+C.ink+';font-weight:500;line-height:1.5;">'+p[0]+'</div>'
+   +'<div style="font-size:11.5px;color:'+C.mut+';margin-top:2px;line-height:1.5;">'+p[1]+'</div></div></div>';}).join("");
+ return '<div class="body" style="padding:0;">'
+ +'<div style="background:'+C.card+';min-height:100%;padding-bottom:26px;">'
+ +'<div style="padding:20px 22px 0;display:flex;align-items:center;gap:12px;">'+logo(52)
+  +'<div><div class="srf" style="font-size:17px;font-weight:500;letter-spacing:2px;color:'+C.ink+';">溝通健身房</div>'
+  +'<div style="font-size:10px;letter-spacing:2px;color:'+C.mut+';">ATPIFit · 基礎會員</div></div>'
+  +'<button data-go="gym" style="margin-left:auto;background:none;border:0;color:'+C.mut+';font-size:20px;cursor:pointer;font-family:inherit;min-height:44px;">✕</button></div>'
+ +'<div style="padding:18px 22px 15px;">'
+  +'<div class="srf" style="font-size:24px;font-weight:500;line-height:1.45;color:'+C.ink+';">溝通・談判・影響力，<br>是一輩子最值得練的肌肉</div>'
+  +'<div class="srf" style="font-size:18px;color:'+C.warn+';margin-top:9px;">停練，就會萎縮。</div>'
+  +'<div style="font-size:13px;line-height:1.9;color:'+C.mid+';margin-top:13px;">如果你曾經覺得自己嘴巴笨，或想讓聲音更有影響力——用你最真實的聲音，練出影響力。</div></div>'
+ +'<div style="margin:0 22px;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;"></div>'
+ +'<div style="padding:19px 22px 4px;display:grid;gap:14px;">'+perks+'</div>'
+ +'<div style="margin:15px 22px 0;padding:15px;background:'+C.w+';border-radius:14px;">'
+  +'<div style="font-size:12px;font-weight:700;color:'+C.ink+';margin-bottom:12px;">為什麼是現在</div>'
+  +'<div style="display:flex;flex-direction:column;gap:11px;font-size:12px;color:'+C.ink+';line-height:1.8;">'
+  +["體格健檢的報告是教練<b>一個一個陪你看</b>的，這個月還剩 6 個名額。",
+    "課表<b>一個月換一塊肌肉</b>。這個月館裡正在練信任肌肉——剛好是你最卡的那塊，走完就換下一塊。",
+    "會員課是<b>直播上</b>的，每個月兩堂。錄影補得回內容，補不回那天在場的人。"].map(function(x){
+    return '<div style="display:flex;gap:9px;"><span style="color:'+C.act+';flex-shrink:0;">·</span><span>'+x+'</span></div>';}).join("")
+  +'</div>'
+  +'<div style="margin-top:13px;padding-top:12px;border-top:1px solid '+C.line+';font-size:12px;color:'+C.mid+';line-height:1.85;">NT$99／月買的<b style="color:'+C.ink+';">不是內容</b>——內容你自己查也查得到。<br>買的是這個月<b style="color:'+C.ink+';">有人陪你練、有人回你話</b>。</div></div>'
+ +'<div style="padding:17px 22px 0;">'+btnDark("paid","進來練　NT$99／月　→","一杯飲料的錢。隨時開始，不用等開班——練起來的肌肉是你的。")
+  +'<div style="margin-top:11px;text-align:center;font-size:11px;color:'+C.mut+';">信用卡 · 30 秒完成</div></div>'
+ +'</div></div>';};
+
+SC.paid=function(){
+ return '<div class="body" style="padding:0 13px 20px;display:flex;flex-direction:column;justify-content:center;">'
+ +'<div style="text-align:center;padding:30px 0 20px;">'+logo(64)+'</div>'
+ +cw('<div style="text-align:center;">'
+   +'<div class="srf" style="font-size:23px;color:'+C.ink+';margin-bottom:11px;">歡迎入館</div>'
+   +'<div style="font-size:13px;color:'+C.mid+';line-height:1.95;">你的體測結果已經放進來了。<br>接下來三個月，有人會陪你練。</div></div>'
+   +'<div style="background:'+C.card+';border-radius:13px;padding:14px;margin-top:17px;">'
+   +'<div style="font-size:11px;color:'+C.mut+';margin-bottom:11px;">接下來會發生的事</div>'
+   +'<div style="display:flex;flex-direction:column;gap:11px;font-size:12.5px;color:'+C.ink+';line-height:1.75;">'
+   +[["48 小時內","教練會私訊你，約一次陪你把報告看一遍"],
+     ["看完報告","給你這一季練的那一塊，不是全部"],
+     ["每天","館裡會有一件事等你，做完點兩下"],
+     ["每週日","回頭看這週，挑一次貼進館裡"]].map(function(x){
+     return '<div style="display:flex;gap:11px;"><span style="color:'+C.act+';font-weight:700;flex-shrink:0;width:58px;font-size:11px;">'+x[0]+'</span><span>'+x[1]+'</span></div>';}).join("")
+   +'</div></div>','18px')
+ +'<div style="margin-top:12px;">'+btnDark("gym","開始")+'</div></div>';};
+
+/* ══ 流程說明（畫面外） ══ */
+var FLOW=[["quiz","體測結果"],["gym","館"],["today","今天"],["rec1","開練·對誰"],
+          ["rec2","開練·反應"],["done","那 2 秒"],["me","我"],["join","99 頁"],["paid","付款後"]];
+var HINTS={
+ quiz:"<b>第一次</b>做完測驗看到的。不給裸分數——用「已經練起來了／還沒開始長」講，因為 3.1 這種數字路人看不懂。只有一個出口：進館。",
+ gym:"<b>打開的第一屏</b>。累計數字單調成長、動態不限今天、顧問也算進去——人少也不會是空房間。動態流分兩層：有打字的是大卡片，<b>純點擊的只有一行</b>，所以沒人打字館裡照樣會動。",
+ today:"一次只給<b>一件事</b>，不是課表。這一季只練一塊，其他的明說不用管——不露出內部框架，露了讀者會問「那我是不是漏看了什麼」。",
+ rec1:"必填第一下：<b>對誰</b>。點一下就好，不用打字。",
+ rec2:"必填第二下：<b>他有沒有反應</b>。點到「明顯有／超乎預期」才浮出打字框（想寫再寫）；點「沒特別」不扣分。",
+ done:"<b>整個 app 最重要的兩秒</b>。決定他明天回不回來——所以這裡給的是「有長出東西」，不是「+1 分」。",
+ me:"體格（練得怎麼樣）與投入（練了多少）<b>分開放</b>，沒量過的顯示「還沒量」不是 0。週日的橋只在會員模式出現。",
+ join:"體驗客玩過之後才看到。急迫性用三條<b>真的</b>理由，不用假稀缺。",
+ paid:"付完款自動開通，並且<b>先講清楚接下來會發生什麼</b>——避免付完之後不知道要幹嘛。"};
+
+/* ══ 渲染與事件 ══ */
+function render(){
+ el.innerHTML=(SC[S.sc]||SC.quiz)();
+ el.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){go(b.getAttribute("data-go"));};});
+ el.querySelectorAll("[data-tab]").forEach(function(b){b.onclick=function(){var t=b.getAttribute("data-tab");S.tab=t;S.sc=t;mark();render();};});
+ el.querySelectorAll("[data-cheer]").forEach(function(b){b.onclick=function(){var k=b.getAttribute("data-cheer");S.cheered[k]=!S.cheered[k];render();};});
+ el.querySelectorAll("[data-target]").forEach(function(b){b.onclick=function(){
+   var v=b.getAttribute("data-target");
+   S.target = v==="new" ? "新朋友" : TARGETS[+v][0];
+   S.rel = v==="new" ? "" : TARGETS[+v][1];
+   go("rec2");};});
+ el.querySelectorAll("[data-react]").forEach(function(b){b.onclick=function(){
+   var n=document.getElementById("note"); if(n) S.note=n.value;
+   S.react=+b.getAttribute("data-react"); render();};});
+ document.getElementById("mode").textContent = S.member ? "會員模式 · 已付 99" : "訪客模式 · 還沒付 99";
+ document.getElementById("btnPay").textContent = S.member ? "切回訪客" : "切換成會員";
+ document.getElementById("hint").innerHTML = HINTS[S.sc]||"";
+ document.getElementById("crumb").innerHTML = FLOW.map(function(f){
+  var cls = S.sc===f[0] ? "cb on" : (S.visited[f[0]] ? "cb done" : "cb");
+  return '<button class="'+cls+'" data-jump="'+f[0]+'">'+f[1]+'</button>';}).join("");
+ document.querySelectorAll("[data-jump]").forEach(function(b){b.onclick=function(){go(b.getAttribute("data-jump"));};});
+}
+function mark(){ S.visited[S.sc]=true; }
+function go(to){
+ if(to==="done"){ var n=document.getElementById("note"); if(n) S.note=n.value; S.done++; }
+ if(to==="paid"){ S.member=true; }
+ if(to==="rec1"){ S.target=null; S.react=null; S.note=""; }
+ if(to==="gym"||to==="today"||to==="me") S.tab=to;
+ S.sc=to; mark(); render();
+ try{ el.scrollTop=0; var b=el.querySelector(".body"); if(b) b.scrollTop=0; }catch(e){}
+}
+var hintBtn=document.getElementById("btnHint"), stepbox=document.getElementById("stepbox");
+if(window.matchMedia("(max-width:640px)").matches){ hintBtn.style.display="inline-block"; }
+hintBtn.onclick=function(){ stepbox.classList.toggle("open");
+  hintBtn.textContent = stepbox.classList.contains("open") ? "收起說明" : "這一屏在解決什麼？"; };
+document.getElementById("btnReset").onclick=function(){reset();render();};
+document.getElementById("btnPay").onclick=function(){S.member=!S.member;render();};
+mark(); render();
+})();
+</script>
+
+</body>
+</html>
