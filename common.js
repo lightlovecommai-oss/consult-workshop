@@ -8,11 +8,15 @@ var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C
 /* name＝正式維度名。productkit 字典 2026-08-16 定案一律叫「〇〇肌肉」不叫「〇〇力」
    （「力」是天賦語氣＝有或沒有，「肌肉」是可練語氣＝練了就長，扣品牌命門「停練就萎縮」）。
    result＝會員模式的結果句（字典「兩種語言」條），真相在 atpi-core.js 的 DIM_RESULT。 */
+/* color＝原版（填色／≥19px 粗體用）。textColor＝深版（<19px 的字用，過 WCAG）；沒給的維度
+   （目前只有 A）dimTextColor() 會自動退回 color。soft＝淡底（軌道／膠囊／tint）。
+   三組色值真相＝productkit 30-App介面規範 §5；A 的 color 暫不跟改，
+   是否要從 #e8734a 換成暖版原版 #C6603A 是老師尚未拍板的問題（見交接記錄），這裡先不動它。 */
 var DIMS = {
-  A: {name:"吸引肌肉", desc:"別人主動想靠近你",     color:"#e8734a", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
-  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#5DCAA5", key:"team",     k:6,  inner:"真誠・心口合一"},
-  P: {name:"專業肌肉", desc:"別人理解並買你的服務", color:"#378ADD", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
-  I: {name:"推進肌肉", desc:"別人聽你的話採取行動", color:"#c8a84b", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
+  A: {name:"吸引肌肉", desc:"別人主動想靠近你",     color:"#e8734a", soft:"#F3D9CD", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
+  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#6E8B77", textColor:"#5C7464", soft:"#DCE7DE", key:"team",     k:6,  inner:"真誠・心口合一"},
+  P: {name:"專業肌肉", desc:"別人理解並買你的服務", color:"#6E8CA8", textColor:"#54718D", soft:"#DDE6EE", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
+  I: {name:"推進肌肉", desc:"別人聽你的話採取行動", color:"#C99A4E", textColor:"#8E682B", soft:"#F1E5CC", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
 };
 /* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
 
