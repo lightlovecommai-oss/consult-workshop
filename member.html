@@ -203,6 +203,7 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 var S = null, WID = null, PANE = "gym";
 var REC = null;   // 開練中 {muscle, task, who, react, note, share}
 var HFEED = [];   // 榮譽解鎖真事件（loadHonorFeed，一行式那層的真資料來源）
+var GYM_POSTS = []; // 真的分享到館裡貼文（loadGymPosts，有打字那層的真資料來源）
 
 var REACT = [
   {e:"😌", t:"沒特別", v:0},
@@ -298,6 +299,7 @@ async function boot() {
   el("nav").classList.remove("hide");
   render();
   loadHonorFeed(20).then(function(events){ HFEED = events || []; if (PANE === "gym") render(); });
+  loadGymPosts(6).then(function(posts){ GYM_POSTS = posts || []; if (PANE === "gym") render(); });
 }
 
 /* 體驗客的「每次上線一個新秘訣」要跨次開站都記得上次給到第幾個——後端沒有這個欄位
@@ -429,8 +431,19 @@ function gymHTML(){
       + '<span style="font-size:13px;color:#6E4A3C;"> 解鎖了「' + esc_(ev.honorName || "") + '」' + esc_(ev.icon || "🏅") + '</span></div></div>';
   });
 
-  /* 示意的「有打字」大卡——後端還沒有「分享到館裡」的真資料欄位（見交接記錄卡老師項），
-     跟改版前一樣先標示意，不假裝這是真資料。 */
+  /* 真的「分享到館裡」貼文（A5 補死碼：以前 REC.share 有勾選、從沒送出、後端也沒欄位——
+     現在 postCheckin 會送、Code.gs 的 computeGymPosts_() 會回傳，對象已經在後端匿名掉）。
+     一筆都還沒有的話留一張示意卡，清楚標「示意」，不假裝這是真資料。 */
+  var typedReal = GYM_POSTS.map(function(p){
+    var c = dimTextColor(p.dim), soft = (DIMS[p.dim] || {}).soft || "#F0E3DB";
+    return '<div class="cw"><div class="card-top">'
+      + '<div class="av" style="background:' + (DIMS[p.dim] || {}).color + ';margin-left:0;">' + esc_((p.name||"?").slice(0,1)) + '</div>'
+      + '<div style="min-width:0;"><span class="card-n">' + esc_(p.name || "夥伴") + '</span>'
+      + '<div class="card-w">' + esc_(timeAgo(p.date)) + '</div></div>'
+      + '<div class="slim-tag" style="color:' + c + ';background:' + soft + ';margin-left:auto;">' + esc_((MUSCLES[p.muscle] || {}).name || DIMS[p.dim].name) + '</div></div>'
+      + (p.note ? '<div class="card-body"><span>我做了什麼 · </span>' + esc_(p.note) + '</div>' : '')
+      + '<div class="card-echo"><span>對方反應 · </span>' + esc_(p.reaction) + '</div></div>';
+  });
   var typedMock = '<div class="cw"><div class="card-top">'
     + '<div class="av" style="background:#C6603A;margin-left:0;">光</div>'
     + '<div style="min-width:0;"><span class="card-n">光頭教練</span><span class="card-b">教練</span>'
@@ -438,10 +451,10 @@ function gymHTML(){
     + '<div class="slim-tag" style="color:#5C7464;background:#DCE7DE;margin-left:auto;">信任肌肉</div></div>'
     + '<div class="card-body"><span>我做了什麼 · </span>跟第一次見面的老闆承認，我去年那個案子做不起來。</div>'
     + '<div class="card-echo"><span>他怎麼回 · </span>「其實我現在也卡著。」——後來聊了一個半小時</div>'
-    + '<button class="cheer' + (S.cheered1 ? " on" : "") + '" id="cheerMock">👍 ' + (S.cheered1 ? "已鼓勵" : "鼓勵他") + '</button>'
     + '<div style="text-align:right;margin-top:6px;"><span class="mock">示意</span></div></div>';
 
-  h += typedMock + (oneLiners.length ? oneLiners.join("") : '<div class="empty">還沒有人解鎖新徽章，練久一點就會出現在這裡。</div>');
+  h += (typedReal.length ? typedReal.join("") : typedMock)
+    + (oneLiners.length ? oneLiners.join("") : '<div class="empty">還沒有人解鎖新徽章，練久一點就會出現在這裡。</div>');
 
   h += '<div class="cd"><div class="empty">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼——<b style="color:#4A1B0C;">看不到誰比較強</b>。</div></div>';
   if (!S.member) h += ctaCard('這裡看得到的示範是會員在館裡的樣子——分享、被鼓勵，都是會員的完整功能。');
@@ -602,7 +615,7 @@ function saveRec(){
   var note = (el("recnote") || {}).value || "";
   var r = REACT.find(function(x){ return x.v === REC.react; }) || REACT[0];
   doCheckin(S, REC.task, REC.task.workshopId || WID || "", {
-    reaction: r.t, target: REC.who || "", rel: REC.rel || "", note: note.trim()
+    reaction: r.t, target: REC.who || "", rel: REC.rel || "", note: note.trim(), share: !!REC.share
   });
   REC.step = 3;
   render();
@@ -611,7 +624,6 @@ function closeRec(){ REC = null; render(); }
 function bindPane(){
   var pb = el("btnPractice"); if (pb) pb.onclick = openRec;
   var sw = el("btnSwap"); if (sw) sw.onclick = function(){ S.pick = (S.pick || 0) + 1; render(); };
-  var cm = el("cheerMock"); if (cm) cm.onclick = function(){ S.cheered1 = !S.cheered1; render(); };
 }
 
 /* ══════════ 三個月驗收（層 3・關係軌跡搬到這裡，改讀對方反應）══════════

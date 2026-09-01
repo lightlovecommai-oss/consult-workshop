@@ -213,10 +213,14 @@ function render(){
   bindPane();
 }
 
-/* ══ L1-L4 路徑：直接由真資料算——L1=A、L2=T、L3=P、L4=I（規格明文對應）。
-   done＝該維 3 小肌群都量過；now＝第一個還沒全量到的；lock＝之後的。
-   L5-L8（綜合/場景/北極星/甜蜜路徑）沒有可拆解成小肌群的真資料，L1-4 全過才整塊解鎖，
-   不假裝有細部進度。 */
+/* ══ 路徑：兩門課的 L 結構完全不同，真相＝productkit 15-課程梳理-L1-L12對到大包裝.md ══
+   超引力-顧問課＝鍛鍊段L1-L4(一課一塊肌肉：L1吸引/L2信任/L3專業/L4推進) ＋
+                  放大段L5-L8(L5顧問腳本1v1四幕／L6甜蜜路徑／L7導航北極星+燈塔／L8副作用+升單鉤子)。
+   超引力-公眾演說＝演說段L9-L13(L9吸引+信任開場／L10專業體驗感／L11推進收單／
+                  L12三種銷講稿·待老師拍板／L13大師之路+畢業考核)。
+   L1-L4 用真資料算 done/now/lock（該維3個小肌群都量過才算過關）；L5-L8 沒有可拆解成
+   小肌群的真資料，L1-4 全過才整塊解鎖，不假裝有細部進度。公眾演說段完全沒有逐字稿可
+   對照，只列真的 L 名稱跟段落說明，不假裝算得出進度。 */
 function levelState(){
   var scores = calcMuscleScores(S);
   var order = [["L1","A","吸引"], ["L2","T","信任"], ["L3","P","專業"], ["L4","I","推進"]];
@@ -228,23 +232,48 @@ function levelState(){
   });
   if (nowIdx < 0) nowIdx = order.length;
   var lv = order.map(function(l, i){ return { k: l[0], dim: l[1], name: l[2], state: i <= doneIdx ? "done" : i === nowIdx ? "now" : "lock" }; });
-  var advanced = [["L5","綜合"], ["L6","場景"], ["L7","北極星"], ["L8","甜蜜路徑"]];
+  var advanced = [["L5","顧問腳本"], ["L6","甜蜜路徑"], ["L7","導航"], ["L8","副作用"]];
   var advState = doneIdx >= 3 ? "now" : "lock";
   advanced.forEach(function(a){ lv.push({ k: a[0], dim: null, name: a[1], state: advState }); });
   return lv;
 }
+/* 公眾演說段（L9-L13）沒有逐字稿可對照真進度，只列真的段落結構跟一句話說明，
+   狀態一律「lock」（誠實：算不出進度就不要裝）。 */
+function speechLevelState(){
+  return [
+    { k:"L9",  name:"開場",     desc:"A吸引＋T信任・銷講開場",         state:"lock" },
+    { k:"L10", name:"體驗感",   desc:"P專業・讓乾貨有體驗感",           state:"lock" },
+    { k:"L11", name:"收單",     desc:"I推進・銷講收單",                state:"lock" },
+    { k:"L12", name:"三種稿",   desc:"30秒／5分／1.5小時銷講稿（待老師拍板）", state:"lock" },
+    { k:"L13", name:"大師之路", desc:"畢業考核",                       state:"lock" }
+  ];
+}
 function pathHTML(){
-  var lv = levelState();
-  var lrow = lv.map(function(l){
-    var bg = l.state === "done" ? "#e8734a" : l.state === "now" ? "rgba(232,115,74,.18)" : "rgba(234,241,250,.05)";
-    var fg = l.state === "done" ? "#0c131e" : l.state === "now" ? "#e8734a" : "#7d90a3";
-    return '<div class="lcell" style="background:' + bg + ';">' + '<div class="lcell-n" style="color:' + fg + ';">' + l.k + '</div>'
-      + '<div class="lcell-l" style="color:' + (l.state === "lock" ? "#7d90a3" : fg) + ';">' + esc_(l.name) + '</div></div>';
-  }).join("");
-  var h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">' + esc_(WID || "超引力成交學") + ' · L1–L8</div>'
-    + '<div class="lrow">' + lrow + '</div>'
-    + '<div style="display:flex;gap:10px;margin-top:12px;font-size:13px;color:#7d90a3;">'
-    + '<span>L1–L4 每塊肌肉打基礎</span><span style="margin-left:auto;">L5–L8 串成連貫打法</span></div></div>';
+  var isSpeech = WID === "超引力-公眾演說";
+  var h;
+  if (isSpeech) {
+    var slv = speechLevelState();
+    var srow = slv.map(function(l){
+      return '<div class="lcell" style="background:rgba(234,241,250,.05);"><div class="lcell-n" style="color:#7d90a3;">' + l.k + '</div>'
+        + '<div class="lcell-l" style="color:#7d90a3;">' + esc_(l.name) + '</div></div>';
+    }).join("");
+    h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-公眾演說 · L9–L13</div>'
+      + '<div class="lrow">' + srow + '</div>'
+      + '<div style="font-size:13px;color:#7d90a3;margin-top:12px;line-height:1.8;">' + slv.map(function(l){ return l.k + ' ' + esc_(l.desc); }).join('<br>') + '</div>'
+      + '<div class="empty" style="margin-top:12px;">這門課還沒有逐字稿可以對照真進度，這裡先列真的課綱結構，算不出進度就不裝。</div></div>';
+  } else {
+    var lv = levelState();
+    var lrow = lv.map(function(l){
+      var bg = l.state === "done" ? "#e8734a" : l.state === "now" ? "rgba(232,115,74,.18)" : "rgba(234,241,250,.05)";
+      var fg = l.state === "done" ? "#0c131e" : l.state === "now" ? "#e8734a" : "#7d90a3";
+      return '<div class="lcell" style="background:' + bg + ';">' + '<div class="lcell-n" style="color:' + fg + ';">' + l.k + '</div>'
+        + '<div class="lcell-l" style="color:' + (l.state === "lock" ? "#7d90a3" : fg) + ';">' + esc_(l.name) + '</div></div>';
+    }).join("");
+    h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-顧問課 · L1–L8</div>'
+      + '<div class="lrow">' + lrow + '</div>'
+      + '<div style="display:flex;gap:10px;margin-top:12px;font-size:13px;color:#7d90a3;">'
+      + '<span>L1–L4 每塊肌肉打基礎</span><span style="margin-left:auto;">L5–L8 串成連貫打法</span></div></div>';
+  }
 
   h += archArcSection();
   return h;

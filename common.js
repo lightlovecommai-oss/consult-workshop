@@ -354,7 +354,8 @@ function doCheckin(s, task, workshopId, extra) {
     workshopId: workshopId, taskKey: task.key, cadence: task.cadence,
     dim: task.dim, muscle: task.muscle || "", pts: task.pts,
     date: d, week: weekStr(new Date(d)),
-    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || ""
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    share: !!extra.share
   });
   postCheckin(s.lineId, task, workshopId, d, extra);
 }
@@ -394,8 +395,21 @@ function postCheckin(lineId, task, workshopId, dateStr, extra) {
     taskKey: task.key, cadence: task.cadence, dim: task.dim, muscle: task.muscle || "",
     pts: task.pts, date: dateStr || todayStr(),
     /* v2 會員模式：開練記的是「對方的反應」而不只是打勾（低摩擦守則：這三欄都可空） */
-    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || ""
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    /* share＝這筆願不願意被拿去館裡動態流用（v9 補「分享到館裡」死碼：以前 UI 有勾選、
+       這裡沒送、後端沒欄位，使用者以為分享了其實沒有）。館裡顯示時對象一律匿名，只留關係類型。 */
+    share: extra.share ? "1" : ""
   });
+}
+/* ── 館裡的動態流（真資料，取代寫死的示範卡）──
+   後端只回傳 share=true 且有 reaction 的最近幾筆，對象已經匿名（只留 rel 關係類型，
+   不回傳 target 姓名）——不然「分享到館裡」變成把別人的名字公開給陌生人看。 */
+async function loadGymPosts(limit) {
+  try {
+    var r = await fetch(SHEET_API + "?action=gymPosts&limit=" + (limit || 12));
+    var d = await r.json();
+    return d.status === "ok" ? d.posts : [];
+  } catch (e) { console.log("loadGymPosts error:", e); return []; }
 }
 /* ── 體測：寫一筆小肌群評分（1–5）──
    source＝self（會員週測）｜coach（教練校準）｜quiz（測驗基線，由 comconverttest 寫）

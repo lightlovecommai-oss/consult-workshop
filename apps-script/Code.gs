@@ -45,7 +45,9 @@ var COLS = {
               cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],
               /* v2：小肌群層＋會員模式的開練紀錄（都可空，舊列不受影響） */
               muscle:["小肌群","muscle"], reaction:["對方反應","reaction"],
-              target:["對象","target"], rel:["關係","rel"], note:["發生什麼","note"] },
+              target:["對象","target"], rel:["關係","rel"], note:["發生什麼","note"],
+              /* share＝「分享到館裡」勾選（v9 補死碼：以前前端有勾選、這裡沒欄位接） */
+              share:["分享到館裡","share"] },
   /* v2 體測：小肌群 1–5 評分。source＝quiz(測驗基線)／self(週測自評)／coach(教練校準) */
   evals:    { lineId:["LINE userId","lineId"], muscle:["小肌群","muscle"], score:["分數","score"],
               source:["來源","source"], date:["日期","date"], week:["週次","week"] },
@@ -575,6 +577,36 @@ function ensureHonorEventsSheet_() {
   }
   return sh;
 }
+/* 「館」動態流的真資料——補 §9/A5 標記的死碼：REC.share 以前只有前端切換，
+   從沒送到後端也沒欄位可讀。這裡只回傳 share=true 且有 reaction 的最近幾筆，
+   對象一律匿名（只回 rel 關係類型，不回 target 姓名）——分享到館裡分享的是
+   「我做了什麼」，不是把別人的名字公開給陌生人看。 */
+function computeGymPosts_(limit) {
+  limit = limit || 12;
+  var nameByUid = {};
+  rows_(TABS.students).forEach(function(r){
+    var id = String(pick_(r, COLS.students.lineId));
+    if (id) nameByUid[id] = String(pick_(r, COLS.students.name)) || id;
+  });
+  var rows = rows_(TABS.checkins).filter(function(r){
+    return granted_(pick_(r, COLS.checkins.share)) && String(pick_(r, COLS.checkins.reaction) || "");
+  }).map(function(r){
+    var mk = String(pick_(r, COLS.checkins.muscle) || "").toUpperCase();
+    return {
+      lineId: String(pick_(r, COLS.checkins.lineId)),
+      muscle: mk, dim: String(pick_(r, COLS.checkins.dim) || ""),
+      rel: String(pick_(r, COLS.checkins.rel) || ""),
+      reaction: String(pick_(r, COLS.checkins.reaction) || ""),
+      note: String(pick_(r, COLS.checkins.note) || ""),
+      date: normDateStr_(pick_(r, COLS.checkins.date))
+    };
+  }).filter(function(e){ return e.lineId && e.date; });
+  rows.sort(function(a, b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  return rows.slice(0, limit).map(function(e){
+    return { name: nameByUid[e.lineId] || "夥伴", muscle: e.muscle, dim: e.dim,
+             rel: e.rel, reaction: e.reaction, note: e.note, date: e.date };
+  });
+}
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
@@ -734,6 +766,10 @@ function doGet(e) {
       return json_({ status: "ok", events: computeHonorFeed_(Number(p.limit) || 30) });
     }
 
+    if (action === "gymPosts") {
+      return json_({ status: "ok", posts: computeGymPosts_(Number(p.limit) || 12) });
+    }
+
     if (p.userId) {  // 自評（測驗結果），無 action
       var se = computeSelfEval_(String(p.userId));
       if (!se) return json_({ status: "none" });
@@ -812,7 +848,8 @@ function doPost(e) {
         cadence: body.cadence || body.taskType || "daily", dim: body.dim || "",
         muscle: String(body.muscle || "").toUpperCase(), pts: body.pts || 0, date: body.date || today,
         /* v2 會員模式：低摩擦守則——這三欄全部可空，不擋打卡 */
-        reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || ""
+        reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || "",
+        share: body.share ? true : false
       });
       return json_({ status: "ok" });
     }
@@ -1701,12 +1738,63 @@ function addEnrollColumn_(wid) {
   return "開通名單 " + (added ? "已新增" : "已存在") + " 「" + wid + "」欄（第 " + col + " 欄），已套核取方塊";
 }
 
-/* 一鍵：登記「超引力-顧問課」「超引力-公眾演說」兩門課 + 開通名單各加一欄。
-   不建任務／徽章（還沒課綱）。安全可重跑。 */
+/* L1-L4 任務池（超引力-顧問課）：從真的逐字稿萃取（5-逐字稿-raw/引力L1、L2、L3 的
+   素材.csv「練習任務」列）挑出來，муscle 對照 productkit 22-技巧對小肌群對應與練習庫
+   逐格核對過。⚠️ 只收 L1(A)／L3(P)，**L2(T) 先不收**——L2 逐字稿 8/22 萃取，
+   但 T 整組內容是 8/30 才重構（含 7-11-4 退場），L2 的任務對應到哪個 T 格已經對不準了，
+   等 T 重新萃取或老師確認再補。L4(I) 沒逐字稿，先落空——focusTaskInfo() 找不到真任務
+   時会自動退回 judgement.js 的 fallbackMove()，畫面不會空。
+   欄位對齊 (設定)任務：workshopId | taskKey | cadence | dim | muscle | pts | name | icon | needReview | desc */
+var CHAOYINLI_TASKS = [
+  ["workshopId","taskKey","cadence","dim","muscle","pts","name","icon","needReview","desc"],
+  ["超引力-顧問課","cy_a1_admire","daily","A","A1",5,"欣賞練習：每天欣賞三件好","👋",false,
+    "每天欣賞你身邊發生的美麗事物、欣賞別人的好（爸媽、孩子、同事）、動不動就稱讚別人。稱讚的肌肉需要練習，先練欣賞才能真誠稱讚。"],
+  ["超引力-顧問課","cy_a2_beef","daily","A","A2",10,"打造你的牛肉案例庫","🥩",false,
+    "每天記一塊你曾經創造過的結果（before→after），累積成自己的牛肉庫。任何前後對比都算，不限大小。"],
+  ["超引力-顧問課","cy_a3_hero","once","A","A3",20,"寫下你的英雄之旅","📖",true,
+    "把你的故事按英雄之旅結構寫出來：平凡起點→怎麼卡關→轉折→現在的結果。這是你最吸引人的自我介紹底稿。"],
+  ["超引力-顧問課","cy_p1_gap","special","P","P1",20,"把你的服務視覺化成一張圖","🔍",true,
+    "用ChatGPT討論，把你的服務/知識體系拆成客戶看得懂的步驟，畫成一張視覺化流程圖（歸類成3件事最好記）。放進你的成交簡報，讓客戶一眼看懂會經歷哪些階段。"],
+  ["超引力-顧問課","cy_p1_five_why","daily","P","P1",10,"用「五個為什麼」把問題挖到第三層","🔍",false,
+    "拿光頭常用問題集，練習用「五個為什麼」把客戶的問題挖到第三層以上，並把問題從皮（行為）帶到肉（感受）、骨（信念）。目標是改掉問問題不夠深的口語習慣。"],
+  ["超引力-顧問課","cy_p2_demo","special","P","P2",30,"設計你的大絕招試吃品","✨",true,
+    "設計一個5–10分鐘、能讓客戶產生體驗感的「試吃品」，走大絕招三步驟：先讓他用自己的版本做一次→帶入他的生活情境→接收他的回饋。從五覺（視聽觸味嗅）擇一切入，目標是讓客戶在短時間內產生「WOW」。"],
+  ["超引力-顧問課","cy_p3_proof","weekly","P","P3",15,"收集見證、成效數據與第三方背書","🗺️",true,
+    "建立你的見證系統：收單當下請對方留真實回饋，約定一個月後回報變化（結果數據）；同時整理成效數據與第三方背書（證照/名次/推薦函）。平常就存檔素材照片，三年後會極度感謝現在有做。"]
+];
+
+/* 任務整組覆蓋（跟 updateTenleadTasks 同一招）：把「超引力-顧問課」舊列全濾掉，
+   依 CHAOYINLI_TASKS 重寫。其餘課程（含天麗）原順序保留、完全不動。 */
+function updateChaoyinliTasks() {
+  var sh = ss_().getSheetByName(TABS.tasks);
+  if (!sh) return "找不到任務分頁";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
+  var wC = h.indexOf("workshopId");
+  if (wC < 0) return "任務分頁缺 workshopId 欄";
+  var all = lastRow > 1 ? sh.getRange(2, 1, lastRow - 1, lastCol).getValues() : [];
+  var kept = all.filter(function(r){ return String(r[wC]).trim() !== "超引力-顧問課"; });
+  var removed = all.length - kept.length;
+  var header = CHAOYINLI_TASKS[0];
+  var seedRows = [];
+  for (var s = 1; s < CHAOYINLI_TASKS.length; s++) {
+    var row = CHAOYINLI_TASKS[s];
+    seedRows.push(h.map(function(col){ var ci = header.indexOf(col); return ci > -1 ? row[ci] : ""; }));
+  }
+  var body = kept.concat(seedRows);
+  if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+  if (body.length) sh.getRange(2, 1, body.length, lastCol).setValues(body);
+  return "超引力-顧問課任務：移除舊 " + removed + " 列、寫入 " + seedRows.length + " 列（A1/A2/A3/P1×2/P2/P3，T 跟 I 還沒有真任務，會自動退回 fallbackMove()）";
+}
+
+/* 一鍵：登記「超引力-顧問課」「超引力-公眾演說」兩門課 + 開通名單各加一欄 + L1/L3 真任務。
+   安全可重跑（任務整組覆蓋、其餘已存在就跳過）。 */
 function setupChaoyinli() {
-  return CHAOYINLI_WORKSHOPS.map(function(w){
+  var a = CHAOYINLI_WORKSHOPS.map(function(w){
     return ensureWorkshop_(w.id, w.name) + "；" + addEnrollColumn_(w.id);
   }).join("\n");
+  var b = updateChaoyinliTasks();
+  return a + "\n" + b;
 }
 
 /* 依姓名批次填「團隊」欄分隊。只覆蓋對到的天麗夥伴列，其他人不動；未對到會回報。
