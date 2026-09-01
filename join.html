@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>加入溝通健身房</title>
+<meta name="apple-mobile-web-app-title" content="溝通健身房">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F7F1EC">
+<link rel="apple-touch-icon" href="icon2-180.png">
+<link rel="icon" type="image/png" href="icon2-192.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="加入溝通健身房">
+<meta property="og:description" content="NT$99／月，教練陪你練。">
+<meta property="og:image" content="https://lightlovecommai-oss.github.io/consult-workshop/og-image.png">
+<meta property="og:url" content="https://lightlovecommai-oss.github.io/consult-workshop/join.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lightlovecommai-oss.github.io/consult-workshop/og-image.png">
+<style>
+/* ═══ 99 轉換頁 ═══
+   文案照抄 demo.html 的 SC.join/SC.paid（那邊已經是 v6 海報文案改過的定案版，見那份檔頭 §⑤b）。
+   ⚠️ 這頁的按鈕現在還沒有真的接 PayUni——AES-256-GCM 那個技術問題還在等你確認方向
+   （見上次對話：手動幫金流做加解密 vs 你去 PayUni 後台找「收款連結」之類不用寫加解密的產品）。
+   在那之前 PAYUNI_URL 留空，按鈕會顯示清楚的「還沒接金流」提示，不會假裝付款成功。
+   一旦有連結，PAYUNI_URL 填進去、部署，按鈕就會直接帶去 PayUni 收銀台——不用等後端。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:26px;}
+.hd{padding:22px 24px 0;display:flex;align-items:center;gap:12px;}
+.hd-n{font-size:17px;font-weight:500;letter-spacing:2px;color:#4A1B0C;}
+.hd-s{font-size:13px;letter-spacing:2px;color:#6E4A3C;margin-top:2px;}
+.hero{padding:20px 24px 16px;}
+.hero-t{font-size:22px;font-weight:500;line-height:1.5;color:#4A1B0C;}
+.hero-w{font-size:17px;color:#993C1D;margin-top:9px;}
+.hero-d{font-size:15px;line-height:1.9;color:#5A3A2A;margin-top:13px;}
+.rule{margin:0 24px;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;}
+.perks{padding:20px 24px 4px;display:grid;gap:16px;}
+.perk{display:flex;gap:12px;align-items:flex-start;}
+.perk-i{color:#C6603A;flex-shrink:0;margin-top:5px;}
+.perk-n{font-size:15px;color:#4A1B0C;font-weight:500;line-height:1.6;}
+.perk-s{font-size:13px;color:#6E4A3C;margin-top:3px;line-height:1.6;}
+.why{margin:16px 24px 0;padding:14px;background:#fff;border-radius:14px;}
+.why-t{font-size:13px;font-weight:700;color:#4A1B0C;margin-bottom:9px;}
+.why-row{display:flex;gap:8px;font-size:13px;color:#4A1B0C;line-height:1.75;}
+.why-row span{color:#6E4A3C;}
+.price{margin:16px 24px 0;padding-top:15px;border-top:1px solid #E6DAD1;display:flex;align-items:baseline;gap:8px;}
+.price-v{font-size:32px;font-weight:500;color:#4A1B0C;}
+.price-u{font-size:15px;color:#993C1D;}
+.price-note{margin:4px 24px 0;font-size:13px;color:#6E4A3C;}
+.cta-wrap{padding:17px 24px 0;}
+.btn{width:100%;background:#4A1B0C;color:#F7F1EC;border:0;border-radius:14px;padding:16px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;min-height:44px;}
+.btn[disabled]{background:#D8C9BC;cursor:not-allowed;}
+.btn-note{margin-top:11px;text-align:center;font-size:13px;color:#6E4A3C;}
+.tagline{margin-top:9px;text-align:center;font-size:13px;letter-spacing:1px;color:#6E4A3C;}
+.notice{margin:16px 24px 0;padding:13px 14px;background:#F0E3DB;border-radius:14px;font-size:13px;color:#993C1D;line-height:1.8;}
+.done{display:none;flex-direction:column;justify-content:center;min-height:100vh;padding:20px 24px;}
+.done.on{display:flex;}
+.done-e{text-align:center;padding:20px 0 10px;}
+.done-card{background:#fff;border-radius:14px;padding:20px 18px;}
+.done-t{font-size:22px;color:#4A1B0C;margin-bottom:11px;text-align:center;}
+.done-s{font-size:13px;color:#5A3A2A;line-height:1.95;text-align:center;}
+.next{background:#F7F1EC;border-radius:14px;padding:14px;margin-top:17px;}
+.next-t{font-size:13px;color:#6E4A3C;margin-bottom:11px;}
+.next-row{display:flex;gap:11px;font-size:13px;color:#4A1B0C;line-height:1.75;margin-bottom:9px;}
+.next-row b{color:#C6603A;flex-shrink:0;width:58px;}
+:focus-visible{outline:2px solid #C6603A;outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="app" id="offer">
+  <div class="hd">
+    <svg width="54" height="41" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"/><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"/><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"/><circle cx="21" cy="0" r="4.5" fill="#C99A4E"/></svg>
+    <div><div class="hd-n">溝通健身房</div><div class="hd-s">ATPIFit · 基礎會員</div></div>
+  </div>
+  <div class="hero">
+    <div class="hero-t">溝通・談判・影響力，<br>是一輩子最值得練的肌肉</div>
+    <div class="hero-w">停練，就會萎縮。</div>
+    <div class="hero-d">如果你曾經覺得自己嘴巴笨，或想讓聲音更有影響力——用你最真實的聲音，練出影響力。</div>
+  </div>
+  <div class="rule"></div>
+  <div class="perks">
+    <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">入會 ATPI 溝通健檢 ×1</div><div class="perk-s">照出你的溝通能力缺口</div></div></div>
+    <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">每月 2 堂會員權益課</div><div class="perk-s">一次練一塊小肌群</div></div></div>
+    <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">會員社群</div><div class="perk-s">一群人一起練，你不是一個人</div></div></div>
+    <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">每日打卡</div><div class="perk-s">溝通不再靠臨場運氣</div></div></div>
+    <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">3 個月季度複檢</div><div class="perk-s">數據化檢視你的溝通提升</div></div></div>
+  </div>
+  <div class="why">
+    <div class="why-t">為什麼是現在</div>
+    <div class="why-row"><span>·</span><span><b>解盤是人做的，會排隊</b>——本月還剩名額</span></div>
+    <div class="why-row"><span>·</span><span><b>課表是月度的</b>——這期已經開跑，晚進就少練幾天</span></div>
+    <div class="why-row"><span>·</span><span><b>社群裡的免費課</b>——進來就能看</span></div>
+  </div>
+  <div class="price"><span class="price-v">NT$99</span><span class="price-u">/ 月 · 一杯飲料的錢</span></div>
+  <div class="price-note">隨時開始，不必等開班 · 隨時可停</div>
+  <div class="cta-wrap">
+    <button class="btn" id="btnPay">加入溝通健身房 →</button>
+    <div class="btn-note" id="payNote">PayUni 一頁式 · 30 秒完成</div>
+    <div class="tagline">用自己最真實的聲音，創造影響力</div>
+  </div>
+  <div class="notice" id="devNotice"></div>
+</div>
+
+<div class="app done" id="done">
+  <div class="done-e">
+    <svg width="54" height="41" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"/><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"/><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"/><circle cx="21" cy="0" r="4.5" fill="#C99A4E"/></svg>
+  </div>
+  <div class="done-card">
+    <div class="done-t">付款送出了</div>
+    <div class="done-s">教練會在確認入帳後幫你開通——手動確認，不是自動的，通常不會太久。</div>
+    <div class="next">
+      <div class="next-t">接下來會發生的事</div>
+      <div class="next-row"><b>48 小時內</b><span>場邊教練會私訊你，陪你把溝通健檢看一遍</span></div>
+      <div class="next-row"><b>看完健檢</b><span>從最弱的兩塊裡幫你挑一個開始，不是六個全給</span></div>
+      <div class="next-row"><b>每天</b><span>這裡會有一件事等你，做完點兩下</span></div>
+      <div class="next-row"><b>每個月</b><span>場邊教練覆盤一次——前三個月，每個月都跟</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ⚠️ 這裡先放空字串——不知道 PayUni 要用哪種產品（收款連結/一頁式API）之前，
+   不假裝按了會付款。你如果已經在 PayUni 後台生出一個「收款連結」，把網址貼進來，
+   我改這一行、部署，按鈕就會真的帶去 PayUni 收銀台，不用等 Code.gs 那邊的加解密問題解決。 */
+var PAYUNI_URL = "";
+
+function bindPay(){
+  var btn = document.getElementById("btnPay"), note = document.getElementById("devNotice");
+  if (PAYUNI_URL) {
+    btn.onclick = function(){ location.href = PAYUNI_URL; };
+    note.style.display = "none";
+  } else {
+    btn.onclick = function(){
+      note.textContent = "還沒接金流連結——這顆按鈕先讓你看畫面，PayUni 連結給我之後就會真的可以按。";
+      note.style.display = "block";
+    };
+    note.style.display = "none";
+  }
+}
+bindPay();
+
+/* 從 PayUni 導回來的頁面（?paid=1）直接顯示「付款送出」畫面，不用真的接付款也能先看效果：
+   本機測試可以開 join.html?paid=1 直接看這頁。 */
+if (new URLSearchParams(location.search).get("paid") === "1") {
+  document.getElementById("offer").style.display = "none";
+  document.getElementById("done").classList.add("on");
+}
+</script>
+</body>
+</html>
