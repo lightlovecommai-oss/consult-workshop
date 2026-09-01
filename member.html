@@ -595,7 +595,7 @@ function arcNote(t){
       ? '<div class="fam">這段不用走完——他願意跟你說真話，就已經是你要的了。</div>'
       : '<div class="fam">慢慢來。這段的終點不是成交，是他願意跟你說真話。</div>';
   }
-  if (t.dims.A && t.dims.T && !t.dims.P) return '<div class="mo">他已經願意跟你說話了。下一步是<b>讓他覺得你懂</b>。</div>';
+  if (t.dims.A && t.dims.T && !t.dims.P) return '<div class="mo">他已經願意跟你說話了。下一步是<b>讓他覺得有解</b>。</div>';
   if (t.dims.A && !t.dims.T) return '<div class="mo">才剛開始。別急著講產品，下一步是<b>讓他願意說</b>。</div>';
   return '<div class="mo">' + (t.dims.A ? "關係在長。" : "") + '繼續記，會看到它往哪走。</div>';
 }
