@@ -347,7 +347,20 @@ function focusPool(){
 }
 function focusMuscle(){
   var pool = focusPool();
+  /* 體驗客只練最卡那一塊、不能換——換得到是會員才有的選擇權（模組2／3規格的分野） */
+  if (!S.member) return pool[0];
   return pool[(S.pick || 0) % pool.length];
+}
+/* 體驗客/會員內容差異目前只做這兩塊真的能用真資料撐起來的：
+   ①練習只能練最卡那塊、拿不到「換一個」的選擇權　②看不到教練解盤卡/三個月驗收卡。
+   沒有做的（社群完整內容、按上線次數輪的3個秘訣）是因為沒有真的內容/資料可以撐，
+   硬做會變成編假資料，寧可先不做。 */
+function ctaCard(t){
+  return '<div class="cw" style="border:1px solid #E6DAD1;">'
+    + '<div class="pill" style="margin-bottom:12px;">會員才看得到</div>'
+    + '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">' + t + '</div>'
+    + '<div style="font-size:13px;color:#6E4A3C;margin-top:11px;line-height:1.8;">想加入的話，私訊你的場邊教練就可以——這裡還沒接線上付款。</div>'
+    + '</div>';
 }
 function focusTaskInfo(){
   var mk = focusMuscle();
@@ -404,6 +417,7 @@ function gymHTML(){
   h += typedMock + (oneLiners.length ? oneLiners.join("") : '<div class="empty">還沒有人解鎖新徽章，練久一點就會出現在這裡。</div>');
 
   h += '<div class="cd"><div class="empty">這裡沒有排行榜，也不比分數。<br>你看得到誰在練、練了什麼——<b style="color:#4A1B0C;">看不到誰比較強</b>。</div></div>';
+  if (!S.member) h += ctaCard('這裡看得到的示範是會員在館裡的樣子——分享、被鼓勵，都是會員的完整功能。');
   return h;
 }
 
@@ -431,7 +445,7 @@ function todayHTML(){
     + '<div class="foc-why" style="margin-top:11px;">' + esc_(DIM_RESULT[m.dim]) + '——先把這一塊練順，其他的先不用管。</div></div>';
 
   h += '<div class="cw"><div class="foc-hd"><span class="pill">' + esc_(m.tech) + '</span>'
-    + '<button class="foc-badge" id="btnSwap">換一個</button></div>';
+    + (S.member ? '<button class="foc-badge" id="btnSwap">換一個</button>' : '') + '</div>';
   if (j.homework) {
     h += '<div class="tip-h">' + md_(j.homework) + '</div>';
     if (j.opener) h += '<div class="tip-q" style="border-color:' + c + ';">「' + esc_(j.opener) + '」</div>';
@@ -449,6 +463,8 @@ function todayHTML(){
   h += '<div class="cw"><div style="font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:14px;">這週</div>'
     + '<div class="week">' + days + '</div>'
     + '<div style="font-size:15px;color:#6E4A3C;margin-top:14px;line-height:2.05;">這週練了 <b style="color:#C6603A;">' + weekCount + '</b> 天。<br>沒練的那幾天不扣分——<b style="color:#4A1B0C;">溝通要有人才練得起來</b>。</div></div>';
+
+  if (!S.member) h += ctaCard('現在你只練得到最卡的這一塊。<br>會員可以在最弱兩塊肌肉、六個小肌群裡自己挑，練膩了換一個。');
   return h;
 }
 
@@ -647,7 +663,8 @@ function dimScoreNowPrev(s, dim){
   };
 }
 function meHTML(){
-  var h = reviewHTML();
+  var h = S.member ? reviewHTML() : "";
+  if (!S.member) h += ctaCard('教練解盤、三個月驗收都是會員才看得到——那是有人陪你看紀錄，不是自動算出來的分數。');
 
   h += '<div class="cd"><div style="font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:16px;">你的四塊溝通肌肉</div>';
   h += DORD.map(function(k){
