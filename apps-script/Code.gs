@@ -52,16 +52,39 @@ var COLS = {
   quiz:     { lineId:["LINE userId","userId","lineId"],
               A:["吸引肌肉","吸引力","scoreA","A"], T:["信任肌肉","信任力","scoreT","T"],
               P:["專業肌肉","專業力","scoreP","P"], I:["推進肌肉","推進力","影響力","scoreI","I"] },
-  /* 寫入用（comconverttest 測驗送來）：對齊「(引流.A)能力測驗」分頁的所有欄位 */
+  /* 寫入用（comconverttest 測驗送來）：對齊「(引流.A)能力測驗」分頁的所有欄位。
+     ⚠️ 2026-09-01 補齊兩組一直在寫、但這張表沒有對應欄位所以被整批丟棄的資料——
+        ① 情境座標五欄（105504b 那次 commit 就開始送了，字典 G4「分數脫離對象無法判讀」靠它）
+        ② 年收目標 goalIncome、客戶來源 customerSource
+        沒有欄位的欄名 setup()／migrateQuizCols() 會自動補上，跑一次就好。
+     ⭐ Q1..Q12 改對位：測驗改成 12 小肌群之後，Q1..Q12 ＝ A1..I3 的 1–5 原始分（照 MORD 順序）。
+        舊版是「Q1 其實是 GOAL 題、Q2 起才是能力題」，而且只收 12 格 → I 第三題/SRC/INC 被截掉。
+        ⚠️ 2026-09-01 之前的舊列，Q1..Q12 是舊語意，跟新列不可混著比。 */
   quizWrite:{ time:["時間","timestamp"], lineId:["LINE userId","userId","lineId"], displayName:["LINE名稱","displayName"],
               pictureUrl:["頭像","pictureUrl"], name:["姓名","name"], email:["Email","email"], job:["職業","job"],
               A:["吸引肌肉","吸引力","scoreA","A"], T:["信任肌肉","信任力","scoreT","T"],
               P:["專業肌肉","專業力","scoreP","P"], I:["推進肌肉","推進力","影響力","scoreI","I"],
-              income:["收入等級","incomeLevel"],
+              income:["收入等級","incomeLevel"], goalIncome:["年收目標","goalIncome"],
+              customerSource:["客戶來源","customerSource"],
               mainAbility:["主能力"], subAbility:["副能力"],
-              Q1:["Q1"], Q2:["Q2"], Q3:["Q3"], Q4:["Q4"], Q5:["Q5"], Q6:["Q6"],
-              Q7:["Q7"], Q8:["Q8"], Q9:["Q9"], Q10:["Q10"], Q11:["Q11"], Q12:["Q12"] }
+              /* 情境座標（G4）：不進計分，只判讀「這組分數是對誰的分數」 */
+              targetContext:["對象情境","targetContext"], targetDistance:["對象關係","targetDistance"],
+              targetRank:["對象位階","targetRank"], targetNeed:["對象需求","targetNeed"],
+              targetKeyMuscle:["情境最吃哪塊","targetKeyMuscle"],
+              /* Q1..Q12 ＝ 12 小肌群 A1..I3 的 1–5 原始分（別名寫在後面，之後改標題也讀得到） */
+              Q1:["Q1","A1"], Q2:["Q2","A2"], Q3:["Q3","A3"], Q4:["Q4","T1"], Q5:["Q5","T2"], Q6:["Q6","T3"],
+              Q7:["Q7","P1"], Q8:["Q8","P2"], Q9:["Q9","P3"], Q10:["Q10","I1"], Q11:["Q11","I2"], Q12:["Q12","I3"] }
 };
+
+/* 測驗分頁補欄位（可重複執行，已存在就跳過）。改完 COLS.quizWrite 之後在編輯器跑一次。
+   ⚠️ 只補欄名，不動既有資料；補完之後 comconverttest 送來的情境座標才寫得進去。 */
+function migrateQuizCols() {
+  ["年收目標", "客戶來源", "對象情境", "對象關係", "對象位階", "對象需求", "情境最吃哪塊"]
+    .forEach(function(h){ ensureColumn_(TABS.quiz, h); });
+  for (var i = 1; i <= 12; i++) ensureColumn_(TABS.quiz, "Q" + i);
+  evalSheet_();  // 順便確保「(遊戲)體測紀錄」存在——測驗的 action:"eval" 要寫進去
+  Logger.log("完成：測驗分頁欄位已補齊，體測分頁已就緒。");
+}
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
 
@@ -880,10 +903,15 @@ function doPost(e) {
         lineId: quid, displayName: body.displayName || "", pictureUrl: body.pictureUrl || "",
         name: body.name || "", email: body.email || "", job: body.job || "",
         A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0,
-        income: body.incomeLevel || "",
-        mainAbility: body.mainAbility || "", subAbility: body.subAbility || ""
+        income: body.incomeLevel || "", goalIncome: body.goalIncome || "",
+        customerSource: body.customerSource || "",
+        mainAbility: body.mainAbility || "", subAbility: body.subAbility || "",
+        /* 情境座標（G4）：測驗從 105504b 起就在送，但一直沒有欄位接，2026-09-01 補上 */
+        targetContext: body.targetContext || "", targetDistance: body.targetDistance || "",
+        targetRank: body.targetRank || "", targetNeed: body.targetNeed || "",
+        targetKeyMuscle: body.targetKeyMuscle || ""
       };
-      var qraw = String(body.rawAnswers || "").split(",");  // "2,3,2,..." → Q1..Q12
+      var qraw = String(body.rawAnswers || "").split(",");  // "3,2,4,..." → Q1..Q12 ＝ A1..I3 的 1–5
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
       upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals);  // 同 userId 更新那列，重測/重開不重複
       ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）

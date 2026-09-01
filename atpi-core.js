@@ -10,13 +10,17 @@ var DORD = ["A", "T", "P", "I"];
 /* ═══════════════════════════════════════════════════════════
    12 小肌群（唯一真相＝productkit《01-核心定義字典》ATPI 條）
    🔄 2026-08-30 ATPI 重構寫回（逐格真相＝productkit 技巧樹校對）：
-     · 肌理（內部用語，不對學生露）＝A 留多久／T 誰先給／P 怎麼證明你能解／I 卡在哪
+     · 肌理（內部用語，不對學生露）＝A 留多久／T 誰先給／P 怎麼證明你能解／I 差什麼
      · T 整組換內容（T1 講出心裡 OS＝我先給／T2 提問式聆聽＝他才給／T3 承諾兌現＝我兌現，7-11-4 退場）
      · P 重切成「怎麼證明你能解」（P1 目標落差＝三招融合／P2 自證＝大絕招・視覺化 Demo／P3 他證三件組）
      · 真誠收單→真誠邀請、預先框飾→前置約定
-   name＝小肌群名（方案1「讓他XX」主推）｜name2＝方案2「四字動作」備案｜tech＝正選技巧｜ask＝週測問法
-   ⚠️ 命名兩案未決（老師尚未在方案1/方案2 間拍板），此處 name 暫用方案1 主推；改名字前先改字典，這裡跟著改。
-   ⚠️ comconverttest 也吃這份定義（目前只輸出 4 維，未用 name）。
+   name＝小肌群格名（「讓他XX」・2026-08-31 拍板・唯一寫法）｜name2＝歷史別名（已退場的四字動作，
+   僅供回溯，任何 UI 都不要顯示）｜tech＝正選技巧｜ask＝週測問法
+   ⚠️ 格名已定案（2026-08-31 拍板「讓他XX」，備案「四字動作」退場）；改名字前先改字典 01 ATPI 條，這裡跟著改。
+   ✅ 2026-09-01 comconverttest 起真的載入本檔（<script src="atpi-core.js">），
+      且已改成輸出 12 小肌群：每維 3 題＝3 個小肌群，題幹就是把本表 ask 欄改寫成情境選擇題，
+      選項＝EVAL_ANCHORS 的 1–5，所以測驗分無縫就是體格分基線（不用換算）。
+      該 repo 放的是同步副本（用它的 sync-atpi-core.sh 從本檔複製過去）——本檔仍是唯一真相。
    ═══════════════════════════════════════════════════════════ */
 var MUSCLES = {
   A1: {dim:"A", name:"讓他開口", name2:"主動破冰", tech:"真誠稱讚・前置約定",        ask:"陌生情境有沒有主動開口、用真誠稱讚讓對方接話，防衛鬆下來（非只客套回謝謝）"},
@@ -37,8 +41,12 @@ var MORD = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
 
 /* 大肌肉的「結果句」——會員模式用（字典「兩種語言」條）。
    ⚠️ 不是別名：正式維度名仍只有 DIMS[k].name（〇〇肌肉），結果句只能用在會員模式的敘述文案。 */
-var DIM_RESULT = { A:"讓他想靠近", T:"讓他願意說", P:"讓他覺得有解", I:"讓他願意動" };
-/* ⚠️ P 結果句 2026-08-27 改定義：讓他覺得你懂 → 讓他覺得有解（主詞是他不是我；「懂」是卡點不是終點）。 */
+var DIM_RESULT = { A:"讓他想靠近", T:"讓他願意說", P:"讓他要找你", I:"讓他願意動" };
+/* ⚠️ P 結果句 2026-09-01 再改定義（老師拍板）：讓他覺得有解 → 讓他要找你。
+   舊句沒把解法綁到「你」身上（他覺得有解也可以去找別人），與 P 的方向欄「怎麼證明你能解」脫鉤。
+   新句 5 字、與其他三句完全同構、是決定不是認知狀態。
+   ⚠️ 連帶：P/I 分界句同步改成「P＝他認定你就是那個人；I＝他真的動了」。
+   歷史：2026-08-27 讓他覺得你懂 → 讓他覺得有解（兩句皆已作廢）。 */
 
 /* 週測 1–5 錨點（字典 ATPI 條）。評分看「本週有無具體事例」，不憑感覺。
    🔄 2026-08-30（G8）改非單調：做太多（過頭）會扣分，出現「過頭訊號」該格封頂 3 分；
@@ -96,9 +104,9 @@ function calcPotential(scores) {
 
 /* ── 單一強項 → 變現路徑敘述 ──
    ⚠️ 2026-08-28 正典：四維一律「〇〇肌肉」（吸引／信任／專業／推進），「〇〇力」作廢。
-   ⚠️ 底下三份文案庫（STRONG_PATH／COMBO_PATH／WEAK_DESC）comconverttest 目前是
-      「內嵌自己一份」而不是載入本檔（它沒有 <script src="atpi-core.js">），
-      所以改這裡不會同步到測驗結果頁——那邊要另外過一次才會口徑一致。 */
+   ✅ 2026-09-01：底下三份文案庫（STRONG_PATH／COMBO_PATH／WEAK_DESC）comconverttest 已改成
+      載入本檔、刪掉它內嵌的那一份，所以改這裡會同步到測驗結果頁。舊註記「那邊要另外過一次」作廢。
+      ⚠️ 它內嵌版本裡多的 COMBO_PATH.avoid 欄從來沒被讀過，一併刪掉、本檔不補。 */
 var STRONG_PATH = {
   A: "想像這個場景：你在一個商業活動或社群聚會開口說話，周圍的人自然把目光轉向你，有人開始追問「然後呢？」，有人默默加了你的 LINE。\n\n這就是你最容易、也是天賦的變現路徑——吸引型。你不需要刻意推銷，人自然往你身邊靠。最適合你的場景：社群經營、內容創作、演講分享，讓陌生人主動找上門。",
   T: "想像這個場景：你跟一個潛在客戶聊了半小時，對方把從沒跟別人說過的困擾都說出來了，最後主動問你「你有沒有什麼課程或服務？」\n\n這就是你最容易、也是天賦的變現路徑——關係型。你不用追客戶，客戶會追你。最適合你的場景：1對1 深度諮詢、長期顧問關係、讓滿意的客戶主動介紹新客戶。",
@@ -163,8 +171,19 @@ function getCombo(scores) {
    綁定了固定版面，只在「大部分專案都會長一樣」的部分才共用。
    ═══════════════════════════════════════════════════════════ */
 
+/* 文字用色：優先吃 DIMS[k].textColor（品牌 21 檔的「暖版・深版」，小字才過 WCAG），
+   沒給就退回 color——consult-workshop 的 DIMS 沒有這欄，行為與改版前完全一致。
+   ⚠️ 暖版的 I 原版 #C99A4E 連大字都不合格，用暖色盤時 textColor 是必填不是選填。 */
+function dimTextColor(k) { return DIMS[k].textColor || DIMS[k].color; }
+/* #rrggbb → rgba(...)，只給下面的雷達填色用（別的地方請直接寫 CSS 變數） */
+function hexRGBA(hex, alpha) {
+  var h = String(hex).replace("#", "");
+  return "rgba(" + parseInt(h.slice(0,2),16) + "," + parseInt(h.slice(2,4),16) + "," + parseInt(h.slice(4,6),16) + "," + alpha + ")";
+}
+
 /* ── 4 大肌肉雷達圖（SVG 向量版，取代舊的 canvas 畫法）
-      svgEl：一個 <svg> DOM 元素；scores：{A,T,P,I} 0-100 分數 ── */
+      svgEl：一個 <svg> DOM 元素；scores：{A,T,P,I} 0-100 分數
+      資料多邊形吃 DIMS.A.color（＝品牌行動色），所以換色盤時這裡自動跟著換 ── */
 function drawRadarSVG(svgEl, scores) {
   svgEl.innerHTML = "";
   var cx = 130, cy = 140, mr = 90;
@@ -185,7 +204,7 @@ function drawRadarSVG(svgEl, scores) {
     svgEl.appendChild(el("line", {x1:cx, y1:cy, x2:p[0], y2:p[1], stroke:"rgba(168,128,96,0.15)", "stroke-width":"0.8"}));
   });
   var dpts = angles.map(function(a, i) { var p = pt(mr*Math.min(vals[i],1), a); return p[0]+","+p[1]; }).join(" ");
-  svgEl.appendChild(el("polygon", {points:dpts, fill:"rgba(232,115,74,0.15)", stroke:"#e8734a", "stroke-width":"2", "stroke-linejoin":"round"}));
+  svgEl.appendChild(el("polygon", {points:dpts, fill:hexRGBA(DIMS.A.color, 0.15), stroke:DIMS.A.color, "stroke-width":"2", "stroke-linejoin":"round"}));
 
   var tip = el("g", {id:"radar-tip", opacity:"0", style:"pointer-events:none;"});
   var tipBg = el("rect", {rx:"8", ry:"8", fill:"#2d1f0f", height:"26"});
@@ -207,13 +226,13 @@ function drawRadarSVG(svgEl, scores) {
     var c = el("circle", {cx:p[0], cy:p[1], r:"5", fill:DIMS[k].color, stroke:"#fff", "stroke-width":"1.5", style:"pointer-events:none;"});
     hit.addEventListener("click", function(e) {
       e.stopPropagation();
-      showTip(p[0], p[1], DIMS[k].name+" "+scores[k], DIMS[k].color);
+      showTip(p[0], p[1], DIMS[k].name+" "+scores[k], dimTextColor(k));  // tooltip 是色塊上的白色小字＝深版
     });
     svgEl.appendChild(hit); svgEl.appendChild(c);
   });
   DORD.forEach(function(k, i) {
     var p = pt(mr+22, angles[i]);
-    var t = el("text", {x:p[0], y:p[1], "font-size":"12", "font-weight":"500", fill:DIMS[k].color, "text-anchor":"middle", "dominant-baseline":"middle", "font-family":"-apple-system,sans-serif"});
+    var t = el("text", {x:p[0], y:p[1], "font-size":"12", "font-weight":"500", fill:dimTextColor(k), "text-anchor":"middle", "dominant-baseline":"middle", "font-family":"-apple-system,sans-serif"});  // 12px＝小字，一定要深版
     t.textContent = DIMS[k].name;
     svgEl.appendChild(t);
   });

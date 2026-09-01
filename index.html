@@ -24,6 +24,18 @@
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script>
+/* ⭐ 2026-09-01 身分路由（原本只有「開通才放行、其餘一律踢 showcase」，把免費路人擋在門外）。
+   老師拍板「分流取消」＝ ATPI 測驗測完全部進館，所以剛測完的人一定要進得來：
+     · 有開通任一門課       → dashboard.html（學員模式）
+     · 在名單內但沒開通     → member.html（會員模式／參觀路人，看得到自己的 12 格體測基線）
+     · 完全不在名單         → 回傳 null，由呼叫端落到 showcase.html
+   名單那一列是測驗寫的：Code.gs 的 action:"quiz" 會 ensureRosterRow_（課程欄留空＝未開通）。 */
+function routeFor(id) {
+  var s = STUDENTS.find(function(x) { return x.lineId === id; });
+  if (!s) return null;
+  return (s.enrolled ? "dashboard.html?id=" : "member.html?id=") + encodeURIComponent(id);
+}
+
 async function init() {
   try {
     /* 優先：URL 參數 ?id=（方便測試） */
@@ -33,11 +45,8 @@ async function init() {
     await loadStudents();
 
     if (urlId) {
-      var matched = STUDENTS.find(function(s) { return s.lineId === urlId && s.enrolled; });
-      if (matched) {
-        window.location.href = "dashboard.html?id=" + encodeURIComponent(urlId);
-        return;
-      }
+      var landed = routeFor(urlId);
+      if (landed) { window.location.href = landed; return; }
     }
 
     /* 次要：透過 LIFF 取得 LINE userId */
@@ -48,11 +57,8 @@ async function init() {
 
     if (liff.isLoggedIn()) {
       var p = await liff.getProfile();
-      var matched2 = STUDENTS.find(function(s) { return s.lineId === p.userId && s.enrolled; });
-      if (matched2) {
-        window.location.href = "dashboard.html?id=" + encodeURIComponent(p.userId);
-        return;
-      }
+      var landed2 = routeFor(p.userId);
+      if (landed2) { window.location.href = landed2; return; }
     } else if (liff.isInClient()) {
       // 只在 LINE 內才走登入（無縫）；外部瀏覽器不強制登入，避免跳出 access.line.me 網頁登入頁
       liff.login();
@@ -62,10 +68,10 @@ async function init() {
     console.log("init error:", e);
   }
 
-  /* 桌面捷徑若沒帶 id，用上次記住的 id 直接進儀表板 */
+  /* 桌面捷徑若沒帶 id，用上次記住的 id 進場（同樣走身分路由，未開通的人才不會被 dashboard 再彈一次） */
   try {
     var savedId = localStorage.getItem("cw_uid");
-    if (savedId) { window.location.href = "dashboard.html?id=" + encodeURIComponent(savedId); return; }
+    if (savedId) { window.location.href = routeFor(savedId) || ("member.html?id=" + encodeURIComponent(savedId)); return; }
   } catch (e) {}
 
   /* 找不到學員 → 展示頁 */
