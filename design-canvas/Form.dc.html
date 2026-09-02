@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: "Noto Sans TC", "PingFang TC", -apple-system, sans-serif; background: #EFE6DE; }
+    a { color: #AF5433; }
+    a:hover { color: #8a3f26; }
+  </style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：與第一屏同一個頭 -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">溝通影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">練好溝通，你就有影響力</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;margin-bottom:12px;">最後一步・可跳過</div>
+      <div style="font-size:22px;font-weight:700;color:#4A1B0C;line-height:1.55;">要不要把這份結果存起來？</div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.85;margin-top:10px;">留下 Email，這份健檢結果會寄一份給你——之後再測，可以跟這次比較，看肌肉有沒有長。</div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">姓名</div>
+          <input type="text" placeholder="請輸入姓名" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">Email</div>
+          <input type="email" placeholder="請輸入 Email" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">職業／身份</div>
+          <input type="text" placeholder="請選擇" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
+        <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:15px;text-align:center;font-size:17px;font-weight:600;">存起來，寄一份給我</div>
+        <div style="background:transparent;border:1px solid #C9B6A8;color:#6E4A3C;border-radius:14px;padding:13px;text-align:center;font-size:15px;font-weight:600;">不用了，直接進健身房</div>
+      </div>
+      <div style="font-size:13px;color:#8A7266;line-height:1.7;text-align:center;margin-top:10px;">不留也完全不影響——結果你已經看到了。</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
