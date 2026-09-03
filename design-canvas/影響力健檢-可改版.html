@@ -339,7 +339,7 @@
 
   <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
 
-    <!-- 一、總分 -->
+    <!-- 一、總分（正向：已解鎖，數字＝calcPotential 的 unlocked）＋相乘槓桿 -->
     <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;text-align:center;">
       <div style="display:inline-block;font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;margin-bottom:12px;">你的健檢結果</div>
       <div style="font-size:13px;color:#6E4A3C;margin-bottom:4px;">已解鎖的影響力</div>
@@ -351,9 +351,9 @@
       <div style="background:#F0E3DB;border-radius:14px;padding:11px 13px;margin-top:13px;font-size:15px;color:#5A3A2A;line-height:1.75;text-align:left;">四塊是相乘的，所以先練最低那塊最划算——推進肌肉從 <b style="color:#4A1B0C;">47 練到 70</b>，其他三塊完全不動，這個數字就會變成 <b style="color:#C6603A;">282</b>。</div>
     </div>
 
-    <!-- 二、雷達圖＋12 小肌群 -->
+    <!-- 二、雷達＋四塊分數（12 小肌群摺起來，完整版在館裡） -->
     <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:center;margin-bottom:14px;">
         <svg viewBox="0 0 288 260" width="288" height="260" style="max-width:100%;" xmlns="http://www.w3.org/2000/svg">
           <polygon points="144,38 232,126 144,214 56,126" fill="none" stroke="#E6DACF" stroke-width="1"></polygon>
           <polygon points="144,67 203,126 144,185 85,126" fill="none" stroke="#E6DACF" stroke-width="1"></polygon>
@@ -372,57 +372,34 @@
           <text x="144" y="238" text-anchor="middle" font-size="13" font-weight="600" fill="#54718D">專業 67</text>
           <text x="48" y="130" text-anchor="end" font-size="13" font-weight="600" fill="#8E682B">推進 47</text>
         </svg>
-        <div style="font-size:13px;color:#8A7266;">點各塊肌肉可以看分數</div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-            <div style="font-size:15px;font-weight:600;color:#AF5433;">吸引肌肉</div>
-            <div style="font-size:22px;font-weight:700;color:#AF5433;line-height:1;">73</div>
-          </div>
-          <div style="background:#F0E3DB;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#C6603A;height:4px;border-radius:4px;width:73%;"></div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他開口</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">4</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他追問</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">4</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他記得</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">3</div></div>
+        <div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;">
+          <div style="width:72px;font-size:15px;font-weight:600;color:#AF5433;">吸引肌肉</div>
+          <div style="flex:1;background:#F0E3DB;border-radius:4px;height:5px;"><div style="background:#C6603A;height:5px;border-radius:4px;width:73%;"></div></div>
+          <div style="width:26px;text-align:right;font-size:17px;font-weight:700;color:#AF5433;">73</div>
         </div>
-
-        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-            <div style="font-size:15px;font-weight:600;color:#5C7464;">信任肌肉</div>
-            <div style="font-size:22px;font-weight:700;color:#5C7464;line-height:1;">60</div>
-          </div>
-          <div style="background:#DCE7DE;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#6E8B77;height:4px;border-radius:4px;width:60%;"></div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他敢說</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他交心</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他當真</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
+        <div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;">
+          <div style="width:72px;font-size:15px;font-weight:600;color:#5C7464;">信任肌肉</div>
+          <div style="flex:1;background:#DCE7DE;border-radius:4px;height:5px;"><div style="background:#6E8B77;height:5px;border-radius:4px;width:60%;"></div></div>
+          <div style="width:26px;text-align:right;font-size:17px;font-weight:700;color:#5C7464;">60</div>
         </div>
-
-        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-            <div style="font-size:15px;font-weight:600;color:#54718D;">專業肌肉</div>
-            <div style="font-size:22px;font-weight:700;color:#54718D;line-height:1;">67</div>
-          </div>
-          <div style="background:#DDE6EE;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#6E8CA8;height:4px;border-radius:4px;width:67%;"></div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他釐清</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">4</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他有感</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">3</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他放心</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">3</div></div>
+        <div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;">
+          <div style="width:72px;font-size:15px;font-weight:600;color:#54718D;">專業肌肉</div>
+          <div style="flex:1;background:#DDE6EE;border-radius:4px;height:5px;"><div style="background:#6E8CA8;height:5px;border-radius:4px;width:67%;"></div></div>
+          <div style="width:26px;text-align:right;font-size:17px;font-weight:700;color:#54718D;">67</div>
         </div>
-
-        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-            <div style="font-size:15px;font-weight:600;color:#8E682B;">推進肌肉</div>
-            <div style="font-size:22px;font-weight:700;color:#8E682B;line-height:1;">47</div>
-          </div>
-          <div style="background:#F1E5CC;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#C99A4E;height:4px;border-radius:4px;width:47%;"></div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他想要</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">3</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他敢要</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">2</div></div>
-          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他答應</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">2</div></div>
+        <div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;">
+          <div style="width:72px;font-size:15px;font-weight:600;color:#8E682B;">推進肌肉</div>
+          <div style="flex:1;background:#F1E5CC;border-radius:4px;height:5px;"><div style="background:#C99A4E;height:5px;border-radius:4px;width:47%;"></div></div>
+          <div style="width:26px;text-align:right;font-size:17px;font-weight:700;color:#8E682B;">47</div>
         </div>
       </div>
+      <div style="text-align:center;font-size:13px;color:#8A7266;line-height:1.7;margin-top:12px;">每塊還能再拆成 3 塊小肌群——完整 12 塊在健身房裡</div>
     </div>
 
-    <!-- 三、投報率最高的一塊＋最有感的三塊（措辭一律「練起來最有感」，不用「薄／弱／缺口」） -->
+    <!-- 三、投報率最高的一塊＋最有感的三塊（措辭一律「練起來最有感」，不用「薄／弱／缺口／補」） -->
     <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
       <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:8px;">練這塊，影響力提升最快</div>
       <div style="font-size:17px;font-weight:600;color:#4A1B0C;margin-bottom:6px;">推進肌肉，是你現在練起來最有成就的一塊</div>
@@ -448,32 +425,17 @@
       </div>
     </div>
 
-    <!-- 五、強項組合 × 甜蜜路徑 -->
-    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
-      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:10px;">你的強項組合 × 最省力的路徑</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-        <span style="background:#AF5433;color:#fff;font-size:15px;font-weight:600;border-radius:20px;padding:3px 12px;">吸引肌肉</span>
-        <span style="background:#54718D;color:#fff;font-size:15px;font-weight:600;border-radius:20px;padding:3px 12px;">專業肌肉</span>
-        <span style="background:#F0E3DB;color:#6E4A3C;font-size:15px;border-radius:20px;padding:3px 12px;">信任肌肉 待提升</span>
-        <span style="background:#F0E3DB;color:#6E4A3C;font-size:15px;border-radius:20px;padding:3px 12px;">推進肌肉 待提升</span>
-      </div>
-      <div style="font-size:17px;font-weight:700;color:#4A1B0C;line-height:1.5;margin-bottom:10px;">知識型內容 × 課程產品</div>
-      <div style="font-size:15px;color:#5A3A2A;line-height:1.9;white-space:pre-line;">① 持續輸出有深度的內容，吸引肌肉帶流量、專業肌肉讓人覺得你很懂
-② 累積一群「覺得你很厲害」的追蹤者
-③ 推出課程或工作坊（不需要深度信任就能成交）
-④ 課程體驗本身幫你建立信任肌肉，之後再升級高單價</div>
-      <div style="height:1px;background:#E6DAD1;margin:13px 0;"></div>
-      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:6px;">還沒練起來的，先用這個頂著</div>
-      <div style="font-size:15px;color:#6E4A3C;line-height:1.9;white-space:pre-line;">信任肌肉還在練 → 靠出現頻率建熟悉感，常出現 = 類信任，不靠深聊
-推進肌肉還在練 → 用稀缺名額＋截止日期讓環境幫你推進，不用自己開口</div>
-    </div>
-
-    <!-- 六、唯一出口：進館（雙鉤：夥伴在練同一塊＋第二個秘訣免費） -->
+    <!-- 五、唯一出口：進館。摺起來／搬走的兩塊在這裡變成進館的理由 -->
     <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
       <div style="font-size:15px;color:#5A3A2A;line-height:1.85;margin-bottom:13px;">現在健身房裡就有夥伴在練「讓他敢要」這一塊。你的結果會直接變成你的第一份練習清單。</div>
+      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:15px;font-size:15px;color:#5A3A2A;line-height:1.7;">
+        <div style="border-left:3px solid #6E8CA8;padding-left:13px;">完整的 <b style="color:#4A1B0C;">12 塊小肌群</b>分數</div>
+        <div style="border-left:3px solid #C99A4E;padding-left:13px;">你的<b style="color:#4A1B0C;">強項組合 × 最省力的那條路</b></div>
+        <div style="border-left:3px solid #C6603A;padding-left:13px;">第 <b style="color:#4A1B0C;">2、3 個秘訣</b></div>
+      </div>
       <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:16px;text-align:center;">
         <div style="font-size:17px;font-weight:600;">進影響力健身房，開始練</div>
-        <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">免費・第 2 個秘訣在裡面</div>
+        <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">免費・上面三樣都在裡面</div>
       </div>
     </div>
 
