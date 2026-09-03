@@ -59,6 +59,18 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .hero-s{font-size:15px;color:#6E4A3C;margin-top:7px;line-height:1.85;}
 .hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin-top:16px;}
 .sec{font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:1px;margin-bottom:14px;}
+
+/* Nike 式首屏：資料是主角（一個大數字）＋一顆主鈕，其他全退居次要 */
+.bignum{display:flex;align-items:baseline;gap:10px;margin-top:12px;}
+.bignum-v{font-size:54px;font-weight:700;color:#4A1B0C;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;}
+.bignum-l{font-size:13px;color:#6E4A3C;line-height:1.6;}
+.gobtn{display:block;width:100%;background:#4A1B0C;color:#F7F1EC;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;font-family:inherit;min-height:56px;box-sizing:border-box;margin-bottom:16px;}
+.gobtn:active{transform:scale(.98);}
+.gobtn.done{background:#DCE7DE;color:#3E5546;cursor:default;}
+.strip{display:flex;align-items:center;gap:10px;padding:2px 3px 20px;}
+.lockrow{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #F0E3DB;}
+.lockrow-n{font-size:15px;font-weight:600;color:#4A1B0C;}
+.lockrow-d{font-size:13px;color:#6E4A3C;margin-top:2px;line-height:1.7;}
 .gr{font-size:17px;font-weight:700;color:#4A1B0C;margin-bottom:6px;}
 .tier{font-size:13px;color:#993C1D;background:#F0E3DB;padding:4px 11px;border-radius:20px;vertical-align:2px;margin-left:6px;}
 .pill{font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;display:inline-block;}
@@ -463,36 +475,30 @@ function lastPracticeDate_(){
 }
 function gymHTML(){
   var thisMonth = S.checkinLog.filter(function(e){ return weekStr(new Date(e.date)).slice(0,4) === weekStr().slice(0,4); }).length;
-  var withNote = S.checkinLog.filter(function(e){ return e.reaction && e.note; }).slice(-1)[0];
+  var practiced = S.checkinLog.some(function(e){ return normDate(e.date) === taskDayStr(); });
+  var lastD = lastPracticeDate_();
+
+  /* Nike 式首屏（NRC 的骨架）：一個大數字當主角＋一顆主鈕，其他全退居次要。
+     體驗客的推力＝他自己的時間軸（模組2 🔴陪伴不比較：只跟他自己的上次比，
+     ❌「小美練 5 天你只有 1 天」）——併進 hero 副標，不另立卡片；7 天內有練就不出現。 */
+  var sub = '一群人一起練，你不是一個人。';
+  if (!S.member && lastD && (Date.now() - new Date(lastD + "T12:00:00").getTime()) / 86400000 >= 7) {
+    sub = '你上次練是 <b style="color:#C6603A;">' + esc_(timeAgo(lastD)) + '</b>——影響力是肌肉，它不會自己長，但<b>只要練，就只會越練越強</b>。';
+  }
   var h = '<div class="hero"><div class="hero-t">' + greet() + '，' + esc_(S.name || "夥伴") + '。</div>'
-    + '<div class="hero-s">一群人一起練，你不是一個人。</div>'
+    + '<div class="bignum"><span class="bignum-v">' + thisMonth + '</span><span class="bignum-l">這個月練的次數'
+    + (S.team ? '<br>團隊 · ' + esc_(S.team) : '') + '</span></div>'
+    + '<div class="hero-s">' + sub + '</div>'
     + '<div class="hero-rule"></div></div>';
-  h += '<div class="cd"><div class="stat">你這個月練了 <b>' + thisMonth + '</b> 次'
-    + (S.team ? '<br><span style="color:#6E4A3C;">團隊：' + esc_(S.team) + '</span>' : '') + '</div>'
-    + '<div style="display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid #E6DAD1;">'
-    + '<div class="avs">'
+
+  h += practiced
+    ? '<div class="gobtn done">✓ 今天練過了</div>'
+    : '<button class="gobtn" onclick="go(\'today\')">練今天的秘訣</button>';
+
+  h += '<div class="strip"><div class="avs">'
     + '<div class="av" style="background:#C6603A;">陳</div><div class="av" style="background:#6E8B77;">林</div>'
     + '<div class="av" style="background:#6E8CA8;">王</div><div class="av" style="background:#C99A4E;">+</div></div>'
-    + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">夥伴都在練<span class="mock">示意</span><br>你的紀錄會同步一份到館裡</div></div></div>';
-
-  /* 體驗客的推力＝他自己的時間軸（模組2 🔴陪伴不比較）：只跟他自己的上次比，
-     不搬別人出來（❌「小美練 5 天你只有 1 天」）。7 天內有練就不出現。 */
-  if (!S.member) {
-    var lastD = lastPracticeDate_();
-    if (lastD && (Date.now() - new Date(lastD + "T12:00:00").getTime()) / 86400000 >= 7) {
-      h += '<div class="cw"><div style="font-size:15px;color:#4A1B0C;line-height:1.95;">'
-        + '你上次練是 <b style="color:#C6603A;">' + esc_(timeAgo(lastD)) + '</b>。<br>'
-        + '影響力是肌肉——它不會自己長，但<b>只要練，就只會越練越強</b>。</div>'
-        + '<button class="sub" style="margin-top:13px;" onclick="go(\'today\')">看今天的秘訣</button></div>';
-    }
-    /* 首屏兩格（會員App元件-穩暖版的骨架）：打卡了沒一目瞭然＋權益課鉤子（🔒＝99 才開） */
-    var practiced = S.checkinLog.some(function(e){ return normDate(e.date) === taskDayStr(); });
-    h += '<div style="display:flex;gap:10px;margin-bottom:14px;">'
-      + '<div style="flex:1;background:' + (practiced ? '#DCE7DE' : '#4A1B0C') + ';color:' + (practiced ? '#3E5546' : '#F7F1EC') + ';border-radius:14px;padding:14px;text-align:center;cursor:pointer;min-height:44px;" onclick="go(\'today\')">'
-      + '<div style="font-size:20px;line-height:1;">' + (practiced ? '✓' : '💪') + '</div><div style="font-size:13px;margin-top:5px;">' + (practiced ? '今天練過了' : '今天還沒練') + '</div></div>'
-      + '<a href="join.html" style="flex:1;background:#F0E3DB;color:#993C1D;border-radius:14px;padding:14px;text-align:center;text-decoration:none;display:block;min-height:44px;box-sizing:border-box;">'
-      + '<div style="font-size:15px;font-weight:600;line-height:1.4;">🔒 會員權益課</div><div style="font-size:13px;margin-top:4px;">每月 2 堂，一堂練一塊</div></a></div>';
-  }
+    + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">夥伴都在練<span class="mock">示意</span> · 你的紀錄會同步到館裡</div></div>';
 
   /* 兩層動態流：有打字＝大卡片可鼓勵／純點擊＝一行——沒人打字這頁也要會動（A5） */
   h += '<div class="feed-h">夥伴最近在練什麼</div>';
@@ -538,9 +544,31 @@ function gymHTML(){
       + '<div class="card-body">' + esc_(w.d) + '</div></div>';
   }).join("");
 
-  if (!S.member) h += ctaCard('三則戰報的共同點：<b style="color:#4A1B0C;">練的時候有教練在旁邊</b>。你的紀錄現在只有你自己看——會員的每一筆，場邊教練都看得到、都會回。');
+  if (!S.member) h += lockedHTML();
   h += ladderHTML();
   return h;
+}
+
+/* NTC 手法：鎖住的內容用「漂亮的預覽」呈現——嚮往感，不是五張推銷卡輪番擠。
+   體驗客的升級鉤子集中在這一區＋打卡完成後那一句，其他地方不重複。 */
+function lockedHTML(){
+  var rows = [
+    { i: "🔍", n: "教練解析你的影響力健檢", d: "指出你先練哪塊最有感、下一步怎麼走" },
+    { i: "📈", n: "每一筆紀錄都算進肌肉分數", d: "場邊教練都看得到、都會回" },
+    { i: "🎓", n: "會員權益課每月 2 堂", d: "一堂練透一塊小肌群" },
+    { i: "🔁", n: "秘訣自己挑、可以換", d: "不用等輪到" }
+  ];
+  return '<div class="cd"><div class="sec">🔒 會員席才開的</div>'
+    + '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;margin-bottom:6px;">三則戰報的共同點：<b>練的時候有教練在旁邊</b>。</div>'
+    + rows.map(function(r){
+        return '<div class="lockrow"><span style="flex-shrink:0;">' + r.i + '</span>'
+          + '<div><div class="lockrow-n">' + r.n + '</div><div class="lockrow-d">' + r.d + '</div></div></div>';
+      }).join("")
+    + '<a class="gobtn" style="margin:14px 0 0;" href="join.html">坐上會員席 NT$99／月</a>'
+    + (FREE_TALK_URL
+        ? '<a href="' + FREE_TALK_URL + '" style="display:block;text-align:center;margin-top:6px;color:#6E4A3C;font-size:13px;text-decoration:underline;padding:12px;min-height:44px;box-sizing:border-box;">還不確定？先來聽一場免費講座</a>'
+        : '')
+    + '</div>';
 }
 
 /* 三席階梯（2026-09-03 老師拍板命名：體驗席／會員席／私人教練席＝字典四身分的
@@ -548,10 +576,12 @@ function gymHTML(){
    名稱先落 app 不進字典（比照 09-01 用詞暫定表前例），productkit 結清後再補條目。 */
 function ladderHTML(){
   var here = S.member ? 1 : 0;
+  /* NRC 的等級色帶邏輯：下一級永遠看得見＝升級動力。席位色沿用四身分＝A/T/P/I 的
+     對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
   var halls = [
-    {n:"體驗席", p:"免費", d:"3 個秘訣輪流練 · 自己看紀錄", link:""},
-    {n:"會員席", p:"NT$99／月", d:"教練解析健檢 · 紀錄算進肌肉分數 · 會員權益課每月 2 堂 · 秘訣自己挑", link:"join.html"},
-    {n:"私人教練席", p:"私教課學員", d:"1v1 場邊教練 · 12 小肌群全開 · 甜蜜路徑×變現", link:""}
+    {n:"體驗席", p:"免費", d:"3 個秘訣輪流練 · 自己看紀錄", link:"", c:"#6E8B77"},
+    {n:"會員席", p:"NT$99／月", d:"教練解析健檢 · 紀錄算進肌肉分數 · 會員權益課每月 2 堂 · 秘訣自己挑", link:"join.html", c:"#6E8CA8"},
+    {n:"私人教練席", p:"私教課學員", d:"1v1 場邊教練 · 12 小肌群全開 · 甜蜜路徑×變現", link:"", c:"#C99A4E"}
   ];
   var h = '<div class="cd"><div class="sec">你在影響力健身房的位置</div>';
   h += halls.map(function(t, i){
@@ -559,7 +589,8 @@ function ladderHTML(){
     var tag = i === here ? '<span class="lad-here">你在這裡</span>' : '';
     var open = (i === here + 1 && t.link) ? '<a class="lad ' + cls + '" href="' + t.link + '">' : '<div class="lad ' + cls + '">';
     var close = (i === here + 1 && t.link) ? '</a>' : '</div>';
-    return open + '<div class="lad-top"><span class="lad-n">' + t.n + '</span>' + tag
+    return open + '<div class="lad-top"><span style="width:9px;height:9px;border-radius:50%;background:' + t.c + ';flex-shrink:0;'
+      + (i > here ? 'opacity:.45;' : '') + '"></span><span class="lad-n">' + t.n + '</span>' + tag
       + '<span class="lad-p">' + t.p + (i === here + 1 && t.link ? ' →' : '') + '</span></div>'
       + '<div class="lad-d">' + t.d + '</div>' + close;
   }).join("");

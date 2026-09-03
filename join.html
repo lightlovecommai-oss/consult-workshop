@@ -37,6 +37,19 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .hero-w{font-size:17px;color:#993C1D;margin-top:9px;}
 .hero-d{font-size:15px;line-height:1.9;color:#5A3A2A;margin-top:13px;}
 .rule{margin:0 24px;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;}
+/* 三館位置框（2026-09-03 拍板：體驗館／正式館／私人教練館） */
+.halls{margin:18px 24px 0;display:grid;gap:9px;}
+.halls-t{margin:20px 24px 0;font-size:13px;font-weight:700;letter-spacing:1px;color:#6E4A3C;}
+.hallrow{border:1px solid #E6DAD1;border-radius:14px;padding:12px 14px;background:#fff;}
+.hallrow.here{background:#F0E3DB;}
+.hallrow.main{border-color:#C6603A;border-width:1.5px;}
+.hr-top{display:flex;align-items:center;gap:8px;}
+.hr-n{font-size:15px;font-weight:700;color:#4A1B0C;}
+.hr-tag{font-size:11px;color:#6E4A3C;background:#fff;border:1px solid #E6DAD1;padding:2px 8px;border-radius:20px;}
+.hr-tag.on{color:#fff;background:#C6603A;border-color:#C6603A;}
+.hr-p{margin-left:auto;font-size:13px;color:#993C1D;font-weight:600;white-space:nowrap;}
+.hr-d{font-size:13px;color:#6E4A3C;line-height:1.75;margin-top:5px;}
+
 .perks{padding:20px 24px 4px;display:grid;gap:16px;}
 .perk{display:flex;gap:12px;align-items:flex-start;}
 .perk-i{color:#C6603A;flex-shrink:0;margin-top:5px;}
@@ -81,6 +94,13 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
     <div class="hero-d">如果你曾經覺得自己嘴巴笨，或想讓聲音更有影響力——用你最真實的聲音，練出影響力。</div>
   </div>
   <div class="rule"></div>
+  <div class="halls-t">你現在的位置</div>
+  <div class="halls">
+    <div class="hallrow here"><div class="hr-top"><span class="hr-n">體驗席</span><span class="hr-tag">你在這裡</span><span class="hr-p">免費</span></div><div class="hr-d">3 個秘訣輪流練 · 自己看紀錄</div></div>
+    <div class="hallrow main"><div class="hr-top"><span class="hr-n">會員席</span><span class="hr-tag on">這一頁</span><span class="hr-p">NT$99／月</span></div><div class="hr-d">教練解析健檢 · 紀錄算進肌肉分數 · 會員權益課每月 2 堂</div></div>
+    <div class="hallrow"><div class="hr-top"><span class="hr-n">私人教練席</span><span class="hr-p">私教課學員</span></div><div class="hr-d">1v1 場邊教練 · 12 小肌群全開 · 甜蜜路徑×變現</div></div>
+  </div>
+  <div class="halls-t" style="margin-top:22px;">坐上會員席，你會多拿到</div>
   <div class="perks">
     <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">入會 ATPI 影響力健檢 ×1</div><div class="perk-s">照出你先練哪塊最有感</div></div></div>
     <div class="perk"><div class="perk-i">✓</div><div><div class="perk-n">每月 2 堂會員權益課</div><div class="perk-s">一次練一塊小肌群</div></div></div>
