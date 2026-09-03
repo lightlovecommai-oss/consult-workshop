@@ -13,10 +13,10 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="溝通健身房・成長儀表板">
 <meta property="og:description" content="溝通是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
-<meta property="og:image" content="https://lightlovecommai-oss.github.io/consult-workshop/og-image.png">
-<meta property="og:url" content="https://lightlovecommai-oss.github.io/consult-workshop/dashboard.html">
+<meta property="og:image" content="https://app.atpifit.com/og-image.png">
+<meta property="og:url" content="https://app.atpifit.com/dashboard.html">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://lightlovecommai-oss.github.io/consult-workshop/og-image.png">
+<meta name="twitter:image" content="https://app.atpifit.com/og-image.png">
 <link rel="stylesheet" href="common.css">
 <style>
 .tabpanel{display:none;}
@@ -516,7 +516,7 @@ function mk(tag, cls, txt) {
 function addToHomeGuide() {
   // 按鈕在儀表板裡按，已知使用者 id → 帶 id 開 Safari；?addhome=1 讓 Safari 那頁自動跳出圖解箭頭
   var myId = new URLSearchParams(location.search).get("id") || "";
-  var base = "https://lightlovecommai-oss.github.io/consult-workshop/";
+  var base = "https://app.atpifit.com/";
   var url = myId ? (base + "dashboard.html?id=" + encodeURIComponent(myId) + "&addhome=1") : (base + "?app=1&addhome=1");
   try {
     if (window.liff && liff.openWindow) { liff.openWindow({ url: url, external: true }); }
@@ -1534,7 +1534,7 @@ init();
 function openOnDesktopGuide(){
   var id=new URLSearchParams(location.search).get("id")||"";
   if(!id){ try{ id=localStorage.getItem("cw_uid")||""; }catch(e){} }
-  var url="https://lightlovecommai-oss.github.io/consult-workshop/?id="+encodeURIComponent(id);
+  var url="https://app.atpifit.com/?id="+encodeURIComponent(id);
   var ov=document.getElementById("desktop-overlay"); if(!ov) return;
   document.getElementById("desktop-link").textContent=url;
 
