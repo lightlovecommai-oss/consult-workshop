@@ -88,6 +88,23 @@ HTML = f"""<!doctype html>
   [data-edit]:hover {{ outline-color:rgba(198,96,58,.8); background:rgba(198,96,58,.07); }}
   [data-edit]:focus {{ outline:2px solid #C6603A; background:#fff; }}
   [data-edit].dirty {{ background:#FFF6D9; outline-color:#C99A4E; }}
+  /* 選取用淡琥珀底＋深墨字，不用系統的反白（會蓋掉字看不到改了什麼） */
+  [data-edit]::selection {{ background:#FFD79A; color:#4A1B0C; }}
+  [data-edit] *::selection {{ background:#FFD79A; color:#4A1B0C; }}
+
+  /* ---- 修改清單 ---- */
+  #panel {{ position:fixed; top:0; right:0; bottom:0; width:390px; z-index:120; overflow-y:auto;
+            background:#241b17; border-left:1px solid #3a2c25; padding:18px 18px 40px;
+            transform:translateX(100%); transition:transform .18s; }}
+  #panel.open {{ transform:none; }}
+  #panel h2 {{ font-size:14px; margin:0 0 14px; color:#EFE6DE; display:flex; align-items:center; }}
+  #panel h2 button {{ margin-left:auto; }}
+  .chg {{ background:#2f2420; border:1px solid #3f312a; border-radius:10px; padding:12px 13px; margin-bottom:11px; }}
+  .chg .loc {{ font-size:11.5px; color:#8a7266; margin-bottom:7px; letter-spacing:.03em; }}
+  .chg .old {{ font-size:13px; color:#9b8478; text-decoration:line-through; line-height:1.7; }}
+  .chg .new {{ font-size:13.5px; color:#FFD79A; line-height:1.75; margin-top:5px; }}
+  .chg .go {{ font-size:12px; color:#C6603A; cursor:pointer; margin-top:8px; display:inline-block; }}
+  #panel .empty {{ font-size:13px; color:#8a7266; }}
 
   /* ---- 註記 ---- */
   #notes {{ padding:0 22px 60px; display:flex; gap:16px; flex-wrap:wrap; }}
@@ -108,7 +125,13 @@ HTML = f"""<!doctype html>
   </label>
   <button class="ghost" id="toggle">隱藏虛線</button>
   <span id="count">尚未修改</span>
+  <button class="ghost" id="review">看修改清單</button>
   <button id="export" disabled>匯出修改</button>
+</div>
+
+<div id="panel">
+  <h2>我改了哪些<button class="ghost" id="closePanel">關閉</button></h2>
+  <div id="chgs"></div>
 </div>
 
 <div id="canvas">
@@ -136,12 +159,22 @@ document.querySelectorAll('.frame').forEach(frame => {{
       c => c.nodeType === 3 && c.textContent.trim().length > 0
     );
     if (!hasOwnText) return;
+    // 巢狀的不再標一次：外層已經可編輯了，內層再標會讓瀏覽器整塊選起來（＝反白蓋住字）
+    if (el.parentElement && el.parentElement.closest('[data-edit]')) return;
     const id = key + ':' + (n++);
     el.setAttribute('data-edit', id);
-    el.setAttribute('contenteditable', 'plaintext-only');
+    el.setAttribute('contenteditable', 'true');
     el.spellcheck = false;
     store.push({{ id, file: key + '.dc.html', el, original: el.innerText }});
   }});
+}});
+
+// 貼上一律轉純文字，免得把 Word／網頁的樣式帶進來
+document.addEventListener('paste', e => {{
+  const host = e.target.closest && e.target.closest('[data-edit]');
+  if (!host) return;
+  e.preventDefault();
+  document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
 }});
 
 const byId = Object.fromEntries(store.map(s => [s.id, s]));
@@ -151,6 +184,28 @@ const exportBtn = document.getElementById('export');
 function changed() {{
   return store.filter(s => s.el.innerText.trim() !== s.original.trim());
 }}
+const chgsEl = document.getElementById('chgs');
+const panel = document.getElementById('panel');
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+function renderPanel(c) {{
+  if (!c.length) {{ chgsEl.innerHTML = '<div class="empty">還沒有修改。點畫布上任何一段字改改看。</div>'; return; }}
+  chgsEl.innerHTML = c.map(s => (
+    '<div class="chg">'
+    + '<div class="loc">' + esc(s.file) + '</div>'
+    + '<div class="old">' + esc(s.original.trim()) + '</div>'
+    + '<div class="new">' + esc(s.el.innerText.trim()) + '</div>'
+    + '<div class="go" data-goto="' + s.id + '">跳到這一處 →</div>'
+    + '</div>'
+  )).join('');
+}}
+
+chgsEl.addEventListener('click', e => {{
+  const id = e.target.dataset && e.target.dataset.goto;
+  if (!id) return;
+  byId[id].el.scrollIntoView({{ behavior: 'smooth', block: 'center', inline: 'center' }});
+}});
+
 function refresh() {{
   const c = changed();
   store.forEach(s => s.el.classList.toggle(
@@ -158,7 +213,11 @@ function refresh() {{
   ));
   countEl.textContent = c.length ? `已改 ${{c.length}} 處` : '尚未修改';
   exportBtn.disabled = c.length === 0;
+  renderPanel(c);
 }}
+
+document.getElementById('review').addEventListener('click', () => panel.classList.toggle('open'));
+document.getElementById('closePanel').addEventListener('click', () => panel.classList.remove('open'));
 
 document.getElementById('canvas').addEventListener('input', refresh);
 
