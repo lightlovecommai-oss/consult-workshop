@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>影響力健檢・可改版 demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#1b1512; color:#EFE6DE;
+         font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif; }
+  a { color:#AF5433; }
+
+  /* ---- 工具列 ---- */
+  #bar { position:sticky; top:0; z-index:99; display:flex; align-items:center; gap:14px;
+          background:#241b17; border-bottom:1px solid #3a2c25; padding:11px 18px; }
+  #bar h1 { font-size:15px; font-weight:700; margin:0; letter-spacing:.04em; }
+  #bar .sp { flex:1; }
+  button { font-family:inherit; font-size:14px; font-weight:600; border:0; border-radius:9px;
+            padding:9px 15px; cursor:pointer; background:#C6603A; color:#fff; }
+  button.ghost { background:transparent; color:#C9B6A8; border:1px solid #4a382f; }
+  button:disabled { opacity:.4; cursor:default; }
+  #count { font-size:13px; color:#C99A4E; font-weight:600; }
+  #hint { font-size:13px; color:#9b8478; }
+  label.zoom { font-size:13px; color:#9b8478; display:flex; align-items:center; gap:7px; }
+
+  /* ---- 畫布 ---- */
+  #canvas { display:flex; gap:26px; padding:26px 22px 90px; align-items:flex-start;
+             overflow-x:auto; transform-origin:0 0; }
+  .board { flex:0 0 auto; }
+  .bt { font-size:14px; font-weight:700; color:#EFE6DE; padding:0 2px 9px;
+         display:flex; align-items:baseline; gap:9px; }
+  .bf { font-size:12px; font-weight:400; color:#7d6a60; }
+  .frame { width:390px; background:#EFE6DE; color:#4A1B0C; border-radius:6px; overflow:hidden;
+            box-shadow:0 10px 34px rgba(0,0,0,.45); }
+  .frame, .frame * { font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif; }
+
+  /* ---- 可編輯 ---- */
+  [data-edit] { outline:1px dashed transparent; border-radius:3px; transition:outline-color .12s, background .12s; }
+  body.marks [data-edit] { outline-color:rgba(198,96,58,.42); }
+  [data-edit]:hover { outline-color:rgba(198,96,58,.8); background:rgba(198,96,58,.07); }
+  [data-edit]:focus { outline:2px solid #C6603A; background:#fff; }
+  [data-edit].dirty { background:#FFF6D9; outline-color:#C99A4E; }
+
+  /* ---- 註記 ---- */
+  #notes { padding:0 22px 60px; display:flex; gap:16px; flex-wrap:wrap; }
+  .note { flex:0 0 300px; background:#3a2f22; border:1px solid #56452f; color:#e6d5b8;
+           border-radius:11px; padding:13px 15px; font-size:12.5px; line-height:1.75; white-space:normal; }
+  #notes h2 { width:100%; font-size:14px; color:#9b8478; margin:0 0 4px; }
+</style>
+</head>
+<body class="marks">
+
+<div id="bar">
+  <h1>影響力健檢・可改版</h1>
+  <span id="hint">點任何一段字就能直接改</span>
+  <span class="sp"></span>
+  <label class="zoom">縮放
+    <input id="zoom" type="range" min="40" max="130" value="100">
+    <span id="zv">100%</span>
+  </label>
+  <button class="ghost" id="toggle">隱藏虛線</button>
+  <span id="count">尚未修改</span>
+  <button id="export" disabled>匯出修改</button>
+</div>
+
+<div id="canvas">
+<section class="board" data-file="Main.dc.html"><header class="bt">① 開場<span class="bf">Main.dc.html</span></header><div class="frame" data-key="Main"><div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：頁底色條＋logo＋健檢名＋品牌slogan當繫帶（30-規範 §6 的頭，身分換成健檢） -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">影響力是肌肉，練了就有</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <!-- Hero：整頁唯一的 28px 時刻 -->
+    <div style="padding:6px 4px 2px;">
+      <div style="font-size:28px;font-weight:700;color:#4A1B0C;line-height:1.6;text-wrap:balance;">影響力不是天賦，<br>是四塊可以練的肌肉。</div>
+      <div style="font-size:17px;font-weight:600;color:#AF5433;line-height:1.95;margin-top:10px;">變現，是影響力自然的結果。</div>
+    </div>
+
+    <!-- 降門檻膠囊：把「為什麼值得花3分鐘」搬到按鈕之前 -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 2px;">
+      <span style="font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;">16 題</span>
+      <span style="font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;">約 3 分鐘</span>
+      <span style="font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;">免費</span>
+      <span style="font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;">不用留資料</span>
+    </div>
+
+    <!-- 主 CTA：拉進第一屏 -->
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:16px;text-align:center;">
+        <div style="font-size:17px;font-weight:600;">開始健檢</div>
+        <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">16 題・測完馬上看結果</div>
+      </div>
+      <div style="font-size:13px;color:#6E4A3C;line-height:1.7;text-align:center;">不用註冊、不用留 Email——測完直接看結果。</div>
+    </div>
+
+    <!-- ATPI 四色細條：品牌簽名（資訊圖層，不進版面配色） -->
+    <div style="height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin:4px 2px;"></div>
+
+    <!-- 適合你：六個場景，一行一個（普遍場景在前，專業場景在後） -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:13px;">這份健檢適合你，如果你正在</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"></path></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">日常溝通</b>｜說話有份量、關係更和諧</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3.5"></rect><path d="M10.3 9.3 14.7 12l-4.4 2.7Z"></path></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">經營自媒體</b>｜內容說進人心裡</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h12.5"></path><path d="M13.5 5.5l3 3-3 3"></path><path d="M20 15.5H7.5"></path><path d="M10.5 12.5l-3 3 3 3"></path></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">客戶協商談判</b>｜先聽懂，條件才談得動</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21V4.5"></path><path d="M5.5 5c4.2-2.2 7.3 2.2 12.5 0v8.5c-5.2 2.2-8.3-2.2-12.5 0Z"></path></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">帶團隊</b>｜一句話就帶得動人</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a5 5 0 0 1 10 0"></path><circle cx="9" cy="9" r="3.4"></circle><path d="M15 13.5a5 5 0 0 1 5 5"></path><circle cx="16.5" cy="8" r="2.6"></circle></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">1 對 1 顧問深談</b>｜讓對方願意說真話</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:#F0E3DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A1B0C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path></svg>
+          </div>
+          <div style="font-size:15px;color:#6E4A3C;line-height:1.6;"><b style="color:#4A1B0C;">1 對 N 公眾演說</b>｜台下自己被吸引</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 能幫你：溝通訴求四條（左色條分段，不用盒中盒） -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:13px;">測完你會拿到</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:15px;color:#5A3A2A;line-height:1.85;">
+        <div style="border-left:3px solid #C6603A;padding-left:14px;">看懂你的<b style="color: rgb(74, 27, 12)">四塊影響力肌肉</b>——哪塊用的好、哪塊最薄弱</div>
+        <div style="border-left:3px solid #6E8B77;padding-left:14px;">找出<b style="color:#4A1B0C;">讓人願意靠近你、對你說真心話</b>的關鍵</div>
+        <div style="border-left:3px solid #6E8CA8;padding-left:14px;">具體可以練的<b style="color:#4A1B0C;">行動建議</b>——不是「多聽多說」這種空話</div>
+        <div style="border-left:3px solid #C99A4E;padding-left:14px;">看懂這份影響力怎麼用在<b style="color:#4A1B0C;">家庭、職場，甚至成交</b>上</div>
+      </div>
+    </div>
+
+    <!-- 見證區：光頭自介＋兩則純溝通見證（照 demo.html 先例，雅雯/阿澤已換掉） -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:13px;">學員真實故事</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:#6E8B77;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">王</div>
+          <div style="background:#FFFFFF;border-radius:0 14px 14px 14px;padding:11px 13px;">
+            <div style="font-size:13px;font-weight:600;color:#4A1B0C;margin-bottom:3px;">王偉翔 ｜ 到府按摩師</div>
+            <div style="font-size:15px;color:#5A3A2A;line-height:1.8;">如何說話讓自己感覺起來<b style="color:#4A1B0C;">有自信</b>，讓顧客<b style="color:#4A1B0C;">更信賴我</b>，快速幫我拓展客源。</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:#6E8CA8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">學</div>
+          <div style="background:#FFFFFF;border-radius:0 14px 14px 14px;padding:11px 13px;">
+            <div style="font-size:13px;font-weight:600;color:#4A1B0C;margin-bottom:3px;">學員 ｜ 一對一實戰</div>
+            <div style="font-size:15px;color:#5A3A2A;line-height:1.8;">有<b style="color:#4A1B0C;">聊到對方的點</b>，比問完該問的問題還重要。</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:1px;background:#E6DAD1;margin:16px 0 14px;"></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:#C6603A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">光</div>
+        <div style="font-size:15px;color:#5A3A2A;line-height:1.85;">我是<b style="color: rgb(74, 27, 12)">光頭</b>，曾是廣告的專業人士，但講得很專業，卻無法好好表達自己。學會這套方法後，現在一場演講能讓上千人願意聽我說話——<b style="color: rgb(74, 27, 12)">日子也自然跟著變好</b>。</div>
+      </div>
+    </div>
+
+    <!-- 底部 CTA：同一顆主按鈕再出現一次（同一個動作，不是第二顆競爭 CTA） -->
+    <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:16px;text-align:center;">
+      <div style="font-size:17px;font-weight:600;">開始健檢</div>
+      <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">免費・不用留資料</div>
+    </div>
+
+    <!-- 品牌 footer -->
+    <div style="text-align:center;font-size:13px;color:#8A7266;letter-spacing:1px;padding-top:2px;">影響力健身房 · ATPIFit</div>
+
+  </div>
+</div></div></section>
+<section class="board" data-file="Explain.dc.html"><header class="bt">② 說明<span class="bf">Explain.dc.html</span></header><div class="frame" data-key="Explain"><div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：與第一屏同一個頭 -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">影響力是肌肉，練了就有</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <!-- 開頭：這頁在講什麼 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;margin-bottom:12px;">作答前 1 分鐘</div>
+      <div style="font-size:22px;font-weight:700;color:#4A1B0C;line-height:1.55;text-wrap:balance;">你的影響力肌肉，有四塊</div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.85;margin-top:10px;">同樣一句話，有人說完大家點頭就散，有人說完大家願意行動。差別不在努力，在這四塊肌肉哪塊撐著你、哪塊在扯後腿。</div>
+    </div>
+
+    <!-- 四塊肌肉：四色只當左色條資訊圖層 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:13px;">四塊肌肉，各管一件事</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#FFFFFF;border-left:3px solid #C6603A;border-radius:0 14px 14px 0;padding:13px 14px;">
+          <div style="font-size:15px;font-weight:600;color:#AF5433;">① 吸引肌肉 Attract</div>
+          <div style="font-size:15px;color:#4A1B0C;line-height:1.75;margin-top:4px;"><b>讓他想靠近</b>——想繼續聽你說下去</div>
+          <div style="font-size:13px;color:#6E4A3C;line-height:1.7;margin-top:5px;">不夠時：說了很多，對方點頭就走，沒有後續</div>
+        </div>
+        <div style="background:#FFFFFF;border-left:3px solid #6E8B77;border-radius:0 14px 14px 0;padding:13px 14px;">
+          <div style="font-size:15px;font-weight:600;color:#5C7464;">② 信任肌肉 Trust</div>
+          <div style="font-size:15px;color:#4A1B0C;line-height:1.75;margin-top:4px;"><b>讓他願意說</b>——覺得你懂他，真心話才出得來</div>
+          <div style="font-size:13px;color:#6E4A3C;line-height:1.7;margin-top:5px;">不夠時：他對你印象不錯，但聊不深，真心話留在心裡</div>
+        </div>
+        <div style="background:#FFFFFF;border-left:3px solid #6E8CA8;border-radius:0 14px 14px 0;padding:13px 14px;">
+          <div style="font-size:15px;font-weight:600;color:#54718D;">③ 專業肌肉 Professional</div>
+          <div style="font-size:15px;color:#4A1B0C;line-height:1.75;margin-top:4px;"><b>讓他要找你</b>——認定你就是能解他問題的人</div>
+          <div style="font-size:13px;color:#6E4A3C;line-height:1.7;margin-top:5px;">不夠時：他覺得「好像很厲害」，但不知道跟自己有什麼關係</div>
+        </div>
+        <div style="background:#FFFFFF;border-left:3px solid #C99A4E;border-radius:0 14px 14px 0;padding:13px 14px;">
+          <div style="font-size:15px;font-weight:600;color:#8E682B;">④ 推進肌肉 Impact</div>
+          <div style="font-size:15px;color:#4A1B0C;line-height:1.75;margin-top:4px;"><b>讓他願意動</b>——聽完願意現在就行動</div>
+          <div style="font-size:13px;color:#6E4A3C;line-height:1.7;margin-top:5px;">不夠時：聊得都很好，最後一句「我再想想」就沒有下文</div>
+        </div>
+      </div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.85;margin-top:13px;">這四塊是<b style="color:#4A1B0C;">底層邏輯</b>——聊天、開會、演講、社群都用同一套。哪一塊特別弱，整體影響力就跟著打折。</div>
+    </div>
+
+    <!-- 這份健檢會做什麼：墨底強調卡 -->
+    <div style="background:#4A1B0C;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:rgba(247,241,236,.6);letter-spacing:.03em;margin-bottom:10px;">這份健檢會做什麼</div>
+      <div style="font-size:15px;color:#F7F1EC;line-height:1.85;">每塊肌肉再拆成 3 個小肌群，一共 <b style="color:#F3D9CD;">12 塊</b>——測完你會看到哪幾塊撐著你、<b style="color:#F3D9CD;">哪三塊最薄</b>。</div>
+      <div style="font-size:13px;color:rgba(247,241,236,.75);line-height:1.8;margin-top:10px;">中間 12 題只問<b style="color:#F3D9CD;">具體發生過的事</b>（對方說了什麼、做了什麼），不問你覺得自己怎麼樣——想不出實例就選「沒做到」，那才測得準。</div>
+    </div>
+
+    <!-- ATPI 四色細條：品牌簽名，同第一屏 -->
+    <div style="height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin:4px 2px;"></div>
+
+    <!-- CTA：與第一屏同一顆墨底主按鈕 -->
+    <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:16px;text-align:center;">
+      <div style="font-size:17px;font-weight:600;">我準備好了，開始作答</div>
+      <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">16 題・約 3 分鐘</div>
+    </div>
+
+  </div>
+</div></div></section>
+<section class="board" data-file="Quiz.dc.html"><header class="bt">③ 題目（16 題）<span class="bf">Quiz.dc.html</span></header><div class="frame" data-key="Quiz"><div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：與第一屏同一個頭 -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">影響力是肌肉，練了就有</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <!-- 進度 -->
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;color:#6E4A3C;">第 4 題，共 16 題</div>
+        <div style="font-size:13px;color:#8A7266;" aria-hidden="true">19%</div>
+      </div>
+      <div style="background:#F0E3DB;border-radius:4px;height:5px;margin-bottom:16px;">
+        <div style="background:#C6603A;height:5px;border-radius:4px;width:19%;"></div>
+      </div>
+
+      <!-- 題目標籤＋題幹 -->
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#AF5433;background:#F3D9CD;padding:4px 11px;border-radius:20px;margin-bottom:11px;">吸引肌肉｜讓他追問</div>
+      <div style="font-size:17px;font-weight:600;color:#4A1B0C;line-height:1.8;margin-bottom:15px;">你講完自己在做什麼之後，他當場「哇」了一聲，主動追問「然後呢？」「你怎麼做到的？」——不是只點頭說「喔喔」。</div>
+
+      <!-- 五個錨點選項（第 3 個為選中示意） -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <div style="background:#FFFFFF;border:1px solid #EFE6DE;border-radius:14px;padding:13px 14px;font-size:15px;color:#4A1B0C;line-height:1.6;">沒做到</div>
+        <div style="background:#FFFFFF;border:1px solid #EFE6DE;border-radius:14px;padding:13px 14px;font-size:15px;color:#4A1B0C;line-height:1.6;">偶爾，而且生硬</div>
+        <div style="background:#FDF4EF;border:1.5px solid #C6603A;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:600;color:#4A1B0C;line-height:1.6;display:flex;align-items:center;justify-content:space-between;gap:8px;">想到才做、時好時壞<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C6603A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+        <div style="background:#FFFFFF;border:1px solid #EFE6DE;border-radius:14px;padding:13px 14px;font-size:15px;color:#4A1B0C;line-height:1.6;">多數情境做得到</div>
+        <div style="background:#FFFFFF;border:1px solid #EFE6DE;border-radius:14px;padding:13px 14px;font-size:15px;color:#4A1B0C;line-height:1.6;">穩定到自動化</div>
+      </div>
+
+      <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:15px;text-align:center;font-size:17px;font-weight:600;">下一題</div>
+    </div>
+
+    <div style="font-size:13px;color:#8A7266;text-align:center;line-height:1.7;">想不出具體實例就選「沒做到」——那才測得準。</div>
+
+  </div>
+</div></div></section>
+<section class="board" data-file="Result.dc.html"><header class="bt">④ 結果<span class="bf">Result.dc.html</span></header><div class="frame" data-key="Result"><div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：與第一屏同一個頭 -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">影響力是肌肉，練了就有</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <!-- 一、總分 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;text-align:center;">
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;margin-bottom:12px;">你的健檢結果</div>
+      <div style="font-size:13px;color:#6E4A3C;margin-bottom:4px;">尚未解鎖的影響力</div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:5px;">
+        <div style="font-size:52px;font-weight:700;color:#C6603A;line-height:1;">795</div>
+        <div style="font-size:17px;color:#6E4A3C;">/ 1000</div>
+      </div>
+      <div style="font-size:13px;color:#6E4A3C;">吸引 × 信任 × 專業 × 推進　4 大肌肉</div>
+    </div>
+
+    <!-- 二、雷達圖＋12 小肌群 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:14px;">
+        <svg viewBox="0 0 288 260" width="288" height="260" style="max-width:100%;" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="144,38 232,126 144,214 56,126" fill="none" stroke="#E6DACF" stroke-width="1"></polygon>
+          <polygon points="144,67 203,126 144,185 85,126" fill="none" stroke="#E6DACF" stroke-width="1"></polygon>
+          <polygon points="144,97 173,126 144,155 115,126" fill="none" stroke="#E6DACF" stroke-width="1"></polygon>
+          <line x1="144" y1="126" x2="144" y2="38" stroke="#E6DACF" stroke-width="1"></line>
+          <line x1="144" y1="126" x2="232" y2="126" stroke="#E6DACF" stroke-width="1"></line>
+          <line x1="144" y1="126" x2="144" y2="214" stroke="#E6DACF" stroke-width="1"></line>
+          <line x1="144" y1="126" x2="56" y2="126" stroke="#E6DACF" stroke-width="1"></line>
+          <polygon points="144,62 197,126 144,185 103,126" fill="rgba(198,96,58,.16)" stroke="#C6603A" stroke-width="2" stroke-linejoin="round"></polygon>
+          <circle cx="144" cy="62" r="4" fill="#AF5433"></circle>
+          <circle cx="197" cy="126" r="4" fill="#5C7464"></circle>
+          <circle cx="144" cy="185" r="4" fill="#54718D"></circle>
+          <circle cx="103" cy="126" r="4" fill="#8E682B"></circle>
+          <text x="144" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#AF5433">吸引 73</text>
+          <text x="240" y="130" text-anchor="start" font-size="13" font-weight="600" fill="#5C7464">信任 60</text>
+          <text x="144" y="238" text-anchor="middle" font-size="13" font-weight="600" fill="#54718D">專業 67</text>
+          <text x="48" y="130" text-anchor="end" font-size="13" font-weight="600" fill="#8E682B">推進 47</text>
+        </svg>
+        <div style="font-size:13px;color:#8A7266;">點各塊肌肉可以看分數</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:600;color:#AF5433;">吸引肌肉</div>
+            <div style="font-size:22px;font-weight:700;color:#AF5433;line-height:1;">73</div>
+          </div>
+          <div style="background:#F0E3DB;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#C6603A;height:4px;border-radius:4px;width:73%;"></div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他開口</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">4</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他追問</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">4</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他記得</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C6603A;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#AF5433;">3</div></div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:600;color:#5C7464;">信任肌肉</div>
+            <div style="font-size:22px;font-weight:700;color:#5C7464;line-height:1;">60</div>
+          </div>
+          <div style="background:#DCE7DE;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#6E8B77;height:4px;border-radius:4px;width:60%;"></div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他敢說</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他交心</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他當真</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8B77;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#5C7464;">3</div></div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:600;color:#54718D;">專業肌肉</div>
+            <div style="font-size:22px;font-weight:700;color:#54718D;line-height:1;">67</div>
+          </div>
+          <div style="background:#DDE6EE;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#6E8CA8;height:4px;border-radius:4px;width:67%;"></div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他釐清</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">4</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他有感</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">3</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他放心</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#6E8CA8;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#54718D;">3</div></div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:14px;padding:13px 14px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:600;color:#8E682B;">推進肌肉</div>
+            <div style="font-size:22px;font-weight:700;color:#8E682B;line-height:1;">47</div>
+          </div>
+          <div style="background:#F1E5CC;border-radius:4px;height:4px;margin-bottom:9px;"><div style="background:#C99A4E;height:4px;border-radius:4px;width:47%;"></div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他想要</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">3</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他敢要</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">2</div></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><div style="flex:1;font-size:15px;color:#6E4A3C;">讓他答應</div><div style="display:flex;gap:3px;"><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#C99A4E;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div><div style="width:9px;height:9px;border-radius:50%;background:#EDE4DA;"></div></div><div style="width:16px;text-align:right;font-size:15px;font-weight:600;color:#8E682B;">2</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 三、最大缺口＋最薄三塊 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:8px;">練起這塊肌肉，CP 值最高</div>
+      <div style="font-size:17px;font-weight:600;color:#4A1B0C;margin-bottom:6px;">推進肌肉是你現在最大的缺口</div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.8;">前面吸引、信任、專業都做對了，但對方就是沒有採取行動。你需要的是在對的時機給對方一個說「好」的理由，而不是等他自己決定。</div>
+      <div style="height:1px;background:#E6DAD1;margin:14px 0;"></div>
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:6px;">12 塊小肌群裡，你最薄的三塊</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;"><div style="flex:1;font-size:15px;font-weight:500;color:#4A1B0C;">1　讓他敢要</div><span style="background:#8E682B;color:#fff;font-size:13px;border-radius:20px;padding:2px 9px;">推進肌肉</span><div style="font-size:13px;color:#6E4A3C;width:44px;text-align:right;">2 / 5</div></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;"><div style="flex:1;font-size:15px;font-weight:500;color:#4A1B0C;">2　讓他答應</div><span style="background:#8E682B;color:#fff;font-size:13px;border-radius:20px;padding:2px 9px;">推進肌肉</span><div style="font-size:13px;color:#6E4A3C;width:44px;text-align:right;">2 / 5</div></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;"><div style="flex:1;font-size:15px;font-weight:500;color:#4A1B0C;">3　讓他敢說</div><span style="background:#5C7464;color:#fff;font-size:13px;border-radius:20px;padding:2px 9px;">信任肌肉</span><div style="font-size:13px;color:#6E4A3C;width:44px;text-align:right;">3 / 5</div></div>
+      <div style="font-size:13px;color:#6E4A3C;line-height:1.7;margin-top:8px;">進去之後就從這三塊開始練——不必四塊一起補。</div>
+    </div>
+
+    <!-- 四、第一個秘訣（模組1：測完當場給一個完整的、明天能用的秘訣＋署名） -->
+    <div style="background:#FFFFFF;border:1.5px solid #C99A4E;border-radius:20px;padding:18px 16px;">
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#8E682B;background:#F1E5CC;padding:5px 12px;border-radius:20px;margin-bottom:12px;">第 1 個秘訣・現在就能帶走</div>
+      <div style="font-size:17px;font-weight:600;color:#4A1B0C;line-height:1.6;margin-bottom:8px;">你最薄的「讓他敢要」——先讀水溫，不用猜</div>
+      <div style="font-size:15px;color:#5A3A2A;line-height:1.85;">明天挑一次對話，聊到一半主動問一句水溫——問了才知道他在想什麼，不用自己猜。他的擔心先被你問出來，才敢跟你要。</div>
+      <div style="border-left:3px solid #C99A4E;padding-left:14px;margin:13px 0;font-size:17px;font-weight:500;color:#4A1B0C;line-height:1.8;">「你怎麼知道他準備好了？」</div>
+      <div style="height:1px;background:#E6DAD1;margin:14px 0 12px;"></div>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <svg width="30" height="22" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+        <div style="font-size:13px;color:#6E4A3C;line-height:1.6;">這是<b style="color:#4A1B0C;">影響力健身房</b>的第一個秘訣——裡面還有兩個，免費。</div>
+      </div>
+    </div>
+
+    <!-- 五、強項組合 × 甜蜜路徑 -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:10px;">你的強項組合 × 最省力的路徑</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <span style="background:#AF5433;color:#fff;font-size:15px;font-weight:600;border-radius:20px;padding:3px 12px;">吸引肌肉</span>
+        <span style="background:#54718D;color:#fff;font-size:15px;font-weight:600;border-radius:20px;padding:3px 12px;">專業肌肉</span>
+        <span style="background:#F0E3DB;color:#6E4A3C;font-size:15px;border-radius:20px;padding:3px 12px;">信任肌肉 待提升</span>
+        <span style="background:#F0E3DB;color:#6E4A3C;font-size:15px;border-radius:20px;padding:3px 12px;">推進肌肉 待提升</span>
+      </div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;line-height:1.5;margin-bottom:10px;">知識型內容 × 課程產品</div>
+      <div style="font-size:15px;color:#5A3A2A;line-height:1.9;white-space:pre-line;">① 持續輸出有深度的內容，吸引肌肉帶流量、專業肌肉讓人覺得你很懂
+② 累積一群「覺得你很厲害」的追蹤者
+③ 推出課程或工作坊（不需要深度信任就能成交）
+④ 課程體驗本身幫你建立信任肌肉，之後再升級高單價</div>
+      <div style="height:1px;background:#E6DAD1;margin:13px 0;"></div>
+      <div style="font-size:13px;font-weight:700;color:#6E4A3C;letter-spacing:.03em;margin-bottom:6px;">弱項不用補，用這個替代</div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.9;white-space:pre-line;">信任肌肉弱 → 靠出現頻率建熟悉感，常出現 = 類信任，不靠深聊
+推進肌肉弱 → 用稀缺名額＋截止日期讓環境幫你推進，不用自己開口</div>
+    </div>
+
+    <!-- 六、唯一出口：進館（雙鉤：夥伴在練同一塊＋第二個秘訣免費） -->
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="font-size:15px;color:#5A3A2A;line-height:1.85;margin-bottom:13px;">現在健身房裡就有夥伴在練「讓他敢要」這一塊。你的結果會直接變成你的第一份練習清單。</div>
+      <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:16px;text-align:center;">
+        <div style="font-size:17px;font-weight:600;">進影響力健身房，開始練</div>
+        <div style="font-size:13px;color:rgba(247,241,236,.72);margin-top:3px;">免費・第 2 個秘訣在裡面</div>
+      </div>
+    </div>
+
+    <!-- 品牌 footer -->
+    <div style="text-align:center;font-size:13px;color:#8A7266;letter-spacing:1px;padding-top:2px;">影響力健身房 · ATPIFit</div>
+
+  </div>
+</div></div></section>
+<section class="board" data-file="Form.dc.html"><header class="bt">⑤ 留資（結果之後）<span class="bf">Form.dc.html</span></header><div class="frame" data-key="Form"><div style="display:flex;flex-direction:column;width:390px;background:#EFE6DE;box-sizing:border-box;">
+
+  <!-- 頁頭：與第一屏同一個頭 -->
+  <div style="background:#E6DACF;padding:16px 16px 13px;display:flex;align-items:center;gap:11px;">
+    <svg width="40" height="30" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"></path><path d="M48 -10 L48 10 Q48 22 36 22"></path><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"></path><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"></path></g><circle cx="-21" cy="0" r="4.5" fill="#C6603A"></circle><circle cx="-7" cy="0" r="4.5" fill="#6E8B77"></circle><circle cx="7" cy="0" r="4.5" fill="#6E8CA8"></circle><circle cx="21" cy="0" r="4.5" fill="#C99A4E"></circle></svg>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:#4A1B0C;letter-spacing:.04em;">影響力健檢</div>
+      <div style="font-size:13px;color:#C6603A;margin-top:3px;letter-spacing:.02em;">影響力是肌肉，練了就有</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;padding:20px 16px 26px;">
+
+    <div style="background:#F7F1EC;border-radius:20px;padding:18px 16px;">
+      <div style="display:inline-block;font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;margin-bottom:12px;">最後一步・可跳過</div>
+      <div style="font-size:22px;font-weight:700;color:#4A1B0C;line-height:1.55;">要不要把這份結果存起來？</div>
+      <div style="font-size:15px;color:#6E4A3C;line-height:1.85;margin-top:10px;">留下 Email，這份健檢結果會寄一份給你——之後再測，可以跟這次比較，看肌肉有沒有長。</div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">姓名</div>
+          <input type="text" placeholder="請輸入姓名" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">Email</div>
+          <input type="email" placeholder="請輸入 Email" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#6E4A3C;margin-bottom:5px;">職業／身份</div>
+          <input type="text" placeholder="請選擇" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E6DACF;border-radius:12px;padding:12px 13px;font-size:15px;color:#4A1B0C;font-family:inherit;">
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
+        <div style="background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:15px;text-align:center;font-size:17px;font-weight:600;">存起來，寄一份給我</div>
+        <div style="background:transparent;border:1px solid #C9B6A8;color:#6E4A3C;border-radius:14px;padding:13px;text-align:center;font-size:15px;font-weight:600;">不用了，直接進健身房</div>
+      </div>
+      <div style="font-size:13px;color:#8A7266;line-height:1.7;text-align:center;margin-top:10px;">不留也完全不影響——結果你已經看到了。</div>
+    </div>
+
+  </div>
+</div></div></section>
+</div>
+
+<div id="notes">
+  <h2>畫布註記（唯讀・給你當上下文）</h2>
+  <div class="note">改版重點（照你拍板的「行動優先」）<br><br>① hero 主張句放大成整頁唯一的大字時刻<br>② 「16題・約3分鐘・免費・不留資料」四顆膠囊搬到按鈕前——冷流量沒有簡報鋪墊，畫面自己回答「為什麼值得花3分鐘」<br>③ CTA 拉進第一屏，情境卡/見證往下收成輔佐材料<br>④ 底部同一顆按鈕再出現一次（同一個動作，不算第二顆CTA）</div>
+<div class="note">視覺全面對齊 30-App介面規範<br><br>· 四階色層：#E6DACF 頭條 → #EFE6DE 底 → #F7F1EC 卡 → #FFF 內卡（層次感第一來源）<br>· 字級只留四級 13/15/17/22 ＋一個 28 hero<br>· Noto Sans TC（原頁沒載字型）<br>· 「測完你會拿到」用 ATPI 四色左色條分段——四色只當資訊圖層，不進版面<br>· 頁頭＝logo＋影響力健檢＋slogan當品牌繫帶（頁頭窄，用短名；全名「溝通影響力健檢」留給要交代「在檢查什麼」的場合）</div>
+<div class="note">第二屏（說明頁）改版重點<br><br>① 訴求從「溝通變現」切成「影響力」——標題與四塊肌肉的「不夠時」例句全部改成溝通結果（原版的掏錢／成交例句超出 10-15% 變現額度）<br>② 四張卡主句＝字典結果句：讓他想靠近／讓他願意說／讓他要找你／讓他願意動<br>③ 「12 題只問具體發生過的事」保留——16 題＝前 2 題設定＋12 題肌肉＋後 2 題基本資料<br><br>🔄 2026-09-03 改名：標題原為「影響力，是四塊溝通肌肉一起出力」，直接替換會變同語反覆（影響力…影響力肌肉），改寫成「你的影響力肌肉，有四塊」</div>
+<div class="note">見證換人說明<br><br>雅雯（成交率4倍）換成王偉翔（到府按摩師）——demo.html 當時就因為「變現訴求對路人過度承諾」把雅雯/阿澤換掉，這裡沿用同一先例。<br><br>兩則都是 📷 有截圖的逐字見證，一字沒改。<br><br>每一塊都可以直接點進去改字，改完跟我說，我把定稿落回真的測驗頁面。</div>
+<div class="note">③④⑤ 三屏是新畫的，路人整條流程照模組1定案：開場 → 說明 → 16題 → 結果 → 留資 → 進健身房<br><br>【③題目】示意第4題（吸引｜讓他追問），五個1–5錨點、選中態、底下提醒「想不出實例就選沒做到」<br><br>【④結果】分數全是示意（推進最弱47）。新增「第1個秘訣」卡＝模組1「測完當場給一個完整秘訣」＋署名（A3補法：招式要有主人）。秘訣內容取自 judgement.js 的讓他敢要（讀水溫）。強項組合／甜蜜路徑文案照 atpi-core.js 原文，還帶變現詞——要不要為路人版改寫，等你裁<br><br>【⑤留資】照定案移到結果之後：理由改成「把結果存起來，下次比較」，可跳過、跳過不影響<br><br>✅ 已裁定：總分卡「尚未解鎖的影響力 795/1000」——2026-09-03 改名後「影響力」升格成正式主詞，這個先前待議的措辭反而變成正解，定案不動<br><br>⏳ 還沒裁：甜蜜路徑區塊的變現文案（照 atpi-core.js 原文抄的，仍帶變現詞），要不要為路人版改寫<br><br>🔄 2026-09-03 改名同步：五屏頁頭改短名「影響力健檢」、slogan 改字典 S1「影響力是肌肉，練了就有」、hero 改「影響力不是天賦，是四塊可以練的肌肉」、館名一律「影響力健身房」。Main 的「日常溝通｜說話有份量」保留——溝通仍是合法品類／場景詞</div>
+</div>
+
+<script>
+// 走訪 DOM，把「直接含文字」的元素標成可編輯——這樣結構不會被改壞，只有字能動。
+const SKIP = new Set(['SCRIPT','STYLE','SVG','PATH','CIRCLE','LINE','POLYGON','INPUT','BR']);
+const store = [];
+
+document.querySelectorAll('.frame').forEach(frame => {
+  const key = frame.dataset.key;
+  let n = 0;
+  frame.querySelectorAll('*').forEach(el => {
+    if (SKIP.has(el.tagName.toUpperCase())) return;
+    if (el.closest('svg')) return;
+    // 只認「自己身上就有非空白文字節點」的元素
+    const hasOwnText = [...el.childNodes].some(
+      c => c.nodeType === 3 && c.textContent.trim().length > 0
+    );
+    if (!hasOwnText) return;
+    const id = key + ':' + (n++);
+    el.setAttribute('data-edit', id);
+    el.setAttribute('contenteditable', 'plaintext-only');
+    el.spellcheck = false;
+    store.push({ id, file: key + '.dc.html', el, original: el.innerText });
+  });
+});
+
+const byId = Object.fromEntries(store.map(s => [s.id, s]));
+const countEl = document.getElementById('count');
+const exportBtn = document.getElementById('export');
+
+function changed() {
+  return store.filter(s => s.el.innerText.trim() !== s.original.trim());
+}
+function refresh() {
+  const c = changed();
+  store.forEach(s => s.el.classList.toggle(
+    'dirty', s.el.innerText.trim() !== s.original.trim()
+  ));
+  countEl.textContent = c.length ? `已改 ${c.length} 處` : '尚未修改';
+  exportBtn.disabled = c.length === 0;
+}
+
+document.getElementById('canvas').addEventListener('input', refresh);
+
+exportBtn.addEventListener('click', () => {
+  const payload = {
+    生成時間: new Date().toISOString(),
+    說明: '把這支檔交給 AI，他會把修改落回對應的 .dc.html',
+    修改: changed().map(s => ({
+      檔案: s.file,
+      id: s.id,
+      原文: s.original.trim(),
+      改成: s.el.innerText.trim()
+    }))
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '畫布修改.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+});
+
+const zoom = document.getElementById('zoom'), canvas = document.getElementById('canvas');
+zoom.addEventListener('input', () => {
+  const z = zoom.value / 100;
+  canvas.style.transform = `scale(${z})`;
+  canvas.style.width = (100 / z) + '%';
+  document.getElementById('zv').textContent = zoom.value + '%';
+});
+
+const toggle = document.getElementById('toggle');
+toggle.addEventListener('click', () => {
+  document.body.classList.toggle('marks');
+  toggle.textContent = document.body.classList.contains('marks') ? '隱藏虛線' : '顯示虛線';
+});
+
+refresh();
+</script>
+</body>
+</html>
