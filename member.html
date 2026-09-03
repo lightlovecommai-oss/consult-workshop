@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>溝通健身房</title>
-<meta name="apple-mobile-web-app-title" content="溝通健身房">
+<title>影響力健身房</title>
+<meta name="apple-mobile-web-app-title" content="影響力健身房">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#E6DACF">
 <link rel="apple-touch-icon" href="icon2-180.png">
 <link rel="icon" type="image/png" href="icon2-192.png">
 <link rel="manifest" href="manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:title" content="溝通健身房">
-<meta property="og:description" content="溝通是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
+<meta property="og:title" content="影響力健身房">
+<meta property="og:description" content="影響力是肌肉，只會越練越強。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
 <meta property="og:image" content="https://lightlovecommai-oss.github.io/consult-workshop/og-image.png">
 <meta property="og:url" content="https://lightlovecommai-oss.github.io/consult-workshop/member.html">
 <meta name="twitter:card" content="summary_large_image">
@@ -173,14 +173,14 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   <div class="tb">
     <div class="tb-r">
       <svg width="30" height="22" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A"/><circle cx="-7" cy="0" r="5" fill="#6E8B77"/><circle cx="7" cy="0" r="5" fill="#6E8CA8"/><circle cx="21" cy="0" r="5" fill="#C99A4E"/></svg>
-      <div class="tb-n">溝通健身房</div>
+      <div class="tb-n">影響力健身房</div>
       <div class="tb-d" id="joinday">—</div>
     </div>
     <div class="tb-s">練好溝通，你就有影響力</div>
   </div>
 
   <div class="bd" id="bd">
-    <div class="loading"><div class="spin"></div>載入你的溝通肌肉…</div>
+    <div class="loading"><div class="spin"></div>載入你的影響力肌肉…</div>
   </div>
 </div>
 
@@ -243,17 +243,22 @@ function demoState() {
              muscle:mk, pts:1, date:ago(i), week:weekStr(new Date(ago(i))),
              target:target || "", rel:rel || "", reaction:reaction || "", note:note || "" };
   }
+  /* ?demo=1 預設當會員（跟改版前行為一致）；加 &member=0 可以看體驗客會少什麼 */
+  var member = new URLSearchParams(location.search).get("member") !== "0";
   return {
     lineId:"DEMO", name:"Amy", team:"",
-    /* ?demo=1 預設當會員（跟改版前行為一致）；加 &member=0 可以看體驗客會少什麼 */
-    member: new URLSearchParams(location.search).get("member") !== "0",
+    member: member,
     /* 體驗客的秘訣輪流靠這個；demo 用 &visits=3 之類的直接指定第幾次上線 */
     visits: Number(new URLSearchParams(location.search).get("visits")) || 1,
-    checkinLog:[ ck("T1",1,"陳大哥","工作","明顯有","「我早就感覺到了」"), ck("T2",2,"陳大哥","工作","超乎預期"),
-                 ck("P1",3,"陳大哥","工作","有一點"), ck("A2",3,"林小姐","客戶","沒特別"),
-                 ck("A1",4,"妹妹","家人","明顯有"), ck("T2",5,"妹妹","家人","超乎預期"),
-                 ck("A3",6,"妹妹","家人","有一點"),
-                 ck("T1",68,"陳大哥","工作","有一點","跟他講了工作的事，他只回「還好」") ],
+    /* 體驗客示範刻意只留一筆 68 天前的紀錄——夥伴頁那張「你上次練是…」推力卡靠它演
+       （模組2「推力＝他自己的時間軸」；多數體驗客本來就隔很久才回來，這才是真實樣貌） */
+    checkinLog: member
+      ? [ ck("T1",1,"陳大哥","工作","明顯有","「我早就感覺到了」"), ck("T2",2,"陳大哥","工作","超乎預期"),
+          ck("P1",3,"陳大哥","工作","有一點"), ck("A2",3,"林小姐","客戶","沒特別"),
+          ck("A1",4,"妹妹","家人","明顯有"), ck("T2",5,"妹妹","家人","超乎預期"),
+          ck("A3",6,"妹妹","家人","有一點"),
+          ck("T1",68,"陳大哥","工作","有一點","跟他講了工作的事，他只回「還好」") ]
+      : [ ck("T1",68,"陳大哥","工作","有一點","跟他講了工作的事，他只回「還好」") ],
     revenueLog:[],
     evalLog:[ {muscle:"A1",score:3,source:"quiz",date:ago(20),week:""},
               {muscle:"A2",score:2,source:"self",date:ago(6),week:""},
@@ -387,11 +392,17 @@ function focusMuscle(){
      會員在最弱2塊大肌肉(6個小肌群)裡自己挑、有「換一個」（模組2/3規格的分野，兩邊池子不一樣）
    ②看不到教練解盤卡/三個月驗收卡
    社群完整內容沒做，是因為沒有真的內容/資料可以撐，硬做會變成編假資料，寧可先不做。 */
+/* 免費講座報名連結——連結生出來就填這裡（比照 join.html 的 PAYUNI_URL：空字串＝次鈕不出現，
+   不放假連結）。模組2規格的 CTA 是「主鈕 99＋次鈕免費講座」，次鈕等這個值。 */
+var FREE_TALK_URL = "";
 function ctaCard(t){
   return '<div class="cw" style="border:1px solid #E6DAD1;">'
     + '<div class="pill" style="margin-bottom:12px;">會員才看得到</div>'
     + '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">' + t + '</div>'
     + '<a href="join.html" style="display:block;text-align:center;margin-top:13px;background:#4A1B0C;color:#F7F1EC;border-radius:14px;padding:14px;font-size:15px;font-weight:600;text-decoration:none;min-height:44px;box-sizing:border-box;">看看會員方案 NT$99／月</a>'
+    + (FREE_TALK_URL
+        ? '<a href="' + FREE_TALK_URL + '" style="display:block;text-align:center;margin-top:6px;color:#6E4A3C;font-size:13px;text-decoration:underline;padding:12px;min-height:44px;box-sizing:border-box;">還不確定？先來聽一場免費講座</a>'
+        : '')
     + '</div>';
 }
 function focusTaskInfo(){
@@ -414,6 +425,10 @@ function weekDates_(){
 }
 
 /* ══ 分頁 1：夥伴（打開的第一屏——團體感、陪伴感）══ */
+function lastPracticeDate_(){
+  if (!S.checkinLog.length) return null;
+  return S.checkinLog.map(function(e){ return normDate(e.date); }).sort().slice(-1)[0];
+}
 function gymHTML(){
   var thisMonth = S.checkinLog.filter(function(e){ return weekStr(new Date(e.date)).slice(0,4) === weekStr().slice(0,4); }).length;
   var withNote = S.checkinLog.filter(function(e){ return e.reaction && e.note; }).slice(-1)[0];
@@ -424,6 +439,18 @@ function gymHTML(){
     + '<div class="av" style="background:#C6603A;">陳</div><div class="av" style="background:#6E8B77;">林</div>'
     + '<div class="av" style="background:#6E8CA8;">王</div><div class="av" style="background:#C99A4E;">+</div></div>'
     + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">夥伴都在練<span class="mock">示意</span><br>你的紀錄會同步一份到館裡</div></div></div>';
+
+  /* 體驗客的推力＝他自己的時間軸（模組2 🔴陪伴不比較）：只跟他自己的上次比，
+     不搬別人出來（❌「小美練 5 天你只有 1 天」）。7 天內有練就不出現。 */
+  if (!S.member) {
+    var lastD = lastPracticeDate_();
+    if (lastD && (Date.now() - new Date(lastD + "T12:00:00").getTime()) / 86400000 >= 7) {
+      h += '<div class="cw"><div style="font-size:15px;color:#4A1B0C;line-height:1.95;">'
+        + '你上次練是 <b style="color:#C6603A;">' + esc_(timeAgo(lastD)) + '</b>。<br>'
+        + '影響力是肌肉——它不會自己長，但<b>只要練，就只會越練越強</b>。</div>'
+        + '<button class="sub" style="margin-top:13px;" onclick="go(\'today\')">看今天的秘訣</button></div>';
+    }
+  }
 
   /* 兩層動態流：有打字＝大卡片可鼓勵／純點擊＝一行——沒人打字這頁也要會動（A5） */
   h += '<div class="feed-h">夥伴最近在練什麼</div>';
@@ -498,7 +525,7 @@ function todayHTML(){
     h += '<div class="tip-h">這塊還沒有現成的練習腳本，先照你自己的方式試一次，記下對方的反應就好。</div>';
   }
   h += '<div class="sign">' + '<span style="font-size:13px;">💪</span>'
-    + '<div>這是<b style="color:#4A1B0C;">溝通健身房</b>給你的練習提示。</div></div>';
+    + '<div>這是<b style="color:#4A1B0C;">影響力健身房</b>給你的練習提示。</div></div>';
   h += done
     ? '<div class="done-badge">今天已經練過了 ✓</div>'
     : '<button class="sub" id="btnPractice">練溝通</button>'
@@ -710,7 +737,7 @@ function meHTML(){
   var h = S.member ? reviewHTML() : "";
   if (!S.member) h += ctaCard('教練解盤、三個月驗收都是會員才看得到——那是有人陪你看紀錄，不是自動算出來的分數。');
 
-  h += '<div class="cd"><div style="font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:16px;">你的四塊溝通肌肉</div>';
+  h += '<div class="cd"><div style="font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:16px;">你的四塊影響力肌肉</div>';
   h += DORD.map(function(k){
     var np = dimScoreNowPrev(S, k), v = np.now;
     var word = dimStatusWord(v);
