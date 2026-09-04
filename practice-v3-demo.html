@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>練習頁 v3・結構 demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 練習頁 v3 結構 demo（獨立檔，不碰 member.html）═══
+   給老師拍板用的三個提案，全部做成真的可以按：
+   ①第一屏只有「今天這一招」＋一顆大鈕（教學細節收進摺疊、換一個縮成小圖示）
+   ②記錄＝兩步：對誰講 → 他有沒有回應
+   ③完成時刻＝地圖跳出來、今天那塊亮起＋動畫＋骨句（全貌感從門面搬到獎勵時刻）
+   資料是寫死的示意（講故事），拍板後才照這個結構動 member.html。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:22px 24px 40px;}
+.top{display:flex;align-items:center;margin-bottom:26px;}
+.pill{font-size:12px;font-weight:700;letter-spacing:1px;color:#993C1D;background:#F0E3DB;border-radius:20px;padding:4px 12px;}
+.swap{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid #E6DAD1;background:#fff;color:#8A7266;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .25s;}
+.swap:active{transform:rotate(180deg) scale(.92);}
+
+.kicker{font-size:13px;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
+.big{font-size:44px;font-weight:900;line-height:1.15;letter-spacing:1px;}
+.how{font-size:16px;color:#5A3A2A;line-height:1.85;margin-top:12px;}
+.how b{color:#C6603A;font-weight:700;}
+.quote{margin-top:16px;background:#fff;border-radius:16px;padding:15px 16px 15px 18px;position:relative;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.quote::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(180deg,#C6603A,#C99A4E);}
+.quote-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
+.quote-t{font-size:15px;color:#4A1B0C;line-height:1.8;}
+
+.more{margin-top:14px;}
+.more-h{display:flex;align-items:center;gap:6px;font-size:13.5px;color:#8A7266;cursor:pointer;padding:8px 0;user-select:none;}
+.more-h .chev{transition:transform .3s;}
+.more.open .chev{transform:rotate(180deg);}
+.more-b{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1);}
+.more.open .more-b{max-height:400px;}
+.mrow{display:flex;gap:10px;font-size:13.5px;line-height:1.8;color:#5A3A2A;padding:7px 0;}
+.mrow b{flex-shrink:0;color:#993C1D;font-weight:700;width:74px;}
+
+.go{margin-top:22px;width:100%;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:18px;font-size:18px;font-weight:700;font-family:inherit;cursor:pointer;min-height:60px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s,box-shadow .15s;}
+.go:active{transform:scale(.97);box-shadow:0 3px 8px rgba(198,96,58,.2);}
+.go-s{margin-top:10px;text-align:center;font-size:13px;color:#8A7266;}
+
+.week{display:flex;gap:8px;justify-content:center;margin:30px 0 6px;}
+.wd{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8A7266;background:#EFE5DC;transition:all .3s;}
+.wd.did{background:#C6603A;color:#fff;font-weight:700;}
+.wd.today{background:#fff;border:1.5px dashed #C6603A;color:#C6603A;font-weight:700;}
+.week-s{text-align:center;font-size:12.5px;color:#8A7266;margin-bottom:26px;}
+
+.mapwrap{opacity:.55;transition:opacity .4s;}
+.mapwrap.lit{opacity:1;}
+.map-h{font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:10px;}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.cell{border-radius:10px;padding:8px 4px;text-align:center;font-size:11px;line-height:1.4;color:#8A7266;background:#fff;border:1px solid #EFE5DC;transition:all .4s;}
+.cell .d{width:7px;height:7px;border-radius:50%;margin:0 auto 4px;background:#D9C6B8;transition:all .4s;}
+.cell.core{grid-column:span 2;font-weight:700;color:#4A1B0C;}
+.cell.on{border-color:#C6603A;color:#4A1B0C;font-weight:700;}
+.cell.on .d{background:#C6603A;}
+.cell.pop{animation:cellpop .7s cubic-bezier(.34,1.56,.64,1);border-color:#C6603A;box-shadow:0 0 0 4px rgba(198,96,58,.18);color:#4A1B0C;font-weight:700;}
+.cell.pop .d{background:#C6603A;transform:scale(1.4);}
+@keyframes cellpop{0%{transform:scale(1);}45%{transform:scale(1.18);}100%{transform:scale(1);}}
+
+/* 底部記錄 sheet */
+.veil{position:fixed;inset:0;background:rgba(74,27,12,.35);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;}
+.veil.on{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:460px;margin:0 auto;background:#FDF6F0;border-radius:22px 22px 0 0;padding:22px 24px 34px;transform:translateY(105%);transition:transform .42s cubic-bezier(.32,.72,.25,1);}
+.sheet.on{transform:translateY(0);}
+.sh-bar{width:38px;height:4px;border-radius:4px;background:#D9C6B8;margin:0 auto 18px;}
+.sh-q{font-size:17px;font-weight:700;margin-bottom:14px;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{font-size:14px;color:#4A1B0C;background:#fff;border:1px solid #E6DAD1;border-radius:20px;padding:9px 16px;cursor:pointer;transition:all .18s;}
+.chip:active{transform:scale(.94);}
+.chip.sel{background:#C6603A;border-color:#C6603A;color:#fff;font-weight:700;}
+
+/* 完成時刻 overlay */
+.win{position:fixed;inset:0;z-index:60;background:rgba(247,241,236,.96);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .35s;}
+.win.on{opacity:1;pointer-events:auto;}
+.win-card{max-width:400px;width:100%;text-align:center;transform:scale(.86);transition:transform .5s cubic-bezier(.34,1.56,.64,1);}
+.win.on .win-card{transform:scale(1);}
+.win-check{width:64px;height:64px;border-radius:50%;background:#C6603A;color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;animation:checkpop .6s cubic-bezier(.34,1.56,.64,1);}
+@keyframes checkpop{0%{transform:scale(0);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+.win-t{font-size:22px;font-weight:900;margin-bottom:4px;}
+.win-s{font-size:14px;color:#6E4A3C;margin-bottom:18px;}
+.win-map{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 30px rgba(74,27,12,.08);}
+.win-bone{margin:18px 0 16px;font-size:15px;font-weight:500;color:#4A1B0C;line-height:1.8;opacity:0;transition:opacity .6s .5s;}
+.win.on .win-bone{opacity:1;}
+.win-btn{background:#4A1B0C;color:#fff;border:0;border-radius:16px;padding:13px 30px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin:0 auto 18px;width:64px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <span class="pill">今天的練習</span>
+    <div class="swap" onclick="alert('demo：換一個（縮成小圖示、不主張換）')" title="換一個">⟳</div>
+  </div>
+
+  <div class="kicker">基 本 功</div>
+  <div class="big" id="skillName">講故事</div>
+  <div class="how">把想講的<b>道理</b>，換成<b>一件發生過的事</b>講出來。</div>
+
+  <div class="quote">
+    <div class="quote-k">開口就用這句</div>
+    <div class="quote-t">「我跟你說一件事——之前有一次＿＿，後來＿＿。」</div>
+  </div>
+
+  <div class="more" id="more">
+    <div class="more-h" onclick="document.getElementById('more').classList.toggle('open')">
+      多看一點 <span class="chev">▾</span>
+    </div>
+    <div class="more-b">
+      <div class="mrow"><b>對誰練</b><span>今天任何一個你想讓他懂一件事的人——家人、同事、客戶都行。</span></div>
+      <div class="mrow"><b>關鍵</b><span>故事要有人、有畫面、有轉折。道理讓他自己從故事裡撿走。</span></div>
+      <div class="mrow"><b>怎樣算成了</b><span>他聽完自己講出那個道理，或接著講起他自己的故事。</span></div>
+      <div class="mrow"><b>沒成怎麼辦</b><span>換一件更小、更具體、有畫面的事再講一次。</span></div>
+    </div>
+  </div>
+
+  <button class="go" id="goBtn" onclick="openSheet()">做完了 → 記錄</button>
+  <div class="go-s">兩下就好：對誰講的 · 他有沒有回應</div>
+
+  <div class="week">
+    <div class="wd did">一</div><div class="wd did">二</div><div class="wd">三</div>
+    <div class="wd did">四</div><div class="wd today" id="wdToday">五</div><div class="wd">六</div><div class="wd">日</div>
+  </div>
+  <div class="week-s">這 7 天練了 3 次——沒練的日子不扣</div>
+
+  <div class="mapwrap" id="mapwrap">
+    <div class="map-h">你的影響力地圖</div>
+    <div class="map" id="map"></div>
+  </div>
+
+</div>
+
+<div class="veil" id="veil" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sh-bar"></div>
+  <div id="step1">
+    <div class="sh-q">對誰講的？</div>
+    <div class="chips">
+      <div class="chip" onclick="pickWho(this)">家人</div>
+      <div class="chip" onclick="pickWho(this)">朋友</div>
+      <div class="chip" onclick="pickWho(this)">同事</div>
+      <div class="chip" onclick="pickWho(this)">客戶</div>
+    </div>
+  </div>
+  <div id="step2" style="display:none;">
+    <div class="sh-q">他有沒有回應？</div>
+    <div class="chips">
+      <div class="chip" onclick="finish(true)">有回應</div>
+      <div class="chip" onclick="finish(false)">還沒回應</div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-card">
+    <div class="win-check">✓</div>
+    <div class="win-t">今天的肌肉，練到了</div>
+    <div class="win-s" id="winS">第 4 次 · 講故事</div>
+    <div class="win-map">
+      <div class="map" id="winMap"></div>
+    </div>
+    <div class="win-bone" id="winBone">影響力是肌肉，只會越練越強。</div>
+    <div class="rule4"></div>
+    <button class="win-btn" onclick="closeWin()">回到今天</button>
+  </div>
+</div>
+
+<script>
+/* 地圖：2 基本功（跨欄）＋12 小肌群。lit＝之前練過的、pop＝今天剛點亮的 */
+var CELLS = [
+  { n:"講故事", core:true, id:"story" }, { n:"問問題", core:true },
+  { n:"讓他想聽" }, { n:"讓他心動", on:true }, { n:"讓他放心" }, { n:"讓他敢說" },
+  { n:"讓他信你", on:true }, { n:"讓他懂你" }, { n:"讓他服你" }, { n:"讓他要你" },
+  { n:"讓他行動" }, { n:"讓他跟隨" }, { n:"讓他推薦" }, { n:"讓他回來" }
+];
+function mapHTML(popStory){
+  return CELLS.map(function(c){
+    var cls = "cell" + (c.core ? " core" : "") + (c.on ? " on" : "") + (popStory && c.id === "story" ? " pop" : "");
+    return '<div class="' + cls + '"><div class="d"></div>' + c.n + '</div>';
+  }).join("");
+}
+document.getElementById("map").innerHTML = mapHTML(false);
+
+var sheet = document.getElementById("sheet"), veil = document.getElementById("veil");
+function openSheet(){ sheet.classList.add("on"); veil.classList.add("on");
+  document.getElementById("step1").style.display = ""; document.getElementById("step2").style.display = "none"; }
+function closeSheet(){ sheet.classList.remove("on"); veil.classList.remove("on"); }
+function pickWho(el){
+  el.classList.add("sel");
+  setTimeout(function(){
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "";
+  }, 260);
+}
+function finish(replied){
+  closeSheet();
+  document.getElementById("winS").textContent = "第 4 次 · 講故事" + (replied ? "" : " · 沒回應也算練");
+  setTimeout(function(){
+    document.getElementById("winMap").innerHTML = mapHTML(true);
+    document.getElementById("win").classList.add("on");
+  }, 380);
+}
+function closeWin(){
+  document.getElementById("win").classList.remove("on");
+  /* 回到頁面：今天圈打勾、底部地圖亮起今天那塊、按鈕變完成態 */
+  var wd = document.getElementById("wdToday"); wd.classList.remove("today"); wd.classList.add("did");
+  document.getElementById("map").innerHTML = mapHTML(true);
+  document.getElementById("mapwrap").classList.add("lit");
+  var g = document.getElementById("goBtn");
+  g.textContent = "✓ 今天練完了"; g.style.background = "#6E8B77"; g.onclick = null;
+  document.querySelector(".go-s").textContent = "明天見——明天練：問問題";
+}
+</script>
+</body>
+</html>

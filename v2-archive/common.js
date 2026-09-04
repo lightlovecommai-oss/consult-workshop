@@ -1,0 +1,703 @@
+var LIFF_ID = "2010316474-wmb1ODe0";
+var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
+
+/* ── 4 大肌肉定義 ──
+   k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
+   不是硬性滿分——投入% 永遠逼近 100 不爆表，所以可跨多 workshop 無限加總、加 workshop 免校準。
+   k 是軟旋鈕，待真實數據微調，抓錯只影響曲線胖瘦不會頂死。 */
+/* name＝正式維度名。productkit 字典 2026-08-16 定案一律叫「〇〇肌肉」不叫「〇〇力」
+   （「力」是天賦語氣＝有或沒有，「肌肉」是可練語氣＝練了就長，扣品牌命門「停練就萎縮」）。
+   result＝會員模式的結果句（字典「兩種語言」條），真相在 atpi-core.js 的 DIM_RESULT。 */
+/* color＝原版（填色／≥19px 粗體用）。textColor＝深版（<19px 的字用，過 WCAG）；沒給的維度
+   dimTextColor() 會自動退回 color。soft＝淡底（軌道／膠囊／tint）。
+   三組色值真相＝productkit 30-App介面規範 §5／《_交接-2026-09-01-完整簡報.md》§7，
+   四維全部同一張表，A 不再是例外——§7 表格明列 A 現況 #e8734a ✗「暖底用了霓虹」，
+   跟 T/P/I 同病同治。⚠️ 唯一還沒拍板的是「測驗頁面行動色」要不要跟著換（§12 待老師拍板第2點），
+   那是 comconverttest 的 CTA 按鈕色，跟這裡 ATPI 資訊圖層的 A 色是兩件事，不衝突。 */
+var DIMS = {
+  A: {name:"吸引肌肉", desc:"別人主動想靠近你",     color:"#C6603A", textColor:"#AF5433", soft:"#F3D9CD", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
+  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#6E8B77", textColor:"#5C7464", soft:"#DCE7DE", key:"team",     k:6,  inner:"真誠・心口合一"},
+  P: {name:"專業肌肉", desc:"別人理解並買你的服務", color:"#6E8CA8", textColor:"#54718D", soft:"#DDE6EE", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
+  I: {name:"推進肌肉", desc:"別人聽你的話採取行動", color:"#C99A4E", textColor:"#8E682B", soft:"#F1E5CC", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
+};
+/* DORD、calcPotential、COMBO_PATH 已搬到共用檔 atpi-core.js（此檔案的 HTML 需先引入它） */
+
+/* ── 計分校準常數（要調就改這裡，等真實數據累積後再校準）──
+   核心哲學（2026-08-28 裁決 D5A）：**能力分數只由行為證據算**——打卡動作、練習紀錄。
+   成交結果不得回饋進分數：拿成交回推 A/T/P/I、再用 A/T/P/I 去預測「變現潛力」是循環論證。
+   每維能力 ＝ 投入%（飽和曲線），沒有第二個乘數。
+   成交改走 marketValidation()，當「市場驗證」**獨立顯示**，是外部驗證欄位，不乘進任何分數。 */
+var TARGET_AMOUNT = 3000000; // 市場驗證的金額分母＝累計成交 300 萬（對齊畢業錨點）
+var TARGET_COUNT  = 5;       // 市場驗證的筆數分母（防一張大單灌水，要反覆簽得下來）
+var VALID_FLOOR   = 0.5;     // ⚠️ 舊「保底驗證係數」：只剩 legacyFactor 用來重算/對照歷史快照，禁止再乘進能力分
+
+/* ── 每日／每週的完成上限（跨所有 workshop 每種節奏的每期上限）── */
+var CADENCE_CFG = {
+  daily:  {cap:3, caption:"每天最多算 3 項，多做也不加分，明天可重新選"},
+  weekly: {cap:2, caption:"每週最多算 2 項，下週重新開放"}
+};
+
+
+/* 徽章已升級成榮譽系統（4 大肌肉分級 + 努力 + 變現），目錄在 atpi-core.js 的 HONORS。 */
+
+/* ── 稱號階梯（綁「變現潛力 0-1000」，不是個人積分）──
+   角色卡的稱號靠 calcPotential(A×T×P×I) 決定，四塊都是「練出來的」投入分——
+   所以稱號跟著練動、不跟著成交動（D5A：成交不回饋進分數）。四塊越均衡，潛力抬得越快。
+   門檻是軟旋鈕，待真實潛力分佈再校準。 */
+var POTENTIAL_TIERS = [
+  {min:0,   icon:"🌱", title:"初露鋒芒", next:"衝到變現潛力 120，晉升「嶄露頭角」"},
+  {min:120, icon:"✨", title:"嶄露頭角", next:"衝到變現潛力 300，晉升「獨當一面」"},
+  {min:300, icon:"🔥", title:"獨當一面", next:"衝到變現潛力 550，晉升「變現高手」"},
+  {min:550, icon:"💎", title:"變現高手", next:"衝到變現潛力 800，晉升「變現大師」"},
+  {min:800, icon:"👑", title:"變現大師", next:"你已站上變現金字塔頂端，聚焦長期合作與規模化"}
+];
+function potentialTier(pot) {
+  var t = POTENTIAL_TIERS[0];
+  POTENTIAL_TIERS.forEach(function(l){ if (pot >= l.min) t = l; });
+  return t;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   任務設定：全部資料驅動，來自 Google Sheet 的 tasks 分頁（不再寫死）。
+   每筆 task：{workshopId, key, cadence, dim, pts, name, icon, needReview}
+   cadence：once（專案）｜special（需審核）｜daily（每日池）｜weekly（每週池）
+   ═══════════════════════════════════════════════════════════ */
+var WORKSHOPS = [];    // [{id, name}]
+var TASKS = [];        // [{workshopId, key, cadence, dim, pts, name, icon, needReview}]
+var ENROLLMENTS = [];  // [{lineId, workshopId}]
+var WS_HONORS = [];    // 各 workshop 專屬榮譽（來自 (遊戲)榮譽 分頁，資料驅動）
+
+/* 正規化 Sheet 帶回的專屬榮譽（型別清一清）。 */
+function normalizeWsHonors(arr) {
+  return (arr || []).map(function(h){
+    return { id: String(h.honorId || h.id || ""), workshopId: String(h.workshopId || ""),
+             metric: String(h.metric || ""), value: Number(h.value) || 0,
+             icon: String(h.icon || "🎖️"), name: String(h.name || ""), desc: String(h.desc || ""),
+             tier: String(h.tier || ""),
+             celebrate: (h.celebrate === true || String(h.celebrate).toLowerCase() === "true"),
+             scope: String(h.scope || "workshop") };
+  }).filter(function(h){ return h.id && h.name; });
+}
+
+async function loadConfig() {
+  try {
+    var r = await fetch(SHEET_API + "?action=config");
+    var d = await r.json();
+    if (d.status === "ok") {
+      WORKSHOPS = d.workshops || [];
+      TASKS = (d.tasks || []);
+      ENROLLMENTS = d.enrollments || [];
+      WS_HONORS = normalizeWsHonors(d.honors);
+    }
+  } catch (e) { console.log("loadConfig error:", e); }
+}
+
+/* 某 workshop、某節奏的任務清單 */
+function tasksFor(workshopId, cadence) {
+  return TASKS.filter(function(t){ return t.workshopId === workshopId && t.cadence === cadence; });
+}
+/* 某任務 key（在某 workshop 內）的定義 */
+function taskDef(workshopId, key) {
+  return TASKS.find(function(t){ return t.workshopId === workshopId && t.key === key; }) || null;
+}
+/* 某學員報名的 workshop（依 enrollments，比對 WORKSHOPS 取名稱） */
+function enrolledWorkshops(lineId) {
+  var ids = ENROLLMENTS.filter(function(e){ return e.lineId === lineId; }).map(function(e){ return e.workshopId; });
+  return WORKSHOPS.filter(function(w){ return ids.indexOf(w.id) > -1; });  // 只回開通的；一門都沒有＝空（呼叫端會導去 showcase）
+}
+
+/* ── 日期／週次小工具 ── */
+function todayStr(d) {
+  d = d || new Date();
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+}
+/* Sheet 讀回的日期可能是 Date 物件字串，統一 normalize 成本地 YYYY-MM-DD，才能跟 todayStr 比對 */
+function normDate(v) {
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return String(v).slice(0, 10);
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+}
+function weekStr(d) {
+  d = d || new Date();
+  var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  var yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  var weekNo = Math.ceil((((t - yearStart) / 86400000) + 1) / 7);
+  return t.getUTCFullYear() + "-W" + weekNo;
+}
+/* 每日／每週任務池改成「中午12:00才換日／換週」，不是午夜——半夜到中午前還算前一天／上週，
+   給晚睡的人一點緩衝。做法：把「現在」往回撥 12 小時，再用一般午夜起算的算法即可。
+   只用在每日/每週任務的打卡日期與比對，不影響回報成交、也不影響畫面上顯示的真實日期。 */
+function taskCycleNow_() {
+  return new Date(Date.now() - 12 * 60 * 60 * 1000);
+}
+function taskDayStr() { return todayStr(taskCycleNow_()); }
+function taskWeekStr() { return weekStr(taskCycleNow_()); }
+
+/* ═══════════════════════════════════════════════════════════
+   打卡紀錄 checkinLog 是投入的唯一真相來源（每筆帶 workshopId/cadence/dim/pts）。
+   能力用 dim 加總、跨所有 workshop——別的 workshop 的任務不在本專案定義也算得到。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 把 dim 欄拆成維度陣列：支援單維「A」或多維「A,T,P」(逗號/頓號/點/斜線/空白皆可分隔)。 */
+function taskDims_(dimStr) {
+  return String(dimStr || "").split(/[,.、\/\s]+/).filter(function(x){ return DORD.indexOf(x) > -1; });
+}
+/* 該維累積投入分（跨所有 workshop、所有節奏）。多維任務的 pts 平均分攤到各維（3分×A,T,P＝各+1）。 */
+function investDim(s, dim) {
+  return s.checkinLog.reduce(function(sum, e){
+    var ds = taskDims_(e.dim);
+    return ds.indexOf(dim) > -1 ? sum + e.pts / ds.length : sum;
+  }, 0);
+}
+
+/* 每維能力＝ 投入%（飽和曲線），**只吃行為證據**（打卡／練習紀錄），不乘任何成交項。
+   投入% = 100 × 累積分 /(累積分 + k)：k 分＝50%、3k＝75%，永遠逼近 100 不爆表——
+   跨多 workshop 無限加總也不頂死。
+
+   ⚠️ 2026-08-28 裁決 D5A：這裡曾經乘上 validationFactor（由成交金額×筆數算出）。
+   那等於「用成交回推能力、再用能力預測變現」＝循環論證，已拆除。
+   成交現在只走 marketValidation()，在畫面上獨立顯示，不回饋進分數。 */
+function calcDims(s) {
+  var sc = {};
+  DORD.forEach(function(k) {
+    var invest = investDim(s, k);
+    sc[k] = Math.round(100 * invest / (invest + DIMS[k].k));
+  });
+  return sc;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   12 小肌群層（v2）
+   ⚠️ 小肌群有「兩個數字」，刻意不混：
+     ① 體格分 1–5 ＝ 能力（測驗基線／週測自評／教練校準）→ 解盤念的是這個
+     ② 投入分     ＝ 努力（打卡累積）              → 看他有沒有在練
+   兩個交叉才判讀得出來：低分+沒練→給標準功課；低分+練很多→要客製 debug（升單訊號）。
+   定義來源＝productkit 字典 ATPI 條；判讀規則見 productkit 27§8.7。
+   ═══════════════════════════════════════════════════════════ */
+
+/* muscle 欄拆成小肌群陣列：支援單一「A1」或多個「A1,T2」(逗號/頓號/點/斜線/空白皆可)。 */
+function taskMuscles_(muscleStr) {
+  return String(muscleStr || "").toUpperCase().split(/[,.、\/\s]+/)
+    .filter(function(x){ return MORD.indexOf(x) > -1; });
+}
+/* 一筆打卡紀錄帶到的小肌群：優先用紀錄自己的 muscle 欄；
+   舊資料沒有這欄時，回查任務池的定義（跟 calcDims 對舊資料的處理同一個路子）。 */
+function logMuscles_(e) {
+  var ms = taskMuscles_(e.muscle);
+  if (ms.length) return ms;
+  var t = taskDef(e.workshopId, e.taskKey);
+  return t ? taskMuscles_(t.muscle) : [];
+}
+
+/* ── ② 投入分：某小肌群的累積投入（跨所有 workshop）──
+   多小肌群任務的 pts 平均分攤，跟 investDim 同一個規則。 */
+function investMuscle(s, mk) {
+  return s.checkinLog.reduce(function(sum, e){
+    var ms = logMuscles_(e);
+    return ms.indexOf(mk) > -1 ? sum + e.pts / ms.length : sum;
+  }, 0);
+}
+/* 小肌群投入%（飽和曲線，同 calcDims 的公式）。
+   半滿點 k ＝ 該大肌肉的 k ÷ 3——這樣「三塊各投入 x」時，小肌群% 會跟大肌肉% 對得起來，
+   不是另外拍一組數字（DIMS[].k 之後校準，這裡自動跟著動）。 */
+function muscleHalfPoint_(mk) {
+  var d = dimOfMuscle(mk);
+  return d ? DIMS[d].k / 3 : 3;
+}
+function calcMuscleInvest(s) {
+  var out = {};
+  MORD.forEach(function(mk) {
+    var v = investMuscle(s, mk), k = muscleHalfPoint_(mk);
+    out[mk] = { pts: Math.round(v * 10) / 10, pct: Math.round(100 * v / (v + k)) };
+  });
+  return out;
+}
+/* 這個月（或任一區間）某小肌群練了幾次——判讀「低分但練很多」要用。 */
+function muscleTrainCount(s, mk, sinceDateStr) {
+  return s.checkinLog.filter(function(e){
+    if (sinceDateStr && normDate(e.date) < sinceDateStr) return false;
+    return logMuscles_(e).indexOf(mk) > -1;
+  }).length;
+}
+
+/* ── ① 體格分 1–5：取每塊小肌群「最新一筆」評分 ──
+   evalLog 每筆：{muscle, score, source, date, week}
+   source＝quiz（測驗基線）｜self（週測自評）｜coach（教練校準）
+   同一天有多筆時 coach 覆蓋 self 覆蓋 quiz（字典：健檢報告以校準分為準）。 */
+var EVAL_SOURCE_RANK = { quiz: 0, self: 1, coach: 2 };
+function calcMuscleScores(s) {
+  var best = {};
+  (s.evalLog || []).forEach(function(e) {
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0) return;
+    var sc = Number(e.score);
+    if (!(sc >= 1 && sc <= 5)) return;
+    var d = normDate(e.date), rank = EVAL_SOURCE_RANK[e.source] || 0;
+    var cur = best[mk];
+    if (!cur || d > cur.d || (d === cur.d && rank >= cur.rank)) {
+      best[mk] = { score: sc, d: d, rank: rank, source: e.source || "self" };
+    }
+  });
+  var out = {};
+  MORD.forEach(function(mk){ if (best[mk]) out[mk] = best[mk].score; });
+  return out;   // 沒量過的小肌群不給預設值——「還沒量」和「量出來很低」是兩件事
+}
+/* 體格分的來源標記（要在 UI 上標「教練校準」還是「自評」時用） */
+function muscleScoreMeta(s) {
+  var meta = {}, seen = {};
+  (s.evalLog || []).forEach(function(e) {
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0) return;
+    var d = normDate(e.date), rank = EVAL_SOURCE_RANK[e.source] || 0, cur = seen[mk];
+    if (!cur || d > cur.d || (d === cur.d && rank >= cur.rank)) {
+      seen[mk] = { d: d, rank: rank };
+      meta[mk] = { source: e.source || "self", date: d };
+    }
+  });
+  return meta;
+}
+/* 大肌肉的體格分（1–5）＝該維 3 小肌群平均（字典規則），跟 calcDims 的 0–100 投入分是兩把尺。 */
+function calcDimScores5(s) { return dimFromMuscles(calcMuscleScores(s)); }
+
+/* 最弱三塊（解盤層 1「指出最低三塊」／自動派這一組都用它）。
+   還沒量過的小肌群不會被選中——沒量到不等於很弱。 */
+function weakestThree(s) { return weakestMuscles(calcMuscleScores(s), 3); }
+
+/* 判讀提示（27§8.7 層 2 的程式面）：低分 + 有沒有在練 → 兩種完全不同的處置。
+   回傳 [{muscle, score, count, verdict}]，verdict＝"untrained"（給標準功課）｜"plateau"（要客製 debug＝升單訊號）。
+   PLATEAU_MIN_COUNT 是軟旋鈕，待真實數據校準。 */
+var PLATEAU_MIN_COUNT = 8;
+function readWeakest(s, sinceDateStr) {
+  var scores = calcMuscleScores(s);
+  return weakestThree(s).map(function(mk) {
+    var c = muscleTrainCount(s, mk, sinceDateStr);
+    return { muscle: mk, name: MUSCLES[mk].name, score: scores[mk], count: c,
+             verdict: c >= PLATEAU_MIN_COUNT ? "plateau" : "untrained" };
+  });
+}
+
+/* ── 目前連續天數（v2）──
+   規則＝**開練一個動作就算今天有練**（不看做滿幾個、不看是哪個 workshop）。
+   從今天往回數；今天還沒練不算斷（給他一天的緩衝，斷在昨天才歸零）。
+   跟 bestStreakDays（歷史最佳）不同，這是「現在連幾天」。 */
+function currentStreak(s) {
+  var days = {};
+  s.checkinLog.forEach(function(e){ days[normDate(e.date)] = true; });
+  var cur = new Date(), n = 0;
+  if (!days[todayStr(cur)]) cur = new Date(cur.getTime() - 86400000);  // 今天沒練 → 從昨天起算
+  while (days[todayStr(cur)]) { n++; cur = new Date(cur.getTime() - 86400000); }
+  return n;
+}
+/* 入館第 N 天＝第一筆打卡至今（沒有紀錄就是第 1 天） */
+function daysSinceJoin(s) {
+  if (!s.checkinLog.length) return 1;
+  var first = s.checkinLog.map(function(e){ return normDate(e.date); }).sort()[0];
+  var d = Math.floor((new Date(todayStr()) - new Date(first)) / 86400000);
+  return Math.max(1, d + 1);
+}
+
+/* 個人總分（所有 workshop、所有節奏的打卡分加總）——驅動等級／血條 */
+function totalScore(s) {
+  return s.checkinLog.reduce(function(sum, e){ return sum + e.pts; }, 0);
+}
+
+/* ── 市場驗證（外部驗證欄位・獨立顯示，不進能力分數）──
+   原本叫 validationFactor，被 calcDims 乘進 A/T/P/I ＝ 循環論證；2026-08-28 D5A 改名並改用途。
+   算法本身原封不動保留（金額達成 × 筆數達成，相乘擋一張大單灌水），只是不再回饋進分數。
+   回傳 {amount, count, amtAchieve, cntAchieve, index, pct, legacyFactor}：
+     index/pct ＝ 現行對外口徑的市場驗證度 0~1 / 0~100（沒成交就是 0，不再有保底 50%）
+     legacyFactor ＝ 舊係數（含 VALID_FLOOR 保底），只留給重算／對照舊快照，禁止乘進分數。 */
+function marketValidation(s) {
+  var amount = revenueTotal(s), count = (s.revenueLog || []).length;
+  var amtAchieve = Math.min(1, amount / TARGET_AMOUNT);
+  var cntAchieve = Math.min(1, count / TARGET_COUNT);
+  var index = amtAchieve * cntAchieve;
+  return {
+    amount: amount, count: count,
+    amtAchieve: amtAchieve, cntAchieve: cntAchieve,
+    index: index, pct: Math.round(index * 100),
+    legacyFactor: VALID_FLOOR + (1 - VALID_FLOOR) * index
+  };
+}
+
+/* ── 某 workshop 內：今天／本週已完成的每日／每週任務 key、已完成的一次性任務 ──
+   換日／換週都改中午12:00才算（見 taskDayStr/taskWeekStr），不是午夜。 */
+function dailyDoneToday(s, workshopId) {
+  var today = taskDayStr();
+  return s.checkinLog.filter(function(e){ return e.cadence === "daily" && e.date === today && e.workshopId === workshopId; })
+                     .map(function(e){ return e.taskKey; });
+}
+function weeklyDoneThisWeek(s, workshopId) {
+  var wk = taskWeekStr();
+  return s.checkinLog.filter(function(e){ return e.cadence === "weekly" && e.week === wk && e.workshopId === workshopId; })
+                     .map(function(e){ return e.taskKey; });
+}
+/* 一次性（once／special）：回傳 {taskKey: true} 的完成表 */
+function onceDoneMap(s, workshopId) {
+  var m = {};
+  s.checkinLog.forEach(function(e){
+    if ((e.cadence === "once" || e.cadence === "special") && e.workshopId === workshopId) m[e.taskKey] = true;
+  });
+  return m;
+}
+
+/* ── 打卡：樂觀更新 checkinLog，同時寫進 Sheet ──
+   每日／每週任務存的日期要跟 dailyDoneToday/weeklyDoneThisWeek 比對的基準一致，
+   所以也用 taskDayStr()（中午換日）；一次性任務用真實日期即可，不影響完成判斷。 */
+function doCheckin(s, task, workshopId, extra) {
+  var isPool = (task.cadence === "daily" || task.cadence === "weekly");
+  var d = isPool ? taskDayStr() : todayStr();
+  extra = extra || {};
+  s.checkinLog.push({
+    workshopId: workshopId, taskKey: task.key, cadence: task.cadence,
+    dim: task.dim, muscle: task.muscle || "", pts: task.pts,
+    date: d, week: weekStr(new Date(d)),
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    share: !!extra.share
+  });
+  postCheckin(s.lineId, task, workshopId, d, extra);
+}
+
+/* ── 回報成交（金額 + 當下四維快照，供走勢圖）──
+   ⚠️ 快照語意在 2026-08-28（D5A）換了：欄位還是 A/T/P/I，但存的是「當下練出來的投入分」，
+   不再是舊的「投入×驗證係數」。2026-08-28 以前寫進 Sheet 的舊列不動、不回頭改寫（歷史就是歷史），
+   所以走勢圖前段是舊口徑、後段是新口徑，跨那條線比較時要知道這件事。 */
+function addRevenue(s, amount, note, workshopId) {
+  var scores = calcDims(s);
+  s.revenueLog.push({
+    workshopId: workshopId || "", date: todayStr(), amount: amount, note: note || "",
+    A: scores.A, T: scores.T, P: scores.P, I: scores.I
+  });
+  postRevenue(s.lineId, amount, note, scores, workshopId);
+}
+function revenueTotal(s) {
+  return s.revenueLog.reduce(function(sum, e){ return sum + e.amount; }, 0);
+}
+/* 走勢圖金額換算成「萬」再畫（存的是「元」），跟 showcase 示範資料同單位 */
+function revenueTrendPoints(s) {
+  return s.revenueLog.map(function(e){ return {label:e.date, A:e.A, T:e.T, P:e.P, I:e.I, income: Math.round(e.amount/1000)/10}; });
+}
+
+/* ── 寫入 Google Sheet：text/plain 避開 CORS 預檢；樂觀更新，下次載入以 Sheet 為準 ── */
+function postToSheet(payload) {
+  return fetch(SHEET_API, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(payload)
+  }).catch(function(e){ console.log("postToSheet error:", e); });
+}
+function postCheckin(lineId, task, workshopId, dateStr, extra) {
+  extra = extra || {};
+  return postToSheet({
+    action: "checkin", lineId: lineId, workshopId: workshopId || "",
+    taskKey: task.key, cadence: task.cadence, dim: task.dim, muscle: task.muscle || "",
+    pts: task.pts, date: dateStr || todayStr(),
+    /* v2 會員模式：開練記的是「對方的反應」而不只是打勾（低摩擦守則：這三欄都可空） */
+    reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    /* share＝這筆願不願意被拿去館裡動態流用（v9 補「分享到館裡」死碼：以前 UI 有勾選、
+       這裡沒送、後端沒欄位，使用者以為分享了其實沒有）。館裡顯示時對象一律匿名，只留關係類型。 */
+    share: extra.share ? "1" : ""
+  });
+}
+/* ── 館裡的動態流（真資料，取代寫死的示範卡）──
+   後端只回傳 share=true 且有 reaction 的最近幾筆，對象已經匿名（只留 rel 關係類型，
+   不回傳 target 姓名）——不然「分享到館裡」變成把別人的名字公開給陌生人看。 */
+var GYM_MONTH_TOTAL = 0;   // 全館本月打卡總數（gymPosts 附帶回傳；舊後端沒這欄位＝維持 0，前端自己退回個人數字）
+var GYM_SLIM = [];         // 純點擊那層（沒打字沒勾分享）——一行小卡，只有名字＋肌肉＋反應
+var GYM_MONTH_TOP = null;  // 本月練最多的肌肉 {muscle, dim}（沒資料＝null，前端退回示意行）
+var GYM_MONTH_PEOPLE = 0;  // 本月有練的人數（distinct lineId）
+async function loadGymPosts(limit) {
+  try {
+    var r = await fetch(SHEET_API + "?action=gymPosts&limit=" + (limit || 12));
+    var d = await r.json();
+    if (d.status !== "ok") return [];
+    GYM_MONTH_TOTAL = Number(d.monthTotal) || 0;
+    GYM_SLIM = d.slim || [];
+    /* 舊制打卡只有維度沒有小肌群——有 dim 就算有真資料 */
+    GYM_MONTH_TOP = (d.monthTop && (d.monthTop.dim || d.monthTop.muscle)) ? d.monthTop : null;
+    GYM_MONTH_PEOPLE = Number(d.monthPeople) || 0;
+    return d.posts;
+  } catch (e) { console.log("loadGymPosts error:", e); return []; }
+}
+/* ── 體測：寫一筆小肌群評分（1–5）──
+   source＝self（會員週測）｜coach（教練校準）｜quiz（測驗基線，由 comconverttest 寫）
+   一次可送多筆：evals＝[{muscle:"A1", score:3}, ...] */
+function postMuscleEval(lineId, evals, source) {
+  var list = (evals || []).filter(function(e){
+    return MORD.indexOf(String(e.muscle || "").toUpperCase()) > -1 && e.score >= 1 && e.score <= 5;
+  }).map(function(e){
+    return { muscle: String(e.muscle).toUpperCase(), score: Number(e.score) };
+  });
+  if (!list.length) return Promise.resolve();
+  return postToSheet({
+    action: "eval", lineId: lineId, source: source || "self",
+    date: todayStr(), week: weekStr(), evals: list
+  });
+}
+/* 樂觀更新本地 evalLog，讓畫面立刻反映（下次載入以 Sheet 為準） */
+function applyMuscleEval(s, evals, source) {
+  var d = todayStr(), w = weekStr();
+  s.evalLog = s.evalLog || [];
+  (evals || []).forEach(function(e){
+    var mk = String(e.muscle || "").toUpperCase();
+    if (MORD.indexOf(mk) < 0 || !(e.score >= 1 && e.score <= 5)) return;
+    s.evalLog.push({ muscle: mk, score: Number(e.score), source: source || "self", date: d, week: w });
+  });
+}
+/* 這一週體測過了沒（決定第一頁要不要把主行動換成「今天量體格」） */
+function evaledThisWeek(s) {
+  var w = weekStr();
+  return (s.evalLog || []).some(function(e){ return e.source !== "quiz" && String(e.week) === w; });
+}
+function postRevenue(lineId, amount, note, scores, workshopId) {
+  return postToSheet({
+    action: "revenue", lineId: lineId, workshopId: workshopId || "", amount: amount, date: todayStr(), note: note || "",
+    scoreA: scores.A, scoreT: scores.T, scoreP: scores.P, scoreI: scores.I
+  });
+}
+/* ── 代幣兌換：伺服器端重算餘額，回傳 {status:"ok"} 或 {status:"error", message} ── */
+async function redeem(lineId, rewardId) {
+  try {
+    var r = await fetch(SHEET_API, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({ action: "redeem", lineId: lineId, rewardId: rewardId })
+    });
+    return await r.json();
+  } catch (e) {
+    console.log("redeem error:", e);
+    return { status: "error", message: "網路錯誤，請稍後再試" };
+  }
+}
+
+/* ── 讀回某學員的打卡＋成交紀錄 ── */
+async function loadLogs(userId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=logs&userId=" + encodeURIComponent(userId));
+    var d = await r.json();
+    if (d.status !== "ok") return {checkins: [], revenue: []};
+    var checkins = (d.checkins || []).map(function(c){
+      return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
+               dim: String(c.dim || ""), pts: Number(c.pts) || 0, date: normDate(c.date), week: weekStr(new Date(c.date)) };
+    });
+    var revenue = (d.revenue || []).map(function(e){
+      return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
+               A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
+    });
+    return {checkins: checkins, revenue: revenue};
+  } catch (e) {
+    console.log("loadLogs error:", e);
+    return {checkins: [], revenue: []};
+  }
+}
+
+/* ── 排行榜：後端彙總（各 workshop 各一張），回傳所有人的分數，跨人才公平 ── */
+async function loadLeaderboard(workshopId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=leaderboard&workshopId=" + encodeURIComponent(workshopId || ""));
+    var d = await r.json();
+    return d.status === "ok" ? d.rows : [];
+  } catch (e) {
+    console.log("loadLeaderboard error:", e);
+    return [];
+  }
+}
+
+/* ── Bootstrap：一通把整個儀表板需要的資料抓回來（取代 6 通分開呼叫，大幅降延遲）──
+   回傳 student/workshops/tasks/enrollments/checkins/revenue/selfEval/defaultWorkshop/leaderboard/team。 */
+async function loadBootstrap(userId, w) {
+  try {
+    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || ""));
+    var d = await r.json();
+    if (d.status !== "ok") return null;
+    d.checkins = (d.checkins || []).map(function(c){
+      return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
+               dim: String(c.dim || ""), muscle: String(c.muscle || ""), pts: Number(c.pts) || 0,
+               date: normDate(c.date), week: weekStr(new Date(c.date)),
+               reaction: String(c.reaction || ""), target: String(c.target || ""), rel: String(c.rel || ""), note: String(c.note || "") };
+    });
+    /* v2 體測紀錄（12 小肌群 1–5）。舊後端還沒部署時會是 undefined → 給空陣列，畫面顯示「還沒量」。 */
+    d.evals = (d.evals || []).map(function(e){
+      return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) || 0,
+               source: String(e.source || "self"), date: normDate(e.date), week: String(e.week || "") };
+    }).filter(function(e){ return MORD.indexOf(e.muscle) > -1 && e.score >= 1 && e.score <= 5; });
+    d.revenue = (d.revenue || []).map(function(e){
+      return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
+               A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
+    });
+    return d;
+  } catch (e) {
+    console.log("loadBootstrap error:", e);
+    return null;
+  }
+}
+
+/* ── 夥伴頁：該課程每位組員的努力指標（連續天數/本週完成率/投入分）── */
+async function loadTeam(workshopId) {
+  try {
+    var r = await fetch(SHEET_API + "?action=team&workshopId=" + encodeURIComponent(workshopId || ""));
+    var d = await r.json();
+    return d.status === "ok" ? d.members : [];
+  } catch (e) {
+    console.log("loadTeam error:", e);
+    return [];
+  }
+}
+
+/* ── 自評起點：讀回測驗自評 ATPI（只當對照顯示，不進計分）── */
+async function loadSelfEval(userId) {
+  try {
+    var r = await fetch(SHEET_API + "?userId=" + encodeURIComponent(userId));
+    var d = await r.json();
+    if (d.status !== "ok") return null;
+    return { A: Number(d.scoreA)||0, T: Number(d.scoreT)||0, P: Number(d.scoreP)||0, I: Number(d.scoreI)||0 };
+  } catch (e) {
+    console.log("loadSelfEval error:", e);
+    return null;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   榮譽系統 ctx：把本專案的打卡/成交聚合成 atpi-core 的 evalHonors 吃的正規化 ctx。
+   榮譽跨所有 workshop 合併算（跟雷達/潛力一致）——榮譽是「人」的屬性、跟著人走。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 最長連續打卡天數（best-ever，才不會因為斷過一次就熄滅歷史榮譽）。 */
+function bestStreakDays(s) {
+  var set = {};
+  s.checkinLog.forEach(function(e){ if (e.date) set[e.date] = 1; });
+  var dates = Object.keys(set).sort();
+  if (!dates.length) return 0;
+  var best = 1, run = 1;
+  for (var i = 1; i < dates.length; i++) {
+    var prev = new Date(dates[i-1] + "T00:00:00"), cur = new Date(dates[i] + "T00:00:00");
+    if (Math.round((cur - prev) / 86400000) === 1) { run++; if (run > best) best = run; }
+    else run = 1;
+  }
+  return best;
+}
+/* 某一週內打卡過的最多不同天數（best-ever，供「全勤週」判定）。 */
+function bestWeekDays(s) {
+  var weeks = {};
+  s.checkinLog.forEach(function(e){
+    if (!e.date) return;
+    var w = e.week || weekStr(new Date(e.date));
+    (weeks[w] = weeks[w] || {})[e.date] = 1;
+  });
+  var best = 0;
+  Object.keys(weeks).forEach(function(w){ var n = Object.keys(weeks[w]).length; if (n > best) best = n; });
+  return best;
+}
+/* 組出榮譽評估用 ctx（全域合併，跨所有 workshop）。 */
+function buildHonorCtx(s) {
+  var scores = calcDims(s);
+  /* D5A 之後能力分＝投入%，兩者同一把尺，所以 investPct 直接沿用 scores（別再各算一次會漂移）。
+     investPct.* 這個 metric 名字保留：Sheet 的專屬榮譽設定（如 tl_trust）是照名字對的。 */
+  var invPct = {};
+  DORD.forEach(function(k){ invPct[k] = scores[k]; });
+  var mv = marketValidation(s);
+  var wsSet = {};
+  s.checkinLog.forEach(function(e){ if (e.workshopId) wsSet[e.workshopId] = 1; });
+  return {
+    scores: scores,
+    potential: calcPotential(scores).unlocked,
+    revenueTotal: revenueTotal(s),
+    dealCount: s.revenueLog.length,
+    marketValidationPct: mv.pct,   // 外部驗證，獨立欄位——不進 scores/potential
+    checkinCount: s.checkinLog.length,
+    investPct: invPct,
+    dimsCovered: DORD.filter(function(k){ return investDim(s, k) > 0; }).length,
+    workshopsActive: Object.keys(wsSet).length,
+    streak: bestStreakDays(s),
+    bestWeekDays: bestWeekDays(s)
+  };
+}
+/* 已解鎖榮譽 id 陣列（核心目錄，全域）。 */
+function earnedHonors(s) { return evalHonors(buildHonorCtx(s)); }
+
+/* 排行榜列的稱號：後端帶回該人跨 workshop 的精簡 logs，這裡組成合成學員、
+   走跟本人一模一樣的 earnedHonors/pickTitle（單一真相，不另寫一套）。
+   預設稱號「見習學員」回空字串——版面只秀有料的人，才有識別/炫耀感。 */
+function titleForLogs(logs) {
+  if (!logs || !logs.checkins) return "";
+  var syn = {
+    lineId: "",
+    checkinLog: logs.checkins.map(function(c){
+      return { workshopId: c.workshopId || "", dim: c.dim || "", pts: Number(c.pts) || 0,
+               date: normDate(c.date), week: weekStr(new Date(c.date)) };
+    }),
+    revenueLog: (logs.revenue || []).map(function(r){ return { amount: Number(r.amount) || 0 }; })
+  };
+  var t = pickTitle(earnedHonors(syn));
+  return t === "見習學員" ? "" : t;
+}
+
+/* 只保留某 workshop 打卡/成交的「子學員」，餵給 buildHonorCtx 就得到該課 scoped ctx。 */
+function subStudent(s, wid) {
+  return {
+    lineId: s.lineId,
+    checkinLog: s.checkinLog.filter(function(e){ return e.workshopId === wid; }),
+    revenueLog: s.revenueLog.filter(function(e){ return (e.workshopId || "") === wid; }),
+    /* 體格是「人」的屬性、不綁 workshop（同 ATPI），所以不過濾、原樣帶過去 */
+    evalLog: s.evalLog || []
+  };
+}
+/* 評估各 workshop 專屬榮譽：scope=workshop 用該課過濾 ctx，否則用全域 ctx。
+   回傳每筆帶 {def, earned, wsName}，供成就頁渲染 + 慶祝彈窗收集 earned id。 */
+function evalWsHonors(s) {
+  var globalCtx = null, wsCtx = {};
+  return WS_HONORS.map(function(h) {
+    var ctx;
+    if (h.scope === "workshop") ctx = wsCtx[h.workshopId] || (wsCtx[h.workshopId] = buildHonorCtx(subStudent(s, h.workshopId)));
+    else ctx = globalCtx || (globalCtx = buildHonorCtx(s));
+    var wsName = (WORKSHOPS.find(function(w){ return w.id === h.workshopId; }) || {}).name || h.workshopId;
+    return { def: h, earned: honorMet(h, ctx), wsName: wsName };
+  });
+}
+/* ws honor id → def（慶祝彈窗查得到）。 */
+function wsHonorById(id) {
+  for (var i = 0; i < WS_HONORS.length; i++) if (WS_HONORS[i].id === id) return WS_HONORS[i];
+  return null;
+}
+/* 榮譽顯示名：4 大肌肉分級徽章要合成「吸引力・銀徽」，其餘用 name。 */
+function honorLabel(h) {
+  return h.cat === "dim" ? (DIMS[h.dim].name + "・" + h.tierLabel + "徽") : h.name;
+}
+
+/* ── 榮譽解鎖事件流（首頁他人快閃的真事件來源）── */
+var HONOR_FEED = [];  // [{lineId, name, honorId, honorName, icon, ts}]，時間新到舊
+
+/* 偵測到新解鎖時 POST 一筆事件（後端去重，一人一榮譽只記一次）。 */
+function postHonorEvent(lineId, h) {
+  return postToSheet({ action: "honorEvent", lineId: lineId, honorId: h.id,
+                       name: honorLabel(h), icon: h.icon || "🏅" });
+}
+/* 讀回最近的榮譽解鎖事件（bootstrap 已帶一份，這支供之後刷新用）。 */
+async function loadHonorFeed(limit) {
+  try {
+    var r = await fetch(SHEET_API + "?action=honorFeed&limit=" + (limit || 30));
+    var d = await r.json();
+    return d.status === "ok" ? d.events : [];
+  } catch (e) { console.log("loadHonorFeed error:", e); return []; }
+}
+
+/* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
+var STUDENTS = [];
+async function loadStudents() {
+  var sr = await fetch(SHEET_API + "?action=students");
+  var sd = await sr.json();
+  if (sd.status === "ok" && sd.students) {
+    STUDENTS = sd.students.map(function(s){
+      return {
+        lineId: s.lineId || s["LINE userId"],
+        name:   s.name   || s["姓名"],
+        team:   s.team   || s["團隊"],
+        enrolled: !!s.enrolled,
+        paidMember: !!s.paidMember,  // 「影響力健身房會員」手動勾選欄——member.html 拿這個分體驗客／會員
+        checkinLog: [], revenueLog: [], evalLog: [], selfEval: null
+      };
+    });
+  }
+}
