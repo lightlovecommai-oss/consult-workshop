@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>member demo・會員（溫暖）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 三頁串連大 demo・第 2 頁：member（溫暖）═══
+   人群習性＝會員：每天只有 30 秒、要習慣迴路、要同伴、要收集慾。
+   設計對策：①一天只給一招（不給清單）②兩下記完 ③累積只加不減（沒有斷簽懲罰）
+   ④肌肉圖鑑收集 ⑤夥伴在場感 ⑥明日預告 future pacing。資料全是示意。
+   串連 DNA：咖啡漸層在這頁升到半版（升級卡＝教練變近了）。
+   ← demo-quiz.html ／ → demo-pro.html */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:22px 24px 90px;}
+.blk{position:relative;margin-bottom:30px;}
+.tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#fff;background:#C99A4E;border-radius:10px;padding:2px 8px;z-index:5;}
+.mock{font-size:10px;color:#fff;background:#8A7266;border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1px;color:#8a6a1e;background:#F3E7CF;border-radius:20px;padding:4px 12px;}
+.cd{background:#fff;border-radius:16px;padding:17px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.sec{font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:11px;}
+.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin-top:14px;}
+.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;min-height:56px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s;}
+.go:active{transform:scale(.97);}
+
+/* m-1 門面：累積環（只加不減，沒有斷簽焦慮） */
+.hd{display:flex;align-items:center;gap:14px;}
+.ring{position:relative;width:74px;height:74px;flex-shrink:0;}
+.ring svg{transform:rotate(-90deg);}
+.ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-n{font-size:20px;font-weight:900;line-height:1;}
+.ring-l{font-size:9.5px;color:#8A7266;margin-top:2px;}
+.hd-t{font-size:22px;font-weight:900;line-height:1.4;}
+.hd-s{font-size:13px;color:#6E4A3C;margin-top:4px;line-height:1.7;}
+.hd-s b{color:#993C1D;}
+
+/* m-2 今天這一下：一天一招、兩下記完（可以真的點） */
+.today{border:1px solid #F3D9CD;background:linear-gradient(180deg,#FDF3EC,#fff 55%);border-radius:16px;padding:17px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.today-k{display:flex;align-items:center;gap:8px;}
+.today-m{font-size:12px;font-weight:700;color:#5C7464;background:#DCE7DE;border-radius:20px;padding:3px 10px;}
+.today-t{font-size:21px;font-weight:900;margin-top:10px;line-height:1.5;}
+.today-say{margin-top:10px;border-left:3px solid #C6603A;padding:2px 0 2px 13px;font-size:15px;line-height:1.9;}
+.today-say b{color:#993C1D;}
+.blank{display:inline-block;min-width:38px;border-bottom:1px solid #8A7266;height:1em;vertical-align:baseline;}
+.react{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.rc{padding:13px 8px;border-radius:14px;border:1px solid #E6DAD1;background:#fff;cursor:pointer;text-align:center;font-family:inherit;}
+.rc-e{font-size:21px;line-height:1;}
+.rc-t{font-size:12.5px;margin-top:5px;color:#4A1B0C;}
+.done-t{font-size:19px;font-weight:900;text-align:center;line-height:1.6;padding:8px 0 2px;}
+.done-s{font-size:13px;color:#6E4A3C;text-align:center;line-height:1.9;margin-top:6px;}
+.done-s b{color:#993C1D;}
+
+/* m-3 肌肉圖鑑：收集慾。解鎖格有色有名，灰格＝還沒解鎖（不是缺） */
+.dex{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.dx{border-radius:12px;padding:10px 8px;font-size:11.5px;line-height:1.5;text-align:center;border:1px solid transparent;}
+.dx-e{font-size:19px;line-height:1;margin-bottom:5px;}
+.dx.lock{background:#F1EBE5;color:#B9A99C;}
+.dx.hot{border-color:#C99A4E;background:#FBF4E4;font-weight:700;}
+.dx small{display:block;font-size:9.5px;margin-top:3px;font-weight:400;}
+
+/* m-4 關係火花 */
+.spark{display:flex;gap:11px;padding:11px 0;border-top:1px solid #EFE5DC;font-size:13.5px;line-height:1.8;}
+.spark:first-of-type{border-top:0;padding-top:2px;}
+.spark-d{flex-shrink:0;width:10px;height:10px;border-radius:50%;margin-top:8px;}
+.spark b{color:#993C1D;}
+
+/* m-5 夥伴在場感 */
+.live{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#6E8B77;flex-shrink:0;animation:blink 1.6s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-t{font-size:14px;line-height:1.7;}
+.live-t b{color:#5C7464;}
+.live-go{margin-left:auto;color:#C6603A;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.avs{display:flex;margin-top:12px;}
+.av{width:30px;height:30px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;margin-left:-7px;}
+.av:first-child{margin-left:0;}
+
+/* m-6 明日預告（future pacing） */
+.tmr{display:flex;align-items:center;gap:12px;}
+.tmr-d{flex-shrink:0;text-align:center;background:#F7F1EC;border-radius:12px;padding:9px 13px;}
+.tmr-dn{font-size:18px;font-weight:900;line-height:1;}
+.tmr-dl{font-size:10px;color:#8A7266;margin-top:3px;}
+.tmr-t{font-size:14.5px;font-weight:700;line-height:1.6;}
+.tmr-s{font-size:12.5px;color:#8A7266;margin-top:3px;}
+
+/* m-7 升級卡：咖啡漸層升到半版——教練變近了（串連 DNA） */
+.upg{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:19px 18px;color:#F7F1EC;}
+.upg-k{font-size:12px;letter-spacing:2px;color:#E8C89A;font-weight:700;}
+.upg-t{font-size:19px;font-weight:900;margin-top:9px;line-height:1.6;}
+.upg-li{display:flex;gap:9px;font-size:13.5px;line-height:1.85;margin-top:10px;color:rgba(247,241,236,.92);}
+.upg-li span:first-child{color:#E8C89A;flex-shrink:0;}
+.upg-b{display:block;text-align:center;margin-top:15px;background:#E8C89A;color:#4A1B0C;border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;}
+.upg-w{font-size:11.5px;color:rgba(247,241,236,.5);text-align:center;margin-top:9px;}
+
+.bone-end{font-size:14px;color:#4A1B0C;line-height:1.9;text-align:center;margin-top:26px;padding:0 8px;}
+.hop{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:2px;background:#4A1B0C;border-radius:22px;padding:4px;box-shadow:0 6px 20px rgba(74,27,12,.35);}
+.hop a{font-size:12px;font-weight:700;color:rgba(247,241,236,.65);text-decoration:none;padding:8px 14px;border-radius:18px;white-space:nowrap;}
+.hop a.on{background:#C6603A;color:#fff;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- m-1 門面：累積環＝只加不減。不是連續 N 天（會斷簽焦慮），是「這個月第 N 次」 -->
+  <div class="blk"><span class="tag">m-1</span>
+    <div class="hd">
+      <div class="ring">
+        <svg width="74" height="74" viewBox="0 0 74 74">
+          <circle cx="37" cy="37" r="32" fill="none" stroke="#EFE5DC" stroke-width="7"/>
+          <circle cx="37" cy="37" r="32" fill="none" stroke="#C6603A" stroke-width="7" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="81"/>
+        </svg>
+        <div class="ring-c"><div class="ring-n">12</div><div class="ring-l">次開練</div></div>
+      </div>
+      <div>
+        <div class="hd-t">午安，家豪。</div>
+        <div class="hd-s">這個月你已經開練 <b>12 次</b>——只會累積，不會歸零。<span class="mock">示意</span></div>
+      </div>
+    </div>
+    <div class="rule4"></div>
+  </div>
+
+  <!-- m-2 今天這一下：一天只給一招。兩下記完（點按鈕試試） -->
+  <div class="blk"><span class="tag">m-2</span>
+    <div class="today" id="today">
+      <div class="today-k"><span class="pill">今天這一下</span><span class="today-m">信任肌肉 · 讓他敢說</span></div>
+      <div class="today-t">今天，只問不勸。</div>
+      <div class="today-say">有人跟你抱怨的時候，忍住解法，只說：<br><b>「後來呢？<span class="blank"></span>的時候你是什麼感覺？」</b></div>
+      <button class="go" onclick="mStep2()">練了 → 記一下反應</button>
+      <div style="font-size:11.5px;color:#8A7266;text-align:center;margin-top:9px;">整個記錄只要兩下——不用寫日記</div>
+    </div>
+  </div>
+
+  <!-- m-3 肌肉圖鑑：收集慾。點亮的有 emoji 有名字，灰格＝還沒解鎖 -->
+  <div class="blk"><span class="tag">m-3</span>
+    <div class="cd">
+      <div class="sec">你的肌肉圖鑑 · 已點亮 5 / 12<span class="mock">示意</span></div>
+      <div class="dex">
+        <div class="dx" style="border-color:#C6603A;background:#FDF3EC;"><div class="dx-e">✨</div>讓他想聽<small style="color:#AF5433;">3 次</small></div>
+        <div class="dx" style="border-color:#C6603A;background:#FDF3EC;"><div class="dx-e">💓</div>讓他心動<small style="color:#AF5433;">1 次</small></div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx hot"><div class="dx-e">🗣</div>讓他敢說<small style="color:#8E682B;">今天練這塊</small></div>
+        <div class="dx" style="border-color:#6E8B77;background:#F2F6F3;"><div class="dx-e">🤝</div>讓他信你<small style="color:#5C7464;">4 次</small></div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx" style="border-color:#6E8CA8;background:#F1F5F9;"><div class="dx-e">💡</div>讓他服你<small style="color:#54718D;">2 次</small></div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+        <div class="dx lock"><div class="dx-e">🔒</div>還沒解鎖</div>
+      </div>
+      <div style="font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;">每練一次點亮一格。灰格不是你的問題——是還沒輪到它出場。</div>
+    </div>
+  </div>
+
+  <!-- m-4 關係火花：獎勵指向「有人因為你變好」，不是分數 -->
+  <div class="blk"><span class="tag">m-4</span>
+    <div class="cd">
+      <div class="sec">這週，有人因為你變好<span class="mock">示意</span></div>
+      <div class="spark"><div class="spark-d" style="background:#6E8B77;"></div><div>你只問不勸之後，<b>太太</b>把工作的委屈講完了——她說「跟你聊完比較睡得著」。</div></div>
+      <div class="spark"><div class="spark-d" style="background:#6E8CA8;"></div><div><b>老客戶</b>把你整理的那一頁轉給了他老闆。</div></div>
+      <div style="font-size:12.5px;color:#8A7266;margin-top:6px;line-height:1.7;">這一格不算分——它是你練下去真正的理由。</div>
+    </div>
+  </div>
+
+  <!-- m-5 夥伴在場感：現在進行式＋頭像堆＝館是活的 -->
+  <div class="blk"><span class="tag">m-5</span>
+    <div class="live">
+      <div class="live-dot"></div>
+      <div class="live-t">現在有 <b>3 位夥伴</b>在練信任肌肉<span class="mock">示意</span></div>
+      <div class="live-go">去鍛鍊 »</div>
+    </div>
+    <div class="cd" style="margin-top:10px;">
+      <div class="sec">這個月大家練最多的是 信任肌肉</div>
+      <div class="avs">
+        <div class="av" style="background:#C6603A;">林</div><div class="av" style="background:#6E8B77;">陳</div>
+        <div class="av" style="background:#6E8CA8;">吳</div><div class="av" style="background:#C99A4E;">黃</div>
+        <div class="av" style="background:#8A7266;">+2</div>
+      </div>
+      <div style="font-size:13px;color:#6E4A3C;margin-top:10px;line-height:1.8;">6 位夥伴這個月一起在練——你不是一個人在改變。</div>
+    </div>
+  </div>
+
+  <!-- m-6 明日預告：future pacing，讓明天打開 app 有理由 -->
+  <div class="blk"><span class="tag">m-6</span>
+    <div class="cd">
+      <div class="tmr">
+        <div class="tmr-d"><div class="tmr-dn">明</div><div class="tmr-dl">預告</div></div>
+        <div>
+          <div class="tmr-t">明天換練「讓他信你」——一句話讓人放下防備</div>
+          <div class="tmr-s">連著今天的只問不勸，剛好接得上</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- m-7 升級卡：咖啡漸層半版＝教練變近了。真連結到 pro demo -->
+  <div class="blk"><span class="tag">m-7</span>
+    <div class="upg">
+      <div class="upg-k">第二層 · 私人教練席</div>
+      <div class="upg-t">把 12 塊肌肉，<br>串成完整的一場成交。</div>
+      <div class="upg-li"><span>✓</span><span>甜蜜路徑四步全開——你最強兩塊組合出的變現打法</span></div>
+      <div class="upg-li"><span>✓</span><span>12 小肌群分數與判讀，教練陪你看</span></div>
+      <div class="upg-li"><span>✓</span><span>1v1 場邊教練，一週一次拆解你的真實對話</span></div>
+      <a class="upg-b" href="demo-pro.html">看看教練席長什麼樣 →</a>
+      <div class="upg-w">看看不用錢——門在這裡，你決定什麼時候走進來。</div>
+    </div>
+  </div>
+
+  <div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>
+
+</div>
+
+<div class="hop">
+  <a href="demo-quiz.html">測驗</a><a class="on" href="demo-member.html">會員</a><a href="demo-pro.html">私教</a>
+</div>
+
+<script>
+/* m-2 互動：兩下記完。第一下＝練了，第二下＝反應，然後直接慶祝＋圖鑑點亮提示 */
+function mStep2(){
+  document.getElementById("today").innerHTML =
+    '<div class="today-k"><span class="pill">今天這一下</span><span class="today-m">信任肌肉 · 讓他敢說</span></div>'
+    + '<div style="font-size:16px;font-weight:700;margin-top:12px;">對方有反應嗎？<span style="font-size:12px;color:#8A7266;font-weight:400;">點一下就好</span></div>'
+    + '<div class="react">'
+    + [["😌","沒特別"],["🙂","有一點"],["😃","明顯有"],["🤩","超乎預期"]].map(function(r,i){
+        return '<button class="rc" onclick="mDone(' + i + ')"><div class="rc-e">' + r[0] + '</div><div class="rc-t">' + r[1] + '</div></button>';
+      }).join("") + '</div>';
+}
+function mDone(i){
+  var good = i >= 2;
+  document.getElementById("today").innerHTML =
+    '<div style="text-align:center;font-size:34px;padding-top:6px;">' + (good ? "🌱" : "🌾") + '</div>'
+    + '<div class="done-t">' + (good ? "他接住了。" : "你講了。<br>他今天沒回應。") + '</div>'
+    + '<div class="done-s">' + (good
+        ? '這就是<b>信任肌肉在動</b>——圖鑑幫你點亮了「讓他敢說」。'
+        : '沒回應也是資料——記進去了，這塊肌肉一樣有練到。')
+    + '</div>'
+    + '<div style="font-size:12.5px;color:#8A7266;text-align:center;margin-top:12px;">明天預告：換練「讓他信你」→</div>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>quiz demo・路人／體驗客（溫暖）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 三頁串連大 demo・第 1 頁：quiz（溫暖）═══
+   人群習性＝路人/體驗客：滑手機、注意力短、怕被推銷。
+   設計對策：①不先留資 ②60秒承諾 ③每答一題立刻回饋 ④測完先給一句今天就能用的
+   ⑤全貌感地圖做 future pacing。資料全是示意。
+   串連 DNA：四色漸層線＝路；咖啡漸層＝教練——這頁只露一小卡（教練還很遠）。
+   → demo-member.html → demo-pro.html */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:22px 24px 90px;}
+.blk{position:relative;margin-bottom:30px;}
+.tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#fff;background:#C99A4E;border-radius:10px;padding:2px 8px;z-index:5;}
+.mock{font-size:10px;color:#fff;background:#8A7266;border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1px;color:#8a6a1e;background:#F3E7CF;border-radius:20px;padding:4px 12px;}
+.cd{background:#fff;border-radius:16px;padding:17px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.sec{font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:11px;}
+.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin-top:14px;}
+.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s;}
+.go:active{transform:scale(.97);}
+
+/* q-1 hero */
+.hero-t{font-size:28px;font-weight:900;line-height:1.35;margin-top:12px;}
+.hero-t em{font-style:normal;color:#C6603A;}
+.hero-s{font-size:14px;color:#6E4A3C;line-height:1.9;margin-top:10px;}
+.hero-meta{display:flex;gap:14px;margin-top:14px;font-size:12.5px;color:#8A7266;}
+.hero-meta b{color:#993C1D;}
+
+/* q-2 互動題卡 */
+.qbar{display:flex;gap:4px;margin-bottom:14px;}
+.qseg{flex:1;height:4px;border-radius:4px;background:#EFE5DC;transition:background .3s;}
+.qq{font-size:18px;font-weight:700;line-height:1.6;margin-bottom:14px;min-height:58px;}
+.qopt{width:100%;text-align:left;background:#F7F1EC;border:1px solid transparent;border-radius:14px;padding:15px 16px;font-size:15px;color:#4A1B0C;font-family:inherit;cursor:pointer;margin-bottom:8px;line-height:1.6;transition:all .15s;min-height:52px;}
+.qopt:active{transform:scale(.98);border-color:#C6603A;}
+.qtoast{font-size:13px;font-weight:700;text-align:center;padding:6px 0 0;height:26px;transition:opacity .3s;}
+
+/* q-3 體格單 reveal */
+.dim{margin-bottom:13px;}
+.dim-hd{display:flex;align-items:baseline;gap:8px;font-size:14px;font-weight:700;}
+.dim-hd small{font-weight:400;color:#8A7266;font-size:12px;}
+.dim-v{margin-left:auto;font-size:15px;font-variant-numeric:tabular-nums;}
+.dim-bar{height:8px;border-radius:8px;background:#EFE5DC;margin-top:6px;overflow:hidden;}
+.dim-bf{height:100%;border-radius:8px;width:0;transition:width 1s cubic-bezier(.2,.7,.3,1);}
+.peek{position:relative;margin-top:14px;border-radius:12px;overflow:hidden;}
+.peek-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;filter:blur(3px);opacity:.55;}
+.peek-c{background:#F7F1EC;border-radius:10px;padding:8px;font-size:11px;line-height:1.5;}
+.peek-ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#993C1D;text-align:center;line-height:1.7;}
+
+/* q-4 最有感的一塊 */
+.gift{border-left:4px solid #C6603A;background:linear-gradient(90deg,#FDF3EC,#fff 70%);border-radius:10px 16px 16px 10px;padding:15px 16px;}
+.gift-k{font-size:12px;font-weight:700;letter-spacing:1px;color:#AF5433;}
+.gift-t{font-size:19px;font-weight:900;margin-top:6px;}
+.gift-s{font-size:14px;line-height:1.9;margin-top:8px;color:#4A1B0C;}
+.gift-s b{color:#993C1D;}
+.blank{display:inline-block;min-width:38px;border-bottom:1px solid #8A7266;height:1em;vertical-align:baseline;}
+
+/* q-5 全貌感地圖 */
+.map{position:relative;padding-left:26px;}
+.map:before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
+.stn{position:relative;padding:9px 0 9px 6px;}
+.stn:before{content:"";position:absolute;left:-24px;top:16px;width:13px;height:13px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(74,27,12,.2);}
+.stn.here:before{background:#C6603A;animation:herepulse 1.8s infinite;}
+.stn.n2:before{background:#6E8B77;}
+.stn.n3:before{background:#6E8CA8;}
+.stn.n4:before{background:#C99A4E;}
+@keyframes herepulse{0%,100%{box-shadow:0 0 0 0 rgba(198,96,58,.4);}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
+.stn-t{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.stn-t .you{font-size:11px;color:#fff;background:#C6603A;border-radius:10px;padding:1px 8px;font-weight:700;}
+.stn-s{font-size:12.5px;color:#8A7266;margin-top:3px;line-height:1.7;}
+.stn a{color:#AF5433;font-weight:700;text-decoration:none;}
+
+/* q-6 分享卡 */
+.share{background:#4A1B0C;border-radius:16px;padding:18px;color:#F7F1EC;text-align:center;}
+.share-t{font-size:16px;font-weight:700;line-height:1.7;}
+.share-s{font-size:12.5px;color:rgba(247,241,236,.6);margin-top:8px;line-height:1.7;}
+.share-b{display:inline-block;margin-top:14px;background:#F7F1EC;color:#4A1B0C;border-radius:14px;padding:11px 26px;font-size:14px;font-weight:700;text-decoration:none;}
+
+/* 咖啡漸層＝教練。這頁只露一小卡：教練還很遠，但存在。 */
+.coach-mini{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:16px 17px;display:flex;gap:12px;align-items:flex-start;}
+.coach-av{width:38px;height:38px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.coach-q{font-size:14px;color:#F7F1EC;line-height:1.9;}
+.coach-q b{color:#E8C89A;}
+.coach-w{font-size:11.5px;color:rgba(247,241,236,.5);margin-top:6px;}
+
+.bone-end{font-size:14px;color:#4A1B0C;line-height:1.9;text-align:center;margin-top:26px;padding:0 8px;}
+
+/* demo 跳頁膠囊（三頁都有，抓元素用） */
+.hop{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:2px;background:#4A1B0C;border-radius:22px;padding:4px;box-shadow:0 6px 20px rgba(74,27,12,.35);}
+.hop a{font-size:12px;font-weight:700;color:rgba(247,241,236,.65);text-decoration:none;padding:8px 14px;border-radius:18px;white-space:nowrap;}
+.hop a.on{background:#C6603A;color:#fff;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- q-1 門面：好奇鉤子，不先留資、不推銷 -->
+  <div class="blk"><span class="tag">q-1</span>
+    <span class="pill">影響力健身房 · 免費體格檢測</span>
+    <div class="hero-t">為什麼有些人一開口，<br>別人就<em>想聽</em>？</div>
+    <div class="hero-s">不是天賦，是 <b>4 大影響力肌肉</b>——吸引、信任、專業、推進。60 秒測出你哪一塊最有感，<b>今天就能用</b>。</div>
+    <div class="hero-meta"><span>⏱ <b>60 秒</b></span><span>📱 不用留資料</span><span>🎁 測完先拿一句話</span></div>
+    <div class="rule4"></div>
+    <button class="go" onclick="document.getElementById('qblk').scrollIntoView({behavior:'smooth'})">開始測 →</button>
+  </div>
+
+  <!-- q-2 互動題卡：一題一畫面、大按鈕、答完立刻 +1 回饋（可以真的點） -->
+  <div class="blk" id="qblk"><span class="tag">q-2</span>
+    <div class="cd">
+      <div class="sec">體格檢測<span style="float:right;font-weight:400;color:#8A7266;" id="qn">1 / 3</span></div>
+      <div class="qbar" id="qbar"><div class="qseg" style="background:#C6603A;"></div><div class="qseg"></div><div class="qseg"></div></div>
+      <div id="qbody"></div>
+      <div class="qtoast" id="qtoast"></div>
+    </div>
+    <div style="font-size:11.5px;color:#8A7266;text-align:center;margin-top:8px;">demo 只放 3 題示意——正式版 12 題，每題都即時 +1</div>
+  </div>
+
+  <!-- q-3 體格單 reveal：四條依序長出來（進場動畫），12 格模糊偷看當鉤子 -->
+  <div class="blk"><span class="tag">q-3</span>
+    <div class="cd">
+      <div class="sec">你的影響力體格單<span class="mock">示意</span></div>
+      <div class="dim"><div class="dim-hd" style="color:#AF5433;">吸引肌肉<small>讓他想靠近</small><span class="dim-v">3.4</span></div><div class="dim-bar"><div class="dim-bf" data-w="60%" style="background:#C6603A;"></div></div></div>
+      <div class="dim"><div class="dim-hd" style="color:#5C7464;">信任肌肉<small>讓他願意說</small><span class="dim-v">4.1</span></div><div class="dim-bar"><div class="dim-bf" data-w="78%" style="background:#6E8B77;"></div></div></div>
+      <div class="dim"><div class="dim-hd" style="color:#54718D;">專業肌肉<small>讓他要找你</small><span class="dim-v">2.9</span></div><div class="dim-bar"><div class="dim-bf" data-w="48%" style="background:#6E8CA8;"></div></div></div>
+      <div class="dim"><div class="dim-hd" style="color:#8E682B;">推進肌肉<small>讓他願意動</small><span class="dim-v">2.4</span></div><div class="dim-bar"><div class="dim-bf" data-w="35%" style="background:#C99A4E;"></div></div></div>
+      <div class="peek">
+        <div class="peek-g">
+          <div class="peek-c">讓他想聽</div><div class="peek-c">讓他心動</div><div class="peek-c">讓他放心</div>
+          <div class="peek-c">讓他敢說</div><div class="peek-c">讓他信你</div><div class="peek-c">讓他懂你</div>
+          <div class="peek-c">讓他服你</div><div class="peek-c">讓他要你</div><div class="peek-c">讓他行動</div>
+        </div>
+        <div class="peek-ov">每塊大肌肉還能拆成 3 塊小肌群<br>——進健身房才全開</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- q-4 先給再要：一句今天就能用的（最有感那塊的口袋語句） -->
+  <div class="blk"><span class="tag">q-4</span>
+    <div class="gift">
+      <div class="gift-k">先送你一句 · 今天就能用</div>
+      <div class="gift-t">你先練「推進肌肉」最有感</div>
+      <div class="gift-s">下次聊完，別說「有需要再找我」。說：<br><b>「我幫你把<span class="blank"></span>整理成一頁，週三傳給你？」</b><br>——給一個具體的下一步，他就動了。</div>
+    </div>
+  </div>
+
+  <!-- q-5 全貌感地圖：你在這裡＋future pacing，串到三頁（真連結） -->
+  <div class="blk"><span class="tag">q-5</span>
+    <div class="cd">
+      <div class="sec">影響力之路——你在這裡</div>
+      <div class="map">
+        <div class="stn here"><div class="stn-t">測出體格 <span class="you">你在這裡</span></div><div class="stn-s">60 秒，知道自己先練哪塊最有感</div></div>
+        <div class="stn n2"><div class="stn-t">免費體驗</div><div class="stn-s">每月分享會＋社群，先看別人怎麼練</div></div>
+        <div class="stn n3"><div class="stn-t">進健身房</div><div class="stn-s">12 小肌群圖鑑、每天一招、夥伴一起 → <a href="demo-member.html">看會員的一天 →</a></div></div>
+        <div class="stn n4"><div class="stn-t">私人教練席</div><div class="stn-s">教練看著你的每一筆紀錄，把影響力練進真實關係 → <a href="demo-pro.html">看教練席 →</a></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- q-6 分享卡：分享本身就是在練吸引肌肉 -->
+  <div class="blk"><span class="tag">q-6</span>
+    <div class="share">
+      <div class="share-t">把體格單傳給一個朋友，<br>猜猜他哪塊最有感。</div>
+      <div class="share-s">傳出去的那一刻，你已經在練吸引肌肉了。</div>
+      <a class="share-b" href="#">傳給朋友<span class="mock" style="background:rgba(74,27,12,.4);">示意</span></a>
+    </div>
+  </div>
+
+  <!-- q-7 教練的一句話（咖啡漸層第一次出現：小小的，教練還很遠）＋溫柔 CTA -->
+  <div class="blk"><span class="tag">q-7</span>
+    <div class="coach-mini">
+      <div class="coach-av">教</div>
+      <div><div class="coach-q">分數不是評價，是起點。<b>影響力是肌肉，只會越練越強。</b></div>
+      <div class="coach-w">—— 場邊教練・在第三站等你</div></div>
+    </div>
+    <a class="go" href="demo-member.html">免費進健身房逛一圈 →</a>
+    <div style="font-size:12px;color:#8A7266;text-align:center;margin-top:8px;">不用付費、不用承諾——先看別人怎麼練</div>
+  </div>
+
+  <div class="bone-end">練影響力不是為了拿下誰，<br>是讓有人因為你變好。</div>
+
+</div>
+
+<div class="hop">
+  <a class="on" href="demo-quiz.html">測驗</a><a href="demo-member.html">會員</a><a href="demo-pro.html">私教</a>
+</div>
+
+<script>
+/* q-2 互動：3 題示意，答完立刻 +1 回饋，答完三題顯示迷你完成態 */
+var QS = [
+  { q:"聚會上有人聊到你懂的領域，你通常？", ops:[["先聽完，再補一個對方沒想到的角度","P"],["講一個自己的親身故事","A"],["先問他為什麼在意這件事","T"]] },
+  { q:"朋友跟你抱怨工作，你第一反應是？", ops:[["先讓他把話說完","T"],["馬上給他三個解法","P"],["約他出來邊吃邊聊","A"]] },
+  { q:"聊得很好但快結束了，你會？", ops:[["說「有需要再找我」","A"],["給一個具體的下一步再散場","I"],["加個 LINE 以後再說","T"]] }
+];
+var DIMC = { A:"#AF5433", T:"#5C7464", P:"#54718D", I:"#8E682B" };
+var DIMN = { A:"吸引肌肉", T:"信任肌肉", P:"專業肌肉", I:"推進肌肉" };
+var qi = 0;
+function qRender(){
+  var body = document.getElementById("qbody");
+  if (qi >= QS.length) {
+    document.getElementById("qn").textContent = "完成";
+    body.innerHTML = '<div style="text-align:center;padding:10px 0;">'
+      + '<div style="font-size:30px;">🌱</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-top:10px;">測完了——體格單在下面長出來了</div>'
+      + '<div style="font-size:13px;color:#8A7266;margin-top:8px;line-height:1.8;">正式版在這裡才問「結果要傳去哪」——先給價值，再留資料</div></div>';
+    document.querySelectorAll(".dim-bf").forEach(function(b, i){
+      setTimeout(function(){ b.style.width = b.getAttribute("data-w"); }, 200 + i * 220);
+    });
+    return;
+  }
+  var q = QS[qi];
+  document.getElementById("qn").textContent = (qi + 1) + " / 3";
+  var segs = document.querySelectorAll(".qseg");
+  segs.forEach(function(s, i){ s.style.background = i <= qi ? "#C6603A" : "#EFE5DC"; });
+  body.innerHTML = '<div class="qq">' + q.q + '</div>'
+    + q.ops.map(function(o, i){ return '<button class="qopt" onclick="qPick(' + i + ')">' + o[0] + '</button>'; }).join("");
+}
+function qPick(i){
+  var d = QS[qi].ops[i][1];
+  var t = document.getElementById("qtoast");
+  t.style.color = DIMC[d];
+  t.textContent = "+1 " + DIMN[d];
+  t.style.opacity = 1;
+  setTimeout(function(){ t.style.opacity = 0; }, 900);
+  qi++;
+  setTimeout(qRender, 350);
+}
+qRender();
+</script>
+</body>
+</html>

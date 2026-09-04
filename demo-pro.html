@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>pro demo・私教學員（科技）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 三頁串連大 demo・第 3 頁：pro（科技）═══
+   人群習性＝私教學員：已付高價、要深度、要專屬感、要看得見成果。
+   設計對策：①指揮艙 HUD——你的資料是被「監測」的（專屬感）②引力場＝超引力本體：
+   對象是繞著你轉的星，A→T→P→I 一關一關被拉進來 ③教練通訊面板 ④改觀句金庫（骨層）。
+   深底 #0c131e 才准用霓虹四色（30-App介面規範 §5）。資料全是示意。
+   串連 DNA：咖啡漸層在這頁滿版（頂欄＋金庫）＝教練就在旁邊。
+   ← demo-member.html ／ demo-quiz.html */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:0 24px 90px;}
+.blk{position:relative;margin-bottom:30px;}
+.tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#0c131e;background:#e6a93a;border-radius:10px;padding:2px 8px;z-index:5;}
+.mock{font-size:10px;color:#7d90a3;background:rgba(234,241,250,.08);border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;}
+.cd{background:#131f2b;border-radius:16px;padding:17px 16px;border:1px solid #1d2c3c;}
+.sec{font-size:12px;font-weight:700;letter-spacing:2px;color:#7d90a3;margin-bottom:12px;}
+.sec b{color:#eaf1fa;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* p-1 指揮艙頂欄：咖啡漸層滿版＝教練就在旁邊（跨頁 DNA 的終點） */
+.tb{background:linear-gradient(135deg,#4A1B0C,#6B3018);margin:0 -24px;padding:20px 24px 18px;position:relative;overflow:hidden;}
+.tb:after{content:"";position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#E8C89A,transparent);animation:scan 3.2s ease-in-out infinite;top:0;}
+@keyframes scan{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
+.tb-k{font-size:11px;letter-spacing:4px;color:#E8C89A;font-weight:700;}
+.tb-t{font-size:24px;font-weight:900;color:#F7F1EC;margin-top:8px;}
+.tb-s{font-size:13px;color:rgba(247,241,236,.65);margin-top:6px;line-height:1.7;}
+.tb-coach{display:flex;align-items:center;gap:10px;margin-top:14px;background:rgba(12,19,30,.35);border:1px solid rgba(232,200,154,.25);border-radius:14px;padding:10px 13px;}
+.tb-av{width:34px;height:34px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.tb-cn{font-size:13.5px;font-weight:700;color:#F7F1EC;}
+.tb-cs{font-size:11.5px;color:rgba(247,241,236,.55);margin-top:1px;}
+.tb-nx{margin-left:auto;text-align:right;font-size:11px;color:rgba(247,241,236,.55);line-height:1.6;flex-shrink:0;}
+.tb-nx b{display:block;font-size:12.5px;color:#E8C89A;}
+
+/* p-2 引力場：對象＝繞著你轉的星，一關一關被拉進來 */
+.orbit-wrap{position:relative;width:100%;aspect-ratio:1;max-width:340px;margin:6px auto 0;}
+.orbit-wrap svg{width:100%;height:100%;display:block;}
+.oring{fill:none;stroke:#1d2c3c;stroke-width:1;}
+.oring.lbl{stroke-dasharray:2 4;}
+.ocore{animation:corepulse 2.4s ease-in-out infinite;transform-origin:center;}
+@keyframes corepulse{0%,100%{opacity:.85;}50%{opacity:1;}}
+.osat{transform-origin:center;}
+.o1{animation:orb 26s linear infinite;}
+.o2{animation:orb 38s linear infinite reverse;}
+.o3{animation:orb 50s linear infinite;}
+.osat text{font-size:8.5px;fill:#7d90a3;font-family:inherit;}
+.oring-lb{font-size:8px;fill:#54718D;letter-spacing:1px;}
+@keyframes orb{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.olegend{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:11px;color:#7d90a3;flex-wrap:wrap;}
+.olegend span{display:flex;align-items:center;gap:5px;}
+.olegend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.otar{margin-top:14px;border-top:1px solid #1d2c3c;padding-top:13px;display:flex;gap:10px;font-size:13px;line-height:1.8;color:#8ea1b6;}
+.otar .cv{width:22px;height:22px;border-radius:50%;background:#4A1B0C;border:1px solid rgba(232,200,154,.4);color:#E8C89A;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
+.otar b{color:#eaf1fa;}
+
+/* p-3 12 小肌群 HUD：霓虹條＋這季主力用瞄準框 */
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.hc{background:#182634;border-radius:10px;padding:9px 8px;font-size:11px;color:#eaf1fa;line-height:1.5;position:relative;}
+.hc .bar{height:3px;border-radius:3px;background:#2a3a4d;margin-top:6px;overflow:hidden;}
+.hc .bf{height:100%;border-radius:3px;}
+.hc .v{font-size:10px;color:#7d90a3;margin-top:4px;}
+.hc.lockon{background:#1a2434;}
+.hc.lockon:before,.hc.lockon:after{content:"";position:absolute;width:9px;height:9px;border:1.5px solid #e6a93a;}
+.hc.lockon:before{top:-2px;left:-2px;border-right:0;border-bottom:0;}
+.hc.lockon:after{bottom:-2px;right:-2px;border-left:0;border-top:0;}
+.hc.lockon .v{color:#e6a93a;font-weight:700;}
+
+/* p-4 甜蜜路徑＝航道 */
+.fp{position:relative;padding-left:24px;}
+.fp:before{content:"";position:absolute;left:7px;top:12px;bottom:12px;width:2px;background:linear-gradient(180deg,#e8734a,#33c495,#4b9bf0,#e6a93a);border-radius:2px;box-shadow:0 0 8px rgba(232,115,74,.35);}
+.wp{position:relative;padding:8px 0 8px 4px;font-size:13.5px;line-height:1.8;color:#eaf1fa;}
+.wp:before{content:"";position:absolute;left:-21px;top:15px;width:10px;height:10px;border-radius:50%;background:#0c131e;border:2px solid #7d90a3;}
+.wp.lit:before{border-color:#33c495;background:#33c495;box-shadow:0 0 8px rgba(51,196,149,.6);}
+.wp small{display:block;font-size:11.5px;color:#7d90a3;margin-top:2px;}
+
+/* p-5 教練通訊 */
+.comm{display:flex;gap:10px;padding:11px 0;border-top:1px solid #1d2c3c;font-size:13px;line-height:1.8;color:#8ea1b6;}
+.comm:first-of-type{border-top:0;padding-top:0;}
+.comm .cv{width:24px;height:24px;border-radius:50%;background:#4A1B0C;border:1px solid rgba(232,200,154,.4);color:#E8C89A;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
+.comm b{color:#eaf1fa;}
+.comm-t{font-size:10.5px;color:#54718D;margin-top:3px;}
+
+/* p-6 成果儀表 */
+.gauge{display:flex;gap:8px;}
+.gg{flex:1;background:#182634;border-radius:12px;padding:12px;text-align:center;}
+.gg-v{font-size:20px;font-weight:700;color:#e8734a;line-height:1.2;}
+.gg-l{font-size:10.5px;color:#7d90a3;margin-top:4px;line-height:1.5;}
+
+/* p-7 改觀句金庫：咖啡漸層＋金＝骨層（科技頁裡唯一的暖） */
+.vault{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:16px;padding:19px 18px;color:#F7F1EC;position:relative;overflow:hidden;}
+.vault:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.12),transparent);animation:sheen 4.5s ease-in-out infinite;}
+@keyframes sheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
+.vault-k{font-size:11px;letter-spacing:3px;color:#E8C89A;font-weight:700;}
+.vault-q{font-size:16px;line-height:1.9;margin-top:10px;}
+.vault-q b{color:#E8C89A;}
+.vault-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
+.vault-quote small{display:block;margin-top:5px;font-size:11px;color:#C9A87A;}
+
+.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#e8734a;color:#0c131e;border:0;border-radius:16px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 0 22px rgba(232,115,74,.35);}
+.bone-end{font-size:14px;color:#8ea1b6;line-height:1.9;text-align:center;margin-top:26px;padding:0 8px;}
+.hop{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:2px;background:#4A1B0C;border-radius:22px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.5);}
+.hop a{font-size:12px;font-weight:700;color:rgba(247,241,236,.65);text-decoration:none;padding:8px 14px;border-radius:18px;white-space:nowrap;}
+.hop a.on{background:#C6603A;color:#fff;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- p-1 指揮艙頂欄：咖啡漸層滿版＋掃描線＝教練就在旁邊、你的資料被看著 -->
+  <div class="blk" style="margin-bottom:26px;"><span class="tag" style="top:8px;">p-1</span>
+    <div class="tb">
+      <div class="tb-k">ATPIFIT · PRIVATE COACH</div>
+      <div class="tb-t">私人教練席</div>
+      <div class="tb-s">超引力成交學 · 第 47 天<span class="mock">示意</span></div>
+      <div class="tb-coach">
+        <div class="tb-av">光</div>
+        <div><div class="tb-cn">光頭教練</div><div class="tb-cs">看著你的每一筆紀錄</div></div>
+        <div class="tb-nx"><b>下次 1v1</b>9/12（五）14:00<span class="mock">示意</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- p-2 引力場：超引力本體。對象＝繞著你轉的星，外圈剛認識、內圈認定你就是那個人。
+       節點會慢速公轉（活著的感覺），關係推進＝從外圈被拉進內圈。 -->
+  <div class="blk"><span class="tag">p-2</span>
+    <div class="cd">
+      <div class="sec">你的引力場 · <b>4 個人正被你拉近</b><span class="mock">示意</span></div>
+      <div class="orbit-wrap">
+        <svg viewBox="0 0 340 340">
+          <circle class="oring" cx="170" cy="170" r="150"/>
+          <circle class="oring" cx="170" cy="170" r="108"/>
+          <circle class="oring" cx="170" cy="170" r="66"/>
+          <circle class="oring lbl" cx="170" cy="170" r="28"/>
+          <text class="oring-lb" x="170" y="16" text-anchor="middle">A 想靠近</text>
+          <text class="oring-lb" x="170" y="58" text-anchor="middle">T 願意說</text>
+          <text class="oring-lb" x="170" y="100" text-anchor="middle">P 要找你</text>
+          <!-- 中心＝你 -->
+          <g class="ocore">
+            <circle cx="170" cy="170" r="17" fill="#4A1B0C" stroke="#E8C89A" stroke-width="1.5"/>
+            <text x="170" y="174" text-anchor="middle" font-size="11" fill="#E8C89A" font-weight="700">你</text>
+          </g>
+          <!-- 外圈：剛認識（A） -->
+          <g class="osat o1">
+            <g transform="translate(170,20)">
+              <circle r="9" fill="#e8734a"/><text y="-14" text-anchor="middle">新朋友</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">安</text>
+            </g>
+          </g>
+          <!-- 中圈：願意說（T） -->
+          <g class="osat o2">
+            <g transform="translate(170,62)">
+              <circle r="9" fill="#33c495"/><text y="-14" text-anchor="middle">爸爸</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">爸</text>
+            </g>
+            <g transform="translate(170,278)">
+              <circle r="9" fill="#33c495"/><text y="22" text-anchor="middle">合作夥伴</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">郭</text>
+            </g>
+          </g>
+          <!-- 內圈：要找你（P）→ 快到中心＝認定你就是那個人（I） -->
+          <g class="osat o3">
+            <g transform="translate(170,104)">
+              <circle r="10" fill="#4b9bf0" stroke="#e6a93a" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <text y="-15" text-anchor="middle">王經理</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">王</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="olegend">
+        <span><i style="background:#e8734a;"></i>想靠近</span>
+        <span><i style="background:#33c495;"></i>願意說</span>
+        <span><i style="background:#4b9bf0;"></i>要找你</span>
+        <span><i style="background:#e6a93a;"></i>認定你</span>
+      </div>
+      <div class="otar">
+        <div class="cv">教</div>
+        <div><b>王經理</b>已經進到「要找你」圈——虛線金框＝下一步在推進：<b>讓他認定你就是那個人</b>。爸爸停在「願意說」就夠了，家人這條線你已經在贏了。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- p-3 12 小肌群 HUD：全開、霓虹條、這季主力＝瞄準框鎖定 -->
+  <div class="blk"><span class="tag">p-3</span>
+    <div class="cd">
+      <div class="sec">MUSCLE SCAN · <b>12 塊全開</b><span class="mock">示意</span></div>
+      <div class="hgrid">
+        <div class="hc">讓他想聽<div class="bar"><div class="bf" style="width:70%;background:#e8734a;"></div></div><div class="v num">3.5</div></div>
+        <div class="hc">讓他心動<div class="bar"><div class="bf" style="width:56%;background:#e8734a;"></div></div><div class="v num">2.8</div></div>
+        <div class="hc">讓他放心<div class="bar"><div class="bf" style="width:80%;background:#e8734a;"></div></div><div class="v num">4.0</div></div>
+        <div class="hc">讓他敢說<div class="bar"><div class="bf" style="width:64%;background:#33c495;"></div></div><div class="v num">3.2</div></div>
+        <div class="hc">讓他信你<div class="bar"><div class="bf" style="width:76%;background:#33c495;"></div></div><div class="v num">3.8</div></div>
+        <div class="hc">讓他懂你<div class="bar"><div class="bf" style="width:60%;background:#33c495;"></div></div><div class="v num">3.0</div></div>
+        <div class="hc">讓他服你<div class="bar"><div class="bf" style="width:66%;background:#4b9bf0;"></div></div><div class="v num">3.3</div></div>
+        <div class="hc">讓他要你<div class="bar"><div class="bf" style="width:50%;background:#4b9bf0;"></div></div><div class="v num">2.5</div></div>
+        <div class="hc">讓他行動<div class="bar"><div class="bf" style="width:58%;background:#4b9bf0;"></div></div><div class="v num">2.9</div></div>
+        <div class="hc lockon">讓他跟隨<div class="bar"><div class="bf" style="width:40%;background:#e6a93a;"></div></div><div class="v num">2.0 · 這季主力</div></div>
+        <div class="hc">讓他推薦<div class="bar"><div class="bf" style="width:44%;background:#e6a93a;"></div></div><div class="v num">2.2</div></div>
+        <div class="hc">讓他回來<div class="bar"><div class="bf" style="width:52%;background:#e6a93a;"></div></div><div class="v num">2.6</div></div>
+      </div>
+      <div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">分數是教練校準過的——低分不是問題，是<b style="color:#e6a93a;">先練這塊最有感</b>。</div>
+    </div>
+  </div>
+
+  <!-- p-4 甜蜜路徑＝航道：四色發光航線，走過的亮綠燈 -->
+  <div class="blk"><span class="tag">p-4</span>
+    <div class="cd">
+      <div class="sec">FLIGHT PATH · <b>你的變現甜蜜路徑</b><span class="mock">示意</span></div>
+      <div class="fp">
+        <div class="wp lit">先用故事讓他看見你在做的事<small>✓ 已走過 · BNI 例會 60 秒</small></div>
+        <div class="wp lit">用問題帶他說出自己的卡點<small>✓ 已走過 · 「最卡的是人還是流程？」</small></div>
+        <div class="wp">把你的方法放進他的框架裡講一次<small>下一站——這次 1v1 演練這裡</small></div>
+        <div class="wp">約下一次——讓他認定你就是那個人</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- p-5 教練通訊：判讀 feed＝教練在場的證據 -->
+  <div class="blk"><span class="tag">p-5</span>
+    <div class="cd">
+      <div class="sec">COACH LINK · <b>教練判讀</b><span class="mock">示意</span></div>
+      <div class="comm"><div class="cv">教</div><div>王經理的信任節點過了——他開始把「不能說的」說給你聽。這次 1v1 我們演練<b>推進</b>那一步。<div class="comm-t">週二 21:04</div></div></div>
+      <div class="comm"><div class="cv">教</div><div>「讓他跟隨」這塊練了 6 次，<b>感受變了沒？</b>帶著這個問題來。<div class="comm-t">週日 09:30</div></div></div>
+      <a class="go" href="https://time.atpifit.com">預約這次 1v1 →</a>
+    </div>
+  </div>
+
+  <!-- p-6 成果儀表：市場驗證獨立顯示（不乘進分數，demo 也守這條） -->
+  <div class="blk"><span class="tag">p-6</span>
+    <div class="cd">
+      <div class="sec">EXTERNAL SIGNAL · <b>市場驗證</b><span class="mock">示意</span></div>
+      <div class="gauge">
+        <div class="gg"><div class="gg-v num">3 筆</div><div class="gg-l">成交回報</div></div>
+        <div class="gg"><div class="gg-v num">21.6 萬</div><div class="gg-l">累計金額</div></div>
+        <div class="gg"><div class="gg-v num">7%</div><div class="gg-l">對齊 300 萬錨點</div></div>
+      </div>
+      <div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">成交是外部驗證變項——獨立顯示，不回饋進能力分數。</div>
+    </div>
+  </div>
+
+  <!-- p-7 改觀句金庫：骨層。科技頁裡唯一的暖＝最深的東西不用霓虹講 -->
+  <div class="blk"><span class="tag">p-7</span>
+    <div class="vault">
+      <div class="vault-k">這三個月，你的想法動了什麼？</div>
+      <div class="vault-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>
+      <div class="vault-quote">「我以前覺得成交是說服——現在我覺得成交是他終於放心了。」<small>7/28 · 月覆盤時你說的<span class="mock" style="background:rgba(247,241,236,.18);color:rgba(247,241,236,.7);">示意</span></small></div>
+    </div>
+  </div>
+
+  <div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>
+
+</div>
+
+<div class="hop">
+  <a href="demo-quiz.html">測驗</a><a href="demo-member.html">會員</a><a class="on" href="demo-pro.html">私教</a>
+</div>
+</body>
+</html>
