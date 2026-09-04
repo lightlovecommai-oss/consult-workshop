@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 120 120">
+<!-- apple-touch-icon 源頭（2026-09-04）：暖底＋深咖啡 logo＋四色點，logo 佔 87%（iOS 不吃透明、自己上圓角遮罩）。出圖：Chrome screenshot 180。⚠️ iOS 圖示快取：檔名從 icon2 換 icon3 才會更新。 -->
+<rect x="0" y="0" width="120" height="120" fill="#F7F1EC"/>
+<g transform="translate(60,54)">
+<g fill="none" stroke="#4A1B0C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-36 -22 L36 -22 Q48 -22 48 -10"/>
+<path d="M48 -10 L48 10 Q48 22 36 22"/>
+<path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/>
+<path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/>
+</g>
+<circle cx="-21" cy="0" r="6" fill="#C6603A"/>
+<circle cx="-7" cy="0" r="6" fill="#6E8B77"/>
+<circle cx="7" cy="0" r="6" fill="#6E8CA8"/>
+<circle cx="21" cy="0" r="6" fill="#C99A4E"/>
+</g>
+</svg>
