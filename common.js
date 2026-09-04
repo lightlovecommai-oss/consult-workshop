@@ -404,11 +404,20 @@ function postCheckin(lineId, task, workshopId, dateStr, extra) {
 /* ── 館裡的動態流（真資料，取代寫死的示範卡）──
    後端只回傳 share=true 且有 reaction 的最近幾筆，對象已經匿名（只留 rel 關係類型，
    不回傳 target 姓名）——不然「分享到館裡」變成把別人的名字公開給陌生人看。 */
+var GYM_MONTH_TOTAL = 0;   // 全館本月打卡總數（gymPosts 附帶回傳；舊後端沒這欄位＝維持 0，前端自己退回個人數字）
+var GYM_SLIM = [];         // 純點擊那層（沒打字沒勾分享）——一行小卡，只有名字＋肌肉＋反應
+var GYM_MONTH_TOP = null;  // 本月練最多的肌肉 {muscle, dim}（沒資料＝null，前端退回示意行）
+var GYM_MONTH_PEOPLE = 0;  // 本月有練的人數（distinct lineId）
 async function loadGymPosts(limit) {
   try {
     var r = await fetch(SHEET_API + "?action=gymPosts&limit=" + (limit || 12));
     var d = await r.json();
-    return d.status === "ok" ? d.posts : [];
+    if (d.status !== "ok") return [];
+    GYM_MONTH_TOTAL = Number(d.monthTotal) || 0;
+    GYM_SLIM = d.slim || [];
+    GYM_MONTH_TOP = (d.monthTop && d.monthTop.muscle) ? d.monthTop : null;
+    GYM_MONTH_PEOPLE = Number(d.monthPeople) || 0;
+    return d.posts;
   } catch (e) { console.log("loadGymPosts error:", e); return []; }
 }
 /* ── 體測：寫一筆小肌群評分（1–5）──

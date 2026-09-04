@@ -607,6 +607,49 @@ function computeGymPosts_(limit) {
              rel: e.rel, reaction: e.reaction, note: e.note, date: e.date };
   });
 }
+/* 純點擊那層（沒勾分享的開練）——夥伴頁一行小卡用，沒人打字這頁照樣會動。
+   這層沒經過「分享到館裡」的同意，只露不涉內容的最小資訊：
+   名字＋肌肉＋反應＋日期，不回 note/target/rel。 */
+function computeGymSlim_(limit) {
+  limit = limit || 8;
+  var nameByUid = {};
+  rows_(TABS.students).forEach(function(r){
+    var id = String(pick_(r, COLS.students.lineId));
+    if (id) nameByUid[id] = String(pick_(r, COLS.students.name)) || id;
+  });
+  var rows = rows_(TABS.checkins).filter(function(r){
+    return String(pick_(r, COLS.checkins.reaction) || "") && !granted_(pick_(r, COLS.checkins.share));
+  }).map(function(r){
+    return { lineId: String(pick_(r, COLS.checkins.lineId)),
+             muscle: String(pick_(r, COLS.checkins.muscle) || "").toUpperCase(),
+             dim: String(pick_(r, COLS.checkins.dim) || ""),
+             reaction: String(pick_(r, COLS.checkins.reaction) || ""),
+             date: normDateStr_(pick_(r, COLS.checkins.date)) };
+  }).filter(function(e){ return e.lineId && e.date; });
+  rows.sort(function(a, b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  return rows.slice(0, limit).map(function(e){
+    return { name: nameByUid[e.lineId] || "夥伴", muscle: e.muscle, dim: e.dim,
+             reaction: e.reaction, date: e.date };
+  });
+}
+/* 全館本月統計——夥伴頁 hero「這個月，大家一起練了 N 次」＋共同焦點
+   「這個月大家練最多的是 X」用（2026-09-04）。算全部打卡不分 share；
+   只回數字與肌肉代號，不回內容，沒有隱私問題。 */
+function monthStats_() {
+  var ym = normDateStr_(new Date()).slice(0, 7);
+  var total = 0, people = {}, byMuscle = {}, dimOf = {};
+  rows_(TABS.checkins).forEach(function(r){
+    if (normDateStr_(pick_(r, COLS.checkins.date)).slice(0, 7) !== ym) return;
+    total++;
+    var uid = String(pick_(r, COLS.checkins.lineId) || "");
+    if (uid) people[uid] = 1;
+    var mk = String(pick_(r, COLS.checkins.muscle) || "").toUpperCase().split(",")[0].trim();
+    if (mk) { byMuscle[mk] = (byMuscle[mk] || 0) + 1; dimOf[mk] = String(pick_(r, COLS.checkins.dim) || ""); }
+  });
+  var top = Object.keys(byMuscle).sort(function(a, b){ return byMuscle[b] - byMuscle[a]; })[0] || "";
+  return { total: total, people: Object.keys(people).length,
+           topMuscle: top, topDim: top ? (dimOf[top] || top.charAt(0)) : "" };
+}
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.checkins.workshopId)), taskKey: String(pick_(r, COLS.checkins.taskKey)),
@@ -767,7 +810,10 @@ function doGet(e) {
     }
 
     if (action === "gymPosts") {
-      return json_({ status: "ok", posts: computeGymPosts_(Number(p.limit) || 12) });
+      var ms = monthStats_();
+      return json_({ status: "ok", posts: computeGymPosts_(Number(p.limit) || 12), slim: computeGymSlim_(8),
+                     monthTotal: ms.total, monthPeople: ms.people,
+                     monthTop: { muscle: ms.topMuscle, dim: ms.topDim } });
     }
 
     if (p.userId) {  // 自評（測驗結果），無 action

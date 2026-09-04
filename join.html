@@ -59,12 +59,15 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .why-t{font-size:13px;font-weight:700;color:#4A1B0C;margin-bottom:9px;}
 .why-row{display:flex;gap:8px;font-size:13px;color:#4A1B0C;line-height:1.75;}
 .why-row span{color:#6E4A3C;}
+/* 主骨句（14 §5 北極星）壓在價格區上方——皮層（錢）不單獨出現，骨先到場 */
+.bone{margin:22px 24px 0;padding-left:12px;border-left:3px solid #C6603A;font-size:15px;font-weight:500;color:#4A1B0C;line-height:1.85;}
 .price{margin:16px 24px 0;padding-top:15px;border-top:1px solid #E6DAD1;display:flex;align-items:baseline;gap:8px;}
 .price-v{font-size:32px;font-weight:500;color:#4A1B0C;}
 .price-u{font-size:15px;color:#993C1D;}
 .price-note{margin:4px 24px 0;font-size:13px;color:#6E4A3C;}
 .cta-wrap{padding:17px 24px 0;}
-.btn{width:100%;background:#4A1B0C;color:#F7F1EC;border:0;border-radius:14px;padding:16px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;min-height:44px;}
+/* 主行動鈕新規（24-VI §3.8）：磚橘 #C6603A＋白字 17px/700，深咖啡退回文字色 */
+.btn{width:100%;background:#C6603A;color:#fff;border:0;border-radius:16px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;min-height:56px;}
 .btn[disabled]{background:#D8C9BC;cursor:not-allowed;}
 .btn-note{margin-top:11px;text-align:center;font-size:13px;color:#6E4A3C;}
 .tagline{margin-top:9px;text-align:center;font-size:13px;letter-spacing:1px;color:#6E4A3C;}
@@ -79,6 +82,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .next-t{font-size:13px;color:#6E4A3C;margin-bottom:11px;}
 .next-row{display:flex;gap:11px;font-size:13px;color:#4A1B0C;line-height:1.75;margin-bottom:9px;}
 .next-row b{color:#C6603A;flex-shrink:0;width:58px;}
+.done-bone{margin-top:18px;text-align:center;font-size:13px;color:#8A7266;line-height:1.8;}
+.rule-end{margin:22px auto 0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
 :focus-visible{outline:2px solid #C6603A;outline-offset:2px;}
 </style>
 </head>
@@ -114,14 +119,16 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
     <div class="why-row"><span>·</span><span><b>課表是月度的</b>——這期已經開跑，晚進就少練幾天</span></div>
     <div class="why-row"><span>·</span><span><b>社群裡的免費課</b>——進來就能看</span></div>
   </div>
+  <div class="bone">影響力的盡頭不是成交，<br>是有人因為你變好。</div>
   <div class="price"><span class="price-v">NT$99</span><span class="price-u">/ 月 · 一杯飲料的錢</span></div>
   <div class="price-note">隨時開始，不必等開班 · 隨時可停</div>
   <div class="cta-wrap">
     <button class="btn" id="btnPay">加入影響力健身房 →</button>
     <div class="btn-note" id="payNote">PayUni 一頁式 · 30 秒完成</div>
-    <div class="tagline">用自己最真實的聲音，創造影響力</div>
+    <div class="tagline">說我所做，做我所說——就從每天一次打卡開始</div>
   </div>
   <div class="notice" id="devNotice"></div>
+  <div class="rule-end"></div>
 </div>
 
 <div class="app done" id="done">
@@ -134,10 +141,12 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
     <div class="next">
       <div class="next-t">接下來會發生的事</div>
       <div class="next-row"><b>48 小時內</b><span>場邊教練會私訊你，陪你把影響力健檢看一遍</span></div>
-      <div class="next-row"><b>看完健檢</b><span>從最弱的兩塊裡幫你挑一個開始，不是六個全給</span></div>
+      <div class="next-row"><b>看完健檢</b><span>幫你挑一塊練了最有感的開始，不是六個全給</span></div>
       <div class="next-row"><b>每天</b><span>這裡會有一件事等你，做完點兩下</span></div>
       <div class="next-row"><b>每個月</b><span>場邊教練覆盤一次——前三個月，每個月都跟</span></div>
     </div>
+    <div class="done-bone">先點亮自己，再照亮別人——裡面見。</div>
+    <div class="rule-end"></div>
   </div>
 </div>
 
