@@ -102,6 +102,10 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mrow-bar{height:8px;border-radius:4px;overflow:hidden;}
 .mrow-fill{height:8px;border-radius:4px;transition:width .4s;}
 .mrow-d{font-size:13px;color:#6E4A3C;margin-top:5px;}
+/* 進-3+6 合併左右滑卡：第一屏＝次數（今天就能動）、往左滑＝四塊肌肉（慢慢動） */
+.swx{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.swx::-webkit-scrollbar{display:none;}
+.swp{flex:0 0 100%;scroll-snap-align:start;min-width:0;}
 
 .wk{font-size:13px;color:#993C1D;background:#F0E3DB;border-radius:14px;padding:11px 13px;margin-top:12px;line-height:1.75;}
 
@@ -1249,8 +1253,9 @@ function meHTML(){
   h += S.member ? reviewHTML() : "";
   if (!S.member) h += ctaCard('分數是機器算的，<b style="color:#4A1B0C;">看懂它要人</b>。NT$99 讓場邊教練幫你把健檢解開——指出你先練哪塊最有感、下一步怎麼走。');
 
-  h += '<div class="cd"><div class="sec">你的四塊影響力肌肉</div>';
-  h += DORD.map(function(k){
+  /* 進-3+6 合併左右滑卡（2026-09-04 老師：兩張是同方向內容、合一張）：
+     第一屏＝這個月的次數（今天就能動）、往左滑＝四塊肌肉狀態（慢慢動）——「先看右邊」變成「先看第一屏」 */
+  var mrowsMe = DORD.map(function(k){
     var np = dimScoreNowPrev(S, k), v = np.now;
     var word = dimStatusWord(v);
     var showScore = v != null && np.prev != null;
@@ -1268,30 +1273,30 @@ function meHTML(){
       + '</div>';
   }).join("");
   var anyMeasured = MORD.some(function(k){ return calcMuscleScores(S)[k] != null; });
-  h += anyMeasured
-    ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
-    : '<div class="wk">還沒量過。先做一次 ATPI 測驗，或直接開始練——練了就會有數字。</div>';
-  if (S.member) h += '<div class="wk">點大肌肉，展開它的 3 塊小肌群——小肌群只看「有沒有在練」，分數與判讀是私人教練席跟教練一起看的。</div>';
-  h += '</div>';
-
-  if (S.member) h += sweetPathHTML();
-
-  /* 慢快兩格（2026-09-04 老師拍板換這個框架）：肌肉慢慢動、次數今天就能動——先看右邊 */
   var d5me = calcDimScores5(S);
   var valsMe = DORD.map(function(k){ return d5me[k]; }).filter(function(v){ return v != null; });
   var avgMe = valsMe.length ? valsMe.reduce(function(a, b){ return a + b; }, 0) / valsMe.length : null;
   var ymMe = todayStr().slice(0, 7);
   var monthMe = S.checkinLog.filter(function(e){ return normDate(e.date).slice(0, 7) === ymMe; }).length;
-  h += '<div class="cw"><div style="display:flex;gap:10px;">'
-    + '<div style="flex:1;background:#F7F1EC;border-radius:14px;padding:13px;">'
-    + '<div style="font-size:13px;color:#6E4A3C;margin-bottom:7px;">你的肌肉</div>'
-    + '<div style="font-size:17px;color:#4A1B0C;line-height:1.2;">' + dimStatusWord(avgMe) + '</div>'
-    + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">' + (avgMe != null ? avgMe.toFixed(1) + ' / 滿分 5' : '量了就有數字') + '</div></div>'
+  var slide1 = '<div class="swp"><div class="sec">你的進步儀表</div><div style="display:flex;gap:10px;">'
     + '<div style="flex:1;background:#F7F1EC;border-radius:14px;padding:13px;">'
     + '<div style="font-size:13px;color:#6E4A3C;margin-bottom:7px;">這個月練了</div>'
     + '<div style="font-size:28px;font-weight:700;color:#C6603A;line-height:1;font-variant-numeric:tabular-nums;">' + monthMe + '<span style="font-size:13px;color:#8A7266;"> 次</span></div>'
-    + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">沒練的日子不扣</div></div></div>'
-    + '<div style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:12px;">左邊會慢慢動，右邊你今天就能動。<b style="color:#4A1B0C;">先看右邊。</b></div></div>';
+    + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">沒練的日子不扣</div></div>'
+    + '<div style="flex:1;background:#F7F1EC;border-radius:14px;padding:13px;">'
+    + '<div style="font-size:13px;color:#6E4A3C;margin-bottom:7px;">你的肌肉</div>'
+    + '<div style="font-size:17px;color:#4A1B0C;line-height:1.2;">' + dimStatusWord(avgMe) + '</div>'
+    + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">' + (avgMe != null ? avgMe.toFixed(1) + ' / 滿分 5' : '量了就有數字') + '</div></div></div>'
+    + '<div onclick="this.closest(\'.swx\').scrollBy({left:420,behavior:\'smooth\'})" style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:12px;cursor:pointer;">次數你今天就能動，肌肉會慢慢跟上——<b style="color:#4A1B0C;">先顧次數。</b>往左滑看四塊肌肉 »</div></div>';
+  var slide2 = '<div class="swp"><div class="sec">你的四塊影響力肌肉</div>' + mrowsMe
+    + (anyMeasured
+      ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
+      : '<div class="wk">還沒量過。<a href="https://quiz.atpifit.com" style="color:#993C1D;font-weight:700;">先做一次 ATPI 測驗 »</a>，或直接開始練——練了就會有數字。</div>')
+    + (S.member ? '<div class="wk">點大肌肉，展開它的 3 塊小肌群——小肌群只看「有沒有在練」，分數與判讀是私人教練席跟教練一起看的。</div>' : '')
+    + '</div>';
+  h += '<div class="cd"><div class="swx">' + slide1 + slide2 + '</div></div>';
+
+  if (S.member) h += sweetPathHTML();
   return h;
 }
 
