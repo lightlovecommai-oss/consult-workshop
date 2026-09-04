@@ -415,7 +415,8 @@ async function loadGymPosts(limit) {
     if (d.status !== "ok") return [];
     GYM_MONTH_TOTAL = Number(d.monthTotal) || 0;
     GYM_SLIM = d.slim || [];
-    GYM_MONTH_TOP = (d.monthTop && d.monthTop.muscle) ? d.monthTop : null;
+    /* 舊制打卡只有維度沒有小肌群——有 dim 就算有真資料 */
+    GYM_MONTH_TOP = (d.monthTop && (d.monthTop.dim || d.monthTop.muscle)) ? d.monthTop : null;
     GYM_MONTH_PEOPLE = Number(d.monthPeople) || 0;
     return d.posts;
   } catch (e) { console.log("loadGymPosts error:", e); return []; }

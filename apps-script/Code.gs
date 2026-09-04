@@ -637,18 +637,22 @@ function computeGymSlim_(limit) {
    只回數字與肌肉代號，不回內容，沒有隱私問題。 */
 function monthStats_() {
   var ym = normDateStr_(new Date()).slice(0, 7);
-  var total = 0, people = {}, byMuscle = {}, dimOf = {};
+  var total = 0, people = {}, byMuscle = {}, dimOf = {}, byDim = {};
   rows_(TABS.checkins).forEach(function(r){
     if (normDateStr_(pick_(r, COLS.checkins.date)).slice(0, 7) !== ym) return;
     total++;
     var uid = String(pick_(r, COLS.checkins.lineId) || "");
     if (uid) people[uid] = 1;
+    var dk = String(pick_(r, COLS.checkins.dim) || "").toUpperCase().split(",")[0].trim();
+    if (dk) byDim[dk] = (byDim[dk] || 0) + 1;
     var mk = String(pick_(r, COLS.checkins.muscle) || "").toUpperCase().split(",")[0].trim();
-    if (mk) { byMuscle[mk] = (byMuscle[mk] || 0) + 1; dimOf[mk] = String(pick_(r, COLS.checkins.dim) || ""); }
+    if (mk) { byMuscle[mk] = (byMuscle[mk] || 0) + 1; dimOf[mk] = dk; }
   });
   var top = Object.keys(byMuscle).sort(function(a, b){ return byMuscle[b] - byMuscle[a]; })[0] || "";
-  return { total: total, people: Object.keys(people).length,
-           topMuscle: top, topDim: top ? (dimOf[top] || top.charAt(0)) : "" };
+  /* muscle 是 v2 欄位，舊列全空——退回用維度欄統計，共同焦點行照樣有真資料 */
+  var topDim = top ? (dimOf[top] || top.charAt(0))
+                   : (Object.keys(byDim).sort(function(a, b){ return byDim[b] - byDim[a]; })[0] || "");
+  return { total: total, people: Object.keys(people).length, topMuscle: top, topDim: topDim };
 }
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
