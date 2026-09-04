@@ -71,6 +71,13 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .lockrow{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #F0E3DB;}
 .lockrow-n{font-size:15px;font-weight:600;color:#4A1B0C;}
 .lockrow-d{font-size:13px;color:#6E4A3C;margin-top:2px;line-height:1.7;}
+
+/* 12 小肌群地圖（會員層：只看有沒有在練，不給分——分數與判讀是私人教練席的） */
+.mm{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mmc{border-radius:12px;padding:10px 11px;background:#fff;border:1px solid #F0E3DB;}
+.mmc.dash{border-style:dashed;background:transparent;}
+.mmc-n{font-size:13px;font-weight:600;color:#4A1B0C;line-height:1.5;}
+.mmc-s{font-size:11px;color:#6E4A3C;margin-top:3px;}
 .gr{font-size:17px;font-weight:700;color:#4A1B0C;margin-bottom:6px;}
 .tier{font-size:13px;color:#993C1D;background:#F0E3DB;padding:4px 11px;border-radius:20px;vertical-align:2px;margin-left:6px;}
 .pill{font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;display:inline-block;}
@@ -841,6 +848,42 @@ function dimScoreNowPrev(s, dim){
     prev: prevVals.length ? prevVals.reduce(function(a,b){return a+b;},0) / prevVals.length : null
   };
 }
+/* ══ 會員席的變現鉤子（往私人教練席）：跟體驗席同一招往上搬一層——
+   12 塊給地圖不給分數、甜蜜路徑給預告不給全圖（30-規範 §8：小肌群分數是私教學員層才打開）。 ══ */
+function muscleMapHTML(){
+  var sc = calcMuscleScores(S), fm = focusMuscle();
+  var h = '<div class="cd"><div class="sec">你的 12 塊小肌群</div><div class="mm">';
+  h += MORD.map(function(mk){
+    var m = MUSCLES[mk], d = m.dim, n = muscleTrainCount(S, mk);
+    var measured = sc[mk] != null, focus = mk === fm;
+    var st = focus ? '這季主力' : n > 0 ? '練了 ' + n + ' 次' : measured ? '量過・還沒練' : '還沒量';
+    return '<div class="mmc' + (!measured && !n ? ' dash' : '') + '"'
+      + (focus ? ' style="border-color:' + DIMS[d].color + ';"' : '') + '>'
+      + '<div class="mmc-n"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + DIMS[d].color + ';margin-right:6px;"></span>' + esc_(m.name) + '</div>'
+      + '<div class="mmc-s"' + (focus ? ' style="color:' + dimTextColor(d) + ';font-weight:700;"' : '') + '>' + st + '</div></div>';
+  }).join("");
+  h += '</div><div class="wk">這裡只看「有沒有在練」。12 塊的<b>分數與判讀</b>不在這層打開——那是私人教練席跟教練一起看的。</div></div>';
+  return h;
+}
+function sweetPathHTML(){
+  var d5 = calcDimScores5(S);
+  var ms = DORD.filter(function(k){ return d5[k] != null; });
+  var h = '<div class="cw" style="border:1px solid #E6DAD1;">'
+    + '<div class="pill" style="margin-bottom:12px;">私人教練席才開的</div>';
+  if (ms.length >= 2) {
+    var top2 = ms.sort(function(a, b){ return d5[b] - d5[a]; }).slice(0, 2);
+    var combo = COMBO_PATH[top2.slice().sort().join("")];
+    h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">你最強的兩塊已經浮出來了：<b>'
+      + esc_(DIMS[top2[0]].name) + ' × ' + esc_(DIMS[top2[1]].name) + '</b>。<br>'
+      + '這個組合有一條變現甜蜜路徑——<b>「' + esc_(combo.title) + '」</b>。</div>'
+      + '<div style="margin-top:12px;background:#F7F1EC;border-radius:14px;padding:13px 14px;font-size:13px;color:#6E4A3C;line-height:1.85;">'
+      + '🔒 這條路怎麼走成收入（四步流程＋你的打法），教練在私人教練席帶你走。<br>想看的話，下次場邊回饋時跟教練說一聲就好。</div>';
+  } else {
+    h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">把體格量起來，你的<b>變現甜蜜路徑</b>就會浮出來——最強兩塊的組合，就是你最省力的那條路。</div>';
+  }
+  return h + '</div>';
+}
+
 function meHTML(){
   var h = '<div class="hero"><div class="hero-t">你的進步</div>'
     + '<div class="hero-s">不跟別人比——只跟上次的你比。</div>'
@@ -869,6 +912,8 @@ function meHTML(){
     ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
     : '<div class="wk">還沒量過。先做一次 ATPI 測驗，或直接開始練——練了就會有數字。</div>';
   h += '</div>';
+
+  if (S.member) h += muscleMapHTML() + sweetPathHTML();
 
   var measured = MORD.filter(function(k){ return calcMuscleScores(S)[k] != null; }).length;
   var withReaction = S.checkinLog.filter(function(e){ return e.reaction; }).length;
