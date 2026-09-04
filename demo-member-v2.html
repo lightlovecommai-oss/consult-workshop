@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DEMO · 會員頁（新版）</title>
+<style>
+:root{
+  --bg:#F7F1EC; --card:#ffffff; --ink:#2b2118; --sub:#7a6a5c;
+  --act:#C6603A; --actD:#AF5433;
+  --a:#C6603A; --aT:#AF5433; --t:#6E8B77; --tT:#5C7464;
+  --p:#6E8CA8; --pT:#54718D; --i:#C99A4E; --iT:#8E682B;
+  --line:#e8ddd3;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
+.wrap{max-width:480px;margin:0 auto;padding:14px 16px 60px;}
+.demo-banner{background:#2b2118;color:#F7F1EC;font-size:12px;text-align:center;padding:6px;letter-spacing:1px;}
+.blk{position:relative;margin:14px 0;}
+.tag{position:absolute;top:-9px;left:10px;z-index:5;background:#2b2118;color:#F7F1EC;font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px;letter-spacing:.5px;}
+.mock{font-size:10px;color:#b8a894;margin-left:6px;font-weight:400;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.sec{font-size:13px;font-weight:800;letter-spacing:2px;color:var(--sub);margin:22px 4px 10px;}
+
+/* n-1 頂欄 */
+.top{display:flex;align-items:center;justify-content:space-between;padding:4px 2px;}
+.top-brand{font-size:13px;font-weight:800;letter-spacing:1px;color:var(--actD);}
+.top-brand small{font-weight:400;color:var(--sub);letter-spacing:0;margin-left:6px;font-size:11px;}
+.streak{display:flex;align-items:center;gap:8px;}
+.sdots{display:flex;gap:4px;}
+.sd{width:9px;height:9px;border-radius:50%;background:#e4d7c9;}
+.sd.on{background:var(--act);box-shadow:0 0 0 3px rgba(198,96,58,.15);}
+.snum{font-size:12px;font-weight:800;color:var(--actD);}
+
+/* n-2 教練開場（Duolingo 吉祥物位） */
+.greet{display:flex;gap:12px;align-items:flex-start;}
+.greet-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#4A1B0C,#6B3018);color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;border:2px solid #E8C89A;}
+.greet-b{background:#fff;border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:11px 14px;font-size:14px;box-shadow:0 2px 8px rgba(90,60,30,.05);}
+.greet-b b{color:var(--actD);}
+.greet-n{font-size:11px;color:var(--sub);margin-bottom:2px;}
+
+/* n-3 今日主卡 */
+.hero{border:none;background:linear-gradient(160deg,#fff 0%,#fdf6ef 100%);box-shadow:0 6px 24px rgba(90,60,30,.10);}
+.hero-eyebrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);margin-bottom:8px;}
+.mbadge{background:var(--a);color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:2px 10px;letter-spacing:1px;}
+.hero-skill{font-size:24px;font-weight:900;letter-spacing:1px;}
+.hero-skill span{color:var(--aT);}
+.hero-sub{font-size:13px;color:var(--sub);margin-bottom:10px;}
+.hero-move{margin:10px 0 4px;padding:12px 14px;background:#faf3ea;border-left:3px solid var(--a);border-radius:0 12px 12px 0;font-size:15px;}
+.hero-move b{color:var(--aT);}
+.corechips{display:flex;gap:8px;margin:12px 0 16px;font-size:12px;}
+.corechips span{border:1px solid var(--line);border-radius:20px;padding:3px 12px;background:#fff;color:var(--sub);}
+.corechips b{font-weight:700;color:var(--ink);}
+.go{display:block;width:100%;border:none;background:var(--act);color:#fff;font-size:17px;font-weight:800;letter-spacing:2px;padding:15px;border-radius:14px;cursor:pointer;transition:transform .08s;}
+.go:active{transform:scale(.97);}
+.rec{display:none;margin-top:4px;}
+.rec.show{display:block;animation:fadeUp .35s ease;}
+.rec-q{font-size:14px;color:var(--sub);text-align:center;margin-bottom:10px;}
+.rec-btns{display:flex;gap:10px;}
+.rb{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:13px 8px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;transition:transform .08s;}
+.rb:active{transform:scale(.96);}
+.rb b{display:block;font-size:12px;color:var(--sub);font-weight:400;margin-top:2px;}
+.rb.yes{border-color:var(--t);color:var(--tT);}
+.done{display:none;text-align:center;padding:6px 0 2px;}
+.done.show{display:block;animation:pop .4s cubic-bezier(.2,1.6,.4,1);}
+.done-ring{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;background:conic-gradient(var(--t) 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
+.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;font-weight:900;color:var(--tT);}
+.done-t{font-size:17px;font-weight:800;}
+.done-s{font-size:13px;color:var(--sub);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* n-4 場邊教練解析（記錄完才出現） */
+.coach{display:none;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:none;color:#F3E2C8;}
+.coach.show{display:block;animation:fadeUp .45s ease;}
+.coach-h{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.coach-av{width:44px;height:44px;border-radius:50%;background:#3a150a;border:2px solid #E8C89A;display:flex;align-items:center;justify-content:center;color:#E8C89A;font-size:12px;font-weight:800;flex-shrink:0;}
+.coach-t{font-size:15px;font-weight:800;color:#E8C89A;}
+.coach-s{font-size:12px;color:#d8bd97;}
+.coach-line{background:rgba(255,255,255,.08);border-radius:12px;padding:11px 13px;font-size:14px;line-height:1.7;}
+.coach-line b{color:#E8C89A;}
+.coach-next{margin-top:10px;font-size:12.5px;color:#d8bd97;}
+.coach-next b{color:#E8C89A;}
+
+/* n-5 主力肌肉：大條＋三小燈＋核心兩招（圖鑑濃縮成這一張） */
+.mus-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
+.mus-n{font-size:16px;font-weight:900;color:var(--aT);}
+.mus-n small{font-size:12px;color:var(--sub);font-weight:400;margin-left:6px;}
+.mus-pct{font-size:13px;font-weight:800;color:var(--aT);}
+.bar{height:10px;background:#f0e7dc;border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.bar i{display:block;height:100%;width:44%;background:var(--a);border-radius:10px;transition:width .6s ease;}
+.lamps{display:flex;flex-direction:column;gap:9px;}
+.lamp{display:flex;align-items:center;gap:11px;}
+.lamp-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;}
+.lamp.on .lamp-dot{background:var(--a);color:#fff;}
+.lamp.now .lamp-dot{background:#fff;border:2px solid var(--a);color:var(--aT);box-shadow:0 0 0 4px rgba(198,96,58,.15);}
+.lamp.off .lamp-dot{background:#efe6db;color:#a08f7d;}
+.lamp-n{font-size:14px;font-weight:700;}
+.lamp.off .lamp-n{color:#a08f7d;font-weight:400;}
+.lamp-s{margin-left:auto;font-size:11.5px;color:var(--sub);}
+.lamp.now .lamp-s{color:var(--aT);font-weight:700;}
+.mus-core{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--sub);}
+.mus-core b{color:var(--ink);}
+
+/* n-6 明日預告 */
+.tmr{display:flex;align-items:center;gap:12px;}
+.tmr-dot{width:38px;height:38px;border-radius:12px;background:#efe6db;color:var(--aT);display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;}
+.tmr-t{font-size:15px;font-weight:800;}
+.tmr-s{font-size:12.5px;color:var(--sub);}
+
+/* n-7 地圖＋骨層 */
+.map{display:flex;align-items:stretch;}
+.mst{flex:1;text-align:center;position:relative;padding:10px 4px;}
+.mst::after{content:"";position:absolute;top:26px;right:-8px;width:16px;height:2px;background:var(--line);}
+.mst:last-child::after{display:none;}
+.mdot{width:34px;height:34px;margin:0 auto 6px;border-radius:50%;background:#efe6db;color:#a08f7d;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.mst.past .mdot{background:#e0d2c2;color:#8a7660;}
+.mst.here .mdot{background:var(--act);color:#fff;box-shadow:0 0 0 4px rgba(198,96,58,.18);}
+.mn{font-size:12.5px;font-weight:800;}
+.ms{font-size:10.5px;color:var(--sub);}
+.mst.here .mn{color:var(--actD);}
+.mst.locked .mn{color:#a08f7d;}
+.grid12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 4px;}
+.g{height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;background:#efe6db;color:#a08f7d;}
+.g.lit{color:#fff;}
+.map-end{margin-top:10px;text-align:center;font-size:12.5px;color:var(--sub);}
+.map-end b{color:var(--actD);}
+.bone{text-align:center;font-size:14px;color:var(--sub);padding:18px 20px 0;}
+.bone b{color:var(--actD);}
+</style>
+</head>
+<body>
+<div class="demo-banner">DEMO · 新版會員頁 · 全部示意資料</div>
+<div class="wrap">
+
+  <!-- n-1 頂欄：品牌＋連續天數（週回顧融進燈點） -->
+  <div class="blk"><span class="tag">n-1</span>
+    <div class="top">
+      <div class="top-brand">影響力健身房<small>會員</small></div>
+      <div class="streak">
+        <div class="sdots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span><span class="sd"></span></div>
+        <span class="snum">連續 5 天<span class="mock">示意</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- n-2 教練開場：開門第一眼是「人」不是功能 -->
+  <div class="blk"><span class="tag">n-2</span>
+    <div class="greet">
+      <div class="greet-av">教練</div>
+      <div>
+        <div class="greet-n">場邊教練 · 光頭</div>
+        <div class="greet-b">昨天那組「讓他開口」你連中兩天了。<b>今天練追問</b>——開口之後，讓他停不下來。<span class="mock">示意</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- n-3 今日主卡：招掛在主力肌肉底下，一天一件事 -->
+  <div class="blk"><span class="tag">n-3</span>
+    <div class="card hero">
+      <div class="hero-eyebrow"><span class="mbadge">本月主力 · 吸引肌肉</span><span>第 2 塊 / 3 塊</span></div>
+      <div class="hero-skill">讓他追問</div>
+      <div class="hero-sub">他開口了，怎麼讓他想繼續問你？</div>
+      <div class="hero-move">講到最有趣的地方<b>停住</b>：「這中間發生一件事……啊，說來話長。」然後等。<span class="mock">示意</span></div>
+      <div class="corechips"><span>核心技巧墊底：<b>讓他開口</b> · <b>讓他敢說</b></span></div>
+      <button class="go" id="btn-go" onclick="showRec()">我去試了，回來記一下 →</button>
+      <div class="rec" id="rec">
+        <div class="rec-q">他後來有追問嗎？</div>
+        <div class="rec-btns">
+          <button class="rb yes" onclick="finish(1)">有，他追問了<b>+1 組</b></button>
+          <button class="rb" onclick="finish(0)">還沒回應<b>明天再丟一次，也算 +1 組</b></button>
+        </div>
+      </div>
+      <div class="done" id="done">
+        <div class="done-ring"><i>+1</i></div>
+        <div class="done-t" id="done-t">這就是一組。</div>
+        <div class="done-s" id="done-s">往下看，教練有話跟你說。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- n-4 場邊教練解析：記錄完才浮出來——回饋跟著行為走，不是常駐板塊 -->
+  <div class="blk" id="coach-blk" style="display:none"><span class="tag">n-4</span>
+    <div class="card coach" id="coach">
+      <div class="coach-h">
+        <div class="coach-av">教練</div>
+        <div><div class="coach-t">場邊解析</div><div class="coach-s">看完你這組的紀錄</div></div>
+      </div>
+      <div class="coach-line" id="coach-line">你停住的那一下就是關鍵——他追問，代表<b>鉤子有掛上</b>。明天試著把「說來話長」換成你自己的版本，用你的故事當餌。<span class="mock">示意</span></div>
+      <div class="coach-next">下一步：<b>明天練「讓他記得」</b>，讓這段對話三天後他還想得起來。</div>
+    </div>
+  </div>
+
+  <!-- n-5 主力肌肉：大條＋三小燈＝圖鑑濃縮成一張卡 -->
+  <div class="sec">本月主力 · 吸引肌肉</div>
+  <div class="blk"><span class="tag">n-5</span>
+    <div class="card">
+      <div class="mus-h"><div class="mus-n">吸引肌肉<small>讓他想靠近</small></div><div class="mus-pct" id="mus-pct">44%<span class="mock">示意</span></div></div>
+      <div class="bar"><i id="mus-bar"></i></div>
+      <div class="lamps">
+        <div class="lamp on"><div class="lamp-dot">A1</div><div class="lamp-n">讓他開口</div><div class="lamp-s">已點亮 · 5 組</div></div>
+        <div class="lamp now" id="lamp-a2"><div class="lamp-dot">A2</div><div class="lamp-n">讓他追問</div><div class="lamp-s" id="lamp-a2-s">今天練 · 2 組</div></div>
+        <div class="lamp off"><div class="lamp-dot">A3</div><div class="lamp-n">讓他記得</div><div class="lamp-s">還沒解鎖</div></div>
+      </div>
+      <div class="mus-core">核心兩招隨時在手：<b>讓他開口</b>（5 組）· <b>讓他敢說</b>（3 組）<span class="mock">示意</span></div>
+    </div>
+  </div>
+
+  <!-- n-6 明日預告：future pacing，明天打開就從這裡開始 -->
+  <div class="blk"><span class="tag">n-6</span>
+    <div class="card tmr">
+      <div class="tmr-dot">A3</div>
+      <div><div class="tmr-t">明天換練「讓他記得」</div><div class="tmr-s">練完這塊，吸引肌肉整塊點亮</div></div>
+    </div>
+  </div>
+
+  <!-- n-7 全貌：12 格全露出＋身分地圖＋骨層終點 -->
+  <div class="sec">全部 12 塊</div>
+  <div class="blk"><span class="tag">n-7</span>
+    <div class="card">
+      <div class="grid12">
+        <div class="g lit" style="background:var(--a)">A1</div>
+        <div class="g lit" style="background:var(--a);opacity:.55">A2</div>
+        <div class="g">A3</div><div class="g">T1</div>
+        <div class="g">T2</div><div class="g">T3</div>
+        <div class="g">P1</div><div class="g">P2</div>
+        <div class="g">P3</div><div class="g">I1</div>
+        <div class="g">I2</div><div class="g">I3</div>
+      </div>
+      <div class="map">
+        <div class="mst past"><div class="mdot">體驗</div><div class="mn">路人體驗</div><div class="ms">完成</div></div>
+        <div class="mst here"><div class="mdot">會員</div><div class="mn">會員</div><div class="ms">2 / 12 塊點亮</div></div>
+        <div class="mst locked"><div class="mdot">私教</div><div class="mn">私人教練</div><div class="ms">1v1 指揮艙</div></div>
+      </div>
+      <div class="map-end">影響力是肌肉，<b>只會越練越強</b>——還有 10 塊等你點亮。</div>
+    </div>
+  </div>
+
+  <div class="blk"><span class="tag">骨</span>
+    <div class="bone">你練的每一組，都不是為了贏過誰。<br>是讓<b>有人因為你，願意把心裡話說完</b>。</div>
+  </div>
+
+</div>
+<script>
+function showRec(){
+  document.getElementById('btn-go').style.display='none';
+  document.getElementById('rec').classList.add('show');
+}
+function finish(got){
+  var rec=document.getElementById('rec');
+  rec.classList.remove('show'); rec.style.display='none';
+  var d=document.getElementById('done');
+  if(!got){
+    document.getElementById('done-t').textContent='丟出去了，就算一組。';
+    document.getElementById('done-s').textContent='沒回應也是情報——往下看，教練有話跟你說。';
+    document.getElementById('coach-line').innerHTML='沒回應不是失手——常常是<b>對方今天沒空接</b>。同一句明天換個時間再丟，第二次接住的機率高很多。<span class="mock">示意</span>';
+  }
+  d.classList.add('show');
+  document.getElementById('coach-blk').style.display='block';
+  document.getElementById('coach').classList.add('show');
+  document.getElementById('lamp-a2-s').textContent='今天練 · 3 組';
+  document.getElementById('mus-pct').innerHTML='50%<span class="mock">示意</span>';
+  document.getElementById('mus-bar').style.width='50%';
+  setTimeout(function(){document.getElementById('coach-blk').scrollIntoView({behavior:'smooth',block:'center'});},400);
+}
+</script>
+</body>
+</html>
