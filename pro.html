@@ -176,6 +176,55 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .boot-dots{display:flex;justify-content:center;gap:12px;margin-top:26px;}
 .boot-dots span{width:11px;height:11px;border-radius:50%;animation:bpulse 1.2s ease-in-out infinite;}
 @keyframes bpulse{0%,100%{transform:scale(.7);opacity:.45;}50%{transform:scale(1.15);opacity:1;}}
+/* ── 三頁大demo搬入（2026-09-04 老師指示：先把相近元素放一起，之後再整合）──
+   dp- 前綴＝demo-pro.html 搬進來的板塊，深底科技 HUD 樣式自帶暗卡底，資料全是示意。 */
+.dp-blk{position:relative;margin-bottom:14px;}
+.dp-tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#0c131e;background:#e6a93a;border-radius:10px;padding:2px 8px;z-index:5;}
+.dp-mock{font-size:10px;color:#7d90a3;background:rgba(234,241,250,.08);border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;}
+.dp-cd{background:#131f2b;border-radius:16px;padding:17px 16px;border:1px solid #1d2c3c;color:#eaf1fa;}
+.dp-sec{font-size:12px;font-weight:700;letter-spacing:2px;color:#7d90a3;margin-bottom:12px;}
+.dp-sec b{color:#eaf1fa;}
+.dp-num{font-variant-numeric:tabular-nums;}
+.dp-tb{background:linear-gradient(135deg,#4A1B0C,#6B3018);margin:0 -16px;padding:20px 16px 18px;position:relative;overflow:hidden;}
+.dp-tb:after{content:"";position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#E8C89A,transparent);animation:dpscan 3.2s ease-in-out infinite;top:0;}
+@keyframes dpscan{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
+.dp-tb-k{font-size:11px;letter-spacing:4px;color:#E8C89A;font-weight:700;}
+.dp-tb-t{font-size:24px;font-weight:900;color:#F7F1EC;margin-top:8px;}
+.dp-tb-s{font-size:13px;color:rgba(247,241,236,.65);margin-top:6px;line-height:1.7;}
+.dp-tb-coach{display:flex;align-items:center;gap:10px;margin-top:14px;background:rgba(12,19,30,.35);border:1px solid rgba(232,200,154,.25);border-radius:14px;padding:10px 13px;}
+.dp-tb-av{width:34px;height:34px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.dp-tb-cn{font-size:13.5px;font-weight:700;color:#F7F1EC;}
+.dp-tb-cs{font-size:11.5px;color:rgba(247,241,236,.55);margin-top:1px;}
+.dp-tb-nx{margin-left:auto;text-align:right;font-size:11px;color:rgba(247,241,236,.55);line-height:1.6;flex-shrink:0;}
+.dp-tb-nx b{display:block;font-size:12.5px;color:#E8C89A;}
+.dp-hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.dp-hc{background:#182634;border-radius:10px;padding:9px 8px;font-size:11px;color:#eaf1fa;line-height:1.5;position:relative;}
+.dp-hc .bar{height:3px;border-radius:3px;background:#2a3a4d;margin-top:6px;overflow:hidden;}
+.dp-hc .bf{height:100%;border-radius:3px;}
+.dp-hc .v{font-size:10px;color:#7d90a3;margin-top:4px;}
+.dp-hc.lockon{background:#1a2434;}
+.dp-hc.lockon:before,.dp-hc.lockon:after{content:"";position:absolute;width:9px;height:9px;border:1.5px solid #e6a93a;}
+.dp-hc.lockon:before{top:-2px;left:-2px;border-right:0;border-bottom:0;}
+.dp-hc.lockon:after{bottom:-2px;right:-2px;border-left:0;border-top:0;}
+.dp-hc.lockon .v{color:#e6a93a;font-weight:700;}
+.dp-fp{position:relative;padding-left:24px;}
+.dp-fp:before{content:"";position:absolute;left:7px;top:12px;bottom:12px;width:2px;background:linear-gradient(180deg,#e8734a,#33c495,#4b9bf0,#e6a93a);border-radius:2px;box-shadow:0 0 8px rgba(232,115,74,.35);}
+.dp-wp{position:relative;padding:8px 0 8px 4px;font-size:13.5px;line-height:1.8;color:#eaf1fa;}
+.dp-wp:before{content:"";position:absolute;left:-21px;top:15px;width:10px;height:10px;border-radius:50%;background:#0c131e;border:2px solid #7d90a3;}
+.dp-wp.lit:before{border-color:#33c495;background:#33c495;box-shadow:0 0 8px rgba(51,196,149,.6);}
+.dp-wp small{display:block;font-size:11.5px;color:#7d90a3;margin-top:2px;}
+.dp-gauge{display:flex;gap:8px;}
+.dp-gg{flex:1;background:#182634;border-radius:12px;padding:12px;text-align:center;}
+.dp-gg-v{font-size:20px;font-weight:700;color:#e8734a;line-height:1.2;}
+.dp-gg-l{font-size:10.5px;color:#7d90a3;margin-top:4px;line-height:1.5;}
+.dp-vault{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:16px;padding:19px 18px;color:#F7F1EC;position:relative;overflow:hidden;}
+.dp-vault:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.12),transparent);animation:dpsheen 4.5s ease-in-out infinite;}
+@keyframes dpsheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
+.dp-vault-k{font-size:11px;letter-spacing:3px;color:#E8C89A;font-weight:700;}
+.dp-vault-q{font-size:16px;line-height:1.9;margin-top:10px;}
+.dp-vault-q b{color:#E8C89A;}
+.dp-vault-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
+.dp-vault-quote small{display:block;margin-top:5px;font-size:11px;color:#C9A87A;}
 :focus-visible{outline:2px solid #C6603A;outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
@@ -337,7 +386,68 @@ function weeklyReviewCard(){
     + '<div style="font-size:13px;color:#6E4A3C;margin-top:8px;line-height:1.8;">一週一次，場邊教練陪你把這週的片刻拆開看——會員層沒有這個時段。</div></div>';
 }
 function pathHTML(){
-  return heroHTML() + archArcSection() + weeklyReviewCard();
+  return demoP1_() + heroHTML() + archArcSection() + weeklyReviewCard();
+}
+
+/* ── 三頁大demo搬入（2026-09-04 老師指示：先把相近元素放一起，之後再整合）──
+   demoP1_~demoP7_＝demo-pro.html 的 p-1/p-3/p-4/p-6/p-7 板塊，資料全是示意（標「示意」）、
+   樣式用 dp- 前綴不與正式版打架。p-2 引力場（SVG 軌道）留在 demo-pro.html 沒搬。 */
+function demoP1_(){
+  return '<div class="dp-blk" style="margin:0 0 18px;"><span class="dp-tag" style="top:8px;right:8px;">p-1</span>'
+    + '<div class="dp-tb">'
+    + '<div class="dp-tb-k">ATPIFIT · PRIVATE COACH</div>'
+    + '<div class="dp-tb-t">私人教練席</div>'
+    + '<div class="dp-tb-s">超引力成交學 · 第 47 天<span class="dp-mock">示意</span></div>'
+    + '<div class="dp-tb-coach"><div class="dp-tb-av">光</div>'
+    + '<div><div class="dp-tb-cn">光頭教練</div><div class="dp-tb-cs">看著你的每一筆紀錄</div></div>'
+    + '<div class="dp-tb-nx"><b>下次 1v1</b>9/12（五）14:00<span class="dp-mock">示意</span></div></div>'
+    + '</div></div>';
+}
+function demoP3_(){
+  var cells = [
+    ["讓他想聽","70%","#e8734a","3.5",0], ["讓他心動","56%","#e8734a","2.8",0], ["讓他放心","80%","#e8734a","4.0",0],
+    ["讓他敢說","64%","#33c495","3.2",0], ["讓他信你","76%","#33c495","3.8",0], ["讓他懂你","60%","#33c495","3.0",0],
+    ["讓他服你","66%","#4b9bf0","3.3",0], ["讓他要你","50%","#4b9bf0","2.5",0], ["讓他行動","58%","#4b9bf0","2.9",0],
+    ["讓他跟隨","40%","#e6a93a","2.0 · 這季主力",1], ["讓他推薦","44%","#e6a93a","2.2",0], ["讓他回來","52%","#e6a93a","2.6",0]
+  ];
+  return '<div class="dp-blk"><span class="dp-tag">p-3</span>'
+    + '<div class="dp-cd"><div class="dp-sec">MUSCLE SCAN · <b>12 塊全開</b><span class="dp-mock">示意</span></div>'
+    + '<div class="dp-hgrid">' + cells.map(function(c){
+        return '<div class="dp-hc' + (c[4] ? ' lockon' : '') + '">' + c[0]
+          + '<div class="bar"><div class="bf" style="width:' + c[1] + ';background:' + c[2] + ';"></div></div>'
+          + '<div class="v dp-num">' + c[3] + '</div></div>';
+      }).join("") + '</div>'
+    + '<div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">分數是教練校準過的——低分不是問題，是<b style="color:#e6a93a;">先練這塊最有感</b>。</div>'
+    + '</div></div>';
+}
+function demoP4_(){
+  return '<div class="dp-blk"><span class="dp-tag">p-4</span>'
+    + '<div class="dp-cd"><div class="dp-sec">FLIGHT PATH · <b>你的變現甜蜜路徑</b><span class="dp-mock">示意</span></div>'
+    + '<div class="dp-fp">'
+    + '<div class="dp-wp lit">先用故事讓他看見你在做的事<small>✓ 已走過 · BNI 例會 60 秒</small></div>'
+    + '<div class="dp-wp lit">用問題帶他說出自己的卡點<small>✓ 已走過 · 「最卡的是人還是流程？」</small></div>'
+    + '<div class="dp-wp">把你的方法放進他的框架裡講一次<small>下一站——這次 1v1 演練這裡</small></div>'
+    + '<div class="dp-wp">約下一次——讓他認定你就是那個人</div>'
+    + '</div></div></div>';
+}
+function demoP6_(){
+  return '<div class="dp-blk"><span class="dp-tag">p-6</span>'
+    + '<div class="dp-cd"><div class="dp-sec">EXTERNAL SIGNAL · <b>市場驗證</b><span class="dp-mock">示意</span></div>'
+    + '<div class="dp-gauge">'
+    + '<div class="dp-gg"><div class="dp-gg-v dp-num">3 筆</div><div class="dp-gg-l">成交回報</div></div>'
+    + '<div class="dp-gg"><div class="dp-gg-v dp-num">21.6 萬</div><div class="dp-gg-l">累計金額</div></div>'
+    + '<div class="dp-gg"><div class="dp-gg-v dp-num">7%</div><div class="dp-gg-l">對齊 300 萬錨點</div></div>'
+    + '</div>'
+    + '<div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">成交是外部驗證變項——獨立顯示，不回饋進能力分數。</div>'
+    + '</div></div>';
+}
+function demoP7_(){
+  return '<div class="dp-blk" style="margin-top:18px;"><span class="dp-tag">p-7</span>'
+    + '<div class="dp-vault">'
+    + '<div class="dp-vault-k">這三個月，你的想法動了什麼？</div>'
+    + '<div class="dp-vault-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>'
+    + '<div class="dp-vault-quote">「我以前覺得成交是說服——現在我覺得成交是他終於放心了。」<small>7/28 · 月覆盤時你說的<span class="dp-mock" style="background:rgba(247,241,236,.18);color:rgba(247,241,236,.7);">示意</span></small></div>'
+    + '</div></div>';
 }
 
 /* ══ 關係軌跡：持續存在的功能（不是驗收才出現），讀真的 e.reaction，
@@ -437,7 +547,9 @@ function bodyHTML(){
           + '<div class="v">' + (v == null ? '還沒量' : v.toFixed(1) + (isFocus ? ' · 這季主力' : '')) + '</div></div>';
       }).join("") + '</div>'
     + '<div style="font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;">分數是跟教練一起校準的——低分不是問題，是<b style="color:#993C1D;">先練這塊最有感</b>。這一層 12 格全開，照上升空間最大的練。</div></div>';
+  h += demoP3_();
   h += sweetProHTML();
+  h += demoP4_();
   return h;
 }
 
@@ -579,6 +691,7 @@ function outHTML(){
     + '<div style="font-size:13px;color:#8A7266;line-height:1.75;margin-top:6px;">成交是<b style="color:#6E4A3C;">外部驗證變項</b>，獨立顯示、不回饋進能力分數。拿成交回推分數、再用分數預測成交＝循環論證。</div>'
     + (!S.revenueLog.length ? '<div class="empty" style="margin-top:8px;">還沒有成交紀錄。這裡會隨你回報成交自動更新。</div>' : '')
     + '</div>';
+  h += demoP6_();
   h += '<a class="go" href="https://time.atpifit.com">預約場邊教練覆盤 →</a>'
     + '<div style="font-size:13px;color:#8A7266;text-align:center;margin-top:8px;">場邊教練陪跑・一週一次拆解</div>';
   /* 改觀句・骨層卡（骨層三問：這一格就是「為什麼」）。沒有後端欄位存改觀句，
@@ -587,6 +700,7 @@ function outHTML(){
     + '<div class="bone-k">這三個月，你的想法動了什麼？</div>'
     + '<div class="bone-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>'
     + '<div class="bone-quote">下次月覆盤，把你最有感的那句說出來——教練幫你記在這裡。</div></div>';
+  h += demoP7_();
   h += '<div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>';
   return h;
 }
