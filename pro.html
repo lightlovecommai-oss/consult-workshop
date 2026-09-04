@@ -62,6 +62,9 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .dot.on{border-color:transparent;color:#0c131e;}
 .nl{font-size:13px;color:#7d90a3;}
 .nl.on{color:#eaf1fa;}
+/* 呼吸節點：DORD 順序下一個還沒點亮的維度，虛線邊＋維度色＋緩脈動 */
+.dot.nx{border-style:dashed;animation:ndpulse 2s ease-in-out infinite;}
+@keyframes ndpulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 .arc-note{border-radius:9px;padding:11px 12px;font-size:13px;line-height:1.75;background:rgba(234,241,250,.05);color:#8ea1b6;}
 .arc-note.soft{background:rgba(51,196,149,.1);color:#33c495;}
 .empty{font-size:13px;color:#7d90a3;line-height:1.85;text-align:center;padding:8px 4px;}
@@ -75,6 +78,22 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mc-n{font-size:13px;color:#eaf1fa;}
 .mc-v{margin-left:auto;font-size:13px;font-weight:700;color:#eaf1fa;font-variant-numeric:tabular-nums;}
 .mc-bar{height:3px;background:#2a3a4d;border-radius:2px;overflow:hidden;}
+
+/* 口袋卡（L1-L4 打基礎的提示・回家演練） */
+.pk-g{font-size:13px;font-weight:700;margin:14px 2px 6px;}
+.pk-r{width:100%;display:flex;align-items:center;gap:8px;background:#182634;border:0;border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer;font-family:inherit;text-align:left;min-height:44px;color:#eaf1fa;}
+.pk-code{font-size:13px;font-weight:700;flex-shrink:0;}
+.pk-nm{font-size:15px;}
+.pk-ar{margin-left:auto;font-size:13px;color:#7d90a3;}
+.pk-bd{background:#182634;border-radius:0 0 10px 10px;margin:-10px 0 6px;padding:2px 12px 13px;}
+.pk-lb{font-size:13px;color:#7d90a3;margin:11px 0 4px;}
+.pk-w{font-size:13px;color:#8ea1b6;line-height:1.7;}
+.pk-say{font-size:15px;color:#eaf1fa;line-height:1.9;}
+.pk-say b{color:#e8734a;}
+.pk-bl{display:inline-block;min-width:34px;border-bottom:1px solid #7d90a3;height:1em;vertical-align:baseline;}
+.pk-exr{display:flex;gap:8px;font-size:13px;line-height:1.7;padding:3px 0;}
+.pk-exk{flex-shrink:0;color:#7d90a3;}
+.pk-exv{color:#8ea1b6;}
 
 /* 成果 */
 .stat-row{display:flex;align-items:baseline;gap:10px;background:#182634;border-radius:12px;padding:13px;margin-bottom:8px;}
@@ -149,19 +168,20 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 </div>
 
 <div class="nav hide" id="nav">
-  <button class="nv on" data-p="path" onclick="go('path')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4.5" cy="19" r="1.7" fill="currentColor" stroke="none"/><path d="M7 19h6a3.5 3.5 0 0 0 0-7h-2a3.5 3.5 0 0 1 0-7h6"/><circle cx="19.5" cy="5" r="1.7" fill="currentColor" stroke="none"/></svg></span>路徑</button>
+  <button class="nv on" data-p="path" onclick="go('path')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4.5" cy="19" r="1.7" fill="currentColor" stroke="none"/><path d="M7 19h6a3.5 3.5 0 0 0 0-7h-2a3.5 3.5 0 0 1 0-7h6"/><circle cx="19.5" cy="5" r="1.7" fill="currentColor" stroke="none"/></svg></span>軌跡</button>
   <button class="nv" data-p="body" onclick="go('body')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 19.5v-5.5M9.2 19.5v-9M14.8 19.5v-6.5M20.5 19.5v-12"/></svg></span>體格</button>
-  <button class="nv" data-p="out" onclick="go('out')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></span>成果</button>
+  <button class="nv" data-p="out" onclick="go('out')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></span>覆盤</button>
 </div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script src="judgement.js"></script>
+<script src="pocket-cards.js"></script>
 <script>
 /* ═══ 私教學員層（科技版）══
    跟會員層(member.html)一樣用低摩擦兩下記錄（對誰／反應），差在這裡 12 格全開、
-   照最弱的補，不是只練一塊。ATPI 是人的屬性不分 workshop，體格/關係軌跡讀全域資料；
+   照上升空間最大的練，不是只練一塊。ATPI 是人的屬性不分 workshop，體格/關係軌跡讀全域資料；
    只有「路徑」的 L1-L8 進度是照這支課程（超引力-顧問課／超引力-公眾演說）算。 */
 var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
 var S = null, WID = null, PANE = "path";
@@ -254,35 +274,23 @@ function speechLevelState(){
     { k:"L13", name:"大師之路", desc:"畢業考核",                       state:"lock" }
   ];
 }
-function pathHTML(){
-  var isSpeech = WID === "超引力-公眾演說";
-  var h;
-  if (isSpeech) {
-    var slv = speechLevelState();
-    var srow = slv.map(function(l){
-      return '<div class="lcell" style="background:rgba(234,241,250,.05);"><div class="lcell-n" style="color:#7d90a3;">' + l.k + '</div>'
-        + '<div class="lcell-l" style="color:#7d90a3;">' + esc_(l.name) + '</div></div>';
-    }).join("");
-    h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-公眾演說 · L9–L13</div>'
-      + '<div class="lrow">' + srow + '</div>'
-      + '<div style="font-size:13px;color:#7d90a3;margin-top:12px;line-height:1.8;">' + slv.map(function(l){ return l.k + ' ' + esc_(l.desc); }).join('<br>') + '</div>'
-      + '<div class="empty" style="margin-top:12px;">這門課還沒有逐字稿可以對照真進度，這裡先列真的課綱結構，算不出進度就不裝。</div></div>';
+/* 軌跡分頁＝關係軌跡（第一位）＋每週覆盤演練卡；課表降級搬去「覆盤」分頁。
+   練習卡由底下的 pathHTML wrapper 接在最後（CTA 下移）。 */
+function weeklyReviewCard(){
+  var topic;
+  if (WID === "超引力-公眾演說") {
+    topic = "這週拆解：跟教練現場定";
   } else {
-    var lv = levelState();
-    var lrow = lv.map(function(l){
-      var bg = l.state === "done" ? "#e8734a" : l.state === "now" ? "rgba(232,115,74,.18)" : "rgba(234,241,250,.05)";
-      var fg = l.state === "done" ? "#0c131e" : l.state === "now" ? "#e8734a" : "#7d90a3";
-      return '<div class="lcell" style="background:' + bg + ';">' + '<div class="lcell-n" style="color:' + fg + ';">' + l.k + '</div>'
-        + '<div class="lcell-l" style="color:' + (l.state === "lock" ? "#7d90a3" : fg) + ';">' + esc_(l.name) + '</div></div>';
-    }).join("");
-    h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-顧問課 · L1–L8</div>'
-      + '<div class="lrow">' + lrow + '</div>'
-      + '<div style="display:flex;gap:10px;margin-top:12px;font-size:13px;color:#7d90a3;">'
-      + '<span>L1–L4 每塊肌肉打基礎</span><span style="margin-left:auto;">L5–L8 串成連貫打法</span></div></div>';
+    var lv = levelState(), now = null;
+    for (var i = 0; i < lv.length; i++) { if (lv[i].state === "now") { now = lv[i]; break; } }
+    topic = now ? "這週拆解：" + now.k + " " + now.name : "這週拆解：跟教練現場定";
   }
-
-  h += archArcSection();
-  return h;
+  return '<div class="cd"><div class="pill" style="margin-bottom:12px;">每週覆盤演練</div>'
+    + '<div style="font-size:22px;font-weight:700;color:#eaf1fa;line-height:1.5;">' + esc_(topic) + '</div>'
+    + '<div style="font-size:13px;color:#8ea1b6;margin-top:8px;line-height:1.8;">一週一次，場邊教練陪你把這週的片刻拆開看——會員層沒有這個時段。</div></div>';
+}
+function pathHTML(){
+  return archArcSection() + weeklyReviewCard();
 }
 
 /* ══ 關係軌跡：持續存在的功能（不是驗收才出現），讀真的 e.reaction，
@@ -302,18 +310,24 @@ function relTargets(){
 }
 function archArcSection(){
   var targets = relTargets();
-  var h = '<div style="font-size:13px;color:#7d90a3;margin:16px 3px 10px;">關係軌跡 · 這一層才看得到</div>';
+  var h = '<div style="font-size:13px;color:#7d90a3;margin:2px 3px 10px;">關係軌跡 · 最多同時看 4 個人——深，比多重要</div>';
   if (!targets.length) {
     h += '<div class="cw"><div class="empty">開練時記下「對誰」，這裡就會把片刻串成一條線——只有練習頁記過反應的對象才會出現在這裡。</div></div>';
     return h;
   }
   h += targets.map(function(x){
     var t = x.t, soft = SOFT_REL.indexOf(t.rel) > -1;
+    /* 呼吸節點：DORD 順序第一個「還沒點亮且非 muted」的維度，虛線邊＋維度色＋緩脈動 */
+    var nextGiven = false;
     var nodes = DORD.map(function(d){
       var muted = soft && (d === "P" || d === "I");
       var on = !!t.dims[d] && !muted;
+      var nx = !on && !muted && !nextGiven;
+      if (nx) nextGiven = true;
+      var dotStyle = on ? ' style="background:' + TDIM[d] + ';"'
+        : nx ? ' style="border-color:' + TDIM[d] + ';color:' + TDIM[d] + ';"' : '';
       return '<div class="node"' + (muted ? ' style="opacity:.32;"' : '') + '>'
-        + '<div class="dot' + (on ? " on" : "") + '"' + (on ? ' style="background:' + TDIM[d] + ';"' : '') + '>' + (muted ? "—" : d) + '</div>'
+        + '<div class="dot' + (on ? " on" : nx ? " nx" : "") + '"' + dotStyle + '>' + (muted ? "—" : d) + '</div>'
         + '<div class="nl' + (on ? " on" : "") + '">' + (muted ? "—" : esc_(DIM_RESULT[d])) + '</div></div>';
     }).join("");
     var note = soft
@@ -330,14 +344,14 @@ function archArcSection(){
   return h;
 }
 
-/* ══ 12 小肌群：全開，照最弱的補（跟會員層相反——會員層不給看這個） ══ */
+/* ══ 12 小肌群：全開，照上升空間最大的練（跟會員層相反——會員層不給看這個） ══ */
 function bodyHTML(){
   var scores = calcMuscleScores(S), meta = muscleScoreMeta(S);
   var weak = {}; weakestThree(S).forEach(function(k, i){ weak[k] = i + 1; });
   var measured = MORD.filter(function(k){ return scores[k] != null; }).length;
   var h = '<div class="cd"><div style="display:flex;align-items:center;font-size:13px;color:#7d90a3;">12 小肌群 · 全開'
     + '<span style="margin-left:auto;">' + measured + ' / 12 已量</span></div>'
-    + '<div style="font-size:13px;color:#7d90a3;margin-top:6px;line-height:1.7;">這一層照最弱的補——跟會員層（練最有體驗的1-2塊）相反，因為你已經買了完整的路。</div></div>';
+    + '<div style="font-size:13px;color:#7d90a3;margin-top:6px;line-height:1.7;">這一層 12 格全開，照上升空間最大的練——跟會員層（練最有體驗的 1–2 塊）相反，因為你已經買了完整的路。</div></div>';
 
   h += DORD.map(function(d){
     var ks = musclesOfDim(d);
@@ -345,21 +359,149 @@ function bodyHTML(){
       + '<div class="mg">' + ks.map(function(mk){
           var m = MUSCLES[mk], v = scores[mk];
           var src = meta[mk] ? ({ coach: "教練校準", self: "自評", quiz: "測驗" }[meta[mk].source] || "") : "";
-          return '<div class="mc' + (v == null ? " none" : "") + '"><div class="mc-top">'
+          return '<div class="mc' + (v == null ? " none" : "") + '"' + (weak[mk] ? ' style="border:1px solid #e6a93a;"' : '') + '><div class="mc-top">'
             + '<span class="mc-k" style="color:' + TDIM[d] + ';">' + mk + '</span>'
             + '<span class="mc-n">' + esc_(m.name) + '</span>'
             + (v == null ? '' : '<span class="mc-v">' + v.toFixed(1) + '</span>') + '</div>'
             + '<div class="mc-bar"><div style="height:3px;width:' + (v == null ? 0 : (v - 1) / 4 * 100) + '%;background:' + TDIM[d] + ';"></div></div>'
-            + '<div style="font-size:13px;color:#7d90a3;margin-top:5px;">' + (v == null ? "還沒量" : weak[mk] ? "重點" : esc_(src || m.tech)) + '</div></div>';
+            + '<div style="font-size:13px;color:#7d90a3;margin-top:5px;">' + (v == null ? "還沒量" : weak[mk] ? "這季主力" : esc_(src || m.tech)) + '</div></div>';
         }).join("") + '</div>';
   }).join("");
+  h += sweetProHTML();
   return h;
 }
 
-/* ══ 成果：市場驗證，獨立顯示不乘進分數，會員層看不到這頁 ══ */
+/* ══ 甜蜜路徑（pro 版）：同 member.html sweetPathHTML 的來源（atpi-core.js COMBO_PATH 查表），
+   差在這裡四步全開不迷霧——你已經買了完整的路。分數不足兩維時給同一句空狀態，不放示意。 ══ */
+function sweetProHTML(){
+  var d5 = calcDimScores5(S);
+  var ms = DORD.filter(function(k){ return d5[k] != null; });
+  var h = '<div class="cd" style="margin-top:14px;"><div class="pill" style="margin-bottom:12px;">甜蜜路徑</div>';
+  if (ms.length >= 2) {
+    var sorted5 = ms.sort(function(a, b){ return d5[b] - d5[a]; });
+    var top2 = sorted5.slice(0, 2);
+    var combo = COMBO_PATH[top2.slice().sort().join("")];
+    var steps = (combo.flow || "").split("\n").filter(function(x){ return x.trim(); });
+    h += '<div style="font-size:15px;color:#eaf1fa;line-height:1.9;">你最強的兩塊：<b>'
+      + esc_(DIMS[top2[0]].name) + ' × ' + esc_(DIMS[top2[1]].name) + '</b>——'
+      + '這個組合的變現甜蜜路徑是<b>「' + esc_(combo.title) + '」</b>，四步全開：</div>'
+      + '<div style="margin-top:10px;">' + steps.map(function(st, i){
+          return '<div style="display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#eaf1fa;line-height:1.8;padding:6px 0;">'
+            + '<span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#e8734a;color:#0c131e;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;">' + (i + 1) + '</span>'
+            + '<span>' + esc_(st.replace(/^[①②③④]\s*/, "")) + '</span></div>';
+        }).join("") + '</div>';
+  } else {
+    h += '<div class="empty">把體格量起來，你的變現甜蜜路徑就會浮出來——最強兩塊的組合，就是你最省力的那條路。</div>';
+  }
+  return h + '</div>';
+}
+
+/* ══ 覆盤分頁：課程進度（降級卡）→ 本月數字 → 成果（市場驗證，獨立顯示不乘進分數，
+   會員層看不到這頁）→ 改觀句骨層卡 → 預約場邊教練覆盤。 ══ */
+function lcellHTML_(l){
+  var bg = l.state === "done" ? "#e8734a" : l.state === "now" ? "rgba(232,115,74,.18)" : "rgba(234,241,250,.05)";
+  var fg = l.state === "done" ? "#0c131e" : l.state === "now" ? "#e8734a" : "#7d90a3";
+  return '<div class="lcell" style="background:' + bg + ';padding:7px 2px;"><div class="lcell-n" style="color:' + fg + ';">' + l.k + '</div>'
+    + '<div class="lcell-l" style="color:' + (l.state === "lock" ? "#7d90a3" : fg) + ';">' + esc_(l.name) + '</div></div>';
+}
+function courseProgressCard(){
+  if (WID === "超引力-公眾演說") {
+    /* 完全保留現行 L9–L13 誠實列法：算不出進度就不裝 */
+    var slv = speechLevelState();
+    var srow = slv.map(function(l){
+      return '<div class="lcell" style="background:rgba(234,241,250,.05);"><div class="lcell-n" style="color:#7d90a3;">' + l.k + '</div>'
+        + '<div class="lcell-l" style="color:#7d90a3;">' + esc_(l.name) + '</div></div>';
+    }).join("");
+    return '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-公眾演說 · L9–L13</div>'
+      + '<div class="lrow">' + srow + '</div>'
+      + '<div style="font-size:13px;color:#7d90a3;margin-top:12px;line-height:1.8;">' + slv.map(function(l){ return l.k + ' ' + esc_(l.desc); }).join('<br>') + '</div>'
+      + '<div class="empty" style="margin-top:12px;">這門課還沒有逐字稿可以對照真進度，這裡先列真的課綱結構，算不出進度就不裝。</div></div>';
+  }
+  var lv = levelState();
+  var base = lv.slice(0, 4), adv = lv.slice(4);
+  var allDone = base.every(function(l){ return l.state === "done"; });
+  var advLock = adv[0].state === "lock";
+  var h = '<div class="cd"><div class="pill" style="margin-bottom:12px;">超引力-顧問課 · L1–L8</div>'
+    + '<div style="font-size:13px;color:#7d90a3;margin-bottom:6px;">技巧底盤 L1–L4</div>';
+  if (allDone) {
+    h += '<div style="font-size:13px;color:#33c495;background:rgba(51,196,149,.1);border-radius:9px;padding:9px 12px;">技巧底盤 L1–L4 ✓ 四塊肌肉都量過了</div>';
+  } else {
+    h += '<div class="lrow">' + base.map(lcellHTML_).join("") + '</div>';
+  }
+  h += '<div style="font-size:13px;color:#7d90a3;margin:12px 0 6px;">應用主軸 L5–L8</div>'
+    + '<div class="lrow"' + (advLock ? ' style="opacity:.45;"' : '') + '>' + adv.map(lcellHTML_).join("") + '</div>';
+  if (advLock) h += '<div style="font-size:13px;color:#7d90a3;margin-top:10px;line-height:1.7;">先把技巧底盤量完，應用主軸就開了</div>';
+  return h + '</div>';
+}
+/* 本月數字：從 checkinLog 算三個真數字，沒有的就是 0，不編假資料 */
+function monthStatsCard(){
+  var mo = normDate(new Date()).slice(0, 7);
+  var n = 0, good = 0, who = {};
+  S.checkinLog.forEach(function(e){
+    if (normDate(e.date).slice(0, 7) !== mo) return;
+    n++;
+    if (e.reaction === "明顯有" || e.reaction === "超乎預期") good++;
+    if (e.target && e.target !== "陌生人") who[e.target] = true;
+  });
+  var cells = [["本月片刻", n], ["明顯有以上", good], ["記錄過的對象", Object.keys(who).length]];
+  return '<div class="cd"><div class="pill" style="margin-bottom:12px;">本月數字</div>'
+    + '<div style="display:flex;gap:8px;">' + cells.map(function(c){
+        return '<div style="flex:1;background:#182634;border-radius:12px;padding:13px;text-align:center;">'
+          + '<div class="stat-l">' + c[0] + '</div><div class="stat-v">' + c[1] + '</div></div>';
+      }).join("") + '</div></div>';
+}
+/* ══ 口袋卡：L1-L4 打基礎的提示（內容真相＝productkit 口袋卡教材，pocket-cards.js 是鏡像）。
+   一張卡＝技巧／解決誤區／語句／三場景，點開看。進階卡(adv)不出——老師裁定它只當
+   演練的補充教材，不進回家演練。 ══ */
+var PK_OPEN = null;
+function togglePk_(i){ PK_OPEN = PK_OPEN === i ? null : i; render(); }
+function pkColor_(d){ return d === "B" ? "#e8734a" : TDIM[d]; }
+function pkSay_(s){
+  return esc_(s).replace(/&lt;br\s*\/?&gt;/g, "<br>")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/＿+/g, '<span class="pk-bl"></span>');
+}
+function pkCardHTML_(c, i){
+  var col = pkColor_(c.dim), open = PK_OPEN === i;
+  var h = '<button class="pk-r" onclick="togglePk_(' + i + ')">'
+    + '<span class="pk-code" style="color:' + col + ';">' + esc_(c.code) + '</span>'
+    + '<span class="pk-nm">' + esc_(c.name) + '</span>'
+    + '<span class="pk-ar">' + (open ? "收合 ▴" : "點開 ▾") + '</span></button>';
+  if (open) {
+    h += '<div class="pk-bd">'
+      + '<div class="pk-lb">解決誤區</div><div class="pk-w">' + esc_(c.wrong) + '</div>'
+      + '<div class="pk-lb">語句</div><div class="pk-say">' + pkSay_(c.say) + '</div>'
+      + '<div class="pk-lb">三場景範例</div>'
+      + c.ex.map(function(x){
+          var skip = /跳過/.test(x[1]);
+          return '<div class="pk-exr"' + (skip ? ' style="opacity:.45;"' : '') + '><span class="pk-exk">'
+            + esc_(x[0]) + '</span><span class="pk-exv">' + esc_(x[1]) + '</span></div>';
+        }).join("")
+      + '</div>';
+  }
+  return h;
+}
+function pocketCardsHTML(){
+  var groups = [["L0", null, "先修 · 兩個基本動作"], ["L1", "A"], ["L2", "T"], ["L3", "P"], ["L4", "I"]];
+  var h = '<div class="cd"><div class="pill" style="margin-bottom:10px;">口袋卡</div>'
+    + '<div style="font-size:13px;color:#7d90a3;line-height:1.8;margin-bottom:2px;">L1–L4 打基礎的提示——上課練完，回家練那一招。每張卡＝語句＋三場景範例，點開看。</div>';
+  groups.forEach(function(g){
+    var set = [];
+    PKCARDS.forEach(function(c, i){ if (c.L === g[0] && !c.adv) set.push([c, i]); });
+    if (!set.length) return;
+    var col = pkColor_(set[0][0].dim);
+    var title = g[2] || (g[0] + " · " + ((DIMS[g[1]] || {}).name || g[1]));
+    h += '<div class="pk-g" style="color:' + col + ';">' + esc_(title) + '</div>'
+      + set.map(function(p){ return pkCardHTML_(p[0], p[1]); }).join("");
+  });
+  return h + '</div>';
+}
 function outHTML(){
+  var h = courseProgressCard();
+  h += pocketCardsHTML();
+  h += monthStatsCard();
   var mv = marketValidation(S);
-  var h = '<div class="cd"><div style="font-size:13px;color:#7d90a3;margin-bottom:14px;">會員層看不到這一頁</div>'
+  h += '<div class="cd"><div style="font-size:13px;color:#7d90a3;margin-bottom:14px;">會員層看不到這一頁</div>'
     + '<div class="stat-row"><div><div class="stat-l">成交回報</div><div class="stat-v">' + S.revenueLog.length + ' 筆</div></div></div>'
     + '<div class="stat-row"><div><div class="stat-l">累計金額</div><div class="stat-v">' + Math.round(mv.amount / 10000 * 10) / 10 + ' 萬</div></div>'
     + '<div class="stat-r">對齊 300 萬錨點<br>' + mv.amtAchieve.toFixed(0) * 100 + '%</div></div>'
@@ -367,10 +509,16 @@ function outHTML(){
     + '<div class="stat-r">獨立顯示<br>不乘進分數</div></div></div>';
   h += '<div class="cw"><div style="font-size:13px;color:#8ea1b6;line-height:1.75;">成交是<b style="color:#eaf1fa;">外部驗證變項</b>，獨立顯示、不回饋進能力分數。拿成交回推分數、再用分數預測成交＝循環論證。</div></div>';
   if (!S.revenueLog.length) h += '<div class="cw"><div class="empty">還沒有成交紀錄。這裡會隨你回報成交自動更新。</div></div>';
+  /* 改觀句・骨層卡（骨層三問：這一格就是「為什麼」） */
+  h += '<div style="background:linear-gradient(135deg,#3a2318,#4A1B0C);border-radius:20px;padding:20px 18px;margin-bottom:14px;">'
+    + '<div style="font-size:17px;font-weight:600;color:#F7F1EC;line-height:1.8;">影響力的盡頭不是成交，是有人因為你變好。</div>'
+    + '<div style="font-size:13px;color:rgba(247,241,236,.55);margin-top:10px;line-height:1.7;">把這季聽到最有感的一句話，帶來月覆盤。</div></div>';
+  h += '<a class="sub" href="https://time.atpifit.com" style="display:block;text-align:center;text-decoration:none;">預約場邊教練覆盤 →</a>'
+    + '<div style="font-size:13px;color:#7d90a3;text-align:center;margin-top:8px;">場邊教練陪跑・一週一次拆解</div>';
   return h;
 }
 
-/* ══ 練習：低摩擦兩下記錄（跟會員層同一招），照最弱的小肌群派 ══ */
+/* ══ 練習：低摩擦兩下記錄（跟會員層同一招），照上升空間最大的小肌群派 ══ */
 function practicePool(){
   var pool = weakestMuscles(calcMuscleScores(S), 12);
   return pool.length ? pool : ["A1", "A2", "A3"];
@@ -408,11 +556,18 @@ function recHTML(){
   if (REC.step === 3) {
     var good = REC.react >= 2;
     return '<div class="cw"><div class="ok"><div class="ok-e">' + (good ? "🌱" : "🌾") + '</div>'
-      + '<div class="ok-t">' + (good ? "他接住了。" : "你講了。<br>他今天沒接。") + '</div>'
-      + '<div class="ok-s">' + (good ? '這就是<b style="color:#eaf1fa;">' + esc_(m.name) + '在動</b>——記進了關係軌跡。' : '沒接住也是資料，記進去了。') + '</div></div>'
+      + '<div class="ok-t">' + (good ? "他接住了。" : "你講了。<br>他今天沒回應。") + '</div>'
+      + '<div class="ok-s">' + (good ? '這就是<b style="color:#eaf1fa;">' + esc_(m.name) + '在動</b>——記進了關係軌跡。' : '沒回應也是資料，記進去了。') + '</div></div>'
       + '<button class="sub" onclick="closeRec()">回路徑</button></div></div>';
   }
   if (t.desc || j.homework) h += '<div class="how">' + md_(t.desc || j.homework) + '</div>';
+  /* 口袋卡提示：這塊小肌群有卡就帶出語句——L1-L4 打基礎的提示，開口前先看一眼 */
+  var pk = PKCARDS.filter(function(x){ return x.code === REC.muscle && !x.adv; })[0];
+  if (pk) {
+    h += '<div class="how" style="border-left:3px solid ' + c + ';">'
+      + '<div style="font-size:13px;color:#7d90a3;margin-bottom:5px;">口袋卡 · ' + esc_(pk.name) + '</div>'
+      + '<div class="pk-say">' + pkSay_(pk.say) + '</div></div>';
+  }
 
   if (REC.step === 1) {
     var recents = recentTargets();
@@ -462,18 +617,18 @@ function bindPane(){
   if (box) box.onclick = openRec;
 }
 
-/* 路徑頁底下加一張「今天練哪塊」卡，串進低摩擦記錄流程 */
+/* 軌跡頁最底下接一張「今天練這塊」卡（CTA 下移），串進低摩擦記錄流程 */
 var _pathHTML = pathHTML;
 pathHTML = function(){
   var mk = focusMuscle(), m = MUSCLES[mk], j = JUDGEMENT[mk] || {};
   var isWeakest = weakestMuscles(calcMuscleScores(S), 1).indexOf(mk) > -1;
   var practiceCard = '<div class="cw" id="practiceBox" style="cursor:pointer;">'
     + '<div style="display:flex;align-items:center;gap:9px;"><span class="pill">今天練這塊</span>'
-    + '<span style="margin-left:auto;font-size:13px;color:#7d90a3;">' + (isWeakest ? "最弱" : "") + '</span></div>'
+    + '<span style="margin-left:auto;font-size:13px;color:#7d90a3;">' + (isWeakest ? "這季主力" : "") + '</span></div>'
     + '<div style="font-size:22px;font-weight:600;color:#eaf1fa;margin-top:10px;">' + esc_(m.name) + '</div>'
     + '<div style="font-size:15px;color:#8ea1b6;margin-top:8px;line-height:1.9;">' + esc_((j.homework || "").replace(/\*\*/g, "")) + '</div>'
     + '<button class="sub">練溝通</button></div>';
-  return practiceCard + _pathHTML();
+  return _pathHTML() + practiceCard;
 };
 
 boot();
