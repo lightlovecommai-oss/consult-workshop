@@ -229,6 +229,8 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .rv-body{pointer-events:none;}
 .rv-note{background:#FFF6D8;border:1.5px dashed #D9BE6A;border-radius:10px;padding:9px 12px;font-size:14px;line-height:1.5;color:#5A4A1E;margin:6px 0 20px;min-height:21px;outline:none;}
 .rv-note:empty::before{content:"想怎麼改寫這裡（自動儲存）";color:#BCA65E;}
+.rv-note-all{background:#FDEBDD;border-color:#D9A276;color:#6E3A1E;margin:0 0 22px;}
+.rv-note-all:empty::before{content:"這一頁的大方向寫這裡（自動儲存）";color:#C89A72;}
 .rv-bar{position:fixed;bottom:14px;right:14px;z-index:60;}
 .rv-copy{background:#C6603A;color:#fff;border:0;border-radius:24px;padding:12px 18px;font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;}
 .loading{text-align:center;padding:56px 20px;color:#6E4A3C;font-size:15px;}
@@ -461,6 +463,13 @@ function renderReview(){
     var head = document.createElement("div");
     head.className = "rv-head"; head.textContent = "── " + p[2] + " ──";
     out.appendChild(head);
+    /* 整頁大方向：不綁單一板塊的總回饋，key＝夥-總／練-總／進-總 */
+    var allId = p[1] + "-總";
+    var allNote = document.createElement("div");
+    allNote.className = "rv-note rv-note-all"; allNote.contentEditable = "true";
+    if (notes[allId]) allNote.textContent = notes[allId];
+    allNote.addEventListener("input", function(){ rvSave_(allId, allNote.textContent.trim()); });
+    out.appendChild(allNote);
     var tmp = document.createElement("div");
     tmp.innerHTML = p[0] === "gym" ? gymHTML() : p[0] === "today" ? todayHTML() : meHTML();
     Array.prototype.slice.call(tmp.children).forEach(function(kid, i){
@@ -487,7 +496,8 @@ function rvCopy_(){
   var o = rvLoad_();
   var ks = Object.keys(o).filter(function(k){ return o[k]; }).sort(function(a, b){
     var pa = a.split("-"), pb = b.split("-");
-    return (RV_ORD[pa[0]] - RV_ORD[pb[0]]) || (Number(pa[1]) - Number(pb[1]));
+    var na = pa[1] === "總" ? 0 : Number(pa[1]), nb = pb[1] === "總" ? 0 : Number(pb[1]);
+    return (RV_ORD[pa[0]] - RV_ORD[pb[0]]) || (na - nb);
   });
   if (!ks.length) { alert("還沒寫任何意見——點板塊下面的黃色框直接打字"); return; }
   var txt = "member 精修意見（" + RV_VER + "）\n" + ks.map(function(k){ return k + "：" + o[k]; }).join("\n");
