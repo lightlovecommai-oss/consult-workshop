@@ -611,8 +611,8 @@ function focusMuscle(){
   return pool[(S.pick || 0) % pool.length];
 }
 /* 體驗客/會員內容差異：
-   ①練習——體驗客最卡那一塊大肌肉的3個秘訣按上線次數輪流、沒有「換一個」；
-     會員在最弱2塊大肌肉(6個小肌群)裡自己挑、有「換一個」（模組2/3規格的分野，兩邊池子不一樣）
+   ①練習——體驗客只給 2 個基本功（講故事/問問題）按上線次數輪流、沒有「換一個」；
+     會員池＝最弱大肌肉3塊＋2基本功共5個自己挑（2026-09-04 核心技巧架構拍板，兩邊池子不一樣）
    ②看不到教練解盤卡/三個月驗收卡
    社群完整內容沒做，是因為沒有真的內容/資料可以撐，硬做會變成編假資料，寧可先不做。 */
 /* 免費講座報名連結——連結生出來就填這裡（比照 join.html 的 PAYUNI_URL：空字串＝次鈕不出現，
@@ -808,7 +808,7 @@ function ladderHTML(){
   /* 橫式三框（2026-09-04 老師拍板：權益改橫式三框、每框 2-3 點）。
      席位色沿用四身分＝A/T/P/I 對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
   var halls = [
-    {n:"體驗席", p:"免費", pts:["3 個秘訣輪流練","自己看紀錄"], link:"", c:"#6E8B77"},
+    {n:"體驗席", p:"免費", pts:["2 個基本功輪流練","自己看紀錄"], link:"", c:"#6E8B77"},
     {n:"會員席", p:"NT$99／月", pts:["教練解析健檢","紀錄算進肌肉分數","權益課每月 2 堂"], link:"join.html", c:"#6E8CA8"},
     {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:"", c:"#C99A4E"}
   ];
@@ -1201,23 +1201,21 @@ function dimScoreNowPrev(s, dim){
     prev: prevVals.length ? prevVals.reduce(function(a,b){return a+b;},0) / prevVals.length : null
   };
 }
-/* ══ 會員席的變現鉤子（往私人教練席）：跟體驗席同一招往上搬一層——
-   12 塊給地圖不給分數、甜蜜路徑給預告不給全圖（30-規範 §8：小肌群分數是私教學員層才打開）。 ══ */
-function muscleMapHTML(){
+/* ══ 進-4（2026-09-04 老師拍板）：獨立的 12 塊卡退役，併進四塊卡——點大肌肉展開它的 3 塊小肌群。
+   30-規範 §8 不變：12 塊給「有沒有在練」不給分數（小肌群分數是私教學員層才打開）。 ══ */
+var ME_OPEN = {};
+function toggleDim_(k){ if (!S.member) return; ME_OPEN[k] = !ME_OPEN[k]; render(); }
+function dimSubHTML_(k){
   var sc = calcMuscleScores(S), fm = focusMuscle();
-  var h = '<div class="cd"><div class="sec">你的 12 塊小肌群</div><div class="mm">';
-  h += MORD.map(function(mk){
-    var m = MUSCLES[mk], d = m.dim, n = muscleTrainCount(S, mk);
+  return '<div style="margin-top:9px;display:grid;gap:6px;">' + musclesOfDim(k).map(function(mk){
+    var m = MUSCLES[mk], n = muscleTrainCount(S, mk);
     var measured = sc[mk] != null, focus = mk === fm;
     var st = focus ? '這季主力' : n > 0 ? '練了 ' + n + ' 次' : measured ? '量過・還沒練' : '還沒量';
-    return '<div class="mmc' + (!measured && !n ? ' dash' : '') + '"'
-      + (focus ? ' style="border-color:' + DIMS[d].color + ';"' : '') + '>'
-      + '<div class="mmc-n"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + DIMS[d].color + ';margin-right:6px;"></span>' + esc_(m.name) + '</div>'
-      + '<div class="mmc-s"' + (focus ? ' style="color:' + dimTextColor(d) + ';font-weight:700;"' : '') + '>' + st + '</div></div>';
-  }).join("");
-  h += '</div><div class="wk">這裡只看「有沒有在練」。12 塊的<b>分數與判讀</b>不在這層打開——那是私人教練席跟教練一起看的。</div>'
-    + '<div style="font-size:13px;color:#8A7266;text-align:center;margin-top:12px;line-height:1.8;">先點亮自己，再照亮別人——這 12 塊，就是那條路。</div></div>';
-  return h;
+    return '<div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#4A1B0C;background:#F7F1EC;border-radius:10px;padding:8px 11px;">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:' + DIMS[k].color + ';flex-shrink:0;"></span>'
+      + '<span>' + esc_(m.name) + '</span>'
+      + '<span style="margin-left:auto;color:' + (focus ? dimTextColor(k) : '#8A7266') + ';' + (focus ? 'font-weight:700;' : '') + '">' + st + '</span></div>';
+  }).join('') + '</div>';
 }
 function sweetPathHTML(){
   var d5 = calcDimScores5(S);
@@ -1257,23 +1255,26 @@ function meHTML(){
     var word = dimStatusWord(v);
     var showScore = v != null && np.prev != null;
     var diff = showScore ? Math.round((v - np.prev) * 10) / 10 : 0;
-    return '<div class="mrow"><div class="mrow-top">'
-      + '<span class="mrow-n">' + esc_(DIMS[k].name) + '</span>'
+    var open = S.member && ME_OPEN[k];
+    return '<div class="mrow"' + (S.member ? ' onclick="toggleDim_(\'' + k + '\')" style="cursor:pointer;"' : '') + '><div class="mrow-top">'
+      + '<span class="mrow-n">' + esc_(DIMS[k].name) + (S.member ? ' <span style="font-size:11px;color:#8A7266;">' + (open ? '▾' : '▸') + '</span>' : '') + '</span>'
       + '<span class="mrow-s" style="color:' + (v == null ? "#8A7266" : dimTextColor(k)) + ';">' + word + '</span>'
       + (showScore ? '<span class="mrow-v">' + v.toFixed(1) + ' / 滿分 5</span>' : '')
       + '</div>'
       + '<div class="mrow-bar" style="background:' + (v == null ? "transparent" : DIMS[k].soft) + ';' + (v == null ? "border:1px dashed #E6DAD1;" : "") + '">'
       + '<div class="mrow-fill" style="width:' + (v == null ? 0 : pct5(v)) + '%;background:' + DIMS[k].color + ';"></div></div>'
       + (showScore ? '<div class="mrow-d">' + (diff > 0 ? "比上次多了 " + diff : diff < 0 ? "比上次少了 " + Math.abs(diff) : "跟上次一樣") + '</div>' : "")
+      + (open ? dimSubHTML_(k) : "")
       + '</div>';
   }).join("");
   var anyMeasured = MORD.some(function(k){ return calcMuscleScores(S)[k] != null; });
   h += anyMeasured
     ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
     : '<div class="wk">還沒量過。先做一次 ATPI 測驗，或直接開始練——練了就會有數字。</div>';
+  if (S.member) h += '<div class="wk">點大肌肉，展開它的 3 塊小肌群——小肌群只看「有沒有在練」，分數與判讀是私人教練席跟教練一起看的。</div>';
   h += '</div>';
 
-  if (S.member) h += muscleMapHTML() + sweetPathHTML();
+  if (S.member) h += sweetPathHTML();
 
   /* 慢快兩格（2026-09-04 老師拍板換這個框架）：肌肉慢慢動、次數今天就能動——先看右邊 */
   var d5me = calcDimScores5(S);
