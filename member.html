@@ -222,6 +222,15 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .nv-i{height:22px;display:flex;align-items:center;justify-content:center;}
 .nv-i svg{display:block;}
 .hide{display:none;}
+/* ── 精修模式（?demo=1&review=1）：三頁攤平＋編號牌＋便利貼，不影響正常流程 ── */
+.rv-head{margin:30px 0 16px;text-align:center;color:#6E4A3C;font-weight:700;font-size:16px;letter-spacing:.1em;}
+.rv-wrap{position:relative;margin-bottom:6px;}
+.rv-tag{position:absolute;top:-9px;left:-4px;z-index:5;background:#4A1B0C;color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;letter-spacing:.05em;}
+.rv-body{pointer-events:none;}
+.rv-note{background:#FFF6D8;border:1.5px dashed #D9BE6A;border-radius:10px;padding:9px 12px;font-size:14px;line-height:1.5;color:#5A4A1E;margin:6px 0 20px;min-height:21px;outline:none;}
+.rv-note:empty::before{content:"想怎麼改寫這裡（自動儲存）";color:#BCA65E;}
+.rv-bar{position:fixed;bottom:14px;right:14px;z-index:60;}
+.rv-copy{background:#C6603A;color:#fff;border:0;border-radius:24px;padding:12px 18px;font-size:15px;font-weight:700;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;}
 .loading{text-align:center;padding:56px 20px;color:#6E4A3C;font-size:15px;}
 .spin{width:30px;height:30px;border:3px solid #E6DAD1;border-top-color:#C6603A;border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 12px;}
 @keyframes sp{to{transform:rotate(360deg);}}
@@ -389,6 +398,7 @@ async function boot() {
       { name: "Amy", muscle: "A2", dim: "A", reaction: "明顯有", date: todayStr(new Date(Date.now() - 2 * 86400000)) },
       { name: "婷", muscle: "T1", dim: "T", reaction: "沒特別", date: todayStr(new Date(Date.now() - 5 * 86400000)) }
     ];
+    if (qs.get("review") === "1") { renderReview(); return; }
     el("nav").classList.remove("hide");
     render();
     return;
@@ -426,6 +436,71 @@ function bumpVisitCount_(lineId){
     localStorage.setItem(key, String(n));
     return n;
   } catch (e) { return 1; }
+}
+
+/* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
+   意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
+   .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
+var RV_VER = "v1", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_ORD = { "夥": 0, "練": 1, "進": 2 };
+function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
+function rvSave_(k, txt){
+  try {
+    var o = rvLoad_();
+    if (txt) o[k] = txt; else delete o[k];
+    localStorage.setItem(RV_KEY, JSON.stringify(o));
+  } catch (e) {}
+}
+function renderReview(){
+  el("hall").textContent = "精修模式";
+  el("joinday").textContent = "意見稿 " + RV_VER;
+  var notes = rvLoad_();
+  var out = document.createElement("div");
+  [["gym","夥","夥伴頁"], ["today","練","練習頁"], ["me","進","進步頁"]].forEach(function(p){
+    PANE = p[0];
+    var head = document.createElement("div");
+    head.className = "rv-head"; head.textContent = "── " + p[2] + " ──";
+    out.appendChild(head);
+    var tmp = document.createElement("div");
+    tmp.innerHTML = p[0] === "gym" ? gymHTML() : p[0] === "today" ? todayHTML() : meHTML();
+    Array.prototype.slice.call(tmp.children).forEach(function(kid, i){
+      var id = p[1] + "-" + (i + 1);
+      var wrap = document.createElement("div"); wrap.className = "rv-wrap";
+      var tag = document.createElement("div"); tag.className = "rv-tag"; tag.textContent = id;
+      var body = document.createElement("div"); body.className = "rv-body"; body.appendChild(kid);
+      var note = document.createElement("div"); note.className = "rv-note"; note.contentEditable = "true";
+      if (notes[id]) note.textContent = notes[id];
+      note.addEventListener("input", function(){ rvSave_(id, note.textContent.trim()); });
+      wrap.appendChild(tag); wrap.appendChild(body); wrap.appendChild(note);
+      out.appendChild(wrap);
+    });
+  });
+  PANE = "gym";
+  el("bd").innerHTML = "";
+  el("bd").appendChild(out);
+  var bar = document.createElement("div");
+  bar.className = "rv-bar";
+  bar.innerHTML = '<button class="rv-copy" onclick="rvCopy_()">複製全部意見</button>';
+  document.body.appendChild(bar);
+}
+function rvCopy_(){
+  var o = rvLoad_();
+  var ks = Object.keys(o).filter(function(k){ return o[k]; }).sort(function(a, b){
+    var pa = a.split("-"), pb = b.split("-");
+    return (RV_ORD[pa[0]] - RV_ORD[pb[0]]) || (Number(pa[1]) - Number(pb[1]));
+  });
+  if (!ks.length) { alert("還沒寫任何意見——點板塊下面的黃色框直接打字"); return; }
+  var txt = "member 精修意見（" + RV_VER + "）\n" + ks.map(function(k){ return k + "：" + o[k]; }).join("\n");
+  var done = function(){ alert("已複製 " + ks.length + " 條，直接貼給 Claude"); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done, function(){ rvCopyFallback_(txt); done(); });
+  } else { rvCopyFallback_(txt); done(); }
+}
+function rvCopyFallback_(txt){
+  var ta = document.createElement("textarea");
+  ta.value = txt; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand("copy"); } catch (e) {}
+  document.body.removeChild(ta);
 }
 
 function go(p){
