@@ -18,15 +18,38 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://app.atpifit.com/og-image.png">
 <link rel="stylesheet" href="common.css">
+<style>
+/* 等待畫面＝品牌精神露出的時刻（2026-09-04 老師拍板）：呼吸燈 logo＋慢速輪替 slogan，乾淨優雅 */
+@keyframes ldBreath{0%,100%{transform:scale(1);opacity:.82;}50%{transform:scale(1.06);opacity:1;}}
+.ld{min-height:78vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem;}
+.ld-logo{animation:ldBreath 2.6s ease-in-out infinite;}
+.ld-slogan{margin-top:24px;font-size:17px;font-weight:500;color:#4A1B0C;line-height:1.85;min-height:2em;opacity:1;transition:opacity 1.1s ease;}
+.ld-note{margin-top:10px;font-size:13px;color:#9C8873;letter-spacing:.04em;}
+.ld-rule{margin-top:28px;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
+@media (prefers-reduced-motion:reduce){.ld-logo{animation:none;}.ld-slogan{transition:none;}}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="card" style="text-align:center;padding:2.5rem 1.25rem;margin-top:2rem;">
-    <div style="font-size:32px;margin-bottom:1rem;">🔄</div>
-    <div style="font-size:17px;font-weight:500;color:#2d1f0f;margin-bottom:6px;">識別中…</div>
-    <div style="font-size:15px;color:#7a5636;">正在透過 LINE 確認你的身份</div>
+  <div class="ld">
+    <svg class="ld-logo" width="78" height="58" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A"/><circle cx="-7" cy="0" r="5" fill="#6E8B77"/><circle cx="7" cy="0" r="5" fill="#6E8CA8"/><circle cx="21" cy="0" r="5" fill="#C99A4E"/></svg>
+    <div class="ld-slogan" id="ldSlogan">練好溝通，你就有影響力</div>
+    <div class="ld-note">正在透過 LINE 確認你的身份…</div>
+    <div class="ld-rule"></div>
   </div>
 </div>
+<script>
+/* slogan 慢速輪替：主標語＋骨層句（14 §5 金句庫），淡出→換字→淡入 */
+(function(){
+  var lines = ["練好溝通，你就有影響力", "這裡可以說真話", "先點亮自己，再照亮別人", "影響力的盡頭不是成交，是有人因為你變好"];
+  var i = 0, s = document.getElementById("ldSlogan");
+  setInterval(function(){
+    if (!document.body.contains(s)) return;
+    s.style.opacity = 0;
+    setTimeout(function(){ i = (i + 1) % lines.length; s.textContent = lines[i]; s.style.opacity = 1; }, 1100);
+  }, 4600);
+})();
+</script>
 
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
