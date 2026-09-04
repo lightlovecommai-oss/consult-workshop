@@ -69,6 +69,7 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .gobtn:active{transform:scale(.98);}
 .gobtn.done{background:#DCE7DE;color:#3E5546;cursor:default;}
 .strip{display:flex;align-items:center;gap:10px;padding:2px 3px 20px;}
+.tick{font-size:12.5px;color:#8A6A58;text-align:center;padding:0 3px 12px;min-height:20px;opacity:1;transition:opacity .6s;}
 .lockrow{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #F0E3DB;}
 .lockrow-n{font-size:15px;font-weight:600;color:#4A1B0C;}
 .lockrow-d{font-size:13px;color:#6E4A3C;margin-top:2px;line-height:1.7;}
@@ -136,6 +137,7 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .wd{flex:1;text-align:center;}
 .wd-b{height:36px;border-radius:14px;background:#F0E3DB;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
 .wd-b.on{background:#C6603A;}
+.wd-b.todo{background:#fff;border:1.5px dashed #C6603A;cursor:pointer;box-sizing:border-box;}
 .wd-l{font-size:13px;color:#6E4A3C;margin-top:6px;}
 
 /* 開練流程 */
@@ -302,17 +304,55 @@ var SOFT_REL = ["家人", "朋友"];   // 這兩種走到「願意說」就夠�
 /* 夥伴戰報：真學員、真截圖原話（真相＝productkit 見證庫-共筆，皆 📷 實名可用區）。
    引言照抄不代擬；放在館裡的用意＝陪伴感＋鉤子——三則的共同點都是「有教練在旁邊」。 */
 var WINS = [
-  {n:"姜姜", role:"銷講學員", dim:"I",
+  {n:"姜姜", role:"私教學員", dim:"I",
    d:"8/11 預約光頭教練，8/12–13 兩天收三萬。「我還是多跟教練約好了。」"},
   {n:"偉翔", role:"到府按摩師", dim:"T",
    d:"「開始注意如何說出有說服力的話，讓顧客更信賴我，然後快速的幫我拓展客源。」"},
-  {n:"Michelle", role:"1v1 學員", dim:"I",
+  {n:"Michelle", role:"私教學員", dim:"I",
    d:"「非常感恩，今天對話已經可以收 4,000 元。」"}
+];
+
+/* ══ 夥-6 種子戰報（2026-09-04 老師拍板：放 5-8 條實際回應案例，強弱都能講）══
+   真相＝productkit 見證庫-共筆 C7（幸福銷售私塾群組截圖，原話萃取不代擬）。
+   app 內用群組暱稱；具名對外授權待補。反應強弱刻意混排——「沒特別」也照樣上牆，
+   讓夥伴知道卡住也能講。⚠️ 老師有否決權，要撤哪條直接刪陣列元素。 */
+var GYM_SEED = [
+  /* 2026-09-04 老師拍板：7 條都放、不露名字，只留縮寫 */
+  {n:"J", dim:"T", react:"超乎預期",
+   d:"用「先同後帶」陪客戶談健康與裸辭的糾結", e:"第二個諮詢就成交"},
+  {n:"關", dim:"I", react:"超乎預期",
+   d:"沒想賣課，把課程真心分享給她", e:"她就報名了"},
+  {n:"N", dim:"T", react:"明顯有",
+   d:"發現他一直要明牌，其實是怕自己判斷錯", e:"在他能理解的框架內，把方法傳給他"},
+  {n:"M", dim:"T", react:"有一點",
+   d:"第一次在別人面前講出內心真實的想法"},
+  {n:"J", dim:"A", react:"有一點",
+   d:"這次練習只做三件事：多問、聆聽、少說"},
+  {n:"關", dim:"A", react:"有一點",
+   d:"傳一首歌給正在經歷挑戰的朋友"},
+  {n:"佳", dim:"P", react:"沒特別",
+   d:"演練卡住——太尊重對方的自主，反而不容易多說什麼"}
 ];
 
 /* Skool 社群（真的在跑的）——會員版夥伴頁的社群橋卡連過去。
    卡片上不放篇數/堂數等即時數字：Skool 沒 API 抓不到，寧可不寫也不編。 */
 var SKOOL_URL = "https://www.skool.com/influence-8679/about?ref=ebb628ac5055497fb61e281e175fc786";
+
+/* 理念跑馬燈句庫（骨層句，短、一次一句；真相＝14 §2b／01 字典命門句）。
+   只放正向——「影響力是肌肉，只會越練越強」，沒有退步句。 */
+var TICK = [
+  "影響力是肌肉，只會越練越強。",
+  "這裡可以說真話——錯了，有人接住你。",
+  "力量是為了給愛，不是為了廝殺。",
+  "先付出愛，產生貢獻，其他的自然會來。"
+];
+var TICK_I = 0;
+setInterval(function(){
+  var t = el("tick"); if (!t) return;
+  TICK_I = (TICK_I + 1) % TICK.length;
+  t.style.opacity = 0;
+  setTimeout(function(){ var t2 = el("tick"); if (!t2) return; t2.textContent = TICK[TICK_I]; t2.style.opacity = 1; }, 600);
+}, 5000);
 
 function el(id){ return document.getElementById(id); }
 function logoSvg_(w){ var hh = Math.round(w * 0.72);
@@ -330,6 +370,11 @@ function toggleCheer_(k){
   if (c[k]) delete c[k]; else c[k] = 1;
   try { localStorage.setItem("cw_cheers", JSON.stringify(c)); } catch (e) {}
   render();
+}
+/* 上鎖格的「看得到吃不到」訊息（2026-09-04 老師拍板文案） */
+function lockMsg_(){
+  var n = el("lockmsg"); if (!n) return;
+  n.style.display = (n.style.display === "none") ? "block" : "none";
 }
 function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
@@ -443,7 +488,7 @@ function bumpVisitCount_(lineId){
 /* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
-var RV_VER = "v1", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_VER = "v2", RV_KEY = "cw_review_notes_" + RV_VER;
 var RV_ORD = { "夥": 0, "練": 1, "進": 2 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
@@ -537,30 +582,17 @@ function greet(){
   return hh < 11 ? "早安" : hh < 18 ? "午安" : "晚安";
 }
 
-/* ══════════ 練習焦點：一季只練一塊（老師 2026-09-01 定案）══════════
-   候選池＝最弱 2 塊大肌肉的小肌群（模組 3 規格「最弱2塊大肌肉=6個小肌群，一個推薦＋換一個」）。
-   排序：練過的（比較有手感、見效快）排前面，同等再看誰分數低——沒有「6 選 1 硬編表」，
-   全部從真資料算，量不到就退回新手起手式 A1→A3。 */
-function weakestTwoDimMuscles(s) {
-  var scores = calcMuscleScores(s), d5 = calcDimScores5(s);
-  var measuredDims = DORD.filter(function(k){
-    return musclesOfDim(k).some(function(mk){ return scores[mk] != null; });
-  });
-  if (!measuredDims.length) return [];
-  var pickDims = measuredDims.slice().sort(function(a,b){ return d5[a] - d5[b]; }).slice(0, 2);
-  var ms = [];
-  pickDims.forEach(function(d){
-    musclesOfDim(d).forEach(function(mk){ if (scores[mk] != null) ms.push(mk); });
-  });
-  return ms.sort(function(a, b){
-    var ca = muscleTrainCount(s, a) > 0, cb = muscleTrainCount(s, b) > 0;
-    if (ca !== cb) return ca ? -1 : 1;
-    return scores[a] - scores[b];
-  });
-}
+/* 核心技巧（2026-09-04 老師拍板架構：影響力溝通 > 2 核心技巧 > 4 大肌肉 > 12 小肌肉 > 無數技巧）
+   講故事/問問題＝共通底，這 2 個用得好、12 塊才用得好。腳本在 judgement.js 的 CORE_DRILL。 */
+var CORE_KEYS = ["CORE:story", "CORE:ask"];
+function isCore_(k){ return String(k).indexOf("CORE:") === 0; }
+function coreDrill_(k){ return (typeof CORE_DRILL !== "undefined" ? CORE_DRILL[String(k).slice(5)] : null) || null; }
+function coreName_(k){ var d = coreDrill_(k); return d ? d.n : "基本功"; }
+function pickAt_(i){ if (!S.member) return; S.pick = i; render(); }
+
 function focusPool(){
-  var pool = weakestTwoDimMuscles(S);
-  return pool.length ? pool : ["A1", "A2", "A3"];
+  /* 會員池（2026-09-04 老師拍板）：主力大肌肉 3 塊＋2 個核心技巧（舊制「最弱 2 條 6 塊」作廢） */
+  return weakestBigDimMuscles(S).concat(CORE_KEYS);
 }
 /* 體驗客的候選池＝最卡「那一塊大肌肉」的 3 個小肌群（模組2規格：不是最弱2塊、是最弱1塊），
    照 MORD 固定順序（如 T1→T2→T3），輪流靠「上線次數」不是日期——多數人隔幾週才回來，
@@ -573,10 +605,8 @@ function weakestBigDimMuscles(s){
   return musclesOfDim(dim);
 }
 function focusMuscle(){
-  if (!S.member) {
-    var free = weakestBigDimMuscles(S);
-    return free[(S.visits - 1) % free.length];
-  }
+  /* 體驗客（2026-09-04 老師拍板）：只給 2 個核心技巧輪流——12 塊留在會員牆後 */
+  if (!S.member) return CORE_KEYS[(S.visits - 1) % CORE_KEYS.length];
   var pool = focusPool();
   return pool[(S.pick || 0) % pool.length];
 }
@@ -600,6 +630,13 @@ function ctaCard(t){
 }
 function focusTaskInfo(){
   var mk = focusMuscle();
+  if (isCore_(mk)) {
+    var cd = coreDrill_(mk) || {};
+    /* 核心技巧打卡歸進主力大肌肉的維度（共通技巧不占小肌群欄），後端零改動 */
+    var dim0 = (MUSCLES[weakestBigDimMuscles(S)[0]] || {}).dim || "A";
+    return { muscle: mk, core: mk.slice(5), task: { taskKey: "core_" + mk.slice(5), cadence: "daily",
+      dim: dim0, muscle: "", pts: 1, name: cd.n || "基本功", workshopId: WID || "" } };
+  }
   var t = TASKS.find(function(x){
     return x.cadence === "daily" && taskMuscles_(x.muscle).indexOf(mk) > -1 && (!WID || x.workshopId === WID);
   });
@@ -607,6 +644,10 @@ function focusTaskInfo(){
 }
 function doneToday_(mk){
   var today = taskDayStr();
+  if (isCore_(mk)) {
+    var tk = "core_" + String(mk).slice(5);
+    return S.checkinLog.some(function(e){ return e.date === today && e.taskKey === tk; });
+  }
   return S.checkinLog.some(function(e){ return e.date === today && logMuscles_(e).indexOf(mk) > -1; });
 }
 function weekDates_(){
@@ -631,8 +672,8 @@ function gymHTML(){
   /* Nike 式首屏（NRC 的骨架）：一個大數字當主角＋一顆主鈕，其他全退居次要。
      體驗客的推力＝他自己的時間軸（模組2 🔴陪伴不比較：只跟他自己的上次比，
      ❌「小美練 5 天你只有 1 天」）——併進 hero 副標，不另立卡片；7 天內有練就不出現。 */
-  /* 環境柱骨層句當牆上招牌（短、不解釋；14 §2b 七願×五支柱） */
-  var sub = '這裡可以說真話——一群人一起練，你不是一個人。';
+  /* 環境柱骨層句當牆上招牌（2026-09-04 老師拍板句，兩行） */
+  var sub = '你可以用真誠的溝通創造影響力<br>而且一群人一起練，你不是一個人。';
   if (!S.member && lastD && (Date.now() - new Date(lastD + "T12:00:00").getTime()) / 86400000 >= 7) {
     sub = '你上次練是 <b style="color:#C6603A;">' + esc_(timeAgo(lastD)) + '</b>——影響力是肌肉，它不會自己長，但<b>只要練，就只會越練越強</b>。';
   }
@@ -651,9 +692,12 @@ function gymHTML(){
     + '<div class="hero-s">' + sub + '</div>'
     + '<div class="hero-rule"></div></div>';
 
+  /* 理念跑馬燈（2026-09-04 老師拍板：減文字、輪播理念）——句子輪流亮，一次只給一句 */
+  h += '<div class="tick" id="tick">' + TICK[TICK_I] + '</div>';
+
   h += practiced
     ? '<div class="gobtn done">✓ 今天練過了——先點亮自己</div>'
-    : '<button class="gobtn" onclick="go(\'today\')">練今天的秘訣</button>';
+    : '<button class="gobtn" onclick="go(\'today\')">鍛鍊今日影響力肌肉</button>';
 
   /* 全館共同焦點（真資料）：本月練最多的肌肉＋有練的人數。舊後端沒回傳＝退回示意行，不編數字。 */
   var topM = (typeof GYM_MONTH_TOP !== "undefined") ? GYM_MONTH_TOP : null;
@@ -661,10 +705,12 @@ function gymHTML(){
     ? '這個月大家練最多的是 <b style="color:' + dimTextColor(topM.dim) + ';">' + esc_((DIMS[topM.dim] || {}).name || topM.muscle) + '</b>'
       + (GYM_MONTH_PEOPLE > 1 ? '<br>' + GYM_MONTH_PEOPLE + ' 位夥伴一起在練' : '')
     : '夥伴都在練<span class="mock">示意</span> · 你的紀錄會同步到館裡';
-  h += '<div class="strip"><div class="avs">'
+  /* strip 整條可點→練習頁（2026-09-04 老師拍板：加 >> 連到練習頁） */
+  h += '<div class="strip" onclick="go(\'today\')" style="cursor:pointer;"><div class="avs">'
     + '<div class="av" style="background:#C6603A;">陳</div><div class="av" style="background:#6E8B77;">林</div>'
     + '<div class="av" style="background:#6E8CA8;">王</div><div class="av" style="background:#C99A4E;">+</div></div>'
-    + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">' + stripTxt + '</div></div>';
+    + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">' + stripTxt + '</div>'
+    + '<div style="margin-left:auto;color:#C6603A;font-size:15px;font-weight:700;flex-shrink:0;padding-left:8px;">»</div></div>';
 
   /* 兩層動態流：有打字＝大卡片可鼓勵／純點擊＝一行——沒人打字這頁也要會動（A5） */
   h += '<div class="feed-h">夥伴最近在練什麼</div>';
@@ -695,18 +741,24 @@ function gymHTML(){
       + '<div class="card-w">' + esc_(timeAgo(p.date)) + ' · ' + esc_(reactPhrase_(p.reaction)) + '</div></div>'
       + '<div class="slim-tag" style="color:' + c + ';background:' + soft + ';">' + esc_((DIMS[p.dim] || {}).name || p.muscle) + '</div></div>';
   }).join("");
-  var typedMock = '<div class="cw"><div class="card-top">'
-    + '<div class="av" style="background:#C6603A;margin-left:0;">光</div>'
-    + '<div style="min-width:0;"><span class="card-n">光頭教練</span><span class="card-b">教練</span>'
-    + '<div class="card-w">第 412 天 · 2 小時前</div></div>'
-    + '<div class="slim-tag" style="color:#5C7464;background:#DCE7DE;margin-left:auto;">信任肌肉</div></div>'
-    + '<div class="card-body"><span>我做了什麼 · </span>跟第一次見面的老闆承認，我去年那個案子做不起來。</div>'
-    + '<div class="card-echo"><span>他怎麼回 · </span>「其實我現在也卡著。」——後來聊了一個半小時</div>'
-    + '<div style="text-align:right;margin-top:6px;"><span class="mock">示意</span></div></div>';
+  /* 種子戰報（真案例，見 GYM_SEED 註解）：墊在即時動態後面，沒人發文這頁也有真內容——
+     示意卡就此退役，不再放編出來的例子。反應標籤直接亮強弱＝「卡住也能講」的視覺證據。 */
+  var seedRows = GYM_SEED.map(function(p){
+    var c = dimTextColor(p.dim), soft = (DIMS[p.dim] || {}).soft || "#F0E3DB";
+    var rx = REACT.find(function(r){ return r.t === p.react; });
+    return '<div class="cw"><div class="card-top">'
+      + '<div class="av" style="background:' + ((DIMS[p.dim] || {}).color || "#C6603A") + ';margin-left:0;">' + esc_(p.n.slice(0,1)) + '</div>'
+      + '<div style="min-width:0;"><span class="card-n">' + esc_(p.n) + '</span>'
+      + (rx ? '<div class="card-w">' + rx.e + ' ' + esc_(rx.t) + '</div>' : '') + '</div>'
+      + '<div class="slim-tag" style="color:' + c + ';background:' + soft + ';margin-left:auto;">' + esc_((DIMS[p.dim] || {}).name || "") + '</div></div>'
+      + '<div class="card-body"><span>我做了什麼 · </span>' + esc_(p.d) + '</div>'
+      + (p.e ? '<div class="card-echo"><span>後來 · </span>' + esc_(p.e) + '</div>' : '')
+      + '</div>';
+  }).join("");
 
-  h += (typedReal.length || slimRows) ? (typedReal.join("") + slimRows) : typedMock;
+  h += typedReal.join("") + slimRows + seedRows;
 
-  h += '<div class="feed-h">夥伴的戰報</div>';
+  /* 「夥伴的戰報」標題行拿掉（2026-09-04 老師拍板：冗行、直接接戰報卡） */
   h += WINS.map(function(w){
     var c = dimTextColor(w.dim), soft = (DIMS[w.dim] || {}).soft || "#F0E3DB";
     return '<div class="cw"><div class="card-top">'
@@ -718,11 +770,16 @@ function gymHTML(){
 
   /* 社群橋卡（2026-09-04 老師拍板要先補上）：紀錄在這裡、聊起來在 Skool。
      不放「這週 N 篇分享」之類的即時數字——Skool 沒 API 抓不到，不編。 */
+  /* 夥-11（2026-09-04 老師拍板）：加分享會/乾貨連結欄——專屬連結還沒有，先都指 Skool 把 UI 做起來 */
   if (S.member && SKOOL_URL) {
-    h += '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="display:block;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:14px;padding:16px;margin-top:13px;margin-bottom:14px;text-decoration:none;">'
+    var chip = 'display:block;flex:1;text-align:center;background:rgba(232,200,154,.14);color:#E8C89A;border:1px solid rgba(232,200,154,.35);border-radius:11px;padding:11px 8px;font-size:13px;font-weight:600;text-decoration:none;min-height:44px;box-sizing:border-box;';
+    h += '<div style="background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:14px;padding:16px;margin-top:13px;margin-bottom:14px;">'
       + '<div style="font-size:13px;font-weight:700;color:#E8C89A;margin-bottom:7px;">夥伴的完整分享在社群裡</div>'
-      + '<div style="font-size:13px;color:rgba(247,241,236,.82);line-height:1.8;">這裡是紀錄，聊起來在社群——夥伴的分享、提問、每月 2 堂會員權益課都在那裡。</div>'
-      + '<div style="display:flex;align-items:center;gap:6px;margin-top:11px;color:#E8C89A;font-size:13px;font-weight:600;">去社群 →</div></a>';
+      + '<div style="font-size:13px;color:rgba(247,241,236,.82);line-height:1.8;">這裡是紀錄，聊起來在社群。</div>'
+      + '<div style="display:flex;gap:8px;margin-top:11px;">'
+      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + chip + '">夥伴分享會 →</a>'
+      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + chip + '">乾貨・課程回放 →</a>'
+      + '</div></div>';
   }
   if (!S.member) h += lockedHTML();
   h += ladderHTML();
@@ -748,33 +805,45 @@ function lockedHTML(){
    名稱先落 app 不進字典（比照 09-01 用詞暫定表前例），productkit 結清後再補條目。 */
 function ladderHTML(){
   var here = S.member ? 1 : 0;
-  /* NRC 的等級色帶邏輯：下一級永遠看得見＝升級動力。席位色沿用四身分＝A/T/P/I 的
-     對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
+  /* 橫式三框（2026-09-04 老師拍板：權益改橫式三框、每框 2-3 點）。
+     席位色沿用四身分＝A/T/P/I 對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
   var halls = [
-    {n:"體驗席", p:"免費", d:"3 個秘訣輪流練 · 自己看紀錄", link:"", c:"#6E8B77"},
-    {n:"會員席", p:"NT$99／月", d:"教練解析健檢 · 紀錄算進肌肉分數 · 會員權益課每月 2 堂 · 秘訣自己挑", link:"join.html", c:"#6E8CA8"},
-    {n:"私人教練席", p:"私教課學員", d:"1v1 場邊教練 · 12 小肌群全開 · 甜蜜路徑×變現", link:"", c:"#C99A4E"}
+    {n:"體驗席", p:"免費", pts:["3 個秘訣輪流練","自己看紀錄"], link:"", c:"#6E8B77"},
+    {n:"會員席", p:"NT$99／月", pts:["教練解析健檢","紀錄算進肌肉分數","權益課每月 2 堂"], link:"join.html", c:"#6E8CA8"},
+    {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:"", c:"#C99A4E"}
   ];
-  var h = '<div class="cd"><div class="sec">你在影響力健身房的位置</div>';
+  var h = '<div class="cd"><div class="sec">你在影響力健身房的位置</div><div style="display:flex;gap:8px;align-items:stretch;">';
   h += halls.map(function(t, i){
-    var cls = i === here ? "here" : i === here + 1 ? "next" : "far";
-    var tag = i === here ? '<span class="lad-here">你在這裡</span>' : '';
-    var open = (i === here + 1 && t.link) ? '<a class="lad ' + cls + '" href="' + t.link + '">' : '<div class="lad ' + cls + '">';
-    var close = (i === here + 1 && t.link) ? '</a>' : '</div>';
-    return open + '<div class="lad-top"><span style="width:9px;height:9px;border-radius:50%;background:' + t.c + ';flex-shrink:0;'
-      + (i > here ? 'opacity:.45;' : '') + '"></span><span class="lad-n">' + t.n + '</span>' + tag
-      + '<span class="lad-p">' + t.p + (i === here + 1 && t.link ? ' →' : '') + '</span></div>'
-      + '<div class="lad-d">' + t.d + '</div>' + close;
+    var isHere = i === here, isNext = i === here + 1;
+    var inner = '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">'
+      + '<span style="width:8px;height:8px;border-radius:50%;background:' + t.c + ';' + (i > here ? 'opacity:.45;' : '') + 'flex-shrink:0;"></span>'
+      + '<span style="font-size:13px;font-weight:700;color:#4A1B0C;">' + t.n + '</span></div>'
+      + '<div style="font-size:12px;color:#C6603A;font-weight:600;margin-bottom:6px;">' + t.p + (isNext && t.link ? ' →' : '') + '</div>'
+      + '<div style="font-size:12px;color:#6E4A3C;line-height:1.7;">' + t.pts.join("<br>") + '</div>'
+      + (isHere ? '<div style="margin-top:7px;"><span class="lad-here">你在這裡</span></div>' : '');
+    var box = 'flex:1;min-width:0;border-radius:12px;padding:11px 9px;'
+      + (isHere ? 'background:#FDF6F0;border:1.5px solid ' + t.c + ';'
+        : isNext ? 'background:#fff;border:1px solid #E6DAD1;'
+        : 'background:#fff;border:1px solid #F0E3DB;opacity:.75;');
+    return (isNext && t.link)
+      ? '<a href="' + t.link + '" style="text-decoration:none;' + box + '">' + inner + '</a>'
+      : '<div style="' + box + '">' + inner + '</div>';
   }).join("");
+  h += '</div>';
+  /* 教練團鉤子（2026-09-04 老師拍板要露） */
+  h += '<div style="margin-top:10px;font-size:12.5px;color:#8A6A58;text-align:center;">還有一條路：成為教練團，把你練會的教給別人。</div>';
   return h + '</div>';
 }
 
 /* ══ 分頁 2：練習（一次只給一件事，不是課表）══ */
 function todayHTML(){
-  var info = focusTaskInfo(), mk = info.muscle, m = MUSCLES[mk], j = JUDGEMENT[mk] || {};
+  var info = focusTaskInfo(), mk = info.muscle, core = info.core || null;
+  var m = core
+    ? { name: (coreDrill_(mk) || {}).n || "基本功", dim: info.task.dim, tech: "核心技巧" }
+    : MUSCLES[mk];
+  var j = core ? {} : (JUDGEMENT[mk] || {});
   var c = dimTextColor(m.dim);
-  var freePool = S.member ? null : weakestBigDimMuscles(S);
-  var freeN = freePool ? (((S.visits || 1) - 1) % freePool.length) + 1 : 0;
+  var freeN = (((S.visits || 1) - 1) % CORE_KEYS.length) + 1;
   var done = doneToday_(mk);
   var dates = weekDates_(), doneDates = {};
   S.checkinLog.forEach(function(e){ doneDates[normDate(e.date)] = true; });
@@ -785,13 +854,16 @@ function todayHTML(){
     var isFuture = ds > todayStr();
     var on = !isFuture && doneDates[ds];
     if (on) weekCount++;
-    return '<div class="wd"><div class="wd-b' + (on ? " on" : "") + '">' + (on ? "✓" : "") + '</div>'
+    /* 今天還沒練＝虛線橘圈、點了直接開練（2026-09-04 老師拍板：今天可補做要看得出來） */
+    var isTodo = ds === todayStr() && !on;
+    return '<div class="wd"><div class="wd-b' + (on ? " on" : isTodo ? " todo" : "") + '"'
+      + (isTodo ? ' onclick="openRec()"' : '') + '>' + (on ? "✓" : "") + '</div>'
       + '<div class="wd-l">' + labels[i] + '</div></div>';
   }).join("");
 
   /* 練習頁 hero＝大肌肉全貌條（2026-09-04 老師拍板：小肌群他沒概念、大肌肉才好懂——
      全圖一次露出、正在練的亮、灰格叫「還沒解鎖」，讓他看到還有多少可以練） */
-  var poolMs = S.member ? focusPool() : weakestBigDimMuscles(S);
+  var poolMs = S.member ? focusPool() : [];
   var poolDims = {}; poolMs.forEach(function(k){ poolDims[(MUSCLES[k] || {}).dim] = 1; });
   var litSet = {}; S.checkinLog.forEach(function(e){ logMuscles_(e).forEach(function(k){ litSet[k] = 1; }); });
   var litN = Object.keys(litSet).length;
@@ -799,7 +871,9 @@ function todayHTML(){
     var cur = dk === m.dim, inPool = !!poolDims[dk], D = DIMS[dk] || {};
     var cls = "m4" + (cur ? " on" : inPool ? "" : " off");
     var st = cur ? "正在練" : inPool ? "可以換" : "還沒解鎖";
-    return '<div class="' + cls + '"' + (cur ? ' style="border-color:' + D.color + ';background:' + (D.soft || "#fff") + ';"' : '') + '>'
+    /* 全貌感規則（2026-09-04 老師拍板）：每格都可點——上鎖格點了給「看得到吃不到」那句 */
+    var click = cur ? "" : inPool ? ' onclick="go(\'today\')"' : ' onclick="lockMsg_()"';
+    return '<div class="' + cls + '"' + click + (cur ? ' style="border-color:' + D.color + ';background:' + (D.soft || "#fff") + ';"' : ' style="cursor:pointer;"') + '>'
       + '<div class="m4-n">' + esc_(D.name || dk) + '</div>'
       + '<div class="m4-s"' + (cur ? ' style="color:' + dimTextColor(dk) + ';font-weight:700;"' : '') + '>' + st + '</div></div>';
   }).join("");
@@ -807,19 +881,40 @@ function todayHTML(){
     ? '4 條大肌肉 · 12 塊小肌群——你點亮過 <b style="color:#C6603A;">' + litN + '</b> 塊，還有 ' + Math.max(12 - litN, 0) + ' 塊可以練。'
     : '4 條大肌肉 · 12 塊小肌群——今天從「' + esc_(m.name) + '」開始，一塊一塊點亮。';
 
+  /* 基本功列（老師架構的第一階：2 個核心技巧——12 塊肌肉共同的底） */
+  var coreRow = '<div style="display:flex;gap:6px;margin-top:14px;">' + CORE_KEYS.map(function(k3){
+    var cur3 = k3 === mk, i3 = S.member ? focusPool().indexOf(k3) : -1;
+    return '<div' + (S.member && i3 > -1 ? ' onclick="pickAt_(' + i3 + ')"' : '')
+      + ' style="flex:1;text-align:center;border-radius:12px;padding:9px 6px;font-size:12.5px;'
+      + (S.member ? 'cursor:pointer;' : '')
+      + (cur3 ? 'background:#FDF6F0;border:1.5px solid #C6603A;color:#B14E2B;font-weight:700;'
+              : 'background:#fff;border:1px solid #E6DAD1;color:#6E4A3C;')
+      + '">' + esc_(coreName_(k3)) + '</div>';
+  }).join("") + '</div>'
+  + '<div class="map4-note" style="margin-top:7px;">基本功 2 個核心技巧——12 塊肌肉共同的底。</div>';
+
   var h = '<div class="hero"><div style="display:flex;align-items:center;gap:9px;">'
-    + '<span class="hero-t">' + esc_((DIMS[m.dim] || {}).name || m.name) + '</span>'
-    + '<span style="margin-left:auto;" class="pill">' + (S.member ? "這一季先練這塊" : "第 " + freeN + " 個秘訣") + '</span></div>'
-    + '<div class="hero-s">這條肌肉練的結果——<b style="color:#4A1B0C;">' + esc_(DIM_RESULT[m.dim]) + '</b>。今天練它的一塊：<b style="color:#4A1B0C;">' + esc_(m.name) + '</b>。</div>'
+    + '<span class="hero-t">' + (core ? "基本功" : esc_((DIMS[m.dim] || {}).name || m.name)) + '</span>'
+    + '<span style="margin-left:auto;" class="pill">' + (core ? (S.member ? "共通底・隨時可練" : "第 " + freeN + " 個基本功") : "這 7 天先練這塊") + '</span></div>'
+    + '<div class="hero-s">' + (core
+        ? '故事和問題，是 12 塊肌肉共同的底。今天練：<b style="color:#4A1B0C;">' + esc_(m.name) + '</b>。'
+        : '這條肌肉練的結果——<b style="color:#4A1B0C;">' + esc_(DIM_RESULT[m.dim]) + '</b>。今天練它的一塊：<b style="color:#4A1B0C;">' + esc_(m.name) + '</b>。') + '</div>'
+    + coreRow
     + '<div class="map4">' + map4 + '</div>'
     + '<div class="map4-note">' + mapNote + '</div>'
+    /* 肌肉全貌第二層（2026-09-04 老師拍板：12 小肌肉是第一層、整套打法是第二層——
+       看得到、吃不到，點了出現場邊教練那句 */
+    + '<div onclick="lockMsg_()" style="margin-top:9px;border:1px dashed #D9C6B8;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#8A6A58;cursor:pointer;display:flex;align-items:center;gap:7px;"><span>🔒</span><span>第二層：整套打法——把 12 塊肌肉串成完整的一場成交</span></div>'
+    + '<div id="lockmsg" style="display:none;margin-top:8px;background:#FDF6F0;border-radius:12px;padding:11px 12px;font-size:13px;color:#4A1B0C;line-height:1.8;">完整影響力請洽<b>場邊教練</b>，詢問私人教練課程。</div>'
     + '<div class="hero-rule"></div></div>';
 
   /* 會員版「場邊教練幫你挑的」框架（2026-09-04 老師拍板先做，場邊教練機制一併上線）：
      why 從真資料生（練過＝有手感見效快／量出來最低＝先練最有感），不編故事。 */
   h += '<div class="cw">';
   if (S.member) {
-    var whyPick = muscleTrainCount(S, mk) > 0
+    var whyPick = core
+      ? '故事和問題是共通底——每一塊肌肉要用得好，都靠這兩下。'
+      : muscleTrainCount(S, mk) > 0
       ? '你練過這塊、有手感——從它開始，見效最快。'
       : '這塊你量出來最低——先練這塊，最有感。';
     h += '<div class="foc-hd">'
@@ -833,7 +928,7 @@ function todayHTML(){
   }
   /* 展開版腳本（judgement.js DRILL·2026-09-04 老師拍板）：沒上過課也要看得懂——
      找誰→怎麼開口→逐字台詞→重點→兩種結果都接住（🌱成了／🌾沒成也不是失敗） */
-  var dr = (typeof DRILL !== "undefined") ? DRILL[mk] : null;
+  var dr = core ? coreDrill_(mk) : ((typeof DRILL !== "undefined") ? DRILL[mk] : null);
   if (dr) {
     h += '<div class="tip-h">' + md_(dr.h) + '</div>'
       + '<div class="dr-row"><span class="dr-l">找誰</span><div>' + md_(dr.who) + '</div></div>'
@@ -857,16 +952,28 @@ function todayHTML(){
       + '<div style="text-align:center;font-size:13px;color:#6E4A3C;margin-top:11px;line-height:1.8;">做完回來點兩下就好：對誰講的 · 他有沒有接<br>不用寫心得，10 秒的事。</div>';
   h += '</div>';
 
-  /* 秘訣池橋卡（2026-09-04 老師拍板，語氣用他改過的那句）：池子的存在感＋升級鉤子 */
-  h += '<div style="background:#F0E3DB;border-radius:14px;padding:15px;margin-bottom:14px;font-size:13px;color:#6E4A3C;line-height:1.9;">'
-    + (S.member
-        ? '這一季的池子裡有 <b style="color:#4A1B0C;">' + focusPool().length + ' 個秘訣</b>可以換著練——挑得動的才練得下去。'
-        : '你有 <b style="color:#4A1B0C;">3 個秘訣</b>可以練，每次進來換一個。<br>如果有人幫你看，你會練得更有效率。')
-    + '</div>';
+  /* 秘訣池橋卡（練-3 句子UI化，2026-09-04 老師拍板）：池子畫成格子，正在練的亮，不用整段字描述 */
+  var pool3 = S.member ? focusPool() : CORE_KEYS;
+  var poolChips = pool3.map(function(k2, i2){
+    var cur2 = k2 === mk;
+    var nm2 = isCore_(k2) ? coreName_(k2) : ((MUSCLES[k2] || {}).name || k2);
+    var d2 = isCore_(k2) ? null : (MUSCLES[k2] || {}).dim;
+    var c2 = d2 ? dimTextColor(d2) : "#B14E2B";
+    return '<span' + (S.member ? ' onclick="pickAt_(' + i2 + ')"' : '') + ' style="border-radius:20px;padding:6px 11px;font-size:12.5px;'
+      + (S.member ? 'cursor:pointer;' : '')
+      + (cur2 ? 'background:' + ((d2 ? (DIMS[d2] || {}).soft : "") || "#FDF6F0") + ';color:' + c2 + ';font-weight:700;border:1.5px solid ' + c2 + ';'
+              : 'background:#fff;color:#6E4A3C;border:1px solid #E6DAD1;')
+      + '">' + esc_(nm2) + '</span>';
+  }).join("");
+  h += '<div style="background:#F0E3DB;border-radius:14px;padding:15px;margin-bottom:14px;">'
+    + '<div style="display:flex;flex-wrap:wrap;gap:7px;">' + poolChips + '</div>'
+    + '<div style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:9px;">'
+    + (S.member ? '這 7 天的池子——挑得動的才練得下去。' : '每次進來換一個。如果有人幫你看，你會練得更有效率。')
+    + '</div></div>';
 
   h += '<div class="cw"><div class="sec">這週</div>'
     + '<div class="week">' + days + '</div>'
-    + '<div style="font-size:15px;color:#6E4A3C;margin-top:14px;line-height:2.05;">這週練了 <b style="color:#C6603A;">' + weekCount + '</b> 天。<br>沒練的那幾天不扣分——<b style="color:#4A1B0C;">溝通要有人才練得起來</b>。</div></div>';
+    + '<div style="font-size:15px;color:#6E4A3C;margin-top:14px;line-height:2.05;">這週練了 <b style="color:#C6603A;">' + weekCount + '</b> 天。</div></div>';
 
   if (!S.member) h += ctaCard('你練的每一筆，會員都會<b style="color:#4A1B0C;">算進肌肉分數、教練都看得到</b>；每月還有 2 堂會員權益課，一堂練透一塊小肌群。');
   return h;
@@ -894,7 +1001,8 @@ function recentTargets(){
   return Object.keys(m).sort(function(a, b){ return m[b].n - m[a].n; }).slice(0, 4).map(function(k){ return m[k]; });
 }
 function recHTML(){
-  var m = MUSCLES[REC.muscle], c = dimTextColor(m.dim), t = REC.task;
+  var m = MUSCLES[REC.muscle] || { name: (coreDrill_(REC.muscle) || {}).n || "基本功", dim: REC.task.dim };
+  var c = dimTextColor(m.dim), t = REC.task;
   var h = '<div class="cw">'
     + '<div class="rec-hd"><button class="rec-bk" onclick="closeRec()" aria-label="返回">‹</button>'
     + '<div><div class="rec-n">' + esc_(t.name) + '</div>'
@@ -1048,19 +1156,20 @@ function reviewHTML(){
     + '<div class="rev-pc"><div class="rev-av">' + esc_(r.name.slice(0,1)) + '</div>'
     + '<div><div class="rev-n">' + esc_(r.name) + (r.rel ? '<span class="tier" style="margin-left:6px;">' + esc_(r.rel) + '</span>' : '') + '</div>'
     + '<div class="rev-s">' + r.count + ' 個片刻・跨了 ' + Math.max(1, Math.round((new Date(normDate(r.last.date)) - new Date(normDate(r.first.date))) / 86400000)) + ' 天</div></div></div>'
+    /* 進-2（2026-09-04 老師拍板）：紀錄只有兩件事——我做的動作＋他的回饋，標籤寫明 */
     + '<div class="rev-pair">'
     + '<div class="rev-row"><div class="rev-when">' + esc_(timeAgo(r.first.date)) + '（第一次記下）</div>'
-      + '<div class="rev-what">' + reviewRowText(r.first) + '</div>'
-      + '<div class="rev-react">對方：' + esc_(r.first.reaction) + '</div></div>'
+      + '<div class="rev-what"><span style="color:#8A7266;">我做的 · </span>' + reviewRowText(r.first) + '</div>'
+      + '<div class="rev-react">他的回饋 · ' + esc_(r.first.reaction) + '</div></div>'
     + '<div class="rev-row now"><div class="rev-when">' + esc_(timeAgo(r.last.date)) + '（最近一次）</div>'
-      + '<div class="rev-what">' + reviewRowText(r.last) + '</div>'
-      + '<div class="rev-react">對方：' + esc_(r.last.reaction) + '</div></div>'
+      + '<div class="rev-what"><span style="color:#8A7266;">我做的 · </span>' + reviewRowText(r.last) + '</div>'
+      + '<div class="rev-react">他的回饋 · ' + esc_(r.last.reaction) + '</div></div>'
     + '</div>';
   if (soft) {
     h += '<div class="fam">這段不用走完——他願意跟你說真話，就已經是你要的了。</div>';
   } else {
-    h += '<div class="rev-insight">從「' + esc_(r.first.reaction) + '」到「' + esc_(r.last.reaction) + '」，這段關係在動。'
-      + '<br>下一步不是再練久一點，<b style="color:#4A1B0C;">是有人在旁邊看你怎麼講</b>——這件事你自己看紀錄看不出來，跟你的場邊教練聊聊。</div>';
+    /* 提醒不說服（2026-09-04 老師拍板：話別太多）——一句收尾就好 */
+    h += '<div class="rev-insight">從「' + esc_(r.first.reaction) + '」到「' + esc_(r.last.reaction) + '」——這段關係在動。想看下一步，找你的場邊教練。</div>';
   }
   return h + '</div>';
 }
@@ -1116,13 +1225,18 @@ function sweetPathHTML(){
   var h = '<div class="cw" style="border:1px solid #E6DAD1;">'
     + '<div class="pill" style="margin-bottom:12px;">私人教練席才開的</div>';
   if (ms.length >= 2) {
-    var top2 = ms.sort(function(a, b){ return d5[b] - d5[a]; }).slice(0, 2);
+    var sorted5 = ms.sort(function(a, b){ return d5[b] - d5[a]; });
+    var top2 = sorted5.slice(0, 2), low1 = sorted5[sorted5.length - 1];
     var combo = COMBO_PATH[top2.slice().sort().join("")];
+    /* 進-5（2026-09-04 老師拍板）：具體定義＋下一塊拼圖＋推場邊教練——強鉤子集中在這一張。
+       「下一塊」用正向講（赤字語言禁用：不寫缺/弱/補）。 */
+    var step1 = (combo.flow || "").split("\n")[0] || "";
     h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">你最強的兩塊已經浮出來了：<b>'
       + esc_(DIMS[top2[0]].name) + ' × ' + esc_(DIMS[top2[1]].name) + '</b>。<br>'
-      + '這個組合有一條變現甜蜜路徑——<b>「' + esc_(combo.title) + '」</b>。</div>'
+      + '這個組合有一條變現甜蜜路徑——<b>「' + esc_(combo.title) + '」</b>：用你已經最順的兩塊，走最省力的那條變現路。</div>'
+      + (step1 ? '<div style="margin-top:10px;font-size:13px;color:#6E4A3C;line-height:1.85;">第一步長這樣：' + esc_(step1.replace(/^①\s*/, "")) + '——後面還有三步。</div>' : '')
       + '<div style="margin-top:12px;background:#F7F1EC;border-radius:14px;padding:13px 14px;font-size:13px;color:#6E4A3C;line-height:1.85;">'
-      + '🔒 這條路怎麼走成收入（四步流程＋你的打法），教練在私人教練席帶你走。<br>想看的話，下次場邊回饋時跟教練說一聲就好。</div>';
+      + '🔒 完整四步＋你的打法，教練在私人教練席帶你走。你的下一塊拼圖是<b style="color:' + dimTextColor(low1) + ';">' + esc_(DIMS[low1].name) + '</b>——先練它最有感。<br>想開這條路，下次場邊回饋時跟教練說一聲就好。</div>';
   } else {
     h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">把體格量起來，你的<b>變現甜蜜路徑</b>就會浮出來——最強兩塊的組合，就是你最省力的那條路。</div>';
   }
@@ -1130,8 +1244,9 @@ function sweetPathHTML(){
 }
 
 function meHTML(){
+  /* 進-1（2026-09-04 老師拍板）：365 天倍數句只用正向——影響力是肌肉，只會越練越強，沒有退步句 */
   var h = '<div class="hero"><div class="hero-t">你的進步</div>'
-    + '<div class="hero-s">不跟別人比——只跟上次的你比。</div>'
+    + '<div class="hero-s">不跟別人比——只跟上次的你比。<br><b style="color:#C6603A;">每天進步 1%，一年後是 37 倍。</b></div>'
     + '<div class="hero-rule"></div></div>';
   h += S.member ? reviewHTML() : "";
   if (!S.member) h += ctaCard('分數是機器算的，<b style="color:#4A1B0C;">看懂它要人</b>。NT$99 讓場邊教練幫你把健檢解開——指出你先練哪塊最有感、下一步怎麼走。');
