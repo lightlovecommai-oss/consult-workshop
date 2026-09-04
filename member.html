@@ -150,8 +150,8 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .p3big{font-size:40px;font-weight:700;line-height:1.25;letter-spacing:1px;color:#4A1B0C;}
 .p3how{font-size:16px;color:#5A3A2A;line-height:1.9;margin-top:12px;}
 .p3how b{color:#C6603A;}
-.p3q{margin-top:16px;background:#fff;border-radius:16px;padding:15px 16px 15px 18px;position:relative;box-shadow:0 2px 10px rgba(74,27,12,.05);}
-.p3q::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(180deg,#C6603A,#C99A4E);}
+.p3q{margin-top:16px;background:linear-gradient(90deg,#FDF3EC,#fff 60%);border-left:6px solid #C6603A;border-radius:8px 16px 16px 8px;padding:14px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
 .p3q-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
 .p3q-t{font-size:15px;color:#4A1B0C;line-height:1.8;}
 .p3more{margin-top:12px;}
@@ -446,6 +446,9 @@ function lockMsg_(){
   var n = el("lockmsg"); if (!n) return;
   n.style.display = (n.style.display === "none") ? "block" : "none";
 }
+/* 整套打法鎖 → 滑出升級方案（2026-09-04 老師拍板：按下去直接看到私人教練席方案） */
+var UPG_OPEN = false;
+function toggleUpg_(){ UPG_OPEN = !UPG_OPEN; render(); }
 function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
 function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
@@ -845,7 +848,7 @@ function gymHTML(){
     + '<div class="av" style="background:#C6603A;">陳</div><div class="av" style="background:#6E8B77;">林</div>'
     + '<div class="av" style="background:#6E8CA8;">王</div><div class="av" style="background:#C99A4E;">+</div></div>'
     + '<div style="min-width:0;font-size:13px;color:#6E4A3C;line-height:1.6;">' + stripTxt + '</div>'
-    + '<div style="margin-left:auto;color:#C6603A;font-size:15px;font-weight:700;flex-shrink:0;padding-left:8px;">»</div></div>';
+    + '<div style="margin-left:auto;color:#C6603A;font-size:12px;font-weight:700;flex-shrink:0;padding-left:8px;white-space:nowrap;">去鍛鍊 »</div></div>';
 
   /* 兩層動態流：有打字＝大卡片可鼓勵／純點擊＝一行——沒人打字這頁也要會動（A5） */
   h += '<div class="feed-h">夥伴最近在練什麼</div>';
@@ -1071,7 +1074,13 @@ function todayHTML(){
   h += '<div class="cw"><div class="sec">你的影響力圖鑑</div>'
     + '<div class="p3map">' + practiceMapHTML_(null) + '</div>'
     + '<div class="map4-note">' + mapNote + '</div>'
-    + '<div onclick="lockMsg_()" style="margin-top:10px;border:1px dashed #D9C6B8;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#8A6A58;cursor:pointer;display:flex;align-items:center;gap:7px;"><span>🔒</span><span>第二層：整套打法——把 12 塊肌肉串成完整的一場成交</span></div>'
+    + '<div onclick="toggleUpg_()" style="margin-top:10px;border:1px dashed #D9C6B8;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#8A6A58;cursor:pointer;display:flex;align-items:center;gap:7px;"><span>🔒</span><span>第二層：整套打法——把 12 塊肌肉串成完整的一場成交</span><span style="margin-left:auto;color:#C6603A;font-weight:700;flex-shrink:0;">' + (UPG_OPEN ? '▴' : '▾') + '</span></div>'
+    + (UPG_OPEN
+      ? '<div style="margin-top:8px;background:#FDF6F0;border-radius:14px;padding:14px;animation:slidein .22s ease;">'
+        + '<div style="font-size:13px;font-weight:700;color:#4A1B0C;margin-bottom:8px;">整套打法在<span style="color:#C6603A;">私人教練席</span>打開</div>'
+        + '<div style="font-size:13px;color:#6E4A3C;line-height:1.9;">・甜蜜路徑四步全開——12 塊肌肉串成完整的一場成交<br>・12 小肌群分數與判讀，教練陪你看<br>・1v1 場邊教練，一週一次拆解</div>'
+        + '<a class="gobtn" style="margin:12px 0 0;" href="' + BOOK_URL + '">預約教練諮詢 →</a></div>'
+      : '')
     + '<div id="lockmsg" style="display:none;margin-top:8px;background:#FDF6F0;border-radius:12px;padding:11px 12px;font-size:13px;color:#4A1B0C;line-height:1.8;">完整影響力請洽<b>場邊教練</b>，詢問私人教練課程。</div>'
     + '</div>';
 
@@ -1327,7 +1336,7 @@ var ME_OPEN = {};
 function toggleDim_(k){ if (!S.member) return; ME_OPEN[k] = !ME_OPEN[k]; render(); }
 function dimSubHTML_(k){
   var sc = calcMuscleScores(S), fm = focusMuscle();
-  return '<div style="margin-top:9px;display:grid;gap:6px;">' + musclesOfDim(k).map(function(mk){
+  return '<div style="margin-top:9px;display:grid;gap:6px;animation:slidein .22s ease;">' + musclesOfDim(k).map(function(mk){
     var m = MUSCLES[mk], n = muscleTrainCount(S, mk);
     var measured = sc[mk] != null, focus = mk === fm;
     var st = focus ? '這季主力' : n > 0 ? '練了 ' + n + ' 次' : measured ? '量過・還沒練' : '還沒量';
@@ -1391,9 +1400,10 @@ function meHTML(){
     var diff = showScore ? Math.round((v - np.prev) * 10) / 10 : 0;
     var open = S.member && ME_OPEN[k];
     return '<div class="mrow"' + (S.member ? ' onclick="toggleDim_(\'' + k + '\')" style="cursor:pointer;"' : '') + '><div class="mrow-top">'
-      + '<span class="mrow-n">' + esc_(DIMS[k].name) + (S.member ? ' <span style="font-size:11px;color:#8A7266;">' + (open ? '▾' : '▸') + '</span>' : '') + '</span>'
+      + '<span class="mrow-n">' + esc_(DIMS[k].name) + '</span>'
       + '<span class="mrow-s" style="color:' + (v == null ? "#8A7266" : dimTextColor(k)) + ';">' + word + '</span>'
       + (showScore ? '<span class="mrow-v">' + v.toFixed(1) + ' / 滿分 5</span>' : '')
+      + (S.member ? '<span style="' + (showScore ? '' : 'margin-left:auto;') + 'align-self:center;flex-shrink:0;width:24px;height:24px;border-radius:50%;background:' + (open ? DIMS[k].soft : '#F7F1EC') + ';color:#993C1D;font-size:12px;display:flex;align-items:center;justify-content:center;">' + (open ? '▴' : '▾') + '</span>' : '')
       + '</div>'
       + '<div class="mrow-bar" style="background:' + (v == null ? "transparent" : DIMS[k].soft) + ';' + (v == null ? "border:1px dashed #E6DAD1;" : "") + '">'
       + '<div class="mrow-fill" style="width:' + (v == null ? 0 : pct5(v)) + '%;background:' + DIMS[k].color + ';"></div></div>'
@@ -1422,7 +1432,6 @@ function meHTML(){
     + (anyMeasured
       ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
       : '<div class="wk">還沒量過。<a href="https://quiz.atpifit.com" style="color:#993C1D;font-weight:700;">先做一次 ATPI 測驗 »</a>，或直接開始練——練了就會有數字。</div>')
-    + (S.member ? '<div class="wk">點大肌肉，展開它的 3 塊小肌群——小肌群只看「有沒有在練」，分數與判讀是私人教練席跟教練一起看的。</div>' : '')
     + '</div>';
   h += '<div class="cd">' + block1 + block2 + '</div>';
 
