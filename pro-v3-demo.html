@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>私人教練席 pro 版面・結構 demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ pro 版面 v3 結構 demo（獨立檔，不碰 pro.html / member.html）═══
+   給老師講理念用的畫布：每個板塊右上角標編號 pro-1〜pro-6，
+   對話框直接叫編號講理念即可。資料全是寫死的示意。
+   設計骨架（遊戲化四問過濾）：
+   ①只加不減 ②只跟自己比 ③獎勵指向「有人因為你變好」④說得出餵九宮格哪格
+   pro 層＝應用梯最深：長時間多次回饋（關係軌跡）→ 活在哪種體驗 → 想法改觀（骨層）。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:22px 24px 46px;}
+.blk{position:relative;margin-bottom:26px;}
+.tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#fff;background:#C99A4E;border-radius:10px;padding:2px 8px;z-index:5;}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1px;color:#8a6a1e;background:#F3E7CF;border-radius:20px;padding:4px 12px;}
+.mock{font-size:10px;color:#fff;background:#8A7266;border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;}
+.hero-t{font-size:26px;font-weight:900;line-height:1.3;margin-top:10px;}
+.hero-s{font-size:14px;color:#6E4A3C;line-height:1.85;margin-top:8px;}
+.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin-top:14px;}
+.cd{background:#fff;border-radius:16px;padding:17px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
+.sec{font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:11px;}
+
+/* 教練卡 */
+.coach{display:flex;align-items:center;gap:12px;}
+.coach-av{width:46px;height:46px;border-radius:50%;background:#4A1B0C;color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;}
+.coach-n{font-size:15px;font-weight:700;}
+.coach-s{font-size:13px;color:#6E4A3C;margin-top:2px;}
+.coach-next{margin-left:auto;text-align:right;font-size:12px;color:#8A7266;line-height:1.6;flex-shrink:0;}
+.coach-next b{display:block;font-size:13px;color:#993C1D;}
+
+/* 關係軌跡 */
+.rel{background:#fff;border-radius:16px;padding:15px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);margin-bottom:10px;cursor:pointer;transition:box-shadow .2s;}
+.rel:active{box-shadow:0 1px 4px rgba(74,27,12,.08);}
+.rel-hd{display:flex;align-items:center;gap:10px;}
+.rel-av{width:36px;height:36px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.rel-n{font-size:15px;font-weight:700;}
+.rel-m{font-size:12.5px;color:#8A7266;margin-top:1px;}
+.rel-arrow{margin-left:auto;color:#C9B8AC;font-size:13px;transition:transform .3s;}
+.rel.open .rel-arrow{transform:rotate(90deg);}
+.arc{margin-top:13px;position:relative;height:46px;}
+.arc-line{position:absolute;left:8px;right:8px;top:14px;height:3px;border-radius:3px;background:#EFE5DC;}
+.arc-fill{position:absolute;left:8px;top:14px;height:3px;border-radius:3px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8);}
+.nd{position:absolute;top:8px;width:15px;height:15px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(74,27,12,.18);}
+.nd-l{position:absolute;top:30px;font-size:10px;color:#8A7266;transform:translateX(-30%);white-space:nowrap;}
+.nd.next{background:#fff !important;border:2px dashed #C99A4E;animation:ndpulse 1.8s infinite;}
+@keyframes ndpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,154,78,.35);}50%{box-shadow:0 0 0 6px rgba(201,154,78,0);}}
+.rel-b{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);}
+.rel.open .rel-b{max-height:220px;}
+.rel-last{margin-top:12px;background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.8;}
+.rel-last span{color:#6E4A3C;font-size:12px;font-weight:700;}
+.rel-read{margin-top:8px;display:flex;gap:8px;font-size:13px;line-height:1.8;color:#4A1B0C;}
+.rel-read .cv{width:22px;height:22px;border-radius:50%;background:#4A1B0C;color:#E8C89A;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
+
+/* 12 小肌群（分數對教練層才露——這裡是 pro，露） */
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.mgc{background:#F7F1EC;border-radius:12px;padding:9px 8px;font-size:11.5px;color:#4A1B0C;line-height:1.5;cursor:pointer;border:1px solid transparent;transition:all .25s;}
+.mgc.focus{border-color:#C99A4E;background:#FBF4E4;font-weight:700;}
+.mgc .bar{height:4px;border-radius:4px;background:#E6DAD1;margin-top:6px;overflow:hidden;}
+.mgc .bf{height:100%;border-radius:4px;}
+.mgc .v{font-size:10.5px;color:#8A7266;margin-top:4px;}
+
+/* 甜蜜路徑（pro＝全解鎖） */
+.step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13.5px;line-height:1.8;}
+.step .no{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#4A1B0C;color:#E8C89A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+.step.done .no{background:#6E8B77;}
+.step .me{margin-top:3px;font-size:12.5px;color:#993C1D;background:#FDF6F0;border-radius:8px;padding:3px 9px;display:inline-block;}
+
+/* 月覆盤 */
+.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s;}
+.go:active{transform:scale(.97);}
+
+/* 改觀句（骨層） */
+.bone-card{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:19px 18px;color:#F7F1EC;}
+.bone-k{font-size:12px;letter-spacing:2px;color:#E8C89A;margin-bottom:10px;font-weight:700;}
+.bone-q{font-size:16px;line-height:1.9;font-weight:500;}
+.bone-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
+.bone-quote small{display:block;margin-top:5px;font-size:11.5px;color:#C9A87A;}
+.bone-end{font-size:14px;color:#4A1B0C;line-height:1.9;text-align:center;margin-top:24px;padding:0 8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- pro-1 門面：你是誰、教練在場、下一次 1v1 -->
+  <div class="blk"><span class="tag">pro-1</span>
+    <span class="pill">私人教練席</span>
+    <div class="hero-t">早安，家豪。</div>
+    <div class="hero-s">這一席只有一件事：<b style="color:#4A1B0C;">有教練陪你，把影響力練進真實的關係裡。</b></div>
+    <div class="cd" style="margin-top:14px;">
+      <div class="coach">
+        <div class="coach-av">光</div>
+        <div><div class="coach-n">光頭教練</div><div class="coach-s">看著你的每一筆紀錄</div></div>
+        <div class="coach-next"><b>下次 1v1</b>9/12（五）14:00<span class="mock">示意</span></div>
+      </div>
+    </div>
+    <div class="rule4"></div>
+  </div>
+
+  <!-- pro-2 關係軌跡（主打賣點）：常駐對象、ATPI 節點、教練判讀 -->
+  <div class="blk"><span class="tag">pro-2</span>
+    <div class="sec">你的關係軌跡——長時間，看得見在動<span class="mock">示意</span></div>
+
+    <div class="rel" id="rel1" onclick="this.classList.toggle('open')">
+      <div class="rel-hd">
+        <div class="rel-av" style="background:#6E8CA8;">王</div>
+        <div><div class="rel-n">王經理</div><div class="rel-m">客戶 · 記了 11 筆 · 跨 6 週</div></div>
+        <div class="rel-arrow">›</div>
+      </div>
+      <div class="arc">
+        <div class="arc-line"></div><div class="arc-fill" style="width:62%;"></div>
+        <div class="nd" style="left:4%;background:#C6603A;"></div><div class="nd-l" style="left:4%;">吸引</div>
+        <div class="nd" style="left:34%;background:#6E8B77;"></div><div class="nd-l" style="left:34%;">信任</div>
+        <div class="nd" style="left:60%;background:#6E8CA8;"></div><div class="nd-l" style="left:60%;">專業</div>
+        <div class="nd next" style="left:86%;"></div><div class="nd-l" style="left:86%;">推進</div>
+      </div>
+      <div class="rel-b">
+        <div class="rel-last"><span>最近一筆 · </span>用「先同後帶」聊了他卡住的案子——他把公司內部的難處都講了。</div>
+        <div class="rel-read"><div class="cv">教</div><div>信任節點過了——他開始把「不能說的」說給你聽。下一步在推進：讓他認定你就是那個人。</div></div>
+      </div>
+    </div>
+
+    <div class="rel" onclick="this.classList.toggle('open')">
+      <div class="rel-hd">
+        <div class="rel-av" style="background:#6E8B77;">爸</div>
+        <div><div class="rel-n">爸爸</div><div class="rel-m">家人 · 記了 5 筆 · 跨 4 週</div></div>
+        <div class="rel-arrow">›</div>
+      </div>
+      <div class="arc">
+        <div class="arc-line"></div><div class="arc-fill" style="width:30%;background:linear-gradient(90deg,#C6603A,#6E8B77);"></div>
+        <div class="nd" style="left:4%;background:#C6603A;"></div><div class="nd-l" style="left:4%;">吸引</div>
+        <div class="nd next" style="left:34%;border-color:#6E8B77;"></div><div class="nd-l" style="left:34%;">信任</div>
+      </div>
+      <div class="rel-b">
+        <div class="rel-last"><span>最近一筆 · </span>吃飯時只問不勸——他第一次講起年輕時的事。</div>
+        <div class="rel-read"><div class="cv">教</div><div>家人走到「願意說」就夠了，不推向成交。這條線你已經在贏了。</div></div>
+      </div>
+    </div>
+
+    <div style="font-size:12.5px;color:#8A7266;text-align:center;margin-top:4px;">最多同時看 4 個人——深，比多重要。</div>
+  </div>
+
+  <!-- pro-3 12 小肌群全開：體格分＋這季主力 -->
+  <div class="blk"><span class="tag">pro-3</span>
+    <div class="cd">
+      <div class="sec">12 塊小肌群——全開，跟教練一起看<span class="mock">示意</span></div>
+      <div class="mg">
+        <div class="mgc">讓他想聽<div class="bar"><div class="bf" style="width:70%;background:#C6603A;"></div></div><div class="v">3.5</div></div>
+        <div class="mgc">讓他心動<div class="bar"><div class="bf" style="width:56%;background:#C6603A;"></div></div><div class="v">2.8</div></div>
+        <div class="mgc">讓他放心<div class="bar"><div class="bf" style="width:80%;background:#C6603A;"></div></div><div class="v">4.0</div></div>
+        <div class="mgc">讓他敢說<div class="bar"><div class="bf" style="width:64%;background:#6E8B77;"></div></div><div class="v">3.2</div></div>
+        <div class="mgc">讓他信你<div class="bar"><div class="bf" style="width:76%;background:#6E8B77;"></div></div><div class="v">3.8</div></div>
+        <div class="mgc">讓他懂你<div class="bar"><div class="bf" style="width:60%;background:#6E8B77;"></div></div><div class="v">3.0</div></div>
+        <div class="mgc">讓他服你<div class="bar"><div class="bf" style="width:66%;background:#6E8CA8;"></div></div><div class="v">3.3</div></div>
+        <div class="mgc">讓他要你<div class="bar"><div class="bf" style="width:50%;background:#6E8CA8;"></div></div><div class="v">2.5</div></div>
+        <div class="mgc">讓他行動<div class="bar"><div class="bf" style="width:58%;background:#6E8CA8;"></div></div><div class="v">2.9</div></div>
+        <div class="mgc focus">讓他跟隨<div class="bar"><div class="bf" style="width:40%;background:#C99A4E;"></div></div><div class="v">2.0 · 這季主力</div></div>
+        <div class="mgc">讓他推薦<div class="bar"><div class="bf" style="width:44%;background:#C99A4E;"></div></div><div class="v">2.2</div></div>
+        <div class="mgc">讓他回來<div class="bar"><div class="bf" style="width:52%;background:#C99A4E;"></div></div><div class="v">2.6</div></div>
+      </div>
+      <div style="font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;">分數是教練校準過的——低分不是問題，是<b style="color:#993C1D;">先練這塊最有感</b>。</div>
+    </div>
+  </div>
+
+  <!-- pro-4 甜蜜路徑：完整四步全解鎖＋你的打法 -->
+  <div class="blk"><span class="tag">pro-4</span>
+    <div class="cd">
+      <div class="sec">你的變現甜蜜路徑——四步全開<span class="mock">示意</span></div>
+      <div class="step done"><span class="no">✓</span><div>先用故事讓他看見你在做的事<div class="me">你的打法：BNI 例會 60 秒，用王經理那個案子開場</div></div></div>
+      <div class="step done"><span class="no">✓</span><div>用問題帶他說出自己的卡點<div class="me">你的打法：「你們現在最卡的是人還是流程？」</div></div></div>
+      <div class="step"><span class="no">3</span><div>把你的方法放進他的框架裡講一次</div></div>
+      <div class="step"><span class="no">4</span><div>約下一次——讓他認定你就是那個人</div></div>
+    </div>
+  </div>
+
+  <!-- pro-5 月覆盤＋1v1：收在行動 -->
+  <div class="blk"><span class="tag">pro-5</span>
+    <div class="cd">
+      <div class="sec">這個月的覆盤，教練想跟你看三件事<span class="mock">示意</span></div>
+      <div style="font-size:14px;line-height:2.1;color:#4A1B0C;">
+        ・王經理的推進節點——這次 1v1 演練一遍<br>
+        ・「讓他跟隨」練了 6 次，感受變了沒<br>
+        ・上個月你說想試的那句話，試了嗎
+      </div>
+      <a class="go" href="https://time.atpifit.com">預約這次 1v1 →</a>
+    </div>
+  </div>
+
+  <!-- pro-6 改觀句（骨層）：他自己的話＝最深的量測 -->
+  <div class="blk"><span class="tag">pro-6</span>
+    <div class="bone-card">
+      <div class="bone-k">這三個月，你的想法動了什麼？</div>
+      <div class="bone-q">技巧會忘，改觀不會。這裡只放<b style="color:#E8C89A;">你自己說出來的那句</b>。</div>
+      <div class="bone-quote">「我以前覺得成交是說服——現在我覺得成交是他終於放心了。」<small>7/28 · 月覆盤時你說的<span class="mock" style="background:rgba(247,241,236,.25);">示意</span></small></div>
+    </div>
+  </div>
+
+  <div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>
+
+</div>
+</body>
+</html>

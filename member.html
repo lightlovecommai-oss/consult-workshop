@@ -69,7 +69,8 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .gobtn:active{transform:scale(.98);}
 .gobtn.done{background:#DCE7DE;color:#3E5546;cursor:default;}
 .strip{display:flex;align-items:center;gap:10px;padding:2px 3px 20px;}
-.tick{font-size:12.5px;color:#8A6A58;text-align:center;padding:0 3px 12px;min-height:20px;opacity:1;transition:opacity .6s;}
+/* 夥-2（2026-09-04 老師拍板）：跑馬燈改大字 */
+.tick{font-size:17px;font-weight:700;color:#4A1B0C;text-align:center;padding:2px 10px 16px;min-height:34px;line-height:1.7;opacity:1;transition:opacity .6s;}
 .lockrow{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #F0E3DB;}
 .lockrow-n{font-size:15px;font-weight:600;color:#4A1B0C;}
 .lockrow-d{font-size:13px;color:#6E4A3C;margin-top:2px;line-height:1.7;}
@@ -103,9 +104,6 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mrow-fill{height:8px;border-radius:4px;transition:width .4s;}
 .mrow-d{font-size:13px;color:#6E4A3C;margin-top:5px;}
 /* 進-3+6 合併左右滑卡：第一屏＝次數（今天就能動）、往左滑＝四塊肌肉（慢慢動） */
-.swx{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.swx::-webkit-scrollbar{display:none;}
-.swp{flex:0 0 100%;scroll-snap-align:start;min-width:0;}
 
 .wk{font-size:13px;color:#993C1D;background:#F0E3DB;border-radius:14px;padding:11px 13px;margin-top:12px;line-height:1.75;}
 
@@ -196,9 +194,9 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .card-b{font-size:11px;color:#993C1D;background:#F0E3DB;padding:2px 8px;border-radius:20px;}
 .card-w{font-size:13px;color:#6E4A3C;margin-top:2px;}
 .card-body{font-size:15px;color:#4A1B0C;line-height:1.8;margin-top:10px;}
-.card-body span{color:#6E4A3C;font-size:13px;}
+.card-body span{color:#6E4A3C;font-size:13px;font-weight:700;}
 .card-echo{background:#F7F1EC;border-radius:14px;padding:11px 12px;margin-top:8px;font-size:15px;color:#4A1B0C;line-height:1.75;}
-.card-echo span{color:#6E4A3C;font-size:13px;}
+.card-echo span{color:#6E4A3C;font-size:13px;font-weight:700;}
 .cheer{display:flex;align-items:center;gap:6px;border:1px solid #E6DAD1;background:#fff;color:#6E4A3C;border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;min-height:40px;margin-top:10px;}
 .cheer.on{border-color:#C6603A;background:#C6603A;color:#fff;}
 .mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;}
@@ -214,8 +212,10 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .rev-row.now{background:#DCE7DE;}
 .rev-when{font-size:13px;color:#6E4A3C;margin-bottom:9px;}
 .rev-what{font-size:15px;color:#4A1B0C;line-height:1.9;}
-.rev-react{font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:9px;padding-top:9px;border-top:1px solid #E6DAD1;}
-.rev-row.now .rev-react{color:#3E5546;border-top-color:rgba(62,85,70,.18);}
+.rev-react{font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:9px;background:#fff;border-radius:10px;padding:8px 10px;}
+.rev-react b{color:#4A1B0C;}
+.rev-row.now .rev-react{color:#3E5546;}
+.rev-row.now .rev-react b{color:#3E5546;}
 .rev-insight{font-size:15px;color:#5A3A2A;line-height:2.05;margin-top:16px;}
 .rev-note{text-align:center;font-size:13px;color:#8A7266;margin-top:13px;line-height:1.8;}
 .fam{background:#DCE7DE;border-radius:14px;padding:12px 13px;font-size:13px;color:#3E5546;line-height:1.75;margin-top:14px;}
@@ -321,34 +321,44 @@ var WINS = [
    app 內用群組暱稱；具名對外授權待補。反應強弱刻意混排——「沒特別」也照樣上牆，
    讓夥伴知道卡住也能講。⚠️ 老師有否決權，要撤哪條直接刪陣列元素。 */
 var GYM_SEED = [
-  /* 2026-09-04 老師拍板：7 條都放、不露名字，只留縮寫 */
-  {n:"J", dim:"T", react:"超乎預期",
-   d:"用「先同後帶」陪客戶談健康與裸辭的糾結", e:"第二個諮詢就成交"},
-  {n:"關", dim:"I", react:"超乎預期",
-   d:"沒想賣課，把課程真心分享給她", e:"她就報名了"},
-  {n:"N", dim:"T", react:"明顯有",
-   d:"發現他一直要明牌，其實是怕自己判斷錯", e:"在他能理解的框架內，把方法傳給他"},
-  {n:"M", dim:"T", react:"有一點",
-   d:"第一次在別人面前講出內心真實的想法"},
-  {n:"J", dim:"A", react:"有一點",
-   d:"這次練習只做三件事：多問、聆聽、少說"},
-  {n:"關", dim:"A", react:"有一點",
-   d:"傳一首歌給正在經歷挑戰的朋友"},
-  {n:"佳", dim:"P", react:"沒特別",
-   d:"演練卡住——太尊重對方的自主，反而不容易多說什麼"}
+  /* 2026-09-04 老師拍板：7 條都放、不露名字，只留縮寫。
+     夥-8 主詞規則：turns 每行標 s="me"（我做了・無底色）或 s="ta"（客戶/對方・有底色），
+     有來回的案例最好。文字沿用見證庫萃取原句，只把主詞抽到標籤，不改字。 */
+  {n:"J", dim:"T", react:"超乎預期", turns:[
+    {s:"me", t:"用「先同後帶」陪客戶談健康與裸辭的糾結"},
+    {s:"ta", lb:"客戶", t:"第二個諮詢就成交"}]},
+  {n:"關", dim:"I", react:"超乎預期", turns:[
+    {s:"me", t:"沒想賣課，把課程真心分享給她"},
+    {s:"ta", lb:"她", t:"就報名了"}]},
+  {n:"N", dim:"T", react:"明顯有", turns:[
+    {s:"me", t:"發現他一直要明牌，其實是怕自己判斷錯"},
+    {s:"me", t:"在他能理解的框架內，把方法傳給他"}]},
+  {n:"M", dim:"T", react:"有一點", turns:[
+    {s:"me", t:"第一次在別人面前講出內心真實的想法"}]},
+  {n:"J", dim:"A", react:"有一點", turns:[
+    {s:"me", t:"這次練習只做三件事：多問、聆聽、少說"}]},
+  {n:"關", dim:"A", react:"有一點", turns:[
+    {s:"me", t:"傳一首歌給正在經歷挑戰的朋友"}]},
+  {n:"佳", dim:"P", react:"沒特別", turns:[
+    {s:"me", t:"演練卡住——太尊重對方的自主，反而不容易多說什麼"}]}
 ];
 
 /* Skool 社群（真的在跑的）——會員版夥伴頁的社群橋卡連過去。
    卡片上不放篇數/堂數等即時數字：Skool 沒 API 抓不到，寧可不寫也不編。 */
 var SKOOL_URL = "https://www.skool.com/influence-8679/about?ref=ebb628ac5055497fb61e281e175fc786";
+/* 預約諮詢頁（2026-09-04 老師拍板：收單馬上、不讓客戶等場邊教練） */
+var BOOK_URL = "https://time.atpifit.com";
 
 /* 理念跑馬燈句庫（骨層句，短、一次一句；真相＝14 §2b／01 字典命門句）。
    只放正向——「影響力是肌肉，只會越練越強」，沒有退步句。 */
 var TICK = [
+  /* 夥-2（2026-09-04 老師拍板：大字、5-10 句輪播）——全部骨層句，句源＝14 §5 金句庫＋新定位句 */
   "影響力是肌肉，只會越練越強。",
   "這裡可以說真話——錯了，有人接住你。",
   "力量是為了給愛，不是為了廝殺。",
-  "先付出愛，產生貢獻，其他的自然會來。"
+  "先付出愛，產生貢獻，其他的自然會來。",
+  "影響力的盡頭不是成交，是有人因為你變好。",
+  "技巧到處都有——感受不同、信念改變，人才會真的改變。"
 ];
 var TICK_I = 0;
 setInterval(function(){
@@ -364,6 +374,10 @@ function logoSvg_(w){ var hh = Math.round(w * 0.72);
 /* 反應選項翻成夥伴頁看得懂的一句（⚠️ 對外不用「沒接」，用「沒回應」——2026-09-04 老師拍板） */
 function reactPhrase_(r){
   return { "沒特別": "他沒回應", "有一點": "有回一點", "明顯有": "他接住了", "超乎預期": "他講了更多" }[r] || r;
+}
+/* 夥-8 對方句（有底色）用的版本——主詞已放在「對方：」標籤裡，這裡不再帶「他」 */
+function echoPhrase_(r){
+  return { "沒特別": "沒回應", "有一點": "回了一點", "明顯有": "接住了", "超乎預期": "講了更多" }[r] || r;
 }
 /* 「鼓勵他」——先做前端暫存（localStorage，只有自己看得到）；
    ⚠️ 待補後端「鼓勵」欄位，讓被鼓勵的人真的看得到（2026-09-04 老師拍板：可以先假存、到時候要補）。 */
@@ -699,9 +713,7 @@ function gymHTML(){
   /* 理念跑馬燈（2026-09-04 老師拍板：減文字、輪播理念）——句子輪流亮，一次只給一句 */
   h += '<div class="tick" id="tick">' + TICK[TICK_I] + '</div>';
 
-  h += practiced
-    ? '<div class="gobtn done">✓ 今天練過了——先點亮自己</div>'
-    : '<button class="gobtn" onclick="go(\'today\')">鍛鍊今日影響力肌肉</button>';
+  /* 夥-3（2026-09-04 老師拍板）：主鈕往下搬——先看完大家練了什麼，CTA 移到戰報之後 */
 
   /* 全館共同焦點（真資料）：本月練最多的肌肉＋有練的人數。舊後端沒回傳＝退回示意行，不編數字。 */
   var topM = (typeof GYM_MONTH_TOP !== "undefined") ? GYM_MONTH_TOP : null;
@@ -732,8 +744,8 @@ function gymHTML(){
       + '<div style="min-width:0;"><span class="card-n">' + esc_(p.name || "夥伴") + '</span>'
       + '<div class="card-w">' + esc_(timeAgo(p.date)) + '</div></div>'
       + '<div class="slim-tag" style="color:' + c + ';background:' + soft + ';margin-left:auto;">' + esc_((MUSCLES[p.muscle] || {}).name || DIMS[p.dim].name) + '</div></div>'
-      + (p.note ? '<div class="card-body"><span>我做了什麼 · </span>' + esc_(p.note) + '</div>' : '')
-      + '<div class="card-echo"><span>對方反應 · </span>' + esc_(p.reaction) + '</div>'
+      + (p.note ? '<div class="card-body"><span>我做了：</span>' + esc_(p.note) + '</div>' : '')
+      + '<div class="card-echo"><span>對方：</span>' + esc_(echoPhrase_(p.reaction)) + '</div>'
       + '<button class="cheer' + (on ? " on" : "") + '" data-cheer="' + i + '">👍 ' + (on ? "已鼓勵" : "鼓勵他") + '</button></div>';
   });
   /* 純點擊那層（真資料，後端 slim）：沒人打字這頁照樣會動——只有名字＋肌肉＋反應，不涉內容 */
@@ -755,8 +767,11 @@ function gymHTML(){
       + '<div style="min-width:0;"><span class="card-n">' + esc_(p.n) + '</span>'
       + (rx ? '<div class="card-w">' + rx.e + ' ' + esc_(rx.t) + '</div>' : '') + '</div>'
       + '<div class="slim-tag" style="color:' + c + ';background:' + soft + ';margin-left:auto;">' + esc_((DIMS[p.dim] || {}).name || "") + '</div></div>'
-      + '<div class="card-body"><span>我做了什麼 · </span>' + esc_(p.d) + '</div>'
-      + (p.e ? '<div class="card-echo"><span>後來 · </span>' + esc_(p.e) + '</div>' : '')
+      + p.turns.map(function(tn, j){
+          return tn.s === "ta"
+            ? '<div class="card-echo"><span>' + esc_(tn.lb || "對方") + '：</span>' + esc_(tn.t) + '</div>'
+            : '<div class="card-body">' + (j ? '' : '<span>我做了：</span>') + esc_(tn.t) + '</div>';
+        }).join("")
       + '</div>';
   }).join("");
 
@@ -772,18 +787,26 @@ function gymHTML(){
       + '<div class="card-body">' + esc_(w.d) + '</div></div>';
   }).join("");
 
-  /* 社群橋卡（2026-09-04 老師拍板要先補上）：紀錄在這裡、聊起來在 Skool。
-     不放「這週 N 篇分享」之類的即時數字——Skool 沒 API 抓不到，不編。 */
-  /* 夥-11（2026-09-04 老師拍板）：加分享會/乾貨連結欄——專屬連結還沒有，先都指 Skool 把 UI 做起來 */
+  /* 夥-3：CTA 在這——看完大家練了什麼，才輪到「換你練」 */
+  h += practiced
+    ? '<div class="gobtn done">✓ 今天練過了——先點亮自己</div>'
+    : '<button class="gobtn" onclick="go(\'today\')">鍛鍊今日影響力肌肉</button>';
+
+  /* 夥-18（2026-09-04 老師拍板）：橋卡切左右兩張不同色卡——左「免費月度課程」（在社群裡開）、
+     右「更多練肌肉乾貨」（導外連結、比較重要＝深咖啡重色卡）。磚橘留給本頁唯一主鈕，不搶。
+     乾貨專屬連結還沒有，先指 Skool 把 UI 做起來。不放即時數字——Skool 沒 API，不編。 */
   if (S.member && SKOOL_URL) {
-    var chip = 'display:block;flex:1;text-align:center;background:rgba(232,200,154,.14);color:#E8C89A;border:1px solid rgba(232,200,154,.35);border-radius:11px;padding:11px 8px;font-size:13px;font-weight:600;text-decoration:none;min-height:44px;box-sizing:border-box;';
-    h += '<div style="background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:14px;padding:16px;margin-top:13px;margin-bottom:14px;">'
-      + '<div style="font-size:13px;font-weight:700;color:#E8C89A;margin-bottom:7px;">夥伴的完整分享在社群裡</div>'
-      + '<div style="font-size:13px;color:rgba(247,241,236,.82);line-height:1.8;">這裡是紀錄，聊起來在社群。</div>'
-      + '<div style="display:flex;gap:8px;margin-top:11px;">'
-      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + chip + '">夥伴分享會 →</a>'
-      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + chip + '">乾貨・課程回放 →</a>'
-      + '</div></div>';
+    var bcard = 'flex:1;display:flex;flex-direction:column;gap:5px;border-radius:14px;padding:15px 13px;text-decoration:none;min-height:44px;box-sizing:border-box;';
+    h += '<div style="display:flex;gap:10px;margin-top:13px;margin-bottom:14px;">'
+      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + bcard + 'background:#fff;border:1px solid #E6DAD1;">'
+        + '<div style="font-size:14px;font-weight:700;color:#4A1B0C;">免費月度課程</div>'
+        + '<div style="font-size:12.5px;color:#6E4A3C;line-height:1.7;">每月 2 堂，在社群裡開</div>'
+        + '<div style="margin-top:auto;padding-top:6px;font-size:13px;font-weight:700;color:#993C1D;">進社群上課 →</div></a>'
+      + '<a href="' + SKOOL_URL + '" target="_blank" rel="noopener" style="' + bcard + 'background:linear-gradient(135deg,#4A1B0C,#6B3018);">'
+        + '<div style="font-size:14px;font-weight:700;color:#E8C89A;">更多練肌肉乾貨</div>'
+        + '<div style="font-size:12.5px;color:rgba(247,241,236,.82);line-height:1.7;">秘訣、練法、課程回放</div>'
+        + '<div style="margin-top:auto;padding-top:6px;font-size:13px;font-weight:700;color:#E8C89A;">看乾貨 →</div></a>'
+      + '</div>';
   }
   if (!S.member) h += lockedHTML();
   h += ladderHTML();
@@ -814,16 +837,18 @@ function ladderHTML(){
   var halls = [
     {n:"體驗席", p:"免費", pts:["2 個基本功輪流練","自己看紀錄"], link:"", c:"#6E8B77"},
     {n:"會員席", p:"NT$99／月", pts:["教練解析健檢","紀錄算進肌肉分數","權益課每月 2 堂"], link:"join.html", c:"#6E8CA8"},
-    {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:"", c:"#C99A4E"}
+    /* 私教席連預約諮詢頁（2026-09-04 老師拍板：收單馬上、不讓客戶等場邊教練） */
+    {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:BOOK_URL, c:"#C99A4E"}
   ];
-  var h = '<div class="cd"><div class="sec">你在影響力健身房的位置</div><div style="display:flex;gap:8px;align-items:stretch;">';
+  /* 夥-19（2026-09-04 老師拍板）：標題「你在影響力健身房的位置」→「健身房權益」；權益條列式、簡單扼要 */
+  var h = '<div class="cd"><div class="sec">健身房權益</div><div style="display:flex;gap:8px;align-items:stretch;">';
   h += halls.map(function(t, i){
     var isHere = i === here, isNext = i === here + 1;
     var inner = '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">'
       + '<span style="width:8px;height:8px;border-radius:50%;background:' + t.c + ';' + (i > here ? 'opacity:.45;' : '') + 'flex-shrink:0;"></span>'
       + '<span style="font-size:13px;font-weight:700;color:#4A1B0C;">' + t.n + '</span></div>'
       + '<div style="font-size:12px;color:#C6603A;font-weight:600;margin-bottom:6px;">' + t.p + (isNext && t.link ? ' →' : '') + '</div>'
-      + '<div style="font-size:12px;color:#6E4A3C;line-height:1.7;">' + t.pts.join("<br>") + '</div>'
+      + '<div style="font-size:12px;color:#6E4A3C;line-height:1.7;">' + t.pts.map(function(x){ return '・' + x; }).join("<br>") + '</div>'
       + (isHere ? '<div style="margin-top:7px;"><span class="lad-here">你在這裡</span></div>' : '');
     var box = 'flex:1;min-width:0;border-radius:12px;padding:11px 9px;'
       + (isHere ? 'background:#FDF6F0;border:1.5px solid ' + t.c + ';'
@@ -1163,11 +1188,11 @@ function reviewHTML(){
     /* 進-2（2026-09-04 老師拍板）：紀錄只有兩件事——我做的動作＋他的回饋，標籤寫明 */
     + '<div class="rev-pair">'
     + '<div class="rev-row"><div class="rev-when">' + esc_(timeAgo(r.first.date)) + '（第一次記下）</div>'
-      + '<div class="rev-what"><span style="color:#8A7266;">我做的 · </span>' + reviewRowText(r.first) + '</div>'
-      + '<div class="rev-react">他的回饋 · ' + esc_(r.first.reaction) + '</div></div>'
+      + '<div class="rev-what"><span style="color:#8A7266;font-weight:700;">我做了：</span>' + reviewRowText(r.first) + '</div>'
+      + '<div class="rev-react"><b>對方：</b>' + esc_(echoPhrase_(r.first.reaction)) + '</div></div>'
     + '<div class="rev-row now"><div class="rev-when">' + esc_(timeAgo(r.last.date)) + '（最近一次）</div>'
-      + '<div class="rev-what"><span style="color:#8A7266;">我做的 · </span>' + reviewRowText(r.last) + '</div>'
-      + '<div class="rev-react">他的回饋 · ' + esc_(r.last.reaction) + '</div></div>'
+      + '<div class="rev-what"><span style="color:#8A7266;font-weight:700;">我做了：</span>' + reviewRowText(r.last) + '</div>'
+      + '<div class="rev-react"><b>對方：</b>' + esc_(echoPhrase_(r.last.reaction)) + '</div></div>'
     + '</div>';
   if (soft) {
     h += '<div class="fam">這段不用走完——他願意跟你說真話，就已經是你要的了。</div>';
@@ -1230,15 +1255,28 @@ function sweetPathHTML(){
     var sorted5 = ms.sort(function(a, b){ return d5[b] - d5[a]; });
     var top2 = sorted5.slice(0, 2), low1 = sorted5[sorted5.length - 1];
     var combo = COMBO_PATH[top2.slice().sort().join("")];
-    /* 進-5（2026-09-04 老師拍板）：具體定義＋下一塊拼圖＋推場邊教練——強鉤子集中在這一張。
-       「下一塊」用正向講（赤字語言禁用：不寫缺/弱/補）。 */
-    var step1 = (combo.flow || "").split("\n")[0] || "";
+    /* 進-4（2026-09-04 老師拍板）：露出 1-2 步、3-4 步上迷霧——用 UI 解鎖手法替代文字說明。
+       文案「下一塊」用正向講（赤字語言禁用：不寫缺/弱/補）。 */
+    var steps = (combo.flow || "").split("\n").filter(function(x){ return x.trim(); });
+    var stepRow_ = function(st, i, fog){
+      return '<div style="display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:#4A1B0C;line-height:1.8;padding:6px 0;'
+        + (fog ? 'filter:blur(5px);user-select:none;pointer-events:none;' : '') + '"' + (fog ? ' aria-hidden="true"' : '') + '>'
+        + '<span style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#F0E3DB;color:#993C1D;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;">' + (i + 1) + '</span>'
+        + '<span>' + esc_(st.replace(/^[①②③④]\s*/, "")) + '</span></div>';
+    };
+    var open2 = steps.slice(0, 2).map(function(st, i){ return stepRow_(st, i, false); }).join("");
+    var fog2 = steps.slice(2).map(function(st, i){ return stepRow_(st, i + 2, true); }).join("");
     h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">你最強的兩塊已經浮出來了：<b>'
       + esc_(DIMS[top2[0]].name) + ' × ' + esc_(DIMS[top2[1]].name) + '</b>。<br>'
       + '這個組合有一條變現甜蜜路徑——<b>「' + esc_(combo.title) + '」</b>：用你已經最順的兩塊，走最省力的那條變現路。</div>'
-      + (step1 ? '<div style="margin-top:10px;font-size:13px;color:#6E4A3C;line-height:1.85;">第一步長這樣：' + esc_(step1.replace(/^①\s*/, "")) + '——後面還有三步。</div>' : '')
-      + '<div style="margin-top:12px;background:#F7F1EC;border-radius:14px;padding:13px 14px;font-size:13px;color:#6E4A3C;line-height:1.85;">'
-      + '🔒 完整四步＋你的打法，教練在私人教練席帶你走。你的下一塊拼圖是<b style="color:' + dimTextColor(low1) + ';">' + esc_(DIMS[low1].name) + '</b>——先練它最有感。<br>想開這條路，下次場邊回饋時跟教練說一聲就好。</div>';
+      + '<div style="margin-top:10px;">' + open2 + '</div>'
+      + (fog2
+        ? '<div style="position:relative;">' + fog2
+          + '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(247,241,236,.2),rgba(247,241,236,.8));border-radius:10px;">'
+          + '<span style="background:#4A1B0C;color:#E8C89A;font-size:12.5px;font-weight:700;border-radius:20px;padding:6px 13px;">🔒 後兩步在私人教練席解鎖</span></div></div>'
+        : '')
+      + '<div style="margin-top:10px;font-size:13px;color:#6E4A3C;line-height:1.85;">你的下一塊拼圖是<b style="color:' + dimTextColor(low1) + ';">' + esc_(DIMS[low1].name) + '</b>——先練它最有感。</div>'
+      + '<a class="gobtn" style="margin:13px 0 0;" href="' + BOOK_URL + '">預約教練諮詢，把這條路走完 →</a>';
   } else {
     h += '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">把體格量起來，你的<b>變現甜蜜路徑</b>就會浮出來——最強兩塊的組合，就是你最省力的那條路。</div>';
   }
@@ -1278,7 +1316,8 @@ function meHTML(){
   var avgMe = valsMe.length ? valsMe.reduce(function(a, b){ return a + b; }, 0) / valsMe.length : null;
   var ymMe = todayStr().slice(0, 7);
   var monthMe = S.checkinLog.filter(function(e){ return normDate(e.date).slice(0, 7) === ymMe; }).length;
-  var slide1 = '<div class="swp"><div class="sec">你的進步儀表</div><div style="display:flex;gap:10px;">'
+  /* 進-3 v3（2026-09-04 老師拍板）：不左右滑了，第二區直接接在下面直排 */
+  var block1 = '<div class="sec">你的進步儀表</div><div style="display:flex;gap:10px;">'
     + '<div style="flex:1;background:#F7F1EC;border-radius:14px;padding:13px;">'
     + '<div style="font-size:13px;color:#6E4A3C;margin-bottom:7px;">這個月練了</div>'
     + '<div style="font-size:28px;font-weight:700;color:#C6603A;line-height:1;font-variant-numeric:tabular-nums;">' + monthMe + '<span style="font-size:13px;color:#8A7266;"> 次</span></div>'
@@ -1287,16 +1326,18 @@ function meHTML(){
     + '<div style="font-size:13px;color:#6E4A3C;margin-bottom:7px;">你的肌肉</div>'
     + '<div style="font-size:17px;color:#4A1B0C;line-height:1.2;">' + dimStatusWord(avgMe) + '</div>'
     + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">' + (avgMe != null ? avgMe.toFixed(1) + ' / 滿分 5' : '量了就有數字') + '</div></div></div>'
-    + '<div onclick="this.closest(\'.swx\').scrollBy({left:420,behavior:\'smooth\'})" style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:12px;cursor:pointer;">次數你今天就能動，肌肉會慢慢跟上——<b style="color:#4A1B0C;">先顧次數。</b>往左滑看四塊肌肉 »</div></div>';
-  var slide2 = '<div class="swp"><div class="sec">你的四塊影響力肌肉</div>' + mrowsMe
+    + '<div style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:12px;">次數你今天就能動，肌肉會慢慢跟上——<b style="color:#4A1B0C;">先顧次數。</b></div>';
+  var block2 = '<div style="margin-top:16px;border-top:1px solid #F0E3DB;padding-top:14px;"><div class="sec">你的四塊影響力肌肉</div>' + mrowsMe
     + (anyMeasured
       ? '<div class="wk">還沒量不等於 0 分——空的不是零，是這塊還沒測過。</div>'
       : '<div class="wk">還沒量過。<a href="https://quiz.atpifit.com" style="color:#993C1D;font-weight:700;">先做一次 ATPI 測驗 »</a>，或直接開始練——練了就會有數字。</div>')
     + (S.member ? '<div class="wk">點大肌肉，展開它的 3 塊小肌群——小肌群只看「有沒有在練」，分數與判讀是私人教練席跟教練一起看的。</div>' : '')
     + '</div>';
-  h += '<div class="cd"><div class="swx">' + slide1 + slide2 + '</div></div>';
+  h += '<div class="cd">' + block1 + block2 + '</div>';
 
   if (S.member) h += sweetPathHTML();
+  /* 進-總 v3（2026-09-04 老師拍板）：位置階梯放最後——看完進步，看見下一席 */
+  h += ladderHTML();
   return h;
 }
 
