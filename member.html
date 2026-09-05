@@ -68,9 +68,12 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .gobtn{display:block;width:100%;background:#C6603A;color:#fff;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;font-family:inherit;min-height:56px;box-sizing:border-box;margin-bottom:16px;}
 .gobtn:active{transform:scale(.98);}
 .gobtn.done{background:#DCE7DE;color:#3E5546;cursor:default;}
+/* v6 夥-3／練-6：行動主鈕用四主色配成漸層（A→T→P→I，往右＝往前走的方向感） */
+.go4{background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);text-shadow:0 1px 2px rgba(0,0,0,.22);}
 .strip{display:flex;align-items:center;gap:10px;padding:2px 3px 20px;}
 /* 夥-2（2026-09-04 老師拍板）：跑馬燈改大字 */
-.tick{font-size:17px;font-weight:700;color:#4A1B0C;text-align:center;padding:2px 10px 16px;min-height:34px;line-height:1.7;opacity:1;transition:opacity .6s;}
+/* v6 夥-1：標語上下留白一致——上方 padding 16px、下方交給 hero-rule 的 margin-top 16px */
+.tick{font-size:17px;font-weight:700;color:#4A1B0C;text-align:center;padding:16px 10px 0;min-height:34px;line-height:1.7;opacity:1;transition:opacity .6s;}
 .lockrow{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #F0E3DB;}
 .lockrow-n{font-size:15px;font-weight:600;color:#4A1B0C;}
 .lockrow-d{font-size:13px;color:#6E4A3C;margin-top:2px;line-height:1.7;}
@@ -156,7 +159,8 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .p3q-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
 .p3q-t{font-size:15px;color:#4A1B0C;line-height:1.8;}
 .p3more{margin-top:12px;}
-.p3more-h{display:flex;align-items:center;gap:6px;font-size:13.5px;color:#8A7266;cursor:pointer;padding:8px 0;user-select:none;}
+/* v6 練-5：技巧詳解切換列文字置右 */
+.p3more-h{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:13.5px;color:#8A7266;cursor:pointer;padding:8px 0;user-select:none;}
 .p3more-h .chev{transition:transform .3s;}
 .p3more.open .chev{transform:rotate(180deg);}
 .p3more-b{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1);}
@@ -240,7 +244,8 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .av:first-child{margin-left:0;}
 .feed-h{font-size:13px;font-weight:700;letter-spacing:1px;color:#6E4A3C;margin:16px 3px 10px;}
 /* v4 夥-總：feed 固定高度唯讀 box——約兩張卡高，內部滑動 */
-.feedbox{max-height:330px;overflow-y:auto;background:#F0E8E0;border-radius:16px;padding:10px 10px 0;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+/* v6 夥-6：box 加高——大約容得下 3 張案例卡 */
+.feedbox{max-height:490px;overflow-y:auto;background:#F0E8E0;border-radius:16px;padding:10px 10px 0;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
 .feedbox .cw{margin-bottom:10px;}
 .slim{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
 .slim-tag{margin-left:auto;flex-shrink:0;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;}
@@ -616,7 +621,7 @@ function bumpVisitCount_(lineId){
 /* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
-var RV_VER = "v6", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_VER = "v7", RV_KEY = "cw_review_notes_" + RV_VER;
 var RV_ORD = { "夥": 0, "練": 1, "進": 2, "記": 3 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
@@ -945,7 +950,6 @@ function gymHTML(){
   /* v5 夥-1（2026-09-05 老師拍板）：數字要有往上跳動的翻頁感——render 後 bignumAnim_() 從低處滾上來 */
   var statH = (total > 0 && total >= thisMonth)
     ? '<div class="bignum" style="margin-top:8px;"><span class="bignum-v" id="bnv" data-n="' + total + '">' + total + '</span><span class="bignum-l">次<br>影響力鍛鍊數</span></div>'
-      + '<div style="margin-top:6px;font-size:17px;color:#4A1B0C;">其中有 <b style="color:#C6603A;">' + thisMonth + '</b> 次是你。</div>'
     : '<div class="bignum"><span class="bignum-v" id="bnv" data-n="' + thisMonth + '">' + thisMonth + '</span><span class="bignum-l">次<br>影響力鍛鍊數'
       + (S.team ? '<br>團隊 · ' + esc_(S.team) : '') + '</span></div>';
   /* v5 夥-2（2026-09-05 老師拍板）：理念跑馬燈搬進 hero、放在漸層線的上方 */
@@ -972,7 +976,7 @@ function gymHTML(){
   /* v3 夥-17：CTA 在 strip 正下方；v5 夥-4（2026-09-05 老師拍板）：鈕文字改「去鍛鍊」 */
   h += practiced
     ? '<div class="gobtn done">✓ 今天練過了——先點亮自己</div>'
-    : '<button class="gobtn" onclick="go(\'today\')">去鍛鍊</button>';
+    : '<button class="gobtn go4" onclick="go(\'today\')">去鍛鍊</button>';
 
   /* 夥-18 橋卡：左「免費月度課程」／右「更多練肌肉乾貨」（深咖啡重色卡）。
      乾貨專屬連結還沒有，先指 Skool。不放即時數字——Skool 沒 API，不編。
@@ -1219,7 +1223,8 @@ function todayHTML(){
   h += done
     ? '<div class="p3go done">✓ 今天練完了</div>'
       + '<div class="p3gos">明天見——明天練：' + esc_(nextSkillName_()) + '</div>'
-    : '<button class="p3go" id="btnPractice">做完了 → 記錄</button>'
+    /* v6 練-6（2026-09-05 老師拍板）：四主色漸層＋文字改「去記錄」 */
+    : '<button class="p3go go4" id="btnPractice">去記錄</button>'
       + '<div class="p3gos">兩下就好：對誰講的 · 他有沒有回應</div>';
 
   /* 這週：apple watch 式週圓環＋七天圈（今天可補做）＋週回顧 */
@@ -1239,6 +1244,8 @@ function todayHTML(){
   /* v5 練-9（2026-09-05 老師拍板）：「你的影響力圖鑑」整卡搬去進步頁、跟進-4 權益卡整合
      （見 ladderHTML withMap）——練習頁不再放圖鑑，一次只給一件事 */
 
+  /* v6 進-3（2026-09-05 老師拍板）：明日預告從進步頁搬回來，放「這週」卡下面 */
+  h += demoM6_();
   h += demoM7_();
   if (!S.member) h += ctaCard('你練的每一筆，會員都會<b style="color:#4A1B0C;">算進肌肉分數、教練都看得到</b>；每月還有 2 堂會員權益課，一堂練透一塊小肌群。');
   return h;
@@ -1539,10 +1546,9 @@ function meHTML(){
     + '</div>';
   h += '<div class="cd">' + block1 + block2 + '</div>';
 
-  /* v4（2026-09-05 老師拍板）：驗收卡（太多評測系統）與甜蜜路徑卡（痛點不夠痛）退役；
-     明日預告從練習頁搬來，放權益卡上面 */
+  /* v4（2026-09-05 老師拍板）：驗收卡（太多評測系統）與甜蜜路徑卡（痛點不夠痛）退役。
+     v6 進-3：明日預告搬回練習頁「這週」卡下面 */
   if (!S.member) h += ctaCard('分數是機器算的，<b style="color:#4A1B0C;">看懂它要人</b>。NT$99 讓場邊教練幫你把健檢解開——指出你先練哪塊最有感、下一步怎麼走。');
-  h += demoM6_();
   /* 進-總 v3（2026-09-04 老師拍板）：位置階梯放最後——看完進步，看見下一席
      2026-09-05 併入 n-7：12 格點亮圖＋續費支點句（withMap 只有進步頁帶） */
   h += ladderHTML(true);
