@@ -557,7 +557,8 @@ function lockMsg_(){
 /* v8：整套打法鎖（UPG_OPEN/toggleUpg_）隨權益卡退役——回歸時見 git 260fa06 之前的版本 */
 function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
-function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+/* \n→<br>：讓文案資料能手動指定斷行點（防詞組被自動換行切碎，如「講／結果」拆行） */
+function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
 function pct5(v){ return Math.max(0, Math.min(100, (v - 1) / 4 * 100)); }
 function timeAgo(dateStr){
   var ms = Date.now() - new Date(normDate(dateStr) + "T12:00:00").getTime();
