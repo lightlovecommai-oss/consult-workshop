@@ -46,7 +46,6 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .lad-top{display:flex;align-items:center;gap:8px;}
 .lad-n{font-size:15px;font-weight:700;color:#4A1B0C;}
 .lad-p{margin-left:auto;font-size:13px;color:#993C1D;font-weight:600;white-space:nowrap;}
-.lad-here{font-size:11px;color:#fff;background:#C6603A;padding:2px 8px;border-radius:20px;}
 .lad-d{font-size:13px;color:#6E4A3C;line-height:1.75;margin-top:6px;}
 
 .bd{padding:20px 20px 16px;}
@@ -248,6 +247,21 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* v4 夥-總：feed 固定高度唯讀 box——約兩張卡高，內部滑動 */
 /* v6 夥-6：box 加高——大約容得下 3 張案例卡 */
 .feedbox{max-height:490px;overflow-y:auto;background:#F0E8E0;border-radius:16px;padding:10px 10px 0;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+/* v8 進步頁 n-7（樣式移植自 demo-member-v2，色票換成正式版盤） */
+.grid12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 4px;}
+.g{height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#F0E3DB;color:#A08F7D;}
+.g.lit{color:#fff;}
+.map{display:flex;align-items:stretch;margin-top:12px;}
+.mst{flex:1;text-align:center;position:relative;padding:10px 4px;}
+.mst::after{content:"";position:absolute;top:26px;right:-8px;width:16px;height:2px;background:#E6DAD1;}
+.mst:last-child::after{display:none;}
+.mdot{width:34px;height:34px;margin:0 auto 6px;border-radius:50%;background:#F0E3DB;color:#A08F7D;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.mst.past .mdot{background:#E0D2C2;color:#8A7660;}
+.mst.here .mdot{background:#C6603A;color:#fff;box-shadow:0 0 0 4px rgba(198,96,58,.18);}
+.mn{font-size:12.5px;font-weight:800;color:#4A1B0C;}
+.ms{font-size:10.5px;color:#8A7266;}
+.mst.here .mn{color:#993C1D;}
+.mst.locked .mn{color:#A08F7D;}
 .feedbox .cw{margin-bottom:10px;}
 .slim{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
 .slim-tag{margin-left:auto;flex-shrink:0;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;}
@@ -509,9 +523,7 @@ function lockMsg_(){
   var n = el("lockmsg"); if (!n) return;
   n.style.display = (n.style.display === "none") ? "block" : "none";
 }
-/* 整套打法鎖 → 滑出升級方案（2026-09-04 老師拍板：按下去直接看到私人教練席方案） */
-var UPG_OPEN = false;
-function toggleUpg_(){ UPG_OPEN = !UPG_OPEN; render(); }
+/* v8：整套打法鎖（UPG_OPEN/toggleUpg_）隨權益卡退役——回歸時見 git 260fa06 之前的版本 */
 function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
 function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
@@ -624,7 +636,7 @@ function bumpVisitCount_(lineId){
 /* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
-var RV_VER = "v8", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_VER = "v9", RV_KEY = "cw_review_notes_" + RV_VER;
 var RV_ORD = { "夥": 0, "練": 1, "進": 2, "記": 3 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
@@ -641,12 +653,8 @@ function renderReview(){
   var out = document.createElement("div");
   /* v4：按進去／摺疊裡的內容也要攤平——肌肉展開全開、詳解與圖例與 feed 強制展開 */
   DORD.forEach(function(k){ ME_OPEN[k] = true; });
-  UPG_OPEN = true;   /* v5：第二層整套打法卡在精修模式直接攤開（正式版要點鎖才展開） */
   function rvOpenAll_(tmp){
     Array.prototype.forEach.call(tmp.querySelectorAll(".p3more"), function(x){ x.classList.add("open"); });
-    ["lockmsg", "lgd-today", "lgd-ladder"].forEach(function(id){
-      var x = tmp.querySelector("#" + id); if (x) x.style.display = "block";
-    });
     /* feed box 在精修模式攤平全部卡片，不留內部捲軸 */
     var fb = tmp.querySelector(".feedbox"); if (fb) fb.style.maxHeight = "none";
   }
@@ -893,21 +901,7 @@ function practiceMapHTML_(popKey){
     return '<div class="' + cls + '"' + click + '><div class="p3d"></div>' + esc_(nm) + '</div>';
   }).join("");
 }
-/* v3 練-11／進-5（2026-09-05 老師點題：「2 基本功＋12 塊」沒被說明過的客戶看不懂）——
-   30 秒客戶視角說明，收在「這些格子是什麼？」點了才展開，不佔版面。兩頁共用。 */
-function atpiLegendHTML_(id, withCore){
-  return '<div style="margin-top:8px;">'
-    + '<div onclick="var b=el(\'' + id + '\');b.style.display=b.style.display===\'none\'?\'block\':\'none\';" style="font-size:12.5px;color:#993C1D;font-weight:700;cursor:pointer;text-align:center;padding:8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:6px;"><span style="width:17px;height:17px;border-radius:50%;background:#F0E3DB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">?</span>這些格子是什麼？</div>'
-    + '<div id="' + id + '" style="display:none;background:#FDF6F0;border-radius:12px;padding:13px 14px;font-size:13px;color:#6E4A3C;line-height:2.0;">'
-    + '影響力像身體，拆成 <b style="color:#4A1B0C;">4 塊大肌肉</b>：<br>'
-    + DORD.map(function(k){
-        return '<span style="display:inline-flex;align-items:center;gap:5px;margin-right:10px;white-space:nowrap;"><span style="width:9px;height:9px;border-radius:50%;background:' + dimTextColor(k) + ';flex-shrink:0;"></span><b style="color:' + dimTextColor(k) + ';">' + esc_((DIMS[k] || {}).name || k) + '</b><span style="font-size:12px;">' + esc_(DIM_RESULT[k] || "") + '</span></span>';
-      }).join("")
-    + '<br>每塊拆 3 個練得起來的小動作＝這 12 格。'
-    + (withCore ? '<br><b style="color:#4A1B0C;">講故事、問問題</b>是 2 個基本功——哪塊肌肉都用得上，所以排最前面。' : '')
-    + '<br>每練一次點亮一格——亮的格子，是你身上已經長出來的。'
-    + '</div></div>';
-}
+/* v8：圖例（atpiLegendHTML_「這些格子是什麼？」）隨權益卡退役——回歸時見 git 260fa06 之前的版本 */
 var WEEK_RV = false;
 function toggleWeekRv_(){ WEEK_RV = !WEEK_RV; render(); }
 function weekReviewHTML_(){
@@ -1095,78 +1089,30 @@ function lockedHTML(){
     + '</div>';
 }
 
-/* 三席階梯（2026-09-03 老師拍板命名：體驗席／會員席／私人教練席＝字典四身分的
-   體驗客／會員／私教學員，路人還沒入席。訂閱制三方案的位置感——你坐哪、上一席多什麼。
-   名稱先落 app 不進字典（比照 09-01 用詞暫定表前例），productkit 結清後再補條目。 */
-function ladderHTML(withMap){
-  var here = S.member ? 1 : 0;
-  /* withMap＝進步頁版（2026-09-05 老師拍板：demo-member-v2 的 n-7 併進這張卡）。
-     v5 練-9 併進-4（2026-09-05 老師拍板）：練習頁的「你的影響力圖鑑」整卡搬進來——
-     原本的 12 格代號小圖升級成 14 格圖鑑（含 2 基本功、正在練的框）＋說明句＋圖例；
-     「第二層整套打法」鎖＋lockmsg 跟著過來，接在續費支點句後面。 */
-  var mapGrid = "", mapEnd = "";
-  if (withMap) {
-    var litSetN = {};
-    S.checkinLog.forEach(function(e){
-      logMuscles_(e).forEach(function(k5){ litSetN[k5] = 1; });
-      if (e.taskKey === "core_story") litSetN["CORE:story"] = 1;
-      if (e.taskKey === "core_ask") litSetN["CORE:ask"] = 1;
-    });
-    var lit14 = Object.keys(litSetN).length;
-    var litN = MORD.filter(function(k){ return litSetN[k]; }).length;
-    var nfo = focusTaskInfo();
-    var nowName = nfo.core ? ((coreDrill_(nfo.muscle) || {}).n || "基本功")
-      : ((MUSCLES[nfo.muscle] || {}).name || "");
-    var mapNote = lit14 > 0
-      ? '基本功 2 個＋小肌群 12 塊——你點亮過 <b style="color:#C6603A;">' + lit14 + '</b> 格，還有 ' + Math.max(14 - lit14, 0) + ' 格可以練。'
-      : '基本功 2 個＋小肌群 12 塊——今天從「' + esc_(nowName) + '」開始，一格一格點亮。';
-    mapGrid = '<div class="p3map" style="margin-bottom:2px;">' + practiceMapHTML_(null) + '</div>'
-      + '<div class="map4-note">' + mapNote + '</div>'
-      + atpiLegendHTML_("lgd-ladder", true)
-      + '<div style="height:12px;"></div>';
-    /* 進-5 v3（2026-09-05 老師拍板）：成交重點——續費支點句改深咖啡漸層色塊（大方向1） */
-    mapEnd = '<div style="margin-top:12px;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:12px;padding:11px 13px;text-align:center;font-size:12.5px;color:#F3E2D2;">影響力是肌肉，<b style="color:#E8C89A;">只會越練越強</b>——'
-      + (litN >= 12 ? '12 塊全點亮了' : '還有 ' + (12 - litN) + ' 塊等你點亮') + '。</div>'
-      + '<div onclick="toggleUpg_()" style="margin-top:10px;border:1px dashed #D9C6B8;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#8A6A58;cursor:pointer;display:flex;align-items:center;gap:7px;"><span>🔒</span><span>第二層：整套打法——把 12 塊肌肉串成完整的一場成交</span><span style="margin-left:auto;color:#C6603A;font-weight:700;flex-shrink:0;">' + (UPG_OPEN ? '▴' : '▾') + '</span></div>'
-      + (UPG_OPEN
-        ? '<div style="margin-top:8px;background:#FDF6F0;border-radius:14px;padding:14px;animation:slidein .22s ease;">'
-          + '<div style="font-size:13px;font-weight:700;color:#4A1B0C;margin-bottom:8px;">整套打法在<span style="color:#C6603A;">私人教練席</span>打開</div>'
-          + '<div style="font-size:13px;color:#6E4A3C;line-height:1.9;">・甜蜜路徑四步全開——12 塊肌肉串成完整的一場成交<br>・12 小肌群分數與判讀，教練陪你看<br>・1v1 場邊教練，一週一次拆解</div>'
-          + '<a class="gobtn" style="margin:12px 0 0;" href="' + BOOK_URL + '">預約教練諮詢 →</a></div>'
-        : '')
-      + '<div id="lockmsg" style="display:none;margin-top:8px;background:#FDF6F0;border-radius:12px;padding:11px 12px;font-size:13px;color:#4A1B0C;line-height:1.8;">完整影響力請洽<b>場邊教練</b>，詢問私人教練課程。</div>';
-  }
-  /* 橫式三框（2026-09-04 老師拍板：權益改橫式三框、每框 2-3 點）。
-     席位色沿用四身分＝A/T/P/I 對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
-  var halls = [
-    {n:"體驗席", p:"免費", pts:["2 個基本功輪流練","自己看紀錄"], link:"", c:"#6E8B77"},
-    {n:"會員席", p:"NT$99／月", pts:["教練解析健檢","紀錄算進肌肉分數","權益課每月 2 堂"], link:"join.html", c:"#6E8CA8"},
-    /* 私教席連預約諮詢頁（2026-09-04 老師拍板：收單馬上、不讓客戶等場邊教練） */
-    {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:BOOK_URL, c:"#C99A4E"}
-  ];
-  /* 夥-19（2026-09-04 老師拍板）：標題「你在影響力健身房的位置」→「健身房權益」；權益條列式、簡單扼要 */
-  var h = '<div class="cd"><div class="sec">健身房權益</div>' + mapGrid + '<div style="display:flex;gap:8px;align-items:stretch;">';
-  h += halls.map(function(t, i){
-    var isHere = i === here, isNext = i === here + 1;
-    var inner = '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">'
-      + '<span style="width:8px;height:8px;border-radius:50%;background:' + t.c + ';' + (i > here ? 'opacity:.45;' : '') + 'flex-shrink:0;"></span>'
-      + '<span style="font-size:13px;font-weight:700;color:#4A1B0C;">' + t.n + '</span></div>'
-      + '<div style="font-size:12px;color:#C6603A;font-weight:600;margin-bottom:6px;">' + t.p + (isNext && t.link ? ' →' : '') + '</div>'
-      + '<div style="font-size:12px;color:#6E4A3C;line-height:1.7;">' + t.pts.map(function(x){ return '・' + x; }).join("<br>") + '</div>'
-      + (isHere ? '<div style="margin-top:7px;"><span class="lad-here">你在這裡</span></div>' : '');
-    var box = 'flex:1;min-width:0;border-radius:12px;padding:11px 9px;'
-      + (isHere ? 'background:#FDF6F0;border:1.5px solid ' + t.c + ';'
-        : isNext ? 'background:#fff;border:1px solid #E6DAD1;'
-        : 'background:#fff;border:1px solid #F0E3DB;opacity:.75;');
-    return (isNext && t.link)
-      ? '<a href="' + t.link + '" style="text-decoration:none;' + box + '">' + inner + '</a>'
-      : '<div style="' + box + '">' + inner + '</div>';
-  }).join("");
-  h += '</div>';
-  h += mapEnd;
-  /* 教練團鉤子（2026-09-04 老師拍板要露） */
-  h += '<div style="margin-top:10px;font-size:12.5px;color:#8A6A58;text-align:center;">還有一條路：成為教練團，把你練會的教給別人。</div>';
-  return h + '</div>';
+/* v8 進步頁（2026-09-05 老師拍板）：「健身房權益」卡整張退役（三席橫框／14 格圖鑑／圖例／
+   第二層鎖都跟著下場），原位置改放 demo-member-v2 的 n-7——12 格全露出＋身分地圖三站＋續費支點句。
+   續費句沿用 v3 進-5 拍板的深咖啡漸層色塊（同一句、同一功能）；
+   會員／私教兩站可點（join.html／BOOK_URL）＝收單路徑不斷。 */
+function n7HTML_(){
+  var litSet = {};
+  S.checkinLog.forEach(function(e){ logMuscles_(e).forEach(function(k){ litSet[k] = 1; }); });
+  var litN = MORD.filter(function(k){ return litSet[k]; }).length;
+  var grid = '<div class="grid12">' + MORD.map(function(k){
+    return litSet[k]
+      ? '<div class="g lit" style="background:' + dimTextColor(k[0]) + ';">' + k + '</div>'
+      : '<div class="g">' + k + '</div>';
+  }).join("") + '</div>';
+  var map = '<div class="map">'
+    + (S.member
+      ? '<div class="mst past"><div class="mdot">體驗</div><div class="mn">路人體驗</div><div class="ms">完成</div></div>'
+        + '<div class="mst here"><div class="mdot">會員</div><div class="mn">會員</div><div class="ms">' + litN + ' / 12 塊點亮</div></div>'
+      : '<div class="mst here"><div class="mdot">體驗</div><div class="mn">路人體驗</div><div class="ms">你在這裡</div></div>'
+        + '<a class="mst locked" href="join.html" style="text-decoration:none;"><div class="mdot">會員</div><div class="mn">會員</div><div class="ms">NT$99／月</div></a>')
+    + '<a class="mst locked" href="' + BOOK_URL + '" style="text-decoration:none;"><div class="mdot">私教</div><div class="mn">私人教練</div><div class="ms">1v1 指揮艙</div></a>'
+    + '</div>';
+  var mapEnd = '<div style="margin-top:12px;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:12px;padding:11px 13px;text-align:center;font-size:12.5px;color:#F3E2D2;">影響力是肌肉，<b style="color:#E8C89A;">只會越練越強</b>——'
+    + (litN >= 12 ? '12 塊全點亮了' : '還有 ' + (12 - litN) + ' 塊等你點亮') + '。</div>';
+  return '<div class="cd"><div class="sec">全部 12 塊</div>' + grid + map + mapEnd + '</div>';
 }
 
 /* ══ 分頁 2：練習（一次只給一件事，不是課表）══ */
@@ -1558,9 +1504,8 @@ function meHTML(){
   /* v4（2026-09-05 老師拍板）：驗收卡（太多評測系統）與甜蜜路徑卡（痛點不夠痛）退役。
      v6 進-3：明日預告搬回練習頁「這週」卡下面 */
   if (!S.member) h += ctaCard('分數是機器算的，<b style="color:#4A1B0C;">看懂它要人</b>。NT$99 讓場邊教練幫你把健檢解開——指出你先練哪塊最有感、下一步怎麼走。');
-  /* 進-總 v3（2026-09-04 老師拍板）：位置階梯放最後——看完進步，看見下一席
-     2026-09-05 併入 n-7：12 格點亮圖＋續費支點句（withMap 只有進步頁帶） */
-  h += ladderHTML(true);
+  /* v8（2026-09-05 老師拍板）：權益卡退役，末尾放 n-7——12 格全露出＋身分地圖＋續費支點句 */
+  h += n7HTML_();
   return h;
 }
 
