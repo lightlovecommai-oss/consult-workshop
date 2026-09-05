@@ -598,7 +598,7 @@ function bumpVisitCount_(lineId){
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
 var RV_VER = "v4", RV_KEY = "cw_review_notes_" + RV_VER;
-var RV_ORD = { "夥": 0, "練": 1, "進": 2 };
+var RV_ORD = { "夥": 0, "練": 1, "進": 2, "記": 3 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
   try {
@@ -612,6 +612,25 @@ function renderReview(){
   el("joinday").textContent = "意見稿 " + RV_VER;
   var notes = rvLoad_();
   var out = document.createElement("div");
+  /* v4：按進去／摺疊裡的內容也要攤平——肌肉展開全開、詳解與圖例與 feed 強制展開 */
+  DORD.forEach(function(k){ ME_OPEN[k] = true; });
+  function rvOpenAll_(tmp){
+    Array.prototype.forEach.call(tmp.querySelectorAll(".p3more"), function(x){ x.classList.add("open"); });
+    ["feedmore", "lockmsg", "lgd-today", "lgd-ladder"].forEach(function(id){
+      var x = tmp.querySelector("#" + id); if (x) x.style.display = "block";
+    });
+    var ft = tmp.querySelector("#feedmore-t"); if (ft) ft.style.display = "none";
+  }
+  function rvBlock_(id, caption, node){
+    var wrap = document.createElement("div"); wrap.className = "rv-wrap";
+    var tag = document.createElement("div"); tag.className = "rv-tag"; tag.textContent = id + (caption ? "・" + caption : "");
+    var body = document.createElement("div"); body.className = "rv-body"; body.appendChild(node);
+    var note = document.createElement("div"); note.className = "rv-note"; note.contentEditable = "true";
+    if (notes[id]) note.textContent = notes[id];
+    note.addEventListener("input", function(){ rvSave_(id, note.textContent.trim()); });
+    wrap.appendChild(tag); wrap.appendChild(body); wrap.appendChild(note);
+    out.appendChild(wrap);
+  }
   [["gym","夥","夥伴頁"], ["today","練","練習頁"], ["me","進","進步頁"]].forEach(function(p){
     PANE = p[0];
     var head = document.createElement("div");
@@ -626,18 +645,36 @@ function renderReview(){
     out.appendChild(allNote);
     var tmp = document.createElement("div");
     tmp.innerHTML = p[0] === "gym" ? gymHTML() : p[0] === "today" ? todayHTML() : meHTML();
+    rvOpenAll_(tmp);
     Array.prototype.slice.call(tmp.children).forEach(function(kid, i){
-      var id = p[1] + "-" + (i + 1);
-      var wrap = document.createElement("div"); wrap.className = "rv-wrap";
-      var tag = document.createElement("div"); tag.className = "rv-tag"; tag.textContent = id;
-      var body = document.createElement("div"); body.className = "rv-body"; body.appendChild(kid);
-      var note = document.createElement("div"); note.className = "rv-note"; note.contentEditable = "true";
-      if (notes[id]) note.textContent = notes[id];
-      note.addEventListener("input", function(){ rvSave_(id, note.textContent.trim()); });
-      wrap.appendChild(tag); wrap.appendChild(body); wrap.appendChild(note);
-      out.appendChild(wrap);
+      rvBlock_(p[1] + "-" + (i + 1), "", kid);
     });
   });
+  /* v4：記錄流程攤平——按「做完了→記錄」之後的五個畫面（示意狀態） */
+  var recHead = document.createElement("div");
+  recHead.className = "rv-head"; recHead.textContent = "── 記錄流程（按「做完了 → 記錄」之後）──";
+  out.appendChild(recHead);
+  var recAllId = "記-總";
+  var recAllNote = document.createElement("div");
+  recAllNote.className = "rv-note rv-note-all"; recAllNote.contentEditable = "true";
+  if (notes[recAllId]) recAllNote.textContent = notes[recAllId];
+  recAllNote.addEventListener("input", function(){ rvSave_(recAllId, recAllNote.textContent.trim()); });
+  out.appendChild(recAllNote);
+  [
+    ["第一步・選對象", function(){ REC.step = 1; }],
+    ["第二步・好反應（文字＋分享勾）", function(){ REC.step = 2; REC.react = 3; }],
+    ["第二步・沒回應（文字＋煞車句）", function(){ REC.step = 2; REC.react = 0; }],
+    ["完成頁・好反應", function(){ REC.step = 3; REC.react = 3; REC.note = "他愣了一下，然後笑著說「你怎麼會注意到」"; REC.share = true; }],
+    ["完成頁・沒回應", function(){ REC.step = 3; REC.react = 0; REC.note = ""; REC.share = false; }]
+  ].forEach(function(v, i){
+    var info = focusTaskInfo();
+    REC = { muscle: info.muscle, task: info.task, who: "小美", rel: "同事", react: null, share: true, step: 1 };
+    v[1]();
+    var tmp2 = document.createElement("div");
+    tmp2.innerHTML = recHTML();
+    rvBlock_("記-" + (i + 1), v[0], tmp2.children.length === 1 ? tmp2.children[0] : tmp2);
+  });
+  REC = null;
   PANE = "gym";
   el("bd").innerHTML = "";
   el("bd").appendChild(out);
