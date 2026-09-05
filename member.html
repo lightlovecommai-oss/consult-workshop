@@ -579,7 +579,7 @@ function bumpVisitCount_(lineId){
 /* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
-var RV_VER = "v2", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_VER = "v3", RV_KEY = "cw_review_notes_" + RV_VER;
 var RV_ORD = { "夥": 0, "練": 1, "進": 2 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
@@ -970,8 +970,26 @@ function lockedHTML(){
 /* 三席階梯（2026-09-03 老師拍板命名：體驗席／會員席／私人教練席＝字典四身分的
    體驗客／會員／私教學員，路人還沒入席。訂閱制三方案的位置感——你坐哪、上一席多什麼。
    名稱先落 app 不進字典（比照 09-01 用詞暫定表前例），productkit 結清後再補條目。 */
-function ladderHTML(){
+function ladderHTML(withMap){
   var here = S.member ? 1 : 0;
+  /* withMap＝進步頁版（2026-09-05 老師拍板：demo-member-v2 的 n-7 併進這張卡）：
+     12 格點亮圖＋「還有 N 塊等你點亮」續費支點；夥伴頁那張不帶。 */
+  var mapGrid = "", mapEnd = "";
+  if (withMap) {
+    var litSet = {};
+    S.checkinLog.forEach(function(e){ logMuscles_(e).forEach(function(k){ litSet[k] = 1; }); });
+    var litN = MORD.filter(function(k){ return litSet[k]; }).length;
+    mapGrid = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 12px;">'
+      + MORD.map(function(k){
+          var on = litSet[k];
+          return '<div style="height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;'
+            + (on ? 'background:' + dimTextColor(k[0]) + ';color:#fff;' : 'background:#F0E3DB;color:#A08F7D;')
+            + '">' + k + '</div>';
+        }).join("")
+      + '</div>';
+    mapEnd = '<div style="margin-top:10px;text-align:center;font-size:12.5px;color:#6E4A3C;">影響力是肌肉，<b style="color:#AF5433;">只會越練越強</b>——'
+      + (litN >= 12 ? '12 塊全點亮了' : '還有 ' + (12 - litN) + ' 塊等你點亮') + '。</div>';
+  }
   /* 橫式三框（2026-09-04 老師拍板：權益改橫式三框、每框 2-3 點）。
      席位色沿用四身分＝A/T/P/I 對應（體驗客T綠／會員P藍／私教I金），不是另拍色盤。 */
   var halls = [
@@ -981,7 +999,7 @@ function ladderHTML(){
     {n:"私人教練席", p:"私教課", pts:["1v1 場邊教練","12 小肌群全開","甜蜜路徑×變現"], link:BOOK_URL, c:"#C99A4E"}
   ];
   /* 夥-19（2026-09-04 老師拍板）：標題「你在影響力健身房的位置」→「健身房權益」；權益條列式、簡單扼要 */
-  var h = '<div class="cd"><div class="sec">健身房權益</div><div style="display:flex;gap:8px;align-items:stretch;">';
+  var h = '<div class="cd"><div class="sec">健身房權益</div>' + mapGrid + '<div style="display:flex;gap:8px;align-items:stretch;">';
   h += halls.map(function(t, i){
     var isHere = i === here, isNext = i === here + 1;
     var inner = '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">'
@@ -999,6 +1017,7 @@ function ladderHTML(){
       : '<div style="' + box + '">' + inner + '</div>';
   }).join("");
   h += '</div>';
+  h += mapEnd;
   /* 教練團鉤子（2026-09-04 老師拍板要露） */
   h += '<div style="margin-top:10px;font-size:12.5px;color:#8A6A58;text-align:center;">還有一條路：成為教練團，把你練會的教給別人。</div>';
   return h + '</div>';
@@ -1480,8 +1499,9 @@ function meHTML(){
   h += '<div class="cd">' + block1 + block2 + '</div>';
 
   if (S.member) h += sweetPathHTML();
-  /* 進-總 v3（2026-09-04 老師拍板）：位置階梯放最後——看完進步，看見下一席 */
-  h += ladderHTML();
+  /* 進-總 v3（2026-09-04 老師拍板）：位置階梯放最後——看完進步，看見下一席
+     2026-09-05 併入 n-7：12 格點亮圖＋續費支點句（withMap 只有進步頁帶） */
+  h += ladderHTML(true);
   return h;
 }
 
