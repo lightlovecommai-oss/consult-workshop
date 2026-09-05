@@ -259,24 +259,32 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .grid12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 4px;}
 .g{height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#F0E3DB;color:#A08F7D;}
 .g.lit{color:#fff;}
-.map{display:flex;align-items:stretch;margin-top:12px;}
-.mst{flex:1;text-align:center;position:relative;padding:10px 4px;}
-.mst::after{content:"";position:absolute;top:26px;right:-8px;width:16px;height:2px;background:#E6DAD1;}
-.mst:last-child::after{display:none;}
-.mdot{width:34px;height:34px;margin:0 auto 6px;border-radius:50%;background:#F0E3DB;color:#A08F7D;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
-/* v9 席位色：體驗＝T綠／會員＝P藍／私教＝I金——三站各自的顏色，鎖住的站用淡版 */
-.mdot.d-v{background:#6E8B77;color:#fff;}
-.mdot.d-m{background:#6E8CA8;color:#fff;}
-.mdot.d-p{background:#C99A4E;color:#fff;}
-.mst.past .mdot{opacity:.7;}
-.mst.here .mdot.d-v{box-shadow:0 0 0 4px rgba(110,139,119,.22);}
-.mst.here .mdot.d-m{box-shadow:0 0 0 4px rgba(110,140,168,.22);}
-.mst.locked .mdot.d-m{background:#E8EEF4;color:#54718D;}
-.mst.locked .mdot.d-p{background:#F5EBD9;color:#8E682B;}
-.mn{font-size:12.5px;font-weight:800;color:#4A1B0C;}
-.ms{font-size:10.5px;color:#8A7266;}
-.mst.here .mn{color:#4A1B0C;}
-.mst.locked .mn{color:#A08F7D;}
+/* v10 進-n7 升單板塊（老師拍板：咖啡漸層高級感＋閃耀動畫）——
+   三站橫式地圖退役、改直列席位階梯＋私教席金框盒（回歸時見 git 56c21ba）。
+   sheen 掃光＝demo-pro vault 基因；私教盒 n7glow 呼吸金光＝這一格在發亮。 */
+.n7{position:relative;overflow:hidden;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:18px;padding:19px 17px;margin-bottom:14px;color:#F7F1EC;box-shadow:0 6px 24px rgba(74,27,12,.22);}
+.n7:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.13),transparent);animation:n7sheen 4.5s ease-in-out infinite;pointer-events:none;}
+@keyframes n7sheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
+.n7 .sec{margin:0 0 12px;color:#C9A87A;}
+.n7 .sec b{color:#E8C89A;}
+.n7 .g{background:rgba(247,241,236,.08);color:rgba(247,241,236,.42);}
+.n7lad{margin-top:13px;}
+.n7r{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12.5px;line-height:1.65;color:rgba(247,241,236,.88);text-decoration:none;border-top:1px solid rgba(232,200,154,.16);}
+.n7r:first-child{border-top:0;}
+.n7d{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-style:normal;color:#fff;}
+.n7tag{margin-left:auto;flex-shrink:0;font-style:normal;font-size:10.5px;color:rgba(247,241,236,.55);white-space:nowrap;}
+.n7tag.on{color:#E8C89A;font-weight:700;}
+.n7pro{margin-top:12px;background:rgba(247,241,236,.07);border:1px solid rgba(232,200,154,.55);border-radius:14px;padding:13px 14px;animation:n7glow 3s ease-in-out infinite;}
+@keyframes n7glow{0%,100%{box-shadow:0 0 0 0 rgba(232,200,154,0);}50%{box-shadow:0 0 20px rgba(232,200,154,.3);}}
+.n7pro-h{display:flex;align-items:center;gap:9px;}
+.n7pro-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#E8C89A;}
+.n7li{display:flex;gap:8px;font-size:13px;line-height:1.8;margin-top:8px;color:rgba(247,241,236,.92);}
+.n7li span:first-child{color:#E8C89A;flex-shrink:0;}
+.n7q{margin-top:11px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 12px;font-size:13px;line-height:1.85;color:rgba(247,241,236,.92);}
+.n7q b{color:#E8C89A;}
+.n7go{display:block;text-align:center;margin-top:12px;background:#E8C89A;color:#4A1B0C;border-radius:12px;padding:13px;font-size:14.5px;font-weight:700;text-decoration:none;}
+.n7end{margin-top:13px;text-align:center;font-size:12.5px;color:#F3E2D2;}
+.n7end b{color:#E8C89A;}
 .feedbox .cw{margin-bottom:10px;}
 .slim{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
 .slim-tag{margin-left:auto;flex-shrink:0;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;}
@@ -1115,10 +1123,13 @@ function lockedHTML(){
     + '</div>';
 }
 
-/* v8 進步頁（2026-09-05 老師拍板）：「健身房權益」卡整張退役（三席橫框／14 格圖鑑／圖例／
-   第二層鎖都跟著下場），原位置改放 demo-member-v2 的 n-7——12 格全露出＋身分地圖三站＋續費支點句。
-   續費句沿用 v3 進-5 拍板的深咖啡漸層色塊（同一句、同一功能）；
-   會員／私教兩站可點（join.html／BOOK_URL）＝收單路徑不斷。 */
+/* v10 進步頁升單板塊（2026-09-05 老師需求）：「Muscle Map 照理說是升單板塊／視覺要改成
+   咖啡色間層高級感配色，並且有動畫會閃耀／升單鉤子不夠強」。
+   整卡改咖啡漸層 .n7＋金邊＋掃光；三站橫式地圖退役，改直列席位階梯（體驗綠→會員藍）；
+   私教另立金框盒（呼吸金光）：深度鉤（技巧・心法・核心三層）當權益行＋
+   成果命名主鉤（顧問變現路徑／甜蜜成交路徑＝老師原詞，強項框架不用赤字語言）。
+   CTA：member→BOOK_URL；visitor→會員列連 join.html（金框盒不放 CTA，不跳級）。
+   續費支點句沿用拍板文案收尾。 */
 function n7HTML_(){
   var litSet = {};
   S.checkinLog.forEach(function(e){ logMuscles_(e).forEach(function(k){ litSet[k] = 1; }); });
@@ -1128,18 +1139,21 @@ function n7HTML_(){
       ? '<div class="g lit" style="background:' + dimTextColor(k[0]) + ';">' + k + '</div>'
       : '<div class="g">' + k + '</div>';
   }).join("") + '</div>';
-  /* v9：三站掛席位色（d-v 體驗綠／d-m 會員藍／d-p 私教金）＝席位分等的視覺語言 */
-  var map = '<div class="map">'
-    + (S.member
-      ? '<div class="mst past"><div class="mdot d-v">體驗</div><div class="mn">路人體驗</div><div class="ms">完成</div></div>'
-        + '<div class="mst here"><div class="mdot d-m">會員</div><div class="mn">會員</div><div class="ms">' + litN + ' / 12 塊點亮</div></div>'
-      : '<div class="mst here"><div class="mdot d-v">體驗</div><div class="mn">路人體驗</div><div class="ms">你在這裡</div></div>'
-        + '<a class="mst locked" href="join.html" style="text-decoration:none;"><div class="mdot d-m">會員</div><div class="mn">會員</div><div class="ms">NT$99／月</div></a>')
-    + '<a class="mst locked" href="' + BOOK_URL + '" style="text-decoration:none;"><div class="mdot d-p">私教</div><div class="mn">私人教練</div><div class="ms">1v1 指揮艙</div></a>'
+  var rows = S.member
+    ? '<div class="n7r"><i class="n7d" style="background:#6E8B77;">體驗</i><span>2 塊核心肌肉</span><em class="n7tag">完成</em></div>'
+      + '<div class="n7r"><i class="n7d" style="background:#6E8CA8;">會員</i><span>＋1 塊大肌肉（3 塊小肌肉）・場邊教練・技巧層次</span><em class="n7tag on">你在這・' + litN + ' / 12</em></div>'
+    : '<div class="n7r"><i class="n7d" style="background:#6E8B77;">體驗</i><span>2 塊核心肌肉</span><em class="n7tag on">你在這</em></div>'
+      + '<a class="n7r" href="join.html"><i class="n7d" style="background:#6E8CA8;">會員</i><span>＋1 塊大肌肉（3 塊小肌肉）・場邊教練・技巧層次</span><em class="n7tag">NT$99／月</em></a>';
+  var pro = '<div class="n7pro">'
+    + '<div class="n7pro-h"><i class="n7d" style="background:#C99A4E;">私教</i><div class="n7pro-k">PRIVATE COACH · 私教席</div></div>'
+    + '<div class="n7li"><span>✦</span><span>12 塊小肌肉全開——技巧・心法・核心，三層練透</span></div>'
+    + '<div class="n7li"><span>✦</span><span>專屬教練＋每週實戰教練課</span></div>'
+    + '<div class="n7q">2 核心＋4 大肌肉，連成你的<b>「顧問變現路徑」</b>——用你最強的兩塊，長出自己的<b>「甜蜜成交路徑」</b>。</div>'
+    + (S.member ? '<a class="n7go" href="' + BOOK_URL + '">約教練聊聊你的下一塊 →</a>' : '')
     + '</div>';
-  var mapEnd = '<div style="margin-top:12px;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:12px;padding:11px 13px;text-align:center;font-size:12.5px;color:#F3E2D2;">影響力是肌肉，<b style="color:#E8C89A;">只會越練越強</b>——'
+  var end = '<div class="n7end">影響力是肌肉，<b>只會越練越強</b>——'
     + (litN >= 12 ? '12 塊全點亮了' : '還有 ' + (12 - litN) + ' 塊等你點亮') + '。</div>';
-  return '<div class="cd">' + secH_("MUSCLE MAP", "全部 12 塊") + grid + map + mapEnd + '</div>';
+  return '<div class="n7">' + secH_("MUSCLE MAP", "你的影響力版圖") + grid + '<div class="n7lad">' + rows + '</div>' + pro + end + '</div>';
 }
 
 /* ══ 分頁 2：練習（一次只給一件事，不是課表）══ */
