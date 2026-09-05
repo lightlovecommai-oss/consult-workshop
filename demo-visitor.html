@@ -3,17 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DEMO · 體驗席頁（可改字）</title>
+<title>DEMO · 體驗席頁（意見版）</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
-/* ═══ DEMO 版＝visitor.html 的可改字鏡像 ═══
-   點任何文字可直接編輯、寫意見；改完截圖或存檔傳回。定稿改 visitor.html 為準。 */
+/* ═══ DEMO 意見版＝visitor.html 的逐塊校對鏡像 ═══
+   每塊下面有意見欄，寫完按底部「複製全部意見」貼回給 Claude。
+   意見存 localStorage（綁版本號），重開頁面不會不見。定稿改 visitor.html 為準。 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
-.app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:40px;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:110px;}
 .demo-banner{background:#2B2118;color:#F7F1EC;font-size:12px;text-align:center;padding:6px 10px;letter-spacing:1px;line-height:1.7;}
 .blk{position:relative;}
 .tag{position:absolute;top:-9px;left:10px;z-index:5;background:#2B2118;color:#F7F1EC;font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px;letter-spacing:.5px;}
+/* 意見欄 */
+.fb{display:block;width:calc(100% - 8px);margin:6px 4px 4px;background:#FFFBEB;border:1.5px dashed #C99A4E;border-radius:12px;padding:9px 12px;font-size:14px;color:#4A1B0C;font-family:inherit;line-height:1.7;min-height:42px;resize:vertical;}
+.fb:focus{outline:none;border-style:solid;background:#fff;}
+.fb::placeholder{color:#B8A08E;}
+/* 底部複製列 */
+.fbbar{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:460px;margin:0 auto;background:#fff;border-top:2px solid #C99A4E;padding:10px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;}
+.fbcopy{flex:1;background:#C6603A;color:#fff;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;min-height:50px;}
+.fbcopy:active{transform:scale(.98);}
+.fbn{flex-shrink:0;font-size:12px;color:#8A7266;line-height:1.6;text-align:center;min-width:64px;}
+.fbn b{display:block;font-size:17px;color:#993C1D;}
 
 .tb{background:linear-gradient(135deg,#5C7464,#6E8B77);padding:16px 20px 14px;color:#fff;}
 .tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.85);}
@@ -28,13 +39,14 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:20px 4px 10px;}
 .sec b{color:#4A1B0C;font-size:13px;letter-spacing:1px;}
 
-.streak{display:flex;align-items:center;gap:10px;padding:0 2px 14px;margin-top:8px;}
+.streak{display:flex;align-items:center;gap:10px;padding:0 2px 6px;margin-top:8px;}
 .sdots{display:flex;gap:5px;}
 .sd{width:9px;height:9px;border-radius:50%;background:#E4D7C9;}
 .sd.on{background:#6E8B77;box-shadow:0 0 0 3px rgba(110,139,119,.16);}
 .snum{font-size:12.5px;font-weight:700;color:#5C7464;}
+.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
 
-.hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
+.hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:4px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .hero-eb{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
 .hero-eb b{letter-spacing:0;color:#AF5433;}
 .hero-t{font-size:24px;font-weight:900;line-height:1.5;color:#4A1B0C;}
@@ -44,7 +56,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .ctx{display:flex;gap:8px;margin:14px 0 16px;}
 .ctx span{font-size:12.5px;color:#6E4A3C;border:1px solid #E6DAD1;border-radius:20px;padding:4px 13px;background:#fff;}
 .ctx span.on{border-color:#5C7464;color:#3E5546;font-weight:700;background:#EAF0EB;}
-.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:16px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;}
+.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:16px;border-radius:16px;font-family:inherit;min-height:56px;}
 .rec-q{font-size:14px;color:#6E4A3C;text-align:center;margin:14px 0 10px;}
 .rec-btns{display:flex;gap:10px;}
 .rb{flex:1;border:1.5px solid #E6DAD1;background:#fff;border-radius:14px;padding:13px 8px;font-size:15px;font-weight:700;color:#4A1B0C;font-family:inherit;}
@@ -65,16 +77,15 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sk.lock .sk-n{color:#A08F7D;}
 .sk.lock .sk-badge{background:#EFE6DB;color:#A08F7D;}
 
-.coach{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:none;color:#F3E2C8;overflow:hidden;}
+.coach{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:none;color:#F3E2C8;overflow:hidden;margin-bottom:4px;}
 .coach-h{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
 .coach-av{width:44px;height:44px;border-radius:50%;background:#3A150A;border:1.5px dashed #E8C89A;display:flex;align-items:center;justify-content:center;color:#E8C89A;font-size:12px;font-weight:700;flex-shrink:0;}
 .coach-t{font-size:15px;font-weight:800;color:#E8C89A;}
 .coach-s{font-size:12px;color:#D8BD97;margin-top:2px;}
 .coach-line{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;filter:blur(3px);user-select:none;}
 .coach-un{font-size:12px;color:#E8C89A;margin-top:10px;text-align:center;letter-spacing:1px;}
-.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
 
-.n7{position:relative;overflow:hidden;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:18px;padding:19px 17px;margin-bottom:14px;color:#F7F1EC;box-shadow:0 6px 24px rgba(74,27,12,.22);}
+.n7{position:relative;overflow:hidden;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:18px;padding:19px 17px;margin-bottom:4px;color:#F7F1EC;box-shadow:0 6px 24px rgba(74,27,12,.22);}
 .n7:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.13),transparent);animation:n7sheen 4.5s ease-in-out infinite;pointer-events:none;}
 @keyframes n7sheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
 .n7 .sec{margin:0 0 12px;color:#C9A87A;}
@@ -97,52 +108,54 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .n7li span:first-child{color:#E8C89A;flex-shrink:0;}
 .n7go{display:block;text-align:center;margin-top:13px;background:#E8C89A;color:#4A1B0C;border-radius:12px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;}
 
-.tour{display:block;text-align:center;background:#fff;border:1.5px solid #6E8B77;color:#3E5546;border-radius:16px;padding:15px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:14px;}
+.tour{display:block;text-align:center;background:#fff;border:1.5px solid #6E8B77;color:#3E5546;border-radius:16px;padding:15px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:4px;}
 .tour small{display:block;font-size:12px;font-weight:400;color:#8A7266;margin-top:3px;}
 
 .bone{text-align:center;font-size:14px;color:#6E4A3C;line-height:2;padding:14px 20px 4px;}
 .bone b{color:#3E5546;}
-.hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin:18px 20px 0;}
-[contenteditable]:focus{outline:2px dashed #C6603A;outline-offset:2px;border-radius:4px;}
+.hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin:14px 20px 0;}
 </style>
 </head>
 <body>
-<div class="demo-banner">DEMO · 體驗席頁 · 點任何文字可直接改字／寫意見，改完截圖傳我<br>正式版＝visitor.html（互動與紀錄在那邊是真的動）</div>
+<div class="demo-banner">DEMO · 體驗席頁 · 每塊下面有意見欄，寫完按最底下「複製全部意見」貼給 Claude<br>正式版＝visitor.html（互動與紀錄在那邊是真的動）</div>
 <div class="app">
 
   <!-- v-1 席位橫幅：體驗席＝T 綠 -->
   <div class="blk"><span class="tag">v-1</span>
     <div class="tb">
-      <div class="tb-k"><span contenteditable="true">ATPIFIT · 影響力健身房</span><span class="tb-d" contenteditable="true">體驗中</span></div>
-      <div class="tb-r"><div class="tb-n" contenteditable="true">體驗席</div><span class="hall">VISITOR</span></div>
-      <div class="tb-s" contenteditable="true">先練會兩招——有感覺，再進來練 12 塊。</div>
+      <div class="tb-k">ATPIFIT · 影響力健身房<span class="tb-d">體驗中</span></div>
+      <div class="tb-r"><div class="tb-n">體驗席</div><span class="hall">VISITOR</span></div>
+      <div class="tb-s">先練會兩招——有感覺，再進來練 12 塊。</div>
     </div>
+    <textarea class="fb" data-tag="v-1 席位橫幅" placeholder="✍️ v-1 的意見寫這裡"></textarea>
   </div>
 
-  <div class="bd">
+  <div class="bd" style="padding-top:12px;">
 
     <!-- v-2 連續天數（正式版由紀錄自動算） -->
-    <div class="blk"><span class="tag">v-2</span>
-      <div class="streak">
+    <div class="blk"><span class="tag" style="top:2px;">v-2</span>
+      <div class="streak" style="padding-top:14px;">
         <div class="sdots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span><span class="sd"></span><span class="sd"></span><span class="sd"></span></div>
-        <span class="snum" contenteditable="true">連續 3 天</span><i class="mock">示意</i>
+        <span class="snum">連續 3 天</span><i class="mock">示意</i>
       </div>
+      <textarea class="fb" data-tag="v-2 連續天數" placeholder="✍️ v-2 的意見寫這裡"></textarea>
     </div>
 
     <!-- v-3 今日主卡：一天一招（兩招每日輪替），記錄長在卡裡 -->
-    <div class="blk"><span class="tag">v-3</span>
+    <div class="blk" style="margin-top:14px;"><span class="tag">v-3</span>
       <div class="hero">
-        <div class="hero-eb">今天就練這一句 · <b contenteditable="true">讓他開口</b></div>
-        <div class="hero-t" contenteditable="true">把「最近好嗎」<br>換成「<span>最近在忙什麼有趣的？</span>」</div>
-        <div class="hero-move" contenteditable="true">丟出去之後<b>停住，等他講</b>。他多說一句，你就贏了。</div>
-        <div class="ctx"><span class="on" contenteditable="true">家人</span><span contenteditable="true">同事</span><span contenteditable="true">客戶</span></div>
-        <button class="go" contenteditable="true">我去試了，回來記一下 →</button>
-        <div class="rec-q" contenteditable="true">他後來有多說嗎？</div>
+        <div class="hero-eb">今天就練這一句 · <b>讓他開口</b></div>
+        <div class="hero-t">把「最近好嗎」<br>換成「<span>最近在忙什麼有趣的？</span>」</div>
+        <div class="hero-move">丟出去之後<b>停住，等他講</b>。他多說一句，你就贏了。</div>
+        <div class="ctx"><span class="on">家人</span><span>同事</span><span>客戶</span></div>
+        <div class="go" style="text-align:center;">我去試了，回來記一下 →</div>
+        <div class="rec-q">他後來有多說嗎？</div>
         <div class="rec-btns">
-          <button class="rb yes" contenteditable="true">有，他多說了<b>+1 組</b></button>
-          <button class="rb" contenteditable="true">還沒回應<b>明天再丟一次，也算 +1 組</b></button>
+          <div class="rb yes" style="text-align:center;">有，他多說了<b>+1 組</b></div>
+          <div class="rb" style="text-align:center;">還沒回應<b>明天再丟一次，也算 +1 組</b></div>
         </div>
       </div>
+      <textarea class="fb" data-tag="v-3 今日主卡" placeholder="✍️ v-3 的意見寫這裡（明天的招＝讓他敢說，兩招每日輪替）"></textarea>
     </div>
 
     <!-- v-4 我的招：兩招上手＋灰卡全貌感 -->
@@ -151,20 +164,21 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
       <div class="skills">
         <div class="sk today">
           <div class="sk-dot" style="background:#C6603A;">A</div>
-          <div><div class="sk-n" contenteditable="true">讓他開口</div><div class="sk-s" contenteditable="true">已練 3 組</div></div>
+          <div><div class="sk-n">讓他開口</div><div class="sk-s">已練 3 組<i class="mock">示意</i></div></div>
           <span class="sk-badge">今天</span>
         </div>
         <div class="sk next">
           <div class="sk-dot" style="background:#6E8B77;">T</div>
-          <div><div class="sk-n" contenteditable="true">讓他敢說</div><div class="sk-s" contenteditable="true">明天開箱</div></div>
+          <div><div class="sk-n">讓他敢說</div><div class="sk-s">明天開箱</div></div>
           <span class="sk-badge">明天</span>
         </div>
         <div class="sk lock">
           <div class="sk-dot">12</div>
-          <div><div class="sk-n" contenteditable="true">12 塊影響力肌肉</div><div class="sk-s" contenteditable="true">會員解鎖 · 一塊一塊點亮</div></div>
-          <span class="sk-badge" contenteditable="true">還沒解鎖</span>
+          <div><div class="sk-n">12 塊影響力肌肉</div><div class="sk-s">會員解鎖 · 一塊一塊點亮</div></div>
+          <span class="sk-badge">還沒解鎖</span>
         </div>
       </div>
+      <textarea class="fb" data-tag="v-4 我的招" placeholder="✍️ v-4 的意見寫這裡"></textarea>
     </div>
 
     <!-- v-5 場邊教練席：椅子先擺著、解析打霧 -->
@@ -173,60 +187,110 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
       <div class="cd coach">
         <div class="coach-h">
           <div class="coach-av">空位</div>
-          <div><div class="coach-t" contenteditable="true">場邊教練席</div><div class="coach-s" contenteditable="true">會員開放 · 他會看你每一組紀錄</div></div>
+          <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
         </div>
-        <div class="coach-line" contenteditable="true">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……</div>
-        <div class="coach-un" contenteditable="true">成為會員，教練坐進來</div>
+        <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……</div>
+        <div class="coach-un">成為會員，教練坐進來</div>
       </div>
+      <textarea class="fb" data-tag="v-5 場邊教練席" placeholder="✍️ v-5 的意見寫這裡"></textarea>
     </div>
 
     <!-- v-6 席位階梯＋CTA1 升級席位（member v10 n7 同款） -->
-    <div class="blk"><span class="tag">v-6</span>
+    <div class="blk" style="margin-top:14px;"><span class="tag">v-6</span>
       <div class="n7">
-        <div class="sec">MUSCLE MAP · <b contenteditable="true">你的影響力版圖</b></div>
+        <div class="sec">MUSCLE MAP · <b>你的影響力版圖</b></div>
         <div class="grid12">
           <div class="g lit" style="background:#C6603A;">A1</div><div class="g">A2</div><div class="g">A3</div><div class="g lit" style="background:#6E8B77;">T1</div>
           <div class="g">T2</div><div class="g">T3</div><div class="g">P1</div><div class="g">P2</div>
           <div class="g">P3</div><div class="g">I1</div><div class="g">I2</div><div class="g">I3</div>
         </div>
-        <div class="n7hint" contenteditable="true">你現在練的兩招，就是這 12 塊裡的前兩塊。</div>
+        <div class="n7hint">你現在練的兩招，就是這 12 塊裡的前兩塊。</div>
         <div class="n7lad">
           <div class="n7r">
             <i class="n7d" style="background:#6E8B77;">體驗</i>
-            <span contenteditable="true"><b>體驗席</b>——兩招上手，先感覺肌肉在動</span>
+            <span><b>體驗席</b>——兩招上手，先感覺肌肉在動</span>
             <i class="n7tag on">你在這</i>
           </div>
           <div class="n7r">
             <i class="n7d" style="background:#6E8CA8;">會員</i>
-            <span contenteditable="true"><b>會員席</b>——12 塊全開＋場邊教練看你每一組</span>
-            <i class="n7tag" contenteditable="true">NT$99/月</i>
+            <span><b>會員席</b>——12 塊全開＋場邊教練看你每一組</span>
+            <i class="n7tag">NT$99/月</i>
           </div>
           <div class="n7pro">
             <div class="n7pro-h">
               <i class="n7d" style="background:#C99A4E;">私教</i>
-              <div class="n7pro-k" contenteditable="true">PRIVATE COACH · 私教席</div>
+              <div class="n7pro-k">PRIVATE COACH · 私教席</div>
             </div>
-            <div class="n7li"><span>✦</span><span contenteditable="true">1v1 指揮艙——教練陪你打實戰、逐句調</span></div>
-            <div class="n7li"><span>✦</span><span contenteditable="true">用你最強的兩塊，長出自己的「甜蜜成交路徑」</span></div>
+            <div class="n7li"><span>✦</span><span>1v1 指揮艙——教練陪你打實戰、逐句調</span></div>
+            <div class="n7li"><span>✦</span><span>用你最強的兩塊，長出自己的「甜蜜成交路徑」</span></div>
           </div>
         </div>
-        <div class="n7go" contenteditable="true">升級席位 · 解鎖 12 塊肌肉 →</div>
+        <div class="n7go">升級席位 · 解鎖 12 塊肌肉 →</div>
       </div>
+      <textarea class="fb" data-tag="v-6 席位階梯＋升級CTA" placeholder="✍️ v-6 的意見寫這裡"></textarea>
     </div>
 
     <!-- v-7 CTA2 參觀會員館 -->
-    <div class="blk"><span class="tag">v-7</span>
-      <div class="tour"><span contenteditable="true">先參觀會員館 →</span><small contenteditable="true">看看 12 塊全開的館裡長什麼樣</small></div>
+    <div class="blk" style="margin-top:14px;"><span class="tag">v-7</span>
+      <div class="tour">先參觀會員館 →<small>看看 12 塊全開的館裡長什麼樣</small></div>
+      <textarea class="fb" data-tag="v-7 參觀會員館CTA" placeholder="✍️ v-7 的意見寫這裡"></textarea>
+    </div>
+
+    <!-- v-8 骨層句＋四色收邊 -->
+    <div class="blk" style="margin-top:14px;"><span class="tag">v-8</span>
+      <div class="bone">這裡練的不是話術。<br>是讓身邊的人，因為你今天這一句，<b>多說了一點真心話</b>。</div>
+      <div class="hero-rule"></div>
+      <textarea class="fb" data-tag="v-8 骨層句" placeholder="✍️ v-8 的意見寫這裡（整頁大方向的意見也可以寫這格）"></textarea>
     </div>
 
   </div>
 
-  <!-- v-8 骨層句＋四色收邊 -->
-  <div class="blk"><span class="tag">v-8</span>
-    <div class="bone" contenteditable="true">這裡練的不是話術。<br>是讓身邊的人，因為你今天這一句，<b>多說了一點真心話</b>。</div>
-    <div class="hero-rule"></div>
-  </div>
-
 </div>
+
+<div class="fbbar">
+  <button class="fbcopy" id="fbcopy" onclick="copyAll()">複製全部意見</button>
+  <div class="fbn"><b id="fbn">0</b>則意見</div>
+</div>
+
+<script>
+var VER = "vzdemo_fb_v1";
+var boxes = Array.prototype.slice.call(document.querySelectorAll(".fb"));
+try {
+  var saved = JSON.parse(localStorage.getItem(VER)) || {};
+  boxes.forEach(function(b){ if(saved[b.dataset.tag]) b.value = saved[b.dataset.tag]; });
+} catch(e){}
+function count(){
+  var n = boxes.filter(function(b){ return b.value.trim(); }).length;
+  document.getElementById("fbn").textContent = n;
+}
+boxes.forEach(function(b){
+  b.addEventListener("input", function(){
+    var o = {};
+    boxes.forEach(function(x){ if(x.value.trim()) o[x.dataset.tag] = x.value.trim(); });
+    try{ localStorage.setItem(VER, JSON.stringify(o)); }catch(e){}
+    count();
+  });
+});
+count();
+function copyAll(){
+  var lines = ["【demo-visitor 意見 · " + new Date().toLocaleDateString("zh-TW") + "】"];
+  boxes.forEach(function(b){
+    if(b.value.trim()) lines.push("▍" + b.dataset.tag + "：\n" + b.value.trim());
+  });
+  if(lines.length === 1){ alert("還沒寫任何意見喔"); return; }
+  var txt = lines.join("\n\n");
+  var btn = document.getElementById("fbcopy");
+  function ok(){ btn.textContent = "已複製，貼給 Claude 就行 ✓"; setTimeout(function(){ btn.textContent = "複製全部意見"; }, 2500); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(ok, function(){ fallback(txt, ok); });
+  } else { fallback(txt, ok); }
+}
+function fallback(txt, ok){
+  var ta = document.createElement("textarea");
+  ta.value = txt; document.body.appendChild(ta);
+  ta.select(); document.execCommand("copy");
+  document.body.removeChild(ta); ok();
+}
+</script>
 </body>
 </html>
