@@ -68,7 +68,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mr b{flex-shrink:0;width:74px;color:#8A7266;font-weight:700;}
 .mr span{flex:1;color:#4A1B0C;}
 .mr span b{width:auto;color:#8E682B;}
-.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:15px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;transition:transform .1s;}
+/* 打卡／記錄＝行動鈕，一律磚橘漸層（同 member .go4） */
+.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:15px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;transition:transform .1s;}
 .go:active{transform:scale(.97);}
 .go small{display:block;font-size:12px;font-weight:400;opacity:.85;margin-top:3px;letter-spacing:.5px;}
 /* 記錄流程（member 搬入：對誰→反應→寫一句→評語） */
@@ -133,7 +134,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .coach-s{font-size:12px;color:#8A7266;margin-top:2px;}
 .coach-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:#5A3A2A;filter:blur(3px);user-select:none;}
 .mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
-.coach-go{display:block;text-align:center;margin-top:13px;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;border-radius:14px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px;text-decoration:none;min-height:52px;}
+.coach-go{display:block;text-align:center;margin-top:13px;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:700;letter-spacing:1px;text-decoration:none;min-height:50px;}
 .coach-go:active{transform:scale(.98);}
 
 /* 席位階梯＝visitor vs member 對照表（n7 咖啡漸層＋掃光；這版不賣私教） */
@@ -235,7 +236,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
         <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
       </div>
       <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……<i class="mock">示意</i></div>
-      <a class="coach-go" href="member.html?demo=1">成為會員，教練坐進來 · 參觀「會員席位」 →</a>
+      <a class="coach-go" href="member.html?demo=1">參觀「會員席位」 →</a>
     </div>
 
     <!-- 席位階梯：visitor vs member 對照＋升級 CTA -->
