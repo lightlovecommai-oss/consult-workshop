@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>影響力健身房 · 體驗席</title>
+<meta name="apple-mobile-web-app-title" content="影響力健身房">
+<meta name="theme-color" content="#5C7464">
+<link rel="apple-touch-icon" href="icon3-180.png">
+<link rel="icon" type="image/png" href="icon3-192.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="影響力健身房 · 體驗席">
+<meta property="og:description" content="先練會兩招——有感覺，再進來練 12 塊。影響力是肌肉，只會越練越強。">
+<meta property="og:image" content="https://app.atpifit.com/og-image.png">
+<meta property="og:url" content="https://app.atpifit.com/visitor.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 體驗席（visitor）・單頁 ═══
+   視覺語言同步 member.html（v9 卡片層次／hero 卡／n7 咖啡漸層），席位色＝體驗綠 T。
+   規範真相＝productkit 30-App介面規範；席位四色＝quiz A磚橘／visitor T綠／member P藍／pro I金。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:40px;}
+
+/* 席位橫幅：體驗席＝T 綠（同 member.html .tb.seat-v） */
+.tb{background:linear-gradient(135deg,#5C7464,#6E8B77);padding:16px 20px 14px;color:#fff;}
+.tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.85);}
+.tb-d{margin-left:auto;font-size:12px;color:rgba(255,255,255,.75);letter-spacing:.5px;white-space:nowrap;}
+.tb-r{display:flex;align-items:center;gap:10px;margin-top:9px;}
+.tb-n{color:#fff;font-size:19px;font-weight:900;letter-spacing:.02em;}
+.tb-s{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:5px;letter-spacing:.02em;}
+.hall{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:auto;}
+
+.bd{padding:20px 20px 16px;}
+.cd{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:20px 4px 10px;}
+.sec b{color:#4A1B0C;font-size:13px;letter-spacing:1px;}
+
+/* 連續天數（席位色＝綠） */
+.streak{display:flex;align-items:center;gap:10px;padding:0 2px 14px;}
+.sdots{display:flex;gap:5px;}
+.sd{width:9px;height:9px;border-radius:50%;background:#E4D7C9;}
+.sd.on{background:#6E8B77;box-shadow:0 0 0 3px rgba(110,139,119,.16);}
+.snum{font-size:12.5px;font-weight:700;color:#5C7464;}
+
+/* 今日主卡（member v9 hero 基因） */
+.hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
+.hero-eb{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
+.hero-eb b{letter-spacing:0;}
+.hero-t{font-size:24px;font-weight:900;line-height:1.5;color:#4A1B0C;}
+.hero-move{margin:14px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;font-size:15px;line-height:1.85;color:#4A1B0C;}
+.ctx{display:flex;gap:8px;margin:14px 0 16px;}
+.ctx span{font-size:12.5px;color:#6E4A3C;border:1px solid #E6DAD1;border-radius:20px;padding:4px 13px;background:#fff;}
+.ctx span.on{border-color:#5C7464;color:#3E5546;font-weight:700;background:#EAF0EB;}
+/* 主行動鈕＝席位綠（白字 17px/700，深綠起頭保對比） */
+.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:16px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;transition:transform .1s;}
+.go:active{transform:scale(.97);}
+.rec{display:none;margin-top:6px;}
+.rec.show{display:block;animation:fadeUp .35s ease;}
+.rec-q{font-size:14px;color:#6E4A3C;text-align:center;margin-bottom:10px;}
+.rec-btns{display:flex;gap:10px;}
+.rb{flex:1;border:1.5px solid #E6DAD1;background:#fff;border-radius:14px;padding:13px 8px;font-size:15px;font-weight:700;color:#4A1B0C;cursor:pointer;font-family:inherit;transition:transform .08s;}
+.rb:active{transform:scale(.96);}
+.rb b{display:block;font-size:12px;color:#8A7266;font-weight:400;margin-top:3px;line-height:1.6;}
+.rb.yes{border-color:#6E8B77;color:#3E5546;}
+.done{display:none;text-align:center;padding:6px 0 2px;}
+.done.show{display:block;animation:pop .4s cubic-bezier(.2,1.6,.4,1);}
+.done-ring{width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:conic-gradient(#6E8B77 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
+.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px;font-weight:900;color:#5C7464;}
+.done-t{font-size:17px;font-weight:800;}
+.done-s{font-size:13px;color:#6E4A3C;margin-top:4px;line-height:1.8;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* 我的招 */
+.skills{display:flex;flex-direction:column;gap:10px;}
+.sk{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #E8DDD3;border-radius:14px;padding:12px 14px;}
+.sk-dot{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:15px;flex-shrink:0;}
+.sk-n{font-size:15px;font-weight:700;}
+.sk-s{font-size:12.5px;color:#6E4A3C;margin-top:2px;}
+.sk.today{border:1.5px solid #6E8B77;background:#F4F8F5;}
+.sk-badge{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;}
+.sk.today .sk-badge{background:#6E8B77;color:#fff;}
+.sk.next .sk-badge{background:#EFE6DB;color:#8A7266;}
+.sk.lock{opacity:.85;}
+.sk.lock .sk-dot{background:#D9CDC0;}
+.sk.lock .sk-n{color:#A08F7D;}
+.sk.lock .sk-badge{background:#EFE6DB;color:#A08F7D;}
+
+/* 場邊教練席（咖啡漸層＝member 深卡語言） */
+.coach{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:none;color:#F3E2C8;overflow:hidden;}
+.coach-h{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.coach-av{width:44px;height:44px;border-radius:50%;background:#3A150A;border:1.5px dashed #E8C89A;display:flex;align-items:center;justify-content:center;color:#E8C89A;font-size:12px;font-weight:700;flex-shrink:0;}
+.coach-t{font-size:15px;font-weight:800;color:#E8C89A;}
+.coach-s{font-size:12px;color:#D8BD97;margin-top:2px;}
+.coach-line{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;filter:blur(3px);user-select:none;}
+.coach-un{font-size:12px;color:#E8C89A;margin-top:10px;text-align:center;letter-spacing:1px;}
+.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
+
+/* 席位階梯＝member v10 n7 板塊（咖啡漸層＋掃光＋金框私教盒） */
+.n7{position:relative;overflow:hidden;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:18px;padding:19px 17px;margin-bottom:14px;color:#F7F1EC;box-shadow:0 6px 24px rgba(74,27,12,.22);}
+.n7:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.13),transparent);animation:n7sheen 4.5s ease-in-out infinite;pointer-events:none;}
+@keyframes n7sheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
+.n7 .sec{margin:0 0 12px;color:#C9A87A;}
+.n7 .sec b{color:#E8C89A;}
+.grid12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 4px;}
+.g{height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:rgba(247,241,236,.08);color:rgba(247,241,236,.42);}
+.g.lit{color:#fff;}
+.n7hint{margin-top:9px;font-size:12px;color:rgba(247,241,236,.6);text-align:center;}
+.n7lad{margin-top:13px;}
+.n7r{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12.5px;line-height:1.65;color:rgba(247,241,236,.88);text-decoration:none;border-top:1px solid rgba(232,200,154,.16);}
+.n7r:first-child{border-top:0;}
+.n7d{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-style:normal;color:#fff;}
+.n7tag{margin-left:auto;flex-shrink:0;font-style:normal;font-size:10.5px;color:rgba(247,241,236,.55);white-space:nowrap;}
+.n7tag.on{color:#E8C89A;font-weight:700;}
+.n7pro{margin-top:12px;background:rgba(247,241,236,.07);border:1px solid rgba(232,200,154,.55);border-radius:14px;padding:13px 14px;animation:n7glow 3s ease-in-out infinite;}
+@keyframes n7glow{0%,100%{box-shadow:0 0 0 0 rgba(232,200,154,0);}50%{box-shadow:0 0 20px rgba(232,200,154,.3);}}
+.n7pro-h{display:flex;align-items:center;gap:9px;}
+.n7pro-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#E8C89A;}
+.n7li{display:flex;gap:8px;font-size:13px;line-height:1.8;margin-top:8px;color:rgba(247,241,236,.92);}
+.n7li span:first-child{color:#E8C89A;flex-shrink:0;}
+.n7go{display:block;text-align:center;margin-top:13px;background:#E8C89A;color:#4A1B0C;border-radius:12px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;}
+.n7go:active{transform:scale(.98);}
+
+/* CTA2：參觀會員館（次要・白底綠框） */
+.tour{display:block;text-align:center;background:#fff;border:1.5px solid #6E8B77;color:#3E5546;border-radius:16px;padding:15px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:14px;}
+.tour:active{transform:scale(.98);}
+.tour small{display:block;font-size:12px;font-weight:400;color:#8A7266;margin-top:3px;}
+
+/* 骨層句＋頁尾四色收邊 */
+.bone{text-align:center;font-size:14px;color:#6E4A3C;line-height:2;padding:14px 20px 4px;}
+.bone b{color:#3E5546;}
+.hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin:18px 20px 0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="tb">
+    <div class="tb-k">ATPIFIT · 影響力健身房<span class="tb-d">體驗中</span></div>
+    <div class="tb-r"><div class="tb-n">體驗席</div><span class="hall">VISITOR</span></div>
+    <div class="tb-s">先練會兩招——有感覺，再進來練 12 塊。</div>
+  </div>
+
+  <div class="bd">
+
+    <div class="streak">
+      <div class="sdots" id="sdots"></div>
+      <span class="snum" id="snum">今天開始</span>
+    </div>
+
+    <!-- 今日主卡：一天一招，記錄長在卡裡 -->
+    <div class="hero">
+      <div class="hero-eb">今天就練這一句 · <b id="mv-name"></b></div>
+      <div class="hero-t" id="mv-big"></div>
+      <div class="hero-move" id="mv-how"></div>
+      <div class="ctx" id="mv-ctx"></div>
+      <button class="go" id="btn-go" onclick="showRec()">我去試了，回來記一下 →</button>
+      <div class="rec" id="rec">
+        <div class="rec-q" id="rec-q"></div>
+        <div class="rec-btns">
+          <button class="rb yes" id="rb-yes" onclick="finish(1)"></button>
+          <button class="rb" id="rb-no" onclick="finish(0)"></button>
+        </div>
+      </div>
+      <div class="done" id="done">
+        <div class="done-ring"><i>+1</i></div>
+        <div class="done-t" id="done-t"></div>
+        <div class="done-s" id="done-s"></div>
+      </div>
+    </div>
+
+    <!-- 我的招：兩招上手，第三張灰＝全貌感 -->
+    <div class="sec">MY MOVES · <b>我的招</b></div>
+    <div class="skills">
+      <div class="sk" id="sk0">
+        <div class="sk-dot" style="background:#C6603A;">A</div>
+        <div><div class="sk-n">讓他開口</div><div class="sk-s" id="sk0-s"></div></div>
+        <span class="sk-badge" id="sk0-b"></span>
+      </div>
+      <div class="sk" id="sk1">
+        <div class="sk-dot" style="background:#6E8B77;">T</div>
+        <div><div class="sk-n">讓他敢說</div><div class="sk-s" id="sk1-s"></div></div>
+        <span class="sk-badge" id="sk1-b"></span>
+      </div>
+      <div class="sk lock">
+        <div class="sk-dot">12</div>
+        <div><div class="sk-n">12 塊影響力肌肉</div><div class="sk-s">會員解鎖 · 一塊一塊點亮</div></div>
+        <span class="sk-badge">還沒解鎖</span>
+      </div>
+    </div>
+
+    <!-- 場邊教練席：椅子先擺著，解析打霧 -->
+    <div class="sec" style="margin-top:22px;">SIDE COACH · <b>場邊教練席</b></div>
+    <div class="cd coach">
+      <div class="coach-h">
+        <div class="coach-av">空位</div>
+        <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
+      </div>
+      <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……<i class="mock">示意</i></div>
+      <div class="coach-un">成為會員，教練坐進來</div>
+    </div>
+
+    <!-- 席位階梯＋CTA1 升級席位 -->
+    <div class="n7">
+      <div class="sec">MUSCLE MAP · <b>你的影響力版圖</b></div>
+      <div class="grid12" id="grid12"></div>
+      <div class="n7hint">你現在練的兩招，就是這 12 塊裡的前兩塊。</div>
+      <div class="n7lad">
+        <div class="n7r">
+          <i class="n7d" style="background:#6E8B77;">體驗</i>
+          <span><b>體驗席</b>——兩招上手，先感覺肌肉在動</span>
+          <i class="n7tag on">你在這</i>
+        </div>
+        <a class="n7r" href="join.html">
+          <i class="n7d" style="background:#6E8CA8;">會員</i>
+          <span><b>會員席</b>——12 塊全開＋場邊教練看你每一組</span>
+          <i class="n7tag">NT$99/月</i>
+        </a>
+        <div class="n7pro">
+          <div class="n7pro-h">
+            <i class="n7d" style="background:#C99A4E;">私教</i>
+            <div class="n7pro-k">PRIVATE COACH · 私教席</div>
+          </div>
+          <div class="n7li"><span>✦</span><span>1v1 指揮艙——教練陪你打實戰、逐句調</span></div>
+          <div class="n7li"><span>✦</span><span>用你最強的兩塊，長出自己的「甜蜜成交路徑」</span></div>
+        </div>
+      </div>
+      <a class="n7go" href="join.html">升級席位 · 解鎖 12 塊肌肉 →</a>
+    </div>
+
+    <!-- CTA2 參觀會員館 -->
+    <a class="tour" href="member.html?demo=1">先參觀會員館 →<small>看看 12 塊全開的館裡長什麼樣</small></a>
+
+  </div>
+
+  <div class="bone">這裡練的不是話術。<br>是讓身邊的人，因為你今天這一句，<b>多說了一點真心話</b>。</div>
+  <div class="hero-rule"></div>
+
+</div>
+<script>
+/* 兩招輪替（文案真相＝judgement.js DRILL A1／T1 系）；紀錄存 localStorage，不打後端 */
+var MOVES = [
+  { key:"m0", name:"讓他開口", color:"#AF5433",
+    big:'把「最近好嗎」<br>換成「<span style="color:#AF5433;">最近在忙什麼有趣的？</span>」',
+    how:'丟出去之後<b style="color:#AF5433;">停住，等他講</b>。他多說一句，你就贏了。',
+    ctx:["家人","同事","客戶"],
+    q:"他後來有多說嗎？",
+    yes:'有，他多說了<b>+1 組</b>', no:'還沒回應<b>明天再丟一次，也算 +1 組</b>',
+    doneT:"這就是一組。", doneS:"肌肉就是這樣長的——明天換下一招。",
+    retryT:"丟出去了，就算一組。", retryS:"沒回應很正常——同一句明天再丟一次，常常第二次就接住了。" },
+  { key:"m1", name:"讓他敢說", color:"#5C7464",
+    big:'他問「最近怎樣」——別回「還好」，<br>換成「<span style="color:#5C7464;">我最近有點卡，不過我想跟你說</span>」',
+    how:'一句就好。講完<b style="color:#5C7464;">停住，數三秒</b>——不要補話，等他接。',
+    ctx:["家人","老朋友","同事"],
+    q:"他有跟著講他自己的事嗎？",
+    yes:'有，他也講了<b>+1 組</b>', no:'只回「加油」<b>換個人再試，也算 +1 組</b>',
+    doneT:"這就是一組。", doneS:"你先掏一句，他才敢掏——這塊肌肉就是這樣長的。",
+    retryT:"講出口了，就算一組。", retryS:"他回「加油」是安慰不算接住——不是失敗，明天換個人再試一次。" }
+];
+var MORD12 = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+var MCOLOR = { A:"#C6603A", T:"#6E8B77", P:"#6E8CA8", I:"#C99A4E" };
+
+var KEY = "vz_visitor_v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {days:[],cnt:{m0:0,m1:0}}; }catch(e){ return {days:[],cnt:{m0:0,m1:0}}; } }
+function save(st){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+function dstr(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+
+var st = load();
+var today = new Date();
+var mvIdx = (today.getFullYear()*372 + today.getMonth()*31 + today.getDate()) % 2;
+var MV = MOVES[mvIdx];
+
+function render(){
+  document.getElementById("mv-name").textContent = MV.name;
+  document.getElementById("mv-name").style.color = MV.color;
+  document.getElementById("mv-big").innerHTML = MV.big;
+  document.getElementById("mv-how").innerHTML = MV.how;
+  document.getElementById("mv-how").style.borderLeftColor = MV.color;
+  document.getElementById("mv-ctx").innerHTML = MV.ctx.map(function(c,i){
+    return '<span class="'+(i===0?"on":"")+'">'+c+'</span>';
+  }).join("");
+  document.getElementById("rec-q").textContent = MV.q;
+  document.getElementById("rb-yes").innerHTML = MV.yes;
+  document.getElementById("rb-no").innerHTML = MV.no;
+
+  // 連續天數＋7 點
+  var dots="", n=0, d=new Date(today);
+  for(var i=6;i>=0;i--){
+    var dd=new Date(today); dd.setDate(today.getDate()-i);
+    dots += '<span class="sd'+(st.days.indexOf(dstr(dd))>-1?" on":"")+'"></span>';
+  }
+  document.getElementById("sdots").innerHTML = dots;
+  if(st.days.indexOf(dstr(d))<0) d.setDate(d.getDate()-1);
+  while(st.days.indexOf(dstr(d))>-1){ n++; d.setDate(d.getDate()-1); }
+  document.getElementById("snum").textContent = n>0 ? "連續 "+n+" 天" : "今天開始";
+
+  // 我的招：今天／明天＋組數
+  var t0 = mvIdx===0, ids=["sk0","sk1"];
+  ids.forEach(function(id,i){
+    var isToday = (i===0)===t0 ? (i===0&&t0)||(i===1&&!t0) : false;
+    isToday = (i===mvIdx);
+    var el=document.getElementById(id);
+    el.className = "sk "+(isToday?"today":"next");
+    document.getElementById(id+"-b").textContent = isToday?"今天":"明天";
+    var c = st.cnt["m"+i]||0;
+    document.getElementById(id+"-s").textContent = c>0 ? "已練 "+c+" 組" : (isToday?"今天開箱":"明天開箱");
+  });
+
+  // 12 格：練過的招點亮對應那塊（m0→A1、m1→T1）
+  document.getElementById("grid12").innerHTML = MORD12.map(function(mk){
+    var lit = (mk==="A1"&&st.cnt.m0>0)||(mk==="T1"&&st.cnt.m1>0);
+    return '<div class="g'+(lit?" lit":"")+'"'+(lit?' style="background:'+MCOLOR[mk[0]]+';"':'')+'>'+mk+'</div>';
+  }).join("");
+}
+
+function showRec(){
+  document.getElementById("btn-go").style.display="none";
+  document.getElementById("rec").classList.add("show");
+}
+function finish(got){
+  var r=document.getElementById("rec");
+  r.classList.remove("show"); r.style.display="none";
+  document.getElementById("done-t").textContent = got?MV.doneT:MV.retryT;
+  document.getElementById("done-s").textContent = got?MV.doneS:MV.retryS;
+  document.getElementById("done").classList.add("show");
+  var ds=dstr(today);
+  if(st.days.indexOf(ds)<0) st.days.push(ds);
+  st.cnt["m"+mvIdx] = (st.cnt["m"+mvIdx]||0)+1;
+  save(st); render();
+}
+render();
+</script>
+</body>
+</html>
