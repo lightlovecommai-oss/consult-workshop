@@ -298,7 +298,16 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* 等待＝品牌精神露出時刻：呼吸燈 logo（同 index.html） */
 @keyframes ldBreath{0%,100%{transform:scale(1);opacity:.82;}50%{transform:scale(1.06);opacity:1;}}
 .ld-logo{animation:ldBreath 2.6s ease-in-out infinite;}
-@media (prefers-reduced-motion:reduce){.ld-logo{animation:none;}}
+@media (prefers-reduced-motion:reduce){.ld-logo{animation:none;}.boot-dots span{animation:none;}}
+/* 開場畫面（2026-09-05 老師拍板：搬 pro.html 的 boot-card、文字換會員版） */
+.boots{padding:18vh 4px 0;}
+.boot-card{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:20px;padding:42px 24px 38px;text-align:center;box-shadow:0 10px 30px rgba(74,27,12,.25);}
+.boot-k{font-size:12px;letter-spacing:4px;color:#E8C89A;font-weight:700;margin-top:16px;}
+.boot-t{font-size:19px;font-weight:700;color:#F7F1EC;margin-top:12px;line-height:1.6;}
+.boot-s{font-size:13px;color:rgba(247,241,236,.6);margin-top:8px;}
+.boot-dots{display:flex;justify-content:center;gap:12px;margin-top:26px;}
+.boot-dots span{width:11px;height:11px;border-radius:50%;animation:bpulse 1.2s ease-in-out infinite;}
+@keyframes bpulse{0%,100%{transform:scale(.7);opacity:.45;}50%{transform:scale(1.15);opacity:1;}}
 :focus-visible{outline:2px solid #C6603A;outline-offset:2px;}
 /* ── 三頁大demo搬入（2026-09-04 老師指示：先把相近元素放一起，之後再整合）──
    dm- 前綴＝demo-member.html 搬進來的板塊（m-6 明日預告／m-7 升級卡）。 */
@@ -333,11 +342,18 @@ body{background:#EFE6DE;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
 
   <div class="bd" id="bd">
-    <div class="loading" style="padding-top:26vh;">
-      <svg class="ld-logo" width="66" height="49" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#4A1B0C" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A"/><circle cx="-7" cy="0" r="5" fill="#6E8B77"/><circle cx="7" cy="0" r="5" fill="#6E8CA8"/><circle cx="21" cy="0" r="5" fill="#C99A4E"/></svg>
-      <div style="font-size:17px;font-weight:500;color:#4A1B0C;margin-top:18px;">練好溝通，你就有影響力</div>
-      <div style="font-size:13px;color:#9C8873;margin-top:8px;">載入你的影響力肌肉…</div>
-    </div>
+    <div class="boots"><div class="boot-card">
+      <svg class="ld-logo" width="66" height="49" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#E8C89A" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A"/><circle cx="-7" cy="0" r="5" fill="#6E8B77"/><circle cx="7" cy="0" r="5" fill="#6E8CA8"/><circle cx="21" cy="0" r="5" fill="#C99A4E"/></svg>
+      <div class="boot-k">影響力健身房</div>
+      <div class="boot-t">練好溝通，你就有影響力</div>
+      <div class="boot-s">載入你的影響力肌肉…</div>
+      <div class="boot-dots">
+        <span style="background:#C6603A;"></span>
+        <span style="background:#6E8B77;animation-delay:.18s;"></span>
+        <span style="background:#6E8CA8;animation-delay:.36s;"></span>
+        <span style="background:#C99A4E;animation-delay:.54s;"></span>
+      </div>
+    </div></div>
   </div>
 </div>
 
@@ -581,7 +597,7 @@ function bumpVisitCount_(lineId){
 /* ══════════ 精修模式：三頁攤平、每個板塊掛編號牌＋可打字便利貼 ══════════
    意見存 localStorage（綁版本號，板塊順序一改就換 key，舊筆記不會錯位蓋新版）。
    .rv-body 鎖 pointer-events：這一頁純看不操作，點按鈕不會跳走。 */
-var RV_VER = "v3", RV_KEY = "cw_review_notes_" + RV_VER;
+var RV_VER = "v4", RV_KEY = "cw_review_notes_" + RV_VER;
 var RV_ORD = { "夥": 0, "練": 1, "進": 2 };
 function rvLoad_(){ try { return JSON.parse(localStorage.getItem(RV_KEY) || "{}"); } catch (e) { return {}; } }
 function rvSave_(k, txt){
