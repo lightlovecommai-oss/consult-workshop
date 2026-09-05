@@ -53,6 +53,24 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .core-zh{flex-shrink:0;font-size:13.5px;font-weight:700;color:#F7F1EC;}
 .core-bar{flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#C9A87A,#E8C89A);}
 
+/* ═ 簡版（4 大肌肉）：一列一肌肉、極限壓縮 ═ */
+.vh{font-size:11px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:18px 4px 8px;}
+.card.slim{padding:14px 16px 12px;}
+.card.slim .hd{margin-bottom:6px;}
+.d4{display:flex;align-items:center;gap:9px;padding:7px 0;}
+.d4-en{flex-shrink:0;width:98px;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
+.d4-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#F7F1EC;}
+.d4-bar{flex:1;height:6px;border-radius:3px;background:rgba(247,241,236,.14);overflow:hidden;}
+.d4-bar i{display:block;height:100%;border-radius:3px;}
+.d4-v{flex-shrink:0;width:30px;text-align:right;font-size:12px;font-weight:700;color:rgba(247,241,236,.6);font-variant-numeric:tabular-nums;}
+.d4-v.gold{color:#E8C89A;}
+.base2{display:flex;gap:10px;margin-top:9px;border-top:1px solid rgba(232,200,154,.25);padding-top:10px;}
+.b2{flex:1;}
+.b2-h{display:flex;align-items:baseline;gap:5px;margin-bottom:5px;}
+.b2-en{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#E8C89A;}
+.b2-zh{font-size:12px;font-weight:700;color:#F7F1EC;}
+.b2-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,#C9A87A,#E8C89A);}
+
 /* 文字插槽：主視覺固定，下面接不同訊息 */
 .slot{margin-top:16px;background:#fff;border:1px solid #E8DDD3;border-radius:16px;padding:15px 16px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
 .slot-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#8A7266;margin-bottom:6px;}
@@ -63,8 +81,22 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 </head>
 <body>
 <div class="wrap">
-  <div class="demo-banner">DEMO · ATPI 四大肌肉拆解卡 v3 · 分數全部示意<br>主視覺固定，最下面的文字插槽接不同訊息</div>
+  <div class="demo-banner">DEMO · ATPI 四大肌肉拆解卡 v3 · 分數全部示意<br>簡版（4 大肌肉）＋詳細版（12 塊），主視覺固定、文字插槽接不同訊息</div>
 
+  <div class="vh">版本 1 · 簡版（只看 4 大肌肉，版面壓縮）</div>
+  <div class="card slim">
+    <div class="hd"><span class="hd-k">ATPI</span><span class="hd-t">影響力肌肉</span><span class="mock">分數示意</span></div>
+    <div class="d4"><span class="d4-en" style="color:#E8946A;">ATTRACT</span><span class="d4-zh">吸引肌肉</span><span class="d4-bar"><i style="width:68%;background:#C6603A;"></i></span><span class="d4-v">3.4</span></div>
+    <div class="d4"><span class="d4-en" style="color:#9BC0A7;">TRUST</span><span class="d4-zh">信任肌肉</span><span class="d4-bar"><i style="width:66%;background:#6E8B77;"></i></span><span class="d4-v">3.3</span></div>
+    <div class="d4"><span class="d4-en" style="color:#A3BDD6;">PROFESSIONAL</span><span class="d4-zh">專業肌肉</span><span class="d4-bar"><i style="width:58%;background:#6E8CA8;"></i></span><span class="d4-v">2.9</span></div>
+    <div class="d4"><span class="d4-en" style="color:#E3C285;">IMPACT</span><span class="d4-zh">推進肌肉</span><span class="d4-bar"><i style="width:46%;background:#C99A4E;"></i></span><span class="d4-v gold">2.3</span></div>
+    <div class="base2">
+      <div class="b2"><div class="b2-h"><span class="b2-en">STORY</span><span class="b2-zh">講故事</span></div><div class="b2-bar"></div></div>
+      <div class="b2"><div class="b2-h"><span class="b2-en">QUESTION</span><span class="b2-zh">問問題</span></div><div class="b2-bar"></div></div>
+    </div>
+  </div>
+
+  <div class="vh" style="margin-top:24px;">版本 2 · 詳細版（12 塊小肌肉全露出）</div>
   <div class="card">
     <div class="hd"><span class="hd-k">ATPI</span><span class="hd-t">影響力肌肉全圖</span><span class="mock">分數示意</span></div>
 
@@ -126,9 +158,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
 
   <div class="note">
-    卡片規格：深咖啡品牌底＋金框；大肌肉一列一色（EN＋中文全名都露出）；小肌肉＝代碼＋肌肉名＋橫 bar＋分數；
-    地基 Story／Question 金色橫 bar 墊在最下面。金色角框＝本週主力（練這塊最有感）。
-    接真分數時 bar 寬＝分數÷5，資料全部從 MUSCLES／體測紀錄來，不用改版型。
+    兩個版本同一套語言：深咖啡品牌底＋金框、大肌肉一列一色（EN＋中文全名都露出）、地基 Story／Question 金 bar 墊底。
+    簡版＝一列一肌肉，塞得進小卡位（quiz 結果頁上方、海報角落）；詳細版＝12 塊全露出，用在週回顧、解盤。
+    金色＝本週主力（練這塊最有感）。接真分數時 bar 寬＝分數÷5，資料全部從 MUSCLES／體測紀錄來，不用改版型。
   </div>
 </div>
 </body>
