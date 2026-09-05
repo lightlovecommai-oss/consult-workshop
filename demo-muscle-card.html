@@ -3,165 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ATPI 四大肌肉拆解卡・三方向 demo</title>
+<title>ATPI 四大肌肉拆解卡・v2 三方向</title>
 <meta name="theme-color" content="#4A1B0C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-/* ═══ demo-muscle-card.html ═══
-   ATPI 四大肌肉拆解卡・可重複使用主元素・三方向比稿（2026-09-05）
-   老師需求：消費者初次接觸看不懂 A1/A2/A3 代碼，要一張「中文名優先」的拆解卡。
-   元素層級（老師拍板）：核心肌肉×2＝地基（基底）＞ 大肌肉×4＝關鍵（重點）＞ 小肌肉×12＝細分練法（最次要）。
-   卡片＝固定主視覺＋下方文字插槽（每個用途換字）。
-   配色＝app 暖版四色：A#C6603A／T#6E8B77／P#6E8CA8／I#C99A4E；地基＝深咖啡漸層。 */
+/* ═══ demo-muscle-card.html v2（2026-09-05）═══
+   v1 三方向被老師打槍「都太醜了」；v2 照老師拍板的文字規格重練：
+   地基露「Story 講故事」「Question 問問題」全名／大肌肉露「Attract 吸引肌肉」全名／
+   小肌肉只放 A1.A2.A3 代碼、不加小字。
+   三個新方向＝混音台（老師提的 mixer app）／放射全圖（sunburst，2>4>12 標準畫法）／捷運路線圖。 */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:#F7F1EC;color:#4A1B0C;padding:18px 14px 60px;}
 .wrap{max-width:430px;margin:0 auto;}
 h1{font-size:19px;font-weight:900;margin-bottom:4px;}
-.sub{font-size:12.5px;color:#8A7266;line-height:1.7;margin-bottom:18px;}
-.dirh{font-size:11px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:26px 0 8px;}
+.sub{font-size:12.5px;color:#8A7266;line-height:1.7;margin-bottom:10px;}
+.dirh{font-size:11px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:28px 0 8px;}
 .dirh b{font-size:14px;letter-spacing:0;color:#4A1B0C;margin-left:6px;}
 .note{font-size:12px;color:#8A7266;line-height:1.75;margin:8px 2px 0;}
+.slot{margin-top:12px;border-top:1px dashed rgba(232,200,154,.4);padding-top:10px;font-size:12.5px;line-height:1.75;color:#F3E2D2;}
+.slot .k{font-size:10px;color:#C9A87A;display:block;margin-bottom:2px;letter-spacing:1px;}
+.wslot{margin-top:12px;border-top:1px dashed #E8DDD3;padding-top:10px;font-size:12.5px;line-height:1.75;color:#4A1B0C;}
+.wslot .k{font-size:10px;color:#B8A594;display:block;margin-bottom:2px;letter-spacing:1px;}
 
-/* ─ 卡片外殼（共用）─ */
-.card{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:17px 15px 15px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
-.ct{font-size:11px;letter-spacing:2px;font-weight:700;color:#8A7266;margin-bottom:12px;}
-.ct b{color:#4A1B0C;font-size:13px;letter-spacing:0;margin-left:4px;}
-.slot{margin-top:13px;border-top:1px dashed #E8DDD3;padding-top:11px;font-size:13px;line-height:1.8;color:#4A1B0C;}
-.slot .k{font-size:10.5px;color:#B8A594;display:block;margin-bottom:3px;}
+/* ═ 方向 A：混音台 ═ */
+.mx{position:relative;overflow:hidden;background:linear-gradient(160deg,#3A1408,#5A2410);border:1px solid rgba(232,200,154,.4);border-radius:18px;padding:16px 14px 15px;box-shadow:0 8px 28px rgba(74,27,12,.28);}
+.mx:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.10),transparent);animation:mxsheen 5s ease-in-out infinite;pointer-events:none;}
+@keyframes mxsheen{0%,60%{left:-60%;}90%,100%{left:120%;}}
+.mx-t{display:flex;align-items:baseline;gap:7px;margin-bottom:13px;}
+.mx-t .en{font-size:10px;letter-spacing:3px;font-weight:700;color:#C9A87A;}
+.mx-t .zh{font-size:14px;font-weight:900;color:#F3E2D2;}
+.mx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.mx-ch{background:rgba(247,241,236,.06);border:1px solid rgba(232,200,154,.18);border-radius:11px;padding:9px 7px 10px;}
+.mx-en{font-size:7.5px;letter-spacing:1.8px;font-weight:700;text-align:center;}
+.mx-zh{font-size:13px;font-weight:900;color:#F7F1EC;text-align:center;margin:2px 0 9px;letter-spacing:.5px;}
+.mx-f{display:flex;align-items:center;gap:5px;margin-top:7px;}
+.mx-f .c{flex-shrink:0;font-size:8.5px;font-weight:800;color:rgba(247,241,236,.6);width:14px;}
+.mx-f .tr{flex:1;height:3px;border-radius:2px;background:rgba(247,241,236,.14);position:relative;}
+.mx-f .tr i{position:absolute;top:50%;transform:translate(-50%,-50%);width:9px;height:15px;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.mx-master{margin-top:13px;border-top:1px solid rgba(232,200,154,.25);padding-top:11px;}
+.mx-mk{font-size:8.5px;letter-spacing:2.5px;font-weight:700;color:#C9A87A;margin-bottom:8px;}
+.mx-mf{display:flex;align-items:center;gap:10px;margin-top:9px;}
+.mx-mf .lb{flex-shrink:0;width:118px;display:flex;align-items:baseline;gap:5px;}
+.mx-mf .lb .en{font-size:8.5px;letter-spacing:1.5px;font-weight:700;color:#C9A87A;}
+.mx-mf .lb .zh{font-size:14px;font-weight:900;color:#F7F1EC;}
+.mx-mf .tr{flex:1;height:4px;border-radius:2px;background:rgba(247,241,236,.14);position:relative;}
+.mx-mf .tr i{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:18px;border-radius:3px;background:linear-gradient(160deg,#F0D9AE,#C99A4E);box-shadow:0 1px 4px rgba(0,0,0,.45);}
 
-/* ─ 地基橫樑（共用）─ */
-.base{margin-top:10px;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:11px;padding:10px 12px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.base .bk{font-size:10px;letter-spacing:1.5px;color:#C9A87A;font-weight:700;flex-shrink:0;}
-.base .bv{font-size:13.5px;font-weight:900;color:#F3E2D2;}
-.base .bv em{font-style:normal;color:#E8C89A;font-weight:400;font-size:11px;margin:0 3px;}
+/* ═ 方向 B：放射全圖 ═ */
+.cd{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:16px 15px 14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.cd-t{display:flex;align-items:baseline;gap:7px;margin-bottom:6px;}
+.cd-t .en{font-size:10px;letter-spacing:3px;font-weight:700;color:#8A7266;}
+.cd-t .zh{font-size:14px;font-weight:900;color:#4A1B0C;}
+#sb{display:block;width:100%;height:auto;}
 
-/* ═ 方向一：四柱地基圖 ═ */
-.p-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.p-col{display:flex;flex-direction:column;gap:0;}
-.p-name{text-align:center;font-size:15px;font-weight:900;margin-bottom:1px;}
-.p-en{text-align:center;font-size:8.5px;letter-spacing:1.5px;color:#B8A594;margin-bottom:6px;}
-.p-cell{color:#fff;text-align:center;font-size:10.5px;font-weight:700;padding:8px 2px;line-height:1.4;}
-.p-cell:first-of-type{border-radius:9px 9px 0 0;}
-.p-cell:last-of-type{border-radius:0 0 9px 9px;}
-.p-cell + .p-cell{border-top:1px solid rgba(255,255,255,.35);}
-
-/* ═ 方向二：爆炸拆解圖 ═ */
-.x-stage{position:relative;height:250px;}
-.x-svg{position:absolute;inset:0;width:100%;height:100%;}
-.x-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:96px;height:96px;border-radius:22px;background:linear-gradient(135deg,#4A1B0C,#6B3018);color:#F3E2D2;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(74,27,12,.25);}
-.x-core .n{font-size:15px;font-weight:900;line-height:1.35;}
-.x-core .e{font-size:8px;letter-spacing:2px;color:#C9A87A;margin-top:3px;}
-.x-chip{position:absolute;width:104px;border-radius:13px;padding:8px 6px 7px;color:#fff;text-align:center;}
-.x-chip .n{font-size:14.5px;font-weight:900;}
-.x-chip .e{font-size:8px;letter-spacing:1.5px;opacity:.75;margin-top:1px;}
-.x-dots{display:flex;justify-content:center;gap:4px;margin-top:5px;}
-.x-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.6);}
-.x-tl{left:0;top:0;}.x-tr{right:0;top:0;}.x-bl{left:0;bottom:0;}.x-br{right:0;bottom:0;}
-
-/* ═ 方向三：訓練菜單層架 ═ */
-.r-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.r-plate{border-radius:12px;padding:9px 4px 8px;text-align:center;color:#fff;}
-.r-plate .n{font-size:14.5px;font-weight:900;}
-.r-plate .r{font-size:9.5px;opacity:.9;margin-top:2px;}
-.r-minis{display:flex;justify-content:center;gap:3px;margin-top:7px;}
-.r-minis i{width:9px;height:9px;border-radius:3px;background:#F0E3DB;}
-.r-bar{margin-top:12px;position:relative;display:flex;align-items:center;justify-content:center;}
-.r-bar:before,.r-bar:after{content:"";width:16px;height:34px;border-radius:5px;background:linear-gradient(135deg,#4A1B0C,#6B3018);flex-shrink:0;}
-.r-bar .mid{flex:1;background:linear-gradient(135deg,#5A2812,#6B3018);padding:8px 6px;text-align:center;color:#F3E2D2;font-size:13px;font-weight:900;}
-.r-bar .mid em{font-style:normal;color:#C9A87A;font-weight:400;font-size:10px;letter-spacing:1px;display:block;margin-bottom:1px;}
+/* ═ 方向 C：捷運路線圖 ═ */
+.mt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.mt-plate{border-radius:10px;padding:7px 3px;text-align:center;color:#fff;}
+.mt-plate .en{font-size:7.5px;letter-spacing:1.5px;font-weight:700;opacity:.85;}
+.mt-plate .zh{font-size:13px;font-weight:900;letter-spacing:.5px;}
+.mt-line{position:relative;display:flex;flex-direction:column;align-items:center;padding:2px 0 0;}
+.mt-line:before{content:"";position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;}
+.mt-st{position:relative;width:26px;height:26px;border-radius:50%;background:#fff;border:3.5px solid;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900;margin:5px 0;}
+.mt-conv{height:16px;position:relative;}
+.mt-conv:before{content:"";position:absolute;left:12.5%;right:12.5%;top:50%;height:5px;transform:translateY(-50%);border-radius:3px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
+.mt-base{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;}
+.mt-hub{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.5);border-radius:12px;padding:10px 6px;text-align:center;}
+.mt-hub .en{font-size:8.5px;letter-spacing:2px;font-weight:700;color:#C9A87A;}
+.mt-hub .zh{font-size:15px;font-weight:900;color:#F3E2D2;margin-top:1px;}
+.mt-hubk{text-align:center;font-size:9px;letter-spacing:2px;color:#B8A594;font-weight:700;margin:10px 0 6px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>ATPI 四大肌肉拆解卡・三方向</h1>
-<div class="sub">同一套素材（核心×2 地基／大肌肉×4 關鍵／小肌肉×12 細分），三種畫法。每張卡下面都留「文字插槽」——主視覺固定、字換用途。手機上直接比，挑一個或混搭。</div>
+<h1>ATPI 拆解卡 v2・三方向</h1>
+<div class="sub">文字規格照拍板：地基露 Story 講故事 × Question 問問題、大肌肉露全名、小肌肉只放 A1–I3 代碼。主視覺固定、卡片下緣是文字插槽。</div>
 
-<!-- ══════════ 方向一 ══════════ -->
-<div class="dirh">方向 1<b>四柱地基圖</b></div>
-<div class="card">
-  <div class="ct">影響力肌肉 · <b>全圖</b></div>
-  <div class="p-grid">
-    <div class="p-col">
-      <div class="p-name" style="color:#C6603A;">吸引</div>
-      <div class="p-en">ATTRACT</div>
-      <div class="p-cell" style="background:#DA9C7F;">讓他記得</div>
-      <div class="p-cell" style="background:#D07E5C;">讓他追問</div>
-      <div class="p-cell" style="background:#C6603A;">讓他開口</div>
+<!-- ══════════ 方向 A：混音台 ══════════ -->
+<div class="dirh">方向 A<b>混音台 MIXER</b></div>
+<div class="mx">
+  <div class="mx-t"><span class="en">INFLUENCE CONSOLE</span><span class="zh">影響力肌肉・全圖</span></div>
+  <div class="mx-grid">
+    <div class="mx-ch">
+      <div class="mx-en" style="color:#E89A78;">ATTRACT</div>
+      <div class="mx-zh">吸引肌肉</div>
+      <div class="mx-f"><span class="c">A1</span><span class="tr"><i style="left:72%;background:#C6603A;"></i></span></div>
+      <div class="mx-f"><span class="c">A2</span><span class="tr"><i style="left:48%;background:#C6603A;"></i></span></div>
+      <div class="mx-f"><span class="c">A3</span><span class="tr"><i style="left:60%;background:#C6603A;"></i></span></div>
     </div>
-    <div class="p-col">
-      <div class="p-name" style="color:#5C7464;">信任</div>
-      <div class="p-en">TRUST</div>
-      <div class="p-cell" style="background:#9FB5A7;">讓他當真</div>
-      <div class="p-cell" style="background:#86A08F;">讓他交心</div>
-      <div class="p-cell" style="background:#6E8B77;">讓他敢說</div>
+    <div class="mx-ch">
+      <div class="mx-en" style="color:#9FC4AD;">TRUST</div>
+      <div class="mx-zh">信任肌肉</div>
+      <div class="mx-f"><span class="c">T1</span><span class="tr"><i style="left:64%;background:#6E8B77;"></i></span></div>
+      <div class="mx-f"><span class="c">T2</span><span class="tr"><i style="left:80%;background:#6E8B77;"></i></span></div>
+      <div class="mx-f"><span class="c">T3</span><span class="tr"><i style="left:55%;background:#6E8B77;"></i></span></div>
     </div>
-    <div class="p-col">
-      <div class="p-name" style="color:#54718D;">專業</div>
-      <div class="p-en">PROFESSIONAL</div>
-      <div class="p-cell" style="background:#A6BACC;">讓他放心</div>
-      <div class="p-cell" style="background:#8AA3BA;">讓他有感</div>
-      <div class="p-cell" style="background:#6E8CA8;">讓他釐清</div>
+    <div class="mx-ch">
+      <div class="mx-en" style="color:#9FBCD8;">PROFESSIONAL</div>
+      <div class="mx-zh">專業肌肉</div>
+      <div class="mx-f"><span class="c">P1</span><span class="tr"><i style="left:52%;background:#6E8CA8;"></i></span></div>
+      <div class="mx-f"><span class="c">P2</span><span class="tr"><i style="left:40%;background:#6E8CA8;"></i></span></div>
+      <div class="mx-f"><span class="c">P3</span><span class="tr"><i style="left:66%;background:#6E8CA8;"></i></span></div>
     </div>
-    <div class="p-col">
-      <div class="p-name" style="color:#8E682B;">推進</div>
-      <div class="p-en">IMPACT</div>
-      <div class="p-cell" style="background:#DFC290;">讓他答應</div>
-      <div class="p-cell" style="background:#D4AE6F;">讓他敢要</div>
-      <div class="p-cell" style="background:#C99A4E;">讓他想要</div>
+    <div class="mx-ch">
+      <div class="mx-en" style="color:#E8C89A;">IMPACT</div>
+      <div class="mx-zh">推進肌肉</div>
+      <div class="mx-f"><span class="c">I1</span><span class="tr"><i style="left:58%;background:#C99A4E;"></i></span></div>
+      <div class="mx-f"><span class="c">I2</span><span class="tr"><i style="left:44%;background:#C99A4E;"></i></span></div>
+      <div class="mx-f"><span class="c">I3</span><span class="tr"><i style="left:70%;background:#C99A4E;"></i></span></div>
     </div>
   </div>
-  <div class="base"><span class="bk">基本功地基</span><span class="bv">講故事<em>×</em>問問題</span></div>
-  <div class="slot"><span class="k">文字插槽（示意——每個用途換字）</span>4 塊大肌肉、每塊拆 3 個練法，全部站在 2 個基本功上——你現在練的每一下，都落在這張圖上。</div>
-</div>
-<div class="note">柱子＝大肌肉、柱內 3 格＝小肌肉（由下往上疊，同色系深→淺）——「由 3 塊組成」直接看得出來。縮小用時 12 格可以只留色塊不放字；柱高以後還能拿來當分數。</div>
-
-<!-- ══════════ 方向二 ══════════ -->
-<div class="dirh">方向 2<b>爆炸拆解圖</b></div>
-<div class="card">
-  <div class="ct">影響力肌肉 · <b>拆解圖</b></div>
-  <div class="x-stage">
-    <svg class="x-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <line x1="18" y1="16" x2="50" y2="50" stroke="#E8DDD3" stroke-width="1.2" stroke-dasharray="3 3"/>
-      <line x1="82" y1="16" x2="50" y2="50" stroke="#E8DDD3" stroke-width="1.2" stroke-dasharray="3 3"/>
-      <line x1="18" y1="84" x2="50" y2="50" stroke="#E8DDD3" stroke-width="1.2" stroke-dasharray="3 3"/>
-      <line x1="82" y1="84" x2="50" y2="50" stroke="#E8DDD3" stroke-width="1.2" stroke-dasharray="3 3"/>
-    </svg>
-    <div class="x-chip x-tl" style="background:#C6603A;"><div class="n">吸引</div><div class="e">ATTRACT</div><div class="x-dots"><i></i><i></i><i></i></div></div>
-    <div class="x-chip x-tr" style="background:#6E8B77;"><div class="n">信任</div><div class="e">TRUST</div><div class="x-dots"><i></i><i></i><i></i></div></div>
-    <div class="x-chip x-bl" style="background:#6E8CA8;"><div class="n">專業</div><div class="e">PROFESSIONAL</div><div class="x-dots"><i></i><i></i><i></i></div></div>
-    <div class="x-chip x-br" style="background:#C99A4E;"><div class="n">推進</div><div class="e">IMPACT</div><div class="x-dots"><i></i><i></i><i></i></div></div>
-    <div class="x-core"><div class="n">影響力<br>肌肉</div><div class="e">ATPIFIT</div></div>
+  <div class="mx-master">
+    <div class="mx-mk">MASTER · 基本功</div>
+    <div class="mx-mf"><span class="lb"><span class="en">STORY</span><span class="zh">講故事</span></span><span class="tr"><i style="left:68%;"></i></span></div>
+    <div class="mx-mf"><span class="lb"><span class="en">QUESTION</span><span class="zh">問問題</span></span><span class="tr"><i style="left:62%;"></i></span></div>
   </div>
-  <div class="base"><span class="bk">基本功地基</span><span class="bv">講故事<em>×</em>問問題</span></div>
-  <div class="slot"><span class="k">文字插槽（示意）</span>影響力不是天分，是一塊一塊拆得出來的肌肉——先看全圖，再一塊一塊練。</div>
+  <div class="slot"><span class="k">文字插槽（示意）</span>影響力不是天分，是一台可以調的機器——12 軌各自推、兩支總推桿墊底。</div>
 </div>
-<div class="note">品牌 Dyson 爆炸圖基因（2D 教材版）：中央主體往四方拆出大肌肉、每塊帶 3 顆小肌肉粒。最有「可拆解」的品牌味；代價是小尺寸時 12 顆只是點、資訊量最少。</div>
+<div class="note">你提的 mixer 方向：channel strip＝大肌肉、每條 3 支 fader＝小肌肉、master 段金色總推桿＝基本功。推桿位置以後直接接真分數（練到幾成＝推多高），架構卡和分數卡是同一張圖。fader 位置目前是示意。</div>
 
-<!-- ══════════ 方向三 ══════════ -->
-<div class="dirh">方向 3<b>訓練菜單層架</b></div>
-<div class="card">
-  <div class="ct">影響力肌肉 · <b>訓練菜單</b></div>
-  <div class="r-grid">
-    <div class="r-plate" style="background:#C6603A;"><div class="n">吸引</div><div class="r">讓他想靠近</div></div>
-    <div class="r-plate" style="background:#6E8B77;"><div class="n">信任</div><div class="r">讓他願意說</div></div>
-    <div class="r-plate" style="background:#6E8CA8;"><div class="n">專業</div><div class="r">讓他要找你</div></div>
-    <div class="r-plate" style="background:#C99A4E;"><div class="n">推進</div><div class="r">讓他願意動</div></div>
+<!-- ══════════ 方向 B：放射全圖 ══════════ -->
+<div class="dirh">方向 B<b>放射全圖 SUNBURST</b></div>
+<div class="cd">
+  <div class="cd-t"><span class="en">INFLUENCE MAP</span><span class="zh">影響力肌肉・全圖</span></div>
+  <svg id="sb" viewBox="0 0 340 340"></svg>
+  <div class="wslot"><span class="k">文字插槽（示意）</span>圓心是兩個基本功，往外長出 4 塊大肌肉、再拆成 12 塊——你的影響力全圖，一圈看完。</div>
+</div>
+<div class="note">2 &gt; 4 &gt; 12 的標準資訊圖畫法：由內往外＝地基→關鍵→細分。最緊湊、一眼看到「整棵樹」；跟 quiz 的雷達圖是同一家族的視覺語言。</div>
+
+<!-- ══════════ 方向 C：捷運路線圖 ══════════ -->
+<div class="dirh">方向 C<b>捷運路線圖 METRO</b></div>
+<div class="cd">
+  <div class="cd-t"><span class="en">INFLUENCE LINES</span><span class="zh">影響力肌肉・路線圖</span></div>
+  <div class="mt-grid">
+    <div class="mt-plate" style="background:#C6603A;"><div class="en">ATTRACT</div><div class="zh">吸引肌肉</div></div>
+    <div class="mt-plate" style="background:#6E8B77;"><div class="en">TRUST</div><div class="zh">信任肌肉</div></div>
+    <div class="mt-plate" style="background:#6E8CA8;"><div class="en">PROFESSIONAL</div><div class="zh">專業肌肉</div></div>
+    <div class="mt-plate" style="background:#C99A4E;"><div class="en">IMPACT</div><div class="zh">推進肌肉</div></div>
+    <div class="mt-line"><i style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;background:#C6603A;border-radius:3px;"></i>
+      <div class="mt-st" style="border-color:#C6603A;color:#C6603A;">A3</div>
+      <div class="mt-st" style="border-color:#C6603A;color:#C6603A;">A2</div>
+      <div class="mt-st" style="border-color:#C6603A;color:#C6603A;">A1</div>
+    </div>
+    <div class="mt-line"><i style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;background:#6E8B77;border-radius:3px;"></i>
+      <div class="mt-st" style="border-color:#6E8B77;color:#5C7464;">T3</div>
+      <div class="mt-st" style="border-color:#6E8B77;color:#5C7464;">T2</div>
+      <div class="mt-st" style="border-color:#6E8B77;color:#5C7464;">T1</div>
+    </div>
+    <div class="mt-line"><i style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;background:#6E8CA8;border-radius:3px;"></i>
+      <div class="mt-st" style="border-color:#6E8CA8;color:#54718D;">P3</div>
+      <div class="mt-st" style="border-color:#6E8CA8;color:#54718D;">P2</div>
+      <div class="mt-st" style="border-color:#6E8CA8;color:#54718D;">P1</div>
+    </div>
+    <div class="mt-line"><i style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;background:#C99A4E;border-radius:3px;"></i>
+      <div class="mt-st" style="border-color:#C99A4E;color:#8E682B;">I3</div>
+      <div class="mt-st" style="border-color:#C99A4E;color:#8E682B;">I2</div>
+      <div class="mt-st" style="border-color:#C99A4E;color:#8E682B;">I1</div>
+    </div>
   </div>
-  <div class="r-grid" style="margin-top:8px;">
-    <div class="r-minis"><i></i><i></i><i></i></div>
-    <div class="r-minis"><i></i><i></i><i></i></div>
-    <div class="r-minis"><i></i><i></i><i></i></div>
-    <div class="r-minis"><i></i><i></i><i></i></div>
+  <div class="mt-conv"></div>
+  <div class="mt-hubk">起點總站 · 基本功</div>
+  <div class="mt-base">
+    <div class="mt-hub"><div class="en">STORY</div><div class="zh">講故事</div></div>
+    <div class="mt-hub"><div class="en">QUESTION</div><div class="zh">問問題</div></div>
   </div>
-  <div class="r-bar"><div class="mid"><em>基本功槓鈴</em>講故事 × 問問題</div></div>
-  <div class="slot"><span class="k">文字插槽（示意）</span>先握穩槓鈴（基本功），再一組一組練上去——每塊大肌肉都有自己的結果句。</div>
+  <div class="wslot"><span class="k">文字插槽（示意）</span>從兩座總站出發，4 條線、每線 3 站——練到哪一站，路線圖上就亮到哪。</div>
 </div>
-<div class="note">健身房器材架隱喻：配重片＝大肌肉（直接掛結果句「讓他想靠近…」）、小方塊＝小肌肉、槓鈴＝基本功。最省高度、塞得進窄卡；代價是「由 3 塊組成」的從屬感比四柱弱。</div>
+<div class="note">地鐵語言人人會讀：白圈站碼＝小肌肉（以後「點亮」＝站碼填色）、色線＝大肌肉、總站＝基本功。方向感天生自帶「從地基出發往上走」。</div>
 
-<div class="note" style="margin-top:26px;border-top:1px solid #E8DDD3;padding-top:14px;">共同規格：中文名是主角、英文小字是氣氛、代碼（A1…）完全退場；四色＝app 暖版；地基一律深咖啡漸層＝跟升單板塊同語言。定稿後做成一支可傳參數的元件（尺寸大／中／小、小肌肉露名／縮點、點亮狀態），member／quiz／join／海報都呼叫同一份。</div>
+<div class="note" style="margin-top:26px;border-top:1px solid #E8DDD3;padding-top:14px;">共同規格：地基與大肌肉中英全名露出、小肌肉只放代碼；四色＝app 暖版、深咖啡＋金＝跟升單板塊同語言。定稿後做成一支元件（尺寸／點亮狀態／分數可傳參），member／quiz／join／海報共用。</div>
 
 </div>
+<script>
+/* 方向 B sunburst：SVG 用 JS 生（16 個環形扇手算座標太容易錯）。
+   角度＝順時針、0 度在正上方；A 右上 → T 右下 → P 左下 → I 左上。 */
+(function(){
+  var CX=170, CY=170;
+  var C = {A:"#C6603A", T:"#6E8B77", P:"#6E8CA8", I:"#C99A4E"};
+  var SHADE = {A:["#C6603A","#D07E5C","#DA9C7F"], T:["#6E8B77","#86A08F","#9FB5A7"],
+               P:["#6E8CA8","#8AA3BA","#A6BACC"], I:["#C99A4E","#D4AE6F","#DFC290"]};
+  var DIMZH = {A:"吸引肌肉", T:"信任肌肉", P:"專業肌肉", I:"推進肌肉"};
+  var DIMEN = {A:"ATTRACT", T:"TRUST", P:"PROFESSIONAL", I:"IMPACT"};
+  function pt(r,deg){ var a=(deg-90)*Math.PI/180; return (CX+r*Math.cos(a)).toFixed(1)+" "+(CY+r*Math.sin(a)).toFixed(1); }
+  function ring(r0,r1,a0,a1,fill){
+    var large = (a1-a0)>180 ? 1 : 0;
+    return '<path d="M '+pt(r1,a0)+' A '+r1+' '+r1+' 0 '+large+' 1 '+pt(r1,a1)
+      +' L '+pt(r0,a1)+' A '+r0+' '+r0+' 0 '+large+' 0 '+pt(r0,a0)+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';
+  }
+  function lbl(r,deg,txt,size,w,fill,ls){
+    var a=(deg-90)*Math.PI/180, x=(CX+r*Math.cos(a)).toFixed(1), y=(CY+r*Math.sin(a)).toFixed(1);
+    return '<text x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="'+size
+      +'" font-weight="'+w+'" fill="'+fill+'"'+(ls?' letter-spacing="'+ls+'"':'')+' font-family="Noto Sans TC,sans-serif">'+txt+'</text>';
+  }
+  var s='';
+  var dims=["A","T","P","I"];
+  dims.forEach(function(d,i){
+    var q0=i*90, q1=q0+90;
+    /* 外環 12 格 */
+    for(var j=0;j<3;j++){
+      var a0=q0+j*30, a1=a0+30;
+      s+=ring(118,152,a0,a1,SHADE[d][j]);
+      s+=lbl(135,a0+15,d+(j+1),12,900,"#fff");
+    }
+    /* 中環 4 扇 */
+    s+=ring(64,114,q0,q1,C[d]);
+    s+=lbl(96,q0+45,DIMZH[d],14,900,"#fff");
+    s+=lbl(78,q0+45,DIMEN[d],(d==="P"?5.5:7),700,"rgba(255,255,255,.85)","1.5");
+  });
+  /* 圓心地基 */
+  s+='<circle cx="'+CX+'" cy="'+CY+'" r="58" fill="#4A1B0C" stroke="#E8C89A" stroke-width="1.5"/>';
+  s+='<text x="'+CX+'" y="'+(CY-30)+'" text-anchor="middle" font-size="7" letter-spacing="2" font-weight="700" fill="#C9A87A" font-family="Noto Sans TC,sans-serif">STORY</text>';
+  s+='<text x="'+CX+'" y="'+(CY-13)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#F3E2D2" font-family="Noto Sans TC,sans-serif">講故事</text>';
+  s+='<line x1="'+(CX-26)+'" y1="'+CY+'" x2="'+(CX+26)+'" y2="'+CY+'" stroke="rgba(232,200,154,.45)" stroke-width="1"/>';
+  s+='<text x="'+CX+'" y="'+(CY+14)+'" text-anchor="middle" font-size="7" letter-spacing="2" font-weight="700" fill="#C9A87A" font-family="Noto Sans TC,sans-serif">QUESTION</text>';
+  s+='<text x="'+CX+'" y="'+(CY+32)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#F3E2D2" font-family="Noto Sans TC,sans-serif">問問題</text>';
+  document.getElementById("sb").innerHTML=s;
+})();
+</script>
 </body>
 </html>
