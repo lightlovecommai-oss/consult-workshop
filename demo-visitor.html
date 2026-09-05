@@ -3,30 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DEMO · 體驗席頁 v2（意見版）</title>
+<title>DEMO · 體驗席頁 v3（意見版）</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
-/* ═══ DEMO 意見版＝visitor.html v2 的逐塊校對鏡像 ═══
+/* ═══ DEMO 意見版＝visitor.html v3 的逐塊校對鏡像 ═══
    每塊下面有意見欄，寫完按底部「複製全部意見」貼回給 Claude。
-   意見存 localStorage（綁版本號 v2），重開頁面不會不見。定稿改 visitor.html 為準。 */
+   意見存 localStorage（綁版本號 v3），重開頁面不會不見。定稿改 visitor.html 為準。 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
 .app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:110px;}
 .demo-banner{background:#2B2118;color:#F7F1EC;font-size:12px;text-align:center;padding:6px 10px;letter-spacing:1px;line-height:1.7;}
 .blk{position:relative;}
 .tag{position:absolute;top:-9px;left:10px;z-index:5;background:#2B2118;color:#F7F1EC;font-size:11px;font-weight:700;padding:1px 8px;border-radius:20px;letter-spacing:.5px;}
-/* 意見欄 */
 .fb{display:block;width:calc(100% - 8px);margin:6px 4px 4px;background:#FFFBEB;border:1.5px dashed #C99A4E;border-radius:12px;padding:9px 12px;font-size:14px;color:#4A1B0C;font-family:inherit;line-height:1.7;min-height:42px;resize:vertical;}
 .fb:focus{outline:none;border-style:solid;background:#fff;}
 .fb::placeholder{color:#B8A08E;}
-/* 底部複製列 */
 .fbbar{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:460px;margin:0 auto;background:#fff;border-top:2px solid #C99A4E;padding:10px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;}
 .fbcopy{flex:1;background:#C6603A;color:#fff;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;min-height:50px;}
 .fbcopy:active{transform:scale(.98);}
 .fbn{flex-shrink:0;font-size:12px;color:#8A7266;line-height:1.6;text-align:center;min-width:64px;}
 .fbn b{display:block;font-size:17px;color:#993C1D;}
 
-/* ─── 以下＝visitor.html v2 樣式原封鏡像 ─── */
+/* ─── 以下＝visitor.html v3 樣式原封鏡像 ─── */
 .tb{background:linear-gradient(135deg,#5C7464,#6E8B77);padding:16px 20px 14px;color:#fff;}
 .tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.85);}
 .tb-d{margin-left:auto;font-size:12px;color:rgba(255,255,255,.75);letter-spacing:.5px;white-space:nowrap;}
@@ -47,30 +45,51 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 
 .hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .hero-eb{display:flex;align-items:baseline;font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
-.hero-eb b{letter-spacing:0;color:#8E682B;}
+.hero-eb b{letter-spacing:0;color:#4A1B0C;}
 .hero-eb i{margin-left:auto;font-style:normal;font-size:11px;font-weight:700;color:#C9A87A;letter-spacing:1px;}
-.hero-t{font-size:23px;font-weight:900;line-height:1.55;color:#4A1B0C;}
-.hero-t b{color:#8E682B;}
-.hero-move{margin:14px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #C99A4E;border-radius:0 12px 12px 0;font-size:15px;line-height:1.9;color:#4A1B0C;}
-.hero-move b{color:#8E682B;}
-.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:16px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;transition:transform .1s;}
+.kick{font-size:13px;font-weight:800;color:#5C7464;letter-spacing:1px;margin-bottom:2px;}
+.p3big{font-size:26px;font-weight:900;color:#4A1B0C;letter-spacing:.04em;}
+.p3how{margin-top:8px;font-size:15.5px;line-height:1.8;color:#4A1B0C;}
+.p3how b{color:#8E682B;}
+.p3q{margin:13px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;}
+.p3q-k{font-size:12.5px;color:#8A7266;line-height:1.7;margin-bottom:5px;}
+.p3q-t{font-size:15.5px;font-weight:700;color:#4A1B0C;line-height:1.8;}
+.more{margin-top:10px;}
+.more-h{font-size:12.5px;font-weight:700;color:#8A7266;cursor:pointer;display:flex;align-items:center;gap:4px;min-height:34px;}
+.more-h .chev{transition:transform .2s;}
+.more.open .more-h .chev{transform:rotate(180deg);}
+.more-b{display:none;padding-top:4px;}
+.more.open .more-b{display:block;animation:fadeUp .3s ease;}
+.mr{display:flex;gap:10px;font-size:13.5px;line-height:1.8;padding:5px 0;}
+.mr b{flex-shrink:0;width:74px;color:#8A7266;font-weight:700;}
+.mr span{flex:1;color:#4A1B0C;}
+.mr span b{width:auto;color:#8E682B;}
+.go{display:block;width:100%;border:none;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:15px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;transition:transform .1s;}
 .go:active{transform:scale(.97);}
-.rec{display:none;margin-top:6px;}
-.rec.show{display:block;animation:fadeUp .35s ease;}
-.rec-q{font-size:14px;color:#6E4A3C;text-align:center;margin:10px 0;}
-.rec-btns{display:flex;gap:10px;}
-.rb{flex:1;border:1.5px solid #E6DAD1;background:#fff;border-radius:14px;padding:13px 8px;font-size:15px;font-weight:700;color:#4A1B0C;cursor:pointer;font-family:inherit;transition:transform .08s;}
-.rb:active{transform:scale(.96);}
-.rb b{display:block;font-size:12px;color:#8A7266;font-weight:400;margin-top:3px;line-height:1.6;}
-.rb.yes{border-color:#6E8B77;color:#3E5546;}
-.done{display:none;text-align:center;padding:6px 0 2px;}
-.done.show{display:block;animation:pop .4s cubic-bezier(.2,1.6,.4,1);}
-.done-ring{width:64px;height:64px;margin:12px auto 10px;border-radius:50%;background:conic-gradient(#6E8B77 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
-.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px;font-weight:900;color:#5C7464;}
-.done-t{font-size:17px;font-weight:800;}
-.done-s{font-size:13px;color:#6E4A3C;margin-top:4px;line-height:1.8;}
+.go small{display:block;font-size:12px;font-weight:400;opacity:.85;margin-top:3px;letter-spacing:.5px;}
+.q{font-size:14.5px;font-weight:700;color:#4A1B0C;margin:16px 0 9px;}
+.q .qs{font-size:12px;color:#B39C89;font-weight:400;margin-left:6px;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;}
+.op{border:1.5px solid #E6DAD1;background:#fff;border-radius:20px;padding:9px 16px;font-size:14px;font-weight:600;color:#4A1B0C;cursor:pointer;font-family:inherit;min-height:40px;}
+.op.on{border-color:#5C7464;background:#EFF3EF;color:#3E5546;}
+.bigr{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.bo{border:1.5px solid #E6DAD1;background:#fff;border-radius:13px;padding:10px 2px;cursor:pointer;font-family:inherit;}
+.bo.on{border-color:#5C7464;background:#EFF3EF;}
+.bo-e{font-size:20px;}
+.bo-t{font-size:11px;font-weight:700;color:#6E4A3C;margin-top:3px;}
+.opt-h{font-size:12.5px;color:#8A7266;line-height:1.7;margin:10px 0 6px;}
+.ta{width:100%;border:1.5px solid #E6DAD1;background:#fff;border-radius:12px;padding:10px 12px;font-size:14.5px;color:#4A1B0C;font-family:inherit;line-height:1.7;min-height:64px;resize:vertical;}
+.ta:focus{outline:none;border-color:#6E8B77;}
+.ta::placeholder{color:#C4B3A2;}
+.skipb{width:100%;margin-top:8px;background:none;border:0;color:#8A7266;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
+.done-ring{width:64px;height:64px;margin:14px auto 10px;border-radius:50%;background:conic-gradient(#6E8B77 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
+.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:19px;font-weight:900;color:#5C7464;}
+.ok-t{font-size:17px;font-weight:800;text-align:center;}
+.ok-s{font-size:13.5px;color:#6E4A3C;margin-top:5px;line-height:1.85;text-align:center;}
+.playback{background:#fff;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;color:#4A1B0C;line-height:1.75;}
+.playback small{display:block;font-size:12px;color:#8A7266;margin-top:4px;}
+.again{display:block;text-align:center;font-size:12.5px;color:#B39C89;margin-top:10px;cursor:pointer;padding:10px;min-height:44px;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
 
 .skills{display:flex;flex-direction:column;gap:10px;}
 .sk{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #E8DDD3;border-radius:14px;padding:12px 14px;}
@@ -86,17 +105,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sk.lock .sk-n{color:#A08F7D;}
 .sk.lock .sk-badge{background:#EFE6DB;color:#A08F7D;}
 
-.coach{display:block;text-decoration:none;color:#4A1B0C;background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
-.coach:active{transform:scale(.99);}
-.coach-h{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.coach-av{width:44px;height:44px;border-radius:50%;background:#FDF9F0;border:1.5px dashed #C99A4E;display:flex;align-items:center;justify-content:center;color:#8E682B;font-size:12px;font-weight:700;flex-shrink:0;}
-.coach-t{font-size:15px;font-weight:800;color:#4A1B0C;}
-.coach-s{font-size:12px;color:#8A7266;margin-top:2px;}
-.coach-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:#5A3A2A;filter:blur(3px);user-select:none;}
-.coach-un{font-size:13px;font-weight:700;color:#3E5546;margin-top:12px;text-align:center;letter-spacing:1px;}
-.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
-
-.mapcard{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 14px 15px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.mapcard{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 16px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
 .map{display:flex;}
 .mst{flex:1;text-align:center;position:relative;}
 .mst::after{content:"";position:absolute;top:17px;right:-8px;width:16px;height:2px;background:#E8DDD3;}
@@ -104,11 +113,20 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mdot{width:34px;height:34px;border-radius:50%;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#EFE6DB;color:#A08F7D;}
 .mst.here .mdot{background:#6E8B77;color:#fff;box-shadow:0 0 0 4px rgba(110,139,119,.18);}
 .mn{font-size:13px;font-weight:800;color:#4A1B0C;}
+.mst.here .mn{color:#3E5546;}
 .mst.locked .mn{color:#A08F7D;}
 .ms{font-size:11px;color:#8A7266;margin-top:2px;line-height:1.6;}
-.mst.here .mn{color:#3E5546;}
-.map-end{margin-top:13px;padding-top:11px;border-top:1px dashed #E8DDD3;font-size:12.5px;color:#6E4A3C;text-align:center;line-height:1.9;}
+.map-end{margin-top:12px;font-size:12.5px;color:#6E4A3C;text-align:center;line-height:1.9;}
 .map-end b{color:#3E5546;}
+.map-div{margin:14px -16px;border-top:1px dashed #E8DDD3;}
+.coach-h{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.coach-av{width:44px;height:44px;border-radius:50%;background:#FDF9F0;border:1.5px dashed #C99A4E;display:flex;align-items:center;justify-content:center;color:#8E682B;font-size:12px;font-weight:700;flex-shrink:0;}
+.coach-t{font-size:15px;font-weight:800;color:#4A1B0C;}
+.coach-s{font-size:12px;color:#8A7266;margin-top:2px;}
+.coach-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:#5A3A2A;filter:blur(3px);user-select:none;}
+.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
+.coach-go{display:block;text-align:center;margin-top:13px;background:linear-gradient(135deg,#5C7464,#6E8B77);color:#fff;border-radius:14px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px;text-decoration:none;min-height:52px;}
+.coach-go:active{transform:scale(.98);}
 
 .n7{position:relative;overflow:hidden;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:18px;padding:19px 17px;margin-bottom:14px;color:#F7F1EC;box-shadow:0 6px 24px rgba(74,27,12,.22);}
 .n7:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.13),transparent);animation:n7sheen 4.5s ease-in-out infinite;pointer-events:none;}
@@ -141,7 +159,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 <body>
 <div class="app">
 
-  <div class="demo-banner">DEMO 意見版 v2 · 每塊下面有意見欄，寫完按底部「複製全部意見」貼給 Claude</div>
+  <div class="demo-banner">DEMO 意見版 v3 · 每塊下面有意見欄，寫完按底部「複製全部意見」貼給 Claude</div>
 
   <!-- v-1 -->
   <div class="blk" style="margin-top:14px;">
@@ -169,29 +187,12 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
     </div>
     <textarea class="fb" data-tag="v-2 連續天數" placeholder="這塊有意見就寫這裡…"></textarea>
 
-    <!-- v-3 今日主卡：一次一塊地基，每次上線換範例 -->
+    <!-- v-3 今日主卡：member 機制（2 塊地基） -->
     <div class="blk" style="margin-top:16px;">
-      <span class="tag">v-3 今日主卡（2 塊地基輪替）</span>
-      <div class="hero">
-        <div class="hero-eb">今天練這塊地基 · <b id="mv-name"></b><i id="mv-ex"></i></div>
-        <div class="hero-t" id="mv-big"></div>
-        <div class="hero-move" id="mv-how"></div>
-        <button class="go" id="btn-go" onclick="showRec()">我去試了，回來記一下 →</button>
-        <div class="rec" id="rec">
-          <div class="rec-q" id="rec-q"></div>
-          <div class="rec-btns">
-            <button class="rb yes" id="rb-yes" onclick="finish(1)"></button>
-            <button class="rb" id="rb-no" onclick="finish(0)"></button>
-          </div>
-        </div>
-        <div class="done" id="done">
-          <div class="done-ring"><i>+1</i></div>
-          <div class="done-t" id="done-t"></div>
-          <div class="done-s" id="done-s"></div>
-        </div>
-      </div>
+      <span class="tag">v-3 今日主卡（member 機制 · 2 地基）</span>
+      <div class="hero" id="hero" style="margin-top:6px;"></div>
     </div>
-    <textarea class="fb" data-tag="v-3 今日主卡" placeholder="這塊有意見就寫這裡…"></textarea>
+    <textarea class="fb" data-tag="v-3 今日主卡" placeholder="這塊有意見就寫這裡…（按「我去試了」可以走完整記錄流程看評語）"></textarea>
 
     <!-- v-4 我的招 -->
     <div class="blk" style="margin-top:16px;">
@@ -217,51 +218,43 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
     </div>
     <textarea class="fb" data-tag="v-4 我的招" placeholder="這塊有意見就寫這裡…"></textarea>
 
-    <!-- v-5 場邊教練席 -->
+    <!-- v-5 三站進度卡＋教練席合併 -->
     <div class="blk" style="margin-top:16px;">
-      <span class="tag">v-5 場邊教練席（輕 CTA 白卡）</span>
-      <div class="sec" style="margin-top:0;padding-top:14px;">SIDE COACH · <b>場邊教練席</b></div>
-      <a class="coach" href="member.html?demo=1">
-        <div class="coach-h">
-          <div class="coach-av">空位</div>
-          <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
-        </div>
-        <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……<i class="mock">示意</i></div>
-        <div class="coach-un">參觀「會員席位」 →</div>
-      </a>
-    </div>
-    <textarea class="fb" data-tag="v-5 場邊教練席" placeholder="這塊有意見就寫這裡…"></textarea>
-
-    <!-- v-6 三站進度卡 -->
-    <div class="blk" style="margin-top:16px;">
-      <span class="tag">v-6 三站進度卡（新）</span>
+      <span class="tag">v-5 進度卡＋教練席（合併一張）</span>
       <div class="sec" style="margin-top:0;padding-top:14px;">YOUR ROAD · <b>你的進度</b></div>
       <div class="mapcard">
         <div class="map">
           <div class="mst here">
             <div class="mdot">體驗</div>
-            <div class="mn">路人體驗</div>
-            <div class="ms">兩招上手</div>
+            <div class="mn">體驗客</div>
+            <div class="ms">2 招地基輪著練</div>
           </div>
           <div class="mst locked">
             <div class="mdot">會員</div>
-            <div class="mn">會員</div>
-            <div class="ms">12 塊肌肉＋教練</div>
+            <div class="mn">會員席</div>
+            <div class="ms">12 塊肌肉＋教練陪伴</div>
           </div>
           <div class="mst locked">
             <div class="mdot">私教</div>
-            <div class="mn">私人教練</div>
-            <div class="ms">1v1 指揮艙</div>
+            <div class="mn">私人教練席</div>
+            <div class="ms">超引力成交學＋教練週課</div>
           </div>
         </div>
         <div class="map-end">終點不是變會講話的人——是<b>有人因為你，願意把心裡話說完</b>。</div>
+        <div class="map-div"></div>
+        <div class="coach-h">
+          <div class="coach-av">空位</div>
+          <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
+        </div>
+        <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……<i class="mock">示意</i></div>
+        <a class="coach-go" href="member.html?demo=1">成為會員，教練坐進來 · 參觀「會員席位」 →</a>
       </div>
     </div>
-    <textarea class="fb" data-tag="v-6 三站進度卡" placeholder="這塊有意見就寫這裡…"></textarea>
+    <textarea class="fb" data-tag="v-5 進度卡＋教練席合併" placeholder="這塊有意見就寫這裡…"></textarea>
 
-    <!-- v-7 版圖＋對照表＋升級 CTA -->
+    <!-- v-6 版圖＋對照表＋升級 CTA -->
     <div class="blk" style="margin-top:16px;">
-      <span class="tag">v-7 版圖＋對照表＋升級 CTA</span>
+      <span class="tag">v-6 版圖＋對照表＋升級 CTA</span>
       <div class="n7" style="margin-top:14px;">
         <div class="sec">MUSCLE MAP · <b>你的影響力版圖</b></div>
         <div class="coreg" id="coreg"></div>
@@ -280,17 +273,17 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
         <a class="n7go" href="join.html">升級席位 · 解鎖你的第一塊大肌肉 →</a>
       </div>
     </div>
-    <textarea class="fb" data-tag="v-7 版圖＋對照表＋升級CTA" placeholder="這塊有意見就寫這裡…"></textarea>
+    <textarea class="fb" data-tag="v-6 版圖＋對照表＋升級CTA" placeholder="這塊有意見就寫這裡…"></textarea>
 
   </div>
 
-  <!-- v-8 骨層句 -->
+  <!-- v-7 骨層句 -->
   <div class="blk">
-    <span class="tag">v-8 骨層句</span>
+    <span class="tag">v-7 骨層句</span>
     <div class="bone" style="padding-top:20px;">這裡練的不是話術。<br>是讓身邊的人，因為你今天這一句，<b>多說了一點真心話</b>。</div>
     <div class="hero-rule"></div>
   </div>
-  <textarea class="fb" style="margin:12px 24px 4px;width:calc(100% - 48px);" data-tag="v-8 骨層句" placeholder="這塊有意見就寫這裡…"></textarea>
+  <textarea class="fb" style="margin:12px 24px 4px;width:calc(100% - 48px);" data-tag="v-7 骨層句" placeholder="這塊有意見就寫這裡…"></textarea>
 
 </div>
 
@@ -299,60 +292,128 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   <div class="fbn"><b id="fbcnt">0</b>已寫則數</div>
 </div>
 
+<script src="judgement.js"></script>
 <script>
-/* ─── 頁面互動（同 visitor.html v2，localStorage 用 demo 專屬 key 不污染正式頁） ─── */
+/* ─── 頁面互動＝visitor.html v3 原封鏡像（localStorage 用 demo 專屬 key 不污染正式頁） ─── */
 var CORE = [
   { key:"story", name:"講故事",
-    q:"他有接著講他自己的故事嗎？",
-    yes:'有，他接住了<b>+1 組</b>',
-    no:'沒什麼反應<b>換件更小的事再講，也算 +1 組</b>',
-    doneT:"這就是一組。", doneS:"道理他自己撿走了——地基就是這樣打的。",
-    retryT:"講出口了，就算一組。", retryS:"通常是故事太籠統——換一件更小、更具體、有畫面的事再講一次。",
+    good:"道理他自己撿走了——地基就是這樣打的。",
+    bad:"通常是故事太籠統——換一件更小、更具體、有畫面的事再講一次。",
     exs:[
-      { big:'想講<b>道理</b>的那一刻先忍住——<br>換成一件<b>發生過的事</b>講出來。',
-        how:'「我跟你說一件事——之前有一次＿＿（發生什麼），後來＿＿（結果是）。」<b>道理不用你說</b>，讓他自己從故事裡撿走。' },
-      { big:'講事情的時候，<br>加一個<b>當時的畫面</b>。',
-        how:'「那天我站在店門口，看著＿＿」——用<b>畫面描述</b>事情，讓他身歷其境、自己產生感受。' },
-      { big:'挑一件今天的小事，<br>照「<b>發生什麼→轉折→結果</b>」講一次。',
-        how:'故事要<b>有人、有畫面、有轉折</b>。他聽完接著講起他自己的故事，就成了。' }
+      { big:'想講<b>道理</b>的那一刻先忍住——換成一件<b>發生過的事</b>講出來。',
+        lead:"想講道理的那一刻先忍住，改講一件真的發生過的事：",
+        line:"我跟你說一件事——之前有一次＿＿（發生什麼），後來＿＿（結果是）。" },
+      { big:'講事情的時候，加一個<b>當時的畫面</b>。',
+        lead:"用畫面開場，讓他身歷其境、自己產生感受：",
+        line:"那天我站在店門口，看著＿＿。" },
+      { big:'挑一件今天的小事，照「<b>發生什麼→轉折→結果</b>」講一次。',
+        lead:"三段就好，照這個順序講：",
+        line:"本來＿＿（發生什麼），結果＿＿（轉折），最後＿＿（變成怎樣）。" }
     ] },
   { key:"ask", name:"問問題",
-    q:"他有越講越多嗎？",
-    yes:'有，他越講越深<b>+1 組</b>',
-    no:'只回一兩個字<b>挑他的詞再問，也算 +1 組</b>',
-    doneT:"這就是一組。", doneS:"話匣子是他的——你話越少，他挖得越深。",
-    retryT:"問出口了，就算一組。", retryS:"從他剛講過的話裡挑一個詞，問下去就好。",
+    good:"話匣子是他的——你話越少，他挖得越深。",
+    bad:"從他剛講過的話裡挑一個詞，問下去就好。",
     exs:[
-      { big:'今天忍住一次「給答案」，<br>改<b>問一個問題</b>。',
-        how:'他講完，把嘴邊那句建議換成：「<b>後來呢？那你自己是怎麼想的？</b>」問完就安靜，讓他講。' },
-      { big:'從他剛講的話裡，<br>挑一個詞<b>問下去</b>。',
-        how:'他說「最近好累」——你就問「<b>怎麼說？</b>」你話越少，他挖得越深。' },
-      { big:'連續接<b>三個問句</b>，<br>不插自己的意見。',
-        how:'「為什麼你會這麼想？」「後來呢？」——他越講越多、講到<b>自己找到答案</b>，就成了。' }
+      { big:'今天忍住一次「給答案」，改<b>問一個問題</b>。',
+        lead:"他講完，把嘴邊那句建議換成問句，問完就安靜：",
+        line:"後來呢？那你自己是怎麼想的？" },
+      { big:'從他剛講的話裡，挑一個詞<b>問下去</b>。',
+        lead:"他說「最近好累」，你就接：",
+        line:"怎麼說？" },
+      { big:'連續接<b>三個問句</b>，不插自己的意見。',
+        lead:"一句一句接下去，讓他講到自己找到答案：",
+        line:"為什麼你會這麼想？……後來呢？" }
     ] }
 ];
+var REL_V = ["家人","朋友","工作","客戶","陌生人"];
+var REACT_V = [
+  {e:"😌", t:"沒特別", v:0},
+  {e:"🙂", t:"有一點", v:1},
+  {e:"😃", t:"明顯有", v:2},
+  {e:"🤩", t:"超乎預期", v:3}
+];
+var PH_NOTE = [
+  "我問了他週末去哪，他只嗯了一聲",
+  "他抬頭看了我一下，說「還不錯啊」就繼續忙",
+  "他放下手機看著我：「你怎麼突然這麼會講話？」",
+  "他愣了一下，笑著說「你怎麼會注意到」，還多聊了十分鐘"
+];
 
-var KEY = "vz_visitor_v2_demo";
+var KEY = "vz_visitor_v3_demo";
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {days:[],cnt:{story:0,ask:0},seq:0}; }catch(e){ return {days:[],cnt:{story:0,ask:0},seq:0}; } }
-function save(st){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
 function dstr(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 var st = load();
 var today = new Date();
 var seq = st.seq || 0;
 var mvIdx = seq % 2;
 var MV = CORE[mvIdx];
-var EX = MV.exs[Math.floor(seq / 2) % MV.exs.length];
+var exN = Math.floor(seq / 2) % MV.exs.length;
+var EX = MV.exs[exN];
+var DR = (typeof CORE_DRILL !== "undefined") ? CORE_DRILL[MV.key] : null;
 st.seq = seq + 1; save(st);
 
+var REC = { step:0, who:"", react:null, note:"" };
+
+function heroHTML(){
+  var h = '<div class="hero-eb">TODAY\'S DRILL · <b>今天的練習</b><i>範例 '+(exN+1)+'</i></div>'
+    + '<div class="kick">基本功 · 地基</div>'
+    + '<div class="p3big">'+MV.name+'</div>'
+    + '<div class="p3how">'+EX.big+'</div>'
+    + '<div class="p3q"><div class="p3q-k">'+esc(EX.lead)+'</div><div class="p3q-t">「'+esc(EX.line)+'」</div>'
+    + (DR ? '<div class="more" id="more"><div class="more-h" onclick="document.getElementById(\'more\').classList.toggle(\'open\')">技巧詳解 <span class="chev">▾</span></div>'
+        + '<div class="more-b">'
+        + '<div class="mr"><b>找誰</b><span>'+md(DR.who)+'</span></div>'
+        + (DR.key ? '<div class="mr"><b>重點</b><span>'+md(DR.key)+'</span></div>' : '')
+        + '<div class="mr"><b>怎樣算成了</b><span>🌱 '+md(DR.win)+'</span></div>'
+        + '<div class="mr"><b>沒成怎麼辦</b><span>🌾 '+md(DR.retry)+'</span></div>'
+        + '</div></div>' : '')
+    + '</div>';
+
+  if (REC.step === 0){
+    h += '<button class="go" onclick="REC.step=1;render()">我去試了，回來記一下 →<small>5 秒鐘記錄，鍛鍊影響力</small></button>';
+  } else if (REC.step === 1){
+    h += '<div class="q">對誰？<span class="qs">點一下就好</span></div><div class="opts">'
+      + REL_V.map(function(r){ return '<button class="op'+(REC.who===r?" on":"")+'" onclick="REC.who=\''+r+'\';REC.step=2;render()">'+r+'</button>'; }).join("")
+      + '</div>';
+  } else if (REC.step === 2){
+    h += '<div class="q">對方有反應嗎？<span class="qs">點一下就好</span></div><div class="bigr">'
+      + REACT_V.map(function(r){ return '<button class="bo'+(REC.react===r.v?" on":"")+'" onclick="REC.react='+r.v+';render()"><div class="bo-e">'+r.e+'</div><div class="bo-t">'+r.t+'</div></button>'; }).join("")
+      + '</div>';
+    if (REC.react != null){
+      h += '<div class="opt-h">發生什麼？寫一句就好——有文字，這筆才留得住感覺。</div>'
+        + '<textarea class="ta" id="recnote" placeholder="'+esc(PH_NOTE[REC.react])+'"></textarea>';
+    }
+    h += '<button class="go" '+(REC.react==null?'disabled style="opacity:.5;"':'onclick="finishRec()"')+'>'+(REC.react==null?"先選一個":"記下來")+'</button>'
+      + (REC.react!=null ? '<button class="skipb" onclick="document.getElementById(\'recnote\').value=\'\';finishRec()">跳過文字，直接記 →</button>' : '');
+  } else {
+    var good = REC.react >= 2;
+    h += '<div class="done-ring"><i>+1</i></div>'
+      + '<div class="ok-t">每天進步一點點。</div>'
+      + '<div class="ok-s">'+(good ? MV.good : '沒回應不代表白講。<br>'+MV.bad)+'</div>'
+      + (REC.note ? '<div class="playback">你記下的：「'+esc(REC.note)+'」<small>文字留得住感覺，分數留不住。</small></div>' : '')
+      + '<div class="again" onclick="REC={step:0,who:\'\',react:null,note:\'\'};render()">點一下，回到練習 ›</div>';
+  }
+  return h;
+}
+
+function md(t){ return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>"); }
+
+function finishRec(){
+  var n = document.getElementById("recnote");
+  REC.note = n ? n.value.trim() : "";
+  var ds = dstr(today);
+  if (st.days.indexOf(ds) < 0) st.days.push(ds);
+  st.cnt[MV.key] = (st.cnt[MV.key]||0) + 1;
+  save(st);
+  REC.step = 3;
+  render();
+}
+
 function render(){
-  document.getElementById("mv-name").textContent = MV.name;
-  document.getElementById("mv-ex").textContent = "範例 " + (Math.floor(seq/2) % MV.exs.length + 1);
-  document.getElementById("mv-big").innerHTML = EX.big;
-  document.getElementById("mv-how").innerHTML = EX.how;
-  document.getElementById("rec-q").textContent = MV.q;
-  document.getElementById("rb-yes").innerHTML = MV.yes;
-  document.getElementById("rb-no").innerHTML = MV.no;
+  document.getElementById("hero").innerHTML = heroHTML();
 
   var dots="", n=0, d=new Date(today);
   for(var i=6;i>=0;i--){
@@ -378,26 +439,10 @@ function render(){
   document.getElementById("grid12").innerHTML = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"]
     .map(function(mk){ return '<div class="g">'+mk+'</div>'; }).join("");
 }
-
-function showRec(){
-  document.getElementById("btn-go").style.display="none";
-  document.getElementById("rec").classList.add("show");
-}
-function finish(got){
-  var r=document.getElementById("rec");
-  r.classList.remove("show"); r.style.display="none";
-  document.getElementById("done-t").textContent = got?MV.doneT:MV.retryT;
-  document.getElementById("done-s").textContent = got?MV.doneS:MV.retryS;
-  document.getElementById("done").classList.add("show");
-  var ds=dstr(today);
-  if(st.days.indexOf(ds)<0) st.days.push(ds);
-  st.cnt[MV.key] = (st.cnt[MV.key]||0)+1;
-  save(st); render();
-}
 render();
 
-/* ─── 意見欄：存 localStorage（v2 版號）＋一鍵複製 ─── */
-var FBKEY = "vzdemo_fb_v2";
+/* ─── 意見欄：存 localStorage（v3 版號）＋一鍵複製 ─── */
+var FBKEY = "vzdemo_fb_v3";
 var boxes = [].slice.call(document.querySelectorAll(".fb"));
 var saved = {};
 try{ saved = JSON.parse(localStorage.getItem(FBKEY)) || {}; }catch(e){}
@@ -417,7 +462,7 @@ updCnt();
 
 function copyAll(){
   var d = new Date();
-  var lines = ["【demo-visitor v2 意見 · "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+"】"];
+  var lines = ["【demo-visitor v3 意見 · "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+"】"];
   boxes.forEach(function(b){
     if(b.value.trim()) lines.push("▍"+b.dataset.tag+"："+b.value.trim());
   });
