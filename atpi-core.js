@@ -48,6 +48,17 @@ var DIM_RESULT = { A:"讓他想靠近", T:"讓他願意說", P:"讓他要找你"
    ⚠️ 連帶：P/I 分界句同步改成「P＝他認定你就是那個人；I＝他真的動了」。
    歷史：2026-08-27 讓他覺得你懂 → 讓他覺得有解（兩句皆已作廢）。 */
 
+/* ── 核心肌肉（基本功）＝地基層，2 塊——講故事＝推／問問題＝拉（字典 §750 推拉閉環：
+      處方互相指向對方，講故事過頭→換去問問題、問問題過頭→換回講故事）。
+      課程層概念、不進 ATPI 四維計分；ask 驗收句與 name2＝2026-09-05 老師拍板。
+      打卡練習腳本在 consult-workshop judgement.js 的 CORE_DRILL（key 對這裡的 story/ask）。 */
+var CORE_MUSCLES = {
+  story: { name:"講故事", name2:"讓我有渲染力", role:"推",
+           ask:"可以選用畫面描述事情，讓人身歷其境的產生感受" },
+  ask:   { name:"問問題", name2:"讓他被引導", role:"拉",
+           ask:"他越講越多，講到自己找到答案" }
+};
+
 /* 週測 1–5 錨點（字典 ATPI 條）。評分看「本週有無具體事例」，不憑感覺。
    🔄 2026-08-30（G8）改非單調：做太多（過頭）會扣分，出現「過頭訊號」該格封頂 3 分；
    健檢要分開寫「不足（加量）」與「過頭（減量並換方向）」。過頭訊號 12 格全表＝productkit 22 檔 §四。
@@ -93,13 +104,21 @@ function weakestMuscles(muscleScores, n) {
     .slice(0, n);
 }
 
-/* ── 潛力值公式（改這裡就全部生效）──
-   吃的 scores 是行為證據算出來的能力（D5A：成交不進 scores，所以潛力也不再由成交回推）。
-   ⚠️ 口徑（D4A）：A×T×P×I 是品牌金句，但對外別再說「缺一即零」——
-   要說「任一塊趨近零時嚴重折損」。公式維持相乘，未改。 */
+/* ── 已解鎖影響力公式（字典 2026-09-03「公式重帶參數」・改這裡就全部生效）──
+   scores＝四維「練到幾成」%（0–100，行為證據算出來的能力；D5A：成交不進 scores）。
+   已解鎖影響力 ＝ (成數A × 成數T × 成數P × 成數I)^0.6 × 1000。
+   γ=0.6 是體感軟旋鈕（只調體感、不改排名）；錨定：四塊全 5 成＝189、全 10 成＝1000。
+   舊參數 ^0.8 作廢（字典 §834）。1–5 量表先用 pctFromEval() 歸零換算再進來。
+   ⚠️ 口徑（D4A）：對外別說「缺一即零」，要說「任一塊趨近零時嚴重折損」。
+   對外名稱一律「已解鎖影響力」；赤字語言禁令＝主敘述只講 unlocked、不拿 locked 當標籤。 */
 function calcPotential(scores) {
-  var unlocked = Math.round(Math.pow(scores.A/100 * scores.T/100 * scores.P/100 * scores.I/100, 0.8) * 1000);
+  var unlocked = Math.round(Math.pow(scores.A/100 * scores.T/100 * scores.P/100 * scores.I/100, 0.6) * 1000);
   return { unlocked: unlocked, locked: 1000 - unlocked };
+}
+/* 1–5 量表 → 成數%：先歸零（1 分＝完全沒做到＝0 成）再除以 4——字典人話三步的第①步。
+   quiz／週測的維度分換算一律走這裡；舊寫法 d/5*100 沒歸零、作廢。 */
+function pctFromEval(v) {
+  return Math.max(0, Math.round((v - 1) / 4 * 100));
 }
 
 /* ── 單一強項 → 變現路徑敘述 ──
@@ -252,7 +271,7 @@ function renderGrowthCard(startScores, nowScores, footerRight) {
   }).join("");
   var potential = calcPotential(nowScores).unlocked;
   var footer = '<div style="display:flex;justify-content:space-between;font-size:12px;">'
-    + '<div style="color:#6b4c30;">已解鎖潛力 <span style="color:#e8734a;font-weight:600;">'+potential+'</span> / 1000</div>'
+    + '<div style="color:#6b4c30;">已解鎖影響力 <span style="color:#e8734a;font-weight:600;">'+potential+'</span> / 1000</div>'
     + (footerRight ? '<div style="color:#6b4c30;">'+footerRight+'</div>' : '')
     + '</div>';
   return '<div style="font-size:12px;color:#a08060;margin-bottom:8px;">起點 vs 現在</div>' + dimRows + '<div class="hdiv"></div>' + footer;
@@ -284,7 +303,7 @@ function renderSelfEvalCompare(selfScores, trainedScores) {
 function renderTrendChart(points, incomeUnit) {
   incomeUnit = incomeUnit || "萬";
   if (!points || points.length < 2) {
-    return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">潛力值 × 金額走勢</div>'
+    return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">影響力 × 金額走勢</div>'
       + '<div style="font-size:12px;color:#a08060;padding:24px 0;text-align:center;">還沒有足夠的紀錄，累積 2 筆以上「回報成交」後就會畫出趨勢線</div>';
   }
   var data = points.map(function(p) { return { label:p.label, v:calcPotential(p).unlocked, income:p.income }; });
@@ -335,10 +354,10 @@ function renderTrendChart(points, incomeUnit) {
    +dots+'</svg>';
   var legend =
     '<div style="display:flex;gap:14px;margin-bottom:8px;">'
-   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>已解鎖潛力</div>'
+   +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#e8734a;border-radius:1px;"></div>已解鎖影響力</div>'
    +'<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b4c30;"><div style="width:14px;height:2px;background:#5DCAA5;border-radius:1px;"></div>金額（'+incomeUnit+'）</div>'
    +'</div>';
-  return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">潛力值 × 金額走勢</div>' + legend + svg;
+  return '<div style="font-size:12px;color:#a08060;margin-bottom:4px;">影響力 × 金額走勢</div>' + legend + svg;
 }
 
 /* ═══════════════════════════════════════════════════════════
