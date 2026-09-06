@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0c131e">
+<title>pro demo v2・大師重架構（科技版）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ pro demo v2・大師重架構（2026-09-06）═══
+   設計論：pro 學員的進度條不在 app 裡，在「客戶被拉近的距離」裡。
+   全 app 只有一條因果鏈：上課 → 解鎖演練 → 對著真客戶演練 → 上場 → 客戶在引力場移動 → 成交/卡住＝升單訊號。
+   四分頁＝鏈上四站：今天(輸入)／引力場(客戶CRM)／練功房(演練+肌肉)／覆盤(成果+升單)。
+   砍掉：關係軌跡線圖(被引力場取代)、甜蜜路徑獨立卡(折進每個客戶的下一步)、口袋卡瀏覽庫(變演練即時彈藥)。
+   視覺：科技版 #0c131e＋PALT 霓虹；咖啡金漸層＝教練識別層(頂欄/金庫/升單)。資料全示意。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;padding:0 22px 96px;}
+.blk{position:relative;margin-bottom:26px;}
+.tag{position:absolute;top:-9px;right:0;font-size:10px;font-weight:700;letter-spacing:1px;color:#0c131e;background:#e6a93a;border-radius:10px;padding:2px 8px;z-index:5;}
+.mock{font-size:10px;color:#7d90a3;background:rgba(234,241,250,.08);border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:2px;font-weight:400;letter-spacing:0;}
+.cd{background:#131f2b;border-radius:16px;padding:17px 16px;border:1px solid #1d2c3c;}
+.sec{font-size:12px;font-weight:700;letter-spacing:2px;color:#7d90a3;margin-bottom:12px;}
+.sec b{color:#eaf1fa;}
+.num{font-variant-numeric:tabular-nums;}
+.hint{font-size:12px;color:#7d90a3;line-height:1.7;margin-top:10px;}
+.hint b{color:#e6a93a;font-weight:700;}
+
+/* 頂欄：咖啡漸層＝教練就在旁邊 */
+.tb{background:linear-gradient(135deg,#4A1B0C,#6B3018);margin:0 -22px 24px;padding:20px 22px 18px;position:relative;overflow:hidden;}
+.tb:after{content:"";position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#E8C89A,transparent);animation:scan 3.2s ease-in-out infinite;top:0;}
+@keyframes scan{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
+.tb-k{font-size:11px;letter-spacing:4px;color:#E8C89A;font-weight:700;}
+.tb-t{font-size:23px;font-weight:900;color:#F7F1EC;margin-top:7px;}
+.tb-s{font-size:13px;color:rgba(247,241,236,.65);margin-top:5px;}
+.tb-coach{display:flex;align-items:center;gap:10px;margin-top:13px;background:rgba(12,19,30,.35);border:1px solid rgba(232,200,154,.25);border-radius:14px;padding:10px 13px;}
+.tb-av{width:34px;height:34px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.tb-cn{font-size:13.5px;font-weight:700;color:#F7F1EC;}
+.tb-cs{font-size:11.5px;color:rgba(247,241,236,.55);margin-top:1px;}
+.tb-nx{margin-left:auto;text-align:right;font-size:11px;color:rgba(247,241,236,.55);line-height:1.6;flex-shrink:0;}
+.tb-nx b{display:block;font-size:12.5px;color:#E8C89A;}
+
+/* 今日一件事 */
+.one-l{font-size:12px;font-weight:700;letter-spacing:2px;color:#e6a93a;}
+.one-t{font-size:20px;font-weight:900;color:#eaf1fa;margin-top:8px;line-height:1.55;}
+.one-s{font-size:13.5px;color:#8ea1b6;margin-top:8px;line-height:1.85;}
+.one-s b{color:#eaf1fa;}
+
+/* 課程星圖：課前課＋L1-L8，打卡亮燈 */
+.map-bar{height:6px;border-radius:6px;background:#1d2c3c;overflow:hidden;margin:4px 0 14px;}
+.map-bf{height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#e8734a);box-shadow:0 0 10px rgba(232,115,74,.5);transition:width .6s ease;}
+.map-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.ln{background:#182634;border:1px solid #1d2c3c;border-radius:12px;padding:10px 9px;text-align:left;font-family:inherit;cursor:default;position:relative;}
+.ln-k{font-size:11px;font-weight:700;color:#7d90a3;}
+.ln-n{font-size:12.5px;font-weight:700;color:#8ea1b6;margin-top:3px;line-height:1.45;}
+.ln.done{background:rgba(198,96,58,.16);border-color:rgba(232,115,74,.45);}
+.ln.done .ln-k{color:#e8734a;}
+.ln.done .ln-n{color:#eaf1fa;}
+.ln.done:after{content:"✓";position:absolute;top:7px;right:9px;font-size:11px;color:#e8734a;font-weight:700;}
+.ln.now{background:#182634;border:1.5px dashed #e6a93a;cursor:pointer;animation:nowpulse 2.2s ease-in-out infinite;}
+.ln.now .ln-k{color:#e6a93a;}
+.ln.now .ln-n{color:#eaf1fa;}
+@keyframes nowpulse{0%,100%{box-shadow:0 0 0 rgba(230,169,58,0);}50%{box-shadow:0 0 14px rgba(230,169,58,.4);}}
+.ln.lock{opacity:.42;}
+.map-toast{margin-top:12px;background:rgba(230,169,58,.1);border:1px solid rgba(230,169,58,.35);border-radius:12px;padding:11px 13px;font-size:13px;color:#e6a93a;line-height:1.75;display:none;}
+.map-toast.show{display:block;}
+
+/* 引力場 orbit */
+.orbit-wrap{position:relative;width:100%;aspect-ratio:1;max-width:330px;margin:4px auto 0;}
+.orbit-wrap svg{width:100%;height:100%;display:block;}
+.oring{fill:none;stroke:#1d2c3c;stroke-width:1;}
+.ocore{animation:corepulse 2.4s ease-in-out infinite;transform-origin:center;}
+@keyframes corepulse{0%,100%{opacity:.85;}50%{opacity:1;}}
+.osat{transform-origin:center;}
+.o1{animation:orb 26s linear infinite;}
+.o2{animation:orb 38s linear infinite reverse;}
+.o3{animation:orb 50s linear infinite;}
+.osat text{font-size:8.5px;fill:#7d90a3;font-family:inherit;}
+.oring-lb{font-size:8px;fill:#54718D;letter-spacing:1px;}
+@keyframes orb{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.olegend{display:flex;justify-content:center;gap:13px;margin-top:10px;font-size:11px;color:#7d90a3;flex-wrap:wrap;}
+.olegend span{display:flex;align-items:center;gap:5px;}
+.olegend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+/* 客戶卡 */
+.cl{background:#131f2b;border:1px solid #1d2c3c;border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.cl-hd{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;background:none;border:0;width:100%;text-align:left;font-family:inherit;}
+.cl-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0c131e;flex-shrink:0;}
+.cl-n{font-size:15px;font-weight:700;color:#eaf1fa;}
+.cl-r{font-size:11.5px;color:#7d90a3;margin-top:2px;}
+.cl-st{margin-left:auto;text-align:right;flex-shrink:0;}
+.cl-sl{font-size:12px;font-weight:700;}
+.cl-d{font-size:10.5px;color:#5d7692;margin-top:2px;}
+.cl-bd{padding:0 14px 14px;border-top:1px solid #1d2c3c;display:none;}
+.cl.open .cl-bd{display:block;}
+.cl-row{font-size:13px;color:#8ea1b6;line-height:1.8;margin-top:11px;}
+.cl-row b{color:#eaf1fa;}
+.cl-next{margin-top:11px;background:rgba(230,169,58,.08);border-left:3px solid #e6a93a;border-radius:0 10px 10px 0;padding:10px 12px;font-size:13.5px;color:#eaf1fa;line-height:1.8;}
+.cl-next small{display:block;font-size:11px;color:#e6a93a;font-weight:700;letter-spacing:1px;margin-bottom:3px;}
+.cl-acts{display:flex;gap:8px;margin-top:12px;}
+.bt-soft{flex:1;background:rgba(232,115,74,.14);border:1px solid rgba(232,115,74,.4);color:#e8734a;border-radius:12px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;}
+.bt-ghost{flex:1;background:none;border:1px solid #2a3c52;color:#8ea1b6;border-radius:12px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;}
+.stuck{margin-top:4px;background:#131f2b;border:1px solid rgba(230,169,58,.4);border-radius:14px;padding:14px 15px;}
+.stuck-k{font-size:11px;font-weight:700;letter-spacing:2px;color:#e6a93a;}
+.stuck-t{font-size:14px;color:#eaf1fa;line-height:1.9;margin-top:8px;}
+.stuck-t b{color:#e6a93a;}
+
+/* 練功房：演練流程 */
+.dr-q{font-size:15px;font-weight:700;color:#eaf1fa;margin:14px 0 9px;line-height:1.7;}
+.dr-q .qs{font-size:12px;color:#5d7692;font-weight:400;margin-left:7px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:rgba(230,237,245,.06);border:1px solid #2a3c52;color:#cfdcea;border-radius:20px;padding:9px 15px;font-size:14px;font-family:inherit;cursor:pointer;}
+.chip.on{background:#C6603A;border-color:#C6603A;color:#fff;}
+.scene{background:rgba(230,237,245,.06);border-radius:12px;padding:13px 14px;font-size:14.5px;color:#cfdcea;line-height:1.9;margin-top:6px;}
+.scene b{color:#eaf1fa;}
+.mv{display:block;width:100%;text-align:left;background:#182634;border:1px solid #1d2c3c;border-radius:12px;padding:12px 14px;font-size:14px;color:#cfdcea;line-height:1.8;font-family:inherit;cursor:pointer;margin-top:9px;}
+.mv.on{border-color:#e6a93a;background:rgba(230,169,58,.08);}
+.fb{margin-top:12px;border-radius:12px;padding:13px 14px;font-size:13.5px;line-height:1.9;display:none;}
+.fb.show{display:block;}
+.fb.good{background:rgba(51,196,149,.1);border:1px solid rgba(51,196,149,.4);color:#cfdcea;}
+.fb.warn{background:rgba(232,115,74,.09);border:1px solid rgba(232,115,74,.4);color:#cfdcea;}
+.fb b{color:#eaf1fa;}
+.fb .fk{display:block;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:6px;}
+.fb.good .fk{color:#33c495;}
+.fb.warn .fk{color:#e8734a;}
+.take{margin-top:12px;background:rgba(230,169,58,.08);border-left:3px solid #e6a93a;border-radius:0 10px 10px 0;padding:11px 13px;font-size:14px;color:#eaf1fa;line-height:1.85;display:none;}
+.take.show{display:block;}
+.take small{display:block;font-size:11px;color:#e6a93a;font-weight:700;letter-spacing:1px;margin-bottom:3px;}
+
+/* 肌肉 HUD */
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.hc{background:#182634;border-radius:10px;padding:9px 8px;font-size:11px;color:#eaf1fa;line-height:1.5;position:relative;}
+.hc .bar{height:3px;border-radius:3px;background:#2a3a4d;margin-top:6px;overflow:hidden;}
+.hc .bf{height:100%;border-radius:3px;}
+.hc .v{font-size:10px;color:#7d90a3;margin-top:4px;}
+.hc.lockon{background:#1a2434;}
+.hc.lockon:before,.hc.lockon:after{content:"";position:absolute;width:9px;height:9px;border:1.5px solid #e6a93a;}
+.hc.lockon:before{top:-2px;left:-2px;border-right:0;border-bottom:0;}
+.hc.lockon:after{bottom:-2px;right:-2px;border-left:0;border-top:0;}
+.hc.lockon .v{color:#e6a93a;font-weight:700;}
+
+/* 覆盤 */
+.gauge{display:flex;gap:8px;}
+.gg{flex:1;background:#182634;border-radius:12px;padding:12px;text-align:center;}
+.gg-v{font-size:20px;font-weight:700;color:#e8734a;line-height:1.2;}
+.gg-l{font-size:10.5px;color:#7d90a3;margin-top:4px;line-height:1.5;}
+.vault{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:16px;padding:19px 18px;color:#F7F1EC;position:relative;overflow:hidden;}
+.vault:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(105deg,transparent,rgba(232,200,154,.12),transparent);animation:sheen 4.5s ease-in-out infinite;}
+@keyframes sheen{0%,55%{left:-60%;}85%,100%{left:120%;}}
+.vault-k{font-size:11px;letter-spacing:3px;color:#E8C89A;font-weight:700;}
+.vault-q{font-size:16px;line-height:1.9;margin-top:10px;}
+.vault-q b{color:#E8C89A;}
+.vault-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
+.vault-quote small{display:block;margin-top:5px;font-size:11px;color:#C9A87A;}
+
+/* 升單卡：訊號→判讀→骨→錢鈕（漸層一頁一顆） */
+.upg{background:linear-gradient(135deg,#4A1B0C,#6B3018);border:1px solid rgba(232,200,154,.35);border-radius:16px;padding:19px 18px;color:#F7F1EC;}
+.upg-k{font-size:11px;letter-spacing:3px;color:#E8C89A;font-weight:700;}
+.upg-sig{margin-top:12px;background:rgba(12,19,30,.4);border:1px solid rgba(232,200,154,.2);border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.85;color:rgba(247,241,236,.85);}
+.upg-sig b{color:#E8C89A;}
+.upg-t{font-size:17px;font-weight:900;line-height:1.75;margin-top:14px;color:#F7F1EC;}
+.upg-s{font-size:13.5px;color:rgba(247,241,236,.75);line-height:1.9;margin-top:9px;}
+.money{margin-top:15px;width:100%;display:block;text-align:center;background:linear-gradient(135deg,#C6603A,#e8734a);color:#fff;border:0;border-radius:16px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 0 22px rgba(232,115,74,.35);}
+.upg-p{font-size:11.5px;color:rgba(247,241,236,.5);text-align:center;margin-top:9px;}
+
+/* 品牌金句（引號視覺層：❝ 走襯線＝介面無襯線的唯一例外） */
+.quote{margin:30px 10px 0;text-align:center;}
+.quote-m{display:block;font-family:Georgia,"Times New Roman",serif;font-size:38px;color:#C99A4E;line-height:.7;}
+.quote-t{font-size:16px;color:#eaf1fa;line-height:2;font-weight:700;margin-top:4px;}
+.quote-by{margin-top:2px;font-size:12.5px;color:#7d90a3;letter-spacing:.08em;}
+
+/* 底部導覽 */
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,25,38,.96);backdrop-filter:blur(10px);border-top:1px solid #1d2c3c;display:flex;z-index:50;}
+.nv{flex:1;background:none;border:0;font-family:inherit;padding:10px 0 max(10px,env(safe-area-inset-bottom));text-align:center;font-size:11px;color:#5d7692;cursor:pointer;}
+.nv i{display:block;font-style:normal;font-size:17px;margin-bottom:2px;}
+.nv.on{color:#e6a93a;text-shadow:0 0 10px rgba(230,169,58,.5);font-weight:700;}
+.pane{display:none;}
+.pane.on{display:block;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 頂欄跨四分頁固定：教練就在旁邊 -->
+  <div class="tb">
+    <div class="tb-k">ATPIFIT · PRIVATE COACH</div>
+    <div class="tb-t">超引力成交學</div>
+    <div class="tb-s">私教學員席 · 第 47 天<span class="mock">示意</span></div>
+    <div class="tb-coach">
+      <div class="tb-av">光</div>
+      <div><div class="tb-cn">光頭教練</div><div class="tb-cs">看著你的每一筆紀錄</div></div>
+      <div class="tb-nx"><b>下次 1v1</b>9/12（五）14:00</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 分頁 1：今天（輸入站） ══════════ -->
+  <div class="pane on" id="p-today">
+
+    <!-- 今-1 今日一件事：系統從「課程進度×客戶狀態」smart pick，一次只給一件 -->
+    <div class="blk"><span class="tag">今-1</span>
+      <div class="cd">
+        <div class="one-l">今天一件事<span class="mock">示意</span></div>
+        <div class="one-t">你剛上完 L4 換框，<br>王經理正好卡在這一步。</div>
+        <div class="one-s">週四要見他。先在練功房<b>對著他演練一次</b>，上場那句話就不會是第一次說。</div>
+        <div class="cl-acts" style="margin-top:14px;">
+          <button class="bt-soft" onclick="gotoDrill('王經理')">先演練一次</button>
+          <button class="bt-ghost" onclick="go('gravity')">看他的位置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 今-2 課程星圖：課前課+L1-L8，聽完課 30 秒內打卡＝完課儀式；打卡解鎖該課演練包 -->
+    <div class="blk"><span class="tag">今-2</span>
+      <div class="cd">
+        <div class="sec">COURSE MAP · <b>課程星圖</b><span class="mock">示意</span></div>
+        <div style="font-size:12px;color:#7d90a3;margin-bottom:6px;"><span class="num" id="mapN">4</span> / 9 亮起</div>
+        <div class="map-bar"><div class="map-bf" id="mapBar" style="width:44%;"></div></div>
+        <div class="map-g" id="mapGrid"></div>
+        <div class="map-toast" id="mapToast"></div>
+        <div class="hint">聽完課回來點一下就亮。每亮一堂，<b>那堂課的演練包就開了</b>——學了當天就要用一次。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ 分頁 2：引力場（客戶 CRM） ══════════ -->
+  <div class="pane" id="p-gravity">
+
+    <!-- 場-1 引力場：超引力本體。客戶＝繞著你轉的星，關係推進＝從外圈被拉進內圈 -->
+    <div class="blk"><span class="tag">場-1</span>
+      <div class="cd">
+        <div class="sec">GRAVITY FIELD · <b>4 個人正被你拉近</b><span class="mock">示意</span></div>
+        <div class="orbit-wrap">
+          <svg viewBox="0 0 340 340">
+            <circle class="oring" cx="170" cy="170" r="150"/>
+            <circle class="oring" cx="170" cy="170" r="108"/>
+            <circle class="oring" cx="170" cy="170" r="66"/>
+            <circle class="oring" cx="170" cy="170" r="28" stroke-dasharray="2 4"/>
+            <text class="oring-lb" x="170" y="16" text-anchor="middle">A 想靠近</text>
+            <text class="oring-lb" x="170" y="58" text-anchor="middle">T 願意說</text>
+            <text class="oring-lb" x="170" y="100" text-anchor="middle">P 要找你</text>
+            <g class="ocore">
+              <circle cx="170" cy="170" r="17" fill="#4A1B0C" stroke="#E8C89A" stroke-width="1.5"/>
+              <text x="170" y="174" text-anchor="middle" font-size="11" fill="#E8C89A" font-weight="700">你</text>
+            </g>
+            <g class="osat o1"><g transform="translate(170,20)">
+              <circle r="9" fill="#e8734a"/><text y="-14" text-anchor="middle">安</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">安</text>
+            </g></g>
+            <g class="osat o2">
+              <g transform="translate(170,62)">
+                <circle r="9" fill="#33c495"/><text y="-14" text-anchor="middle">爸爸</text>
+                <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">爸</text>
+              </g>
+              <g transform="translate(170,278)">
+                <circle r="9" fill="#33c495"/><text y="22" text-anchor="middle">郭夥伴</text>
+                <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">郭</text>
+              </g>
+            </g>
+            <g class="osat o3"><g transform="translate(170,104)">
+              <circle r="10" fill="#4b9bf0" stroke="#e6a93a" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <text y="-15" text-anchor="middle">王經理</text>
+              <text y="3" text-anchor="middle" font-size="8" fill="#0c131e" font-weight="700">王</text>
+            </g></g>
+          </svg>
+        </div>
+        <div class="olegend">
+          <span><i style="background:#e8734a;"></i>想靠近</span>
+          <span><i style="background:#33c495;"></i>願意說</span>
+          <span><i style="background:#4b9bf0;"></i>要找你</span>
+          <span><i style="background:#e6a93a;"></i>認定你</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 場-2 客戶卡：每個人一張，關係到哪／上次互動／下一步（甜蜜路徑折進來變 per-client） -->
+    <div class="blk"><span class="tag">場-2</span>
+      <div class="sec" style="margin-bottom:10px;">每個人的下一步<span class="mock">示意</span></div>
+      <div id="clList"></div>
+    </div>
+
+    <!-- 場-3 卡住偵測：21 天沒動＝教練介入訊號（升單鏈的第一環） -->
+    <div class="blk"><span class="tag">場-3</span>
+      <div class="stuck">
+        <div class="stuck-k">COACH SIGNAL<span class="mock">示意</span></div>
+        <div class="stuck-t">王經理在「要找你」圈停了 <b class="num">21 天</b>。這不是你做錯什麼——是下一步需要新的招。教練已經看到這筆，<b>這次 1v1 就演練它</b>。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ 分頁 3：練功房（演練＋肌肉） ══════════ -->
+  <div class="pane" id="p-drill">
+
+    <!-- 練-1 演練場：選客戶→場景（照他卡的那一關出題）→出招→教練回饋→帶走一句 -->
+    <div class="blk"><span class="tag">練-1</span>
+      <div class="cd">
+        <div class="sec">SPARRING · <b>演練場</b> · 上場前先來這裡<span class="mock">示意</span></div>
+        <div class="dr-q">這次帶誰來練？<span class="qs">照他卡的那一關出題</span></div>
+        <div class="chips" id="drWho"></div>
+        <div id="drScene" style="display:none;">
+          <div class="dr-q">場景</div>
+          <div class="scene" id="drSceneTxt"></div>
+          <div class="dr-q">你會怎麼接？<span class="qs">選一個，看教練怎麼看</span></div>
+          <div id="drMoves"></div>
+          <div class="fb" id="drFb"></div>
+          <div class="take" id="drTake"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 練-2 12 塊肌肉 HUD：體格分＝教練校準過的能力值；這季主力＝瞄準框 -->
+    <div class="blk"><span class="tag">練-2</span>
+      <div class="cd">
+        <div class="sec">MUSCLE SCAN · <b>12 塊全開</b><span class="mock">示意</span></div>
+        <div class="hgrid">
+          <div class="hc">讓他想聽<div class="bar"><div class="bf" style="width:70%;background:#e8734a;"></div></div><div class="v num">3.5</div></div>
+          <div class="hc">讓他心動<div class="bar"><div class="bf" style="width:56%;background:#e8734a;"></div></div><div class="v num">2.8</div></div>
+          <div class="hc">讓他放心<div class="bar"><div class="bf" style="width:80%;background:#e8734a;"></div></div><div class="v num">4.0</div></div>
+          <div class="hc">讓他敢說<div class="bar"><div class="bf" style="width:64%;background:#33c495;"></div></div><div class="v num">3.2</div></div>
+          <div class="hc">讓他信你<div class="bar"><div class="bf" style="width:76%;background:#33c495;"></div></div><div class="v num">3.8</div></div>
+          <div class="hc">讓他懂你<div class="bar"><div class="bf" style="width:60%;background:#33c495;"></div></div><div class="v num">3.0</div></div>
+          <div class="hc">讓他服你<div class="bar"><div class="bf" style="width:66%;background:#4b9bf0;"></div></div><div class="v num">3.3</div></div>
+          <div class="hc">讓他要你<div class="bar"><div class="bf" style="width:50%;background:#4b9bf0;"></div></div><div class="v num">2.5</div></div>
+          <div class="hc">讓他行動<div class="bar"><div class="bf" style="width:58%;background:#4b9bf0;"></div></div><div class="v num">2.9</div></div>
+          <div class="hc lockon">讓他跟隨<div class="bar"><div class="bf" style="width:40%;background:#e6a93a;"></div></div><div class="v num">2.0 · 這季主力</div></div>
+          <div class="hc">讓他推薦<div class="bar"><div class="bf" style="width:44%;background:#e6a93a;"></div></div><div class="v num">2.2</div></div>
+          <div class="hc">讓他回來<div class="bar"><div class="bf" style="width:52%;background:#e6a93a;"></div></div><div class="v num">2.6</div></div>
+        </div>
+        <div class="hint">分數是教練校準過的——低分不是問題，是<b>先練這塊最有感</b>。</div>
+        <button class="bt-soft" style="width:100%;margin-top:13px;" onclick="alert('demo：接週日體測自評（postMuscleEval source=self）')">本週體測 · 量一次看進步</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ 分頁 4：覆盤（成果＋升單） ══════════ -->
+  <div class="pane" id="p-review">
+
+    <!-- 覆-1 本月數字：全部從真紀錄算，沒有就是 0 -->
+    <div class="blk"><span class="tag">覆-1</span>
+      <div class="cd">
+        <div class="sec">THIS MONTH · <b>本月數字</b><span class="mock">示意</span></div>
+        <div class="gauge">
+          <div class="gg"><div class="gg-v num">12</div><div class="gg-l">演練場次</div></div>
+          <div class="gg"><div class="gg-v num">8</div><div class="gg-l">真的上場</div></div>
+          <div class="gg"><div class="gg-v num">2</div><div class="gg-l">客戶被拉近一圈</div></div>
+        </div>
+        <div class="hint">「客戶被拉近一圈」是這頁最重要的數字——你的進度不在 app 裡，<b>在關係裡</b>。</div>
+      </div>
+    </div>
+
+    <!-- 覆-2 市場驗證：獨立顯示，不乘進分數 -->
+    <div class="blk"><span class="tag">覆-2</span>
+      <div class="cd">
+        <div class="sec">EXTERNAL SIGNAL · <b>市場驗證</b><span class="mock">示意</span></div>
+        <div class="gauge">
+          <div class="gg"><div class="gg-v num">3 筆</div><div class="gg-l">成交回報</div></div>
+          <div class="gg"><div class="gg-v num">21.6 萬</div><div class="gg-l">累計金額</div></div>
+          <div class="gg"><div class="gg-v num">7%</div><div class="gg-l">對齊 300 萬錨點</div></div>
+        </div>
+        <div class="hint">成交是外部驗證變項——獨立顯示，不回饋進能力分數。</div>
+      </div>
+    </div>
+
+    <!-- 覆-3 改觀句金庫：骨層。只放學員自己說出來的那句 -->
+    <div class="blk"><span class="tag">覆-3</span>
+      <div class="vault">
+        <div class="vault-k">這三個月，你的想法動了什麼？</div>
+        <div class="vault-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>
+        <div class="vault-quote">「我以前覺得成交是說服——現在我覺得成交是他終於放心了。」<small>7/28 · 月覆盤時你說的<span class="mock" style="background:rgba(247,241,236,.18);color:rgba(247,241,236,.7);">示意</span></small></div>
+      </div>
+    </div>
+
+    <!-- 覆-4 升單訊號卡：訊號(資料)→判讀(一對一vs舞台)→骨層同場→錢鈕（本頁唯一漸層鈕） -->
+    <div class="blk"><span class="tag">覆-4</span>
+      <div class="upg">
+        <div class="upg-k">NEXT STAGE · 超引力-公眾演說</div>
+        <div class="upg-sig">系統看到兩個訊號<span class="mock" style="background:rgba(247,241,236,.18);color:rgba(247,241,236,.7);">示意</span>：<b>3 位客戶</b>到了「要找你」還沒進「認定你」；「讓他跟隨」連練 6 次，進步開始趨緩。</div>
+        <div class="upg-t">一對一，你一次拉近一個人。<br>站上舞台，一次拉近一群人。</div>
+        <div class="upg-s">你已經讓身邊的人因為你變好了。下一步，是讓還沒遇見你的人，也有機會遇見你。</div>
+        <button class="money" onclick="alert('demo：預約教練聊公眾演說這條路')">跟教練聊「舞台」這條路 →</button>
+        <div class="upg-p">超引力-公眾演說 · 10.8 萬 · 先聊，合適再上</div>
+      </div>
+    </div>
+
+    <div class="quote">
+      <span class="quote-m">❝</span>
+      <div class="quote-t">影響力的盡頭不是成交，<br>是有人因為你變好。</div>
+      <div class="quote-by">—— 光頭</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="nav">
+  <button class="nv on" data-p="today" onclick="go('today')"><i>☀</i>今天</button>
+  <button class="nv" data-p="gravity" onclick="go('gravity')"><i>◎</i>引力場</button>
+  <button class="nv" data-p="drill" onclick="go('drill')"><i>⚔</i>練功房</button>
+  <button class="nv" data-p="review" onclick="go('review')"><i>▤</i>覆盤</button>
+</div>
+
+<script>
+/* ── 分頁切換 ── */
+function go(p){
+  document.querySelectorAll(".pane").forEach(function(x){ x.classList.remove("on"); });
+  document.getElementById("p-" + p).classList.add("on");
+  document.querySelectorAll(".nv").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-p") === p); });
+  window.scrollTo(0, 0);
+}
+
+/* ── 今-2 課程星圖：done 亮橘、now 金虛線可點、lock 暗；打卡＝亮燈＋解鎖演練包 ── */
+var LESSONS = [
+  { k: "課前課", n: "為什麼是超引力", st: "done" },
+  { k: "L1", n: "3% 的秘密", st: "done" },
+  { k: "L2", n: "讓他想聽", st: "done" },
+  { k: "L3", n: "讓他敢說", st: "done" },
+  { k: "L4", n: "換框", st: "now" },
+  { k: "L5", n: "讓他服你", st: "lock" },
+  { k: "L6", n: "讓他要你", st: "lock" },
+  { k: "L7", n: "北極星", st: "lock" },
+  { k: "L8", n: "讓他跟隨", st: "lock" }
+];
+function renderMap(){
+  var g = document.getElementById("mapGrid");
+  g.innerHTML = LESSONS.map(function(l, i){
+    return '<button class="ln ' + l.st + '" onclick="tapLesson(' + i + ')">'
+      + '<div class="ln-k">' + l.k + '</div><div class="ln-n">' + l.n + '</div></button>';
+  }).join("");
+  var done = LESSONS.filter(function(l){ return l.st === "done"; }).length;
+  document.getElementById("mapN").textContent = done;
+  document.getElementById("mapBar").style.width = Math.round(done / LESSONS.length * 100) + "%";
+}
+function tapLesson(i){
+  var l = LESSONS[i];
+  if (l.st !== "now") return;
+  l.st = "done";
+  if (LESSONS[i + 1]) LESSONS[i + 1].st = "now";
+  renderMap();
+  var t = document.getElementById("mapToast");
+  t.innerHTML = "✓ " + l.k + "「" + l.n + "」亮起——這堂的<b>演練包解鎖了</b>，去練功房開一場，今天就用出來。";
+  t.classList.add("show");
+}
+renderMap();
+
+/* ── 場-2 客戶卡（甜蜜路徑折進每個人的「下一步」） ── */
+var STAGE = {
+  A: { lb: "想靠近", c: "#e8734a" },
+  T: { lb: "願意說", c: "#33c495" },
+  P: { lb: "要找你", c: "#4b9bf0" },
+  I: { lb: "認定你", c: "#e6a93a" }
+};
+var CLIENTS = [
+  { n: "王經理", r: "客戶 · 記了 8 筆", st: "P", d: "停了 21 天", last: "上次 1v1 後他問「你這套跟市面上的課差在哪」", next: "把你的方法放進他的框架裡講一次（L4 換框）——這步走過，他就從要找你進到認定你。" },
+  { n: "郭夥伴", r: "合作夥伴 · 記了 5 筆", st: "T", d: "3 天前有動", last: "例會後聊開了，他開始講他團隊的狀況", next: "用問題帶他說出最卡的一點——「最卡的是人，還是流程？」" },
+  { n: "安", r: "新朋友 · 記了 2 筆", st: "A", d: "上週認識", last: "BNI 例會交換了名片", next: "先用故事讓他看見你在做的事，60 秒就好。" },
+  { n: "爸爸", r: "家人 · 記了 3 筆", st: "T", d: "穩穩的", last: "上週他主動講了工作的事", next: "家人這條線，停在「願意說」就已經在贏了——不推進，維持就好。" }
+];
+function renderClients(){
+  document.getElementById("clList").innerHTML = CLIENTS.map(function(c, i){
+    var s = STAGE[c.st];
+    return '<div class="cl" id="cl' + i + '">'
+      + '<button class="cl-hd" onclick="toggleCl(' + i + ')">'
+      + '<div class="cl-av" style="background:' + s.c + ';">' + c.n[0] + '</div>'
+      + '<div><div class="cl-n">' + c.n + '</div><div class="cl-r">' + c.r + '</div></div>'
+      + '<div class="cl-st"><div class="cl-sl" style="color:' + s.c + ';">' + s.lb + '</div><div class="cl-d">' + c.d + '</div></div>'
+      + '</button>'
+      + '<div class="cl-bd">'
+      + '<div class="cl-row">上次：' + c.last + '</div>'
+      + '<div class="cl-next"><small>下一步</small>' + c.next + '</div>'
+      + '<div class="cl-acts">'
+      + '<button class="bt-soft" onclick="gotoDrill(\'' + c.n + '\')">帶他去演練</button>'
+      + '<button class="bt-ghost" onclick="alert(\'demo：接低摩擦兩下記錄（對誰／反應）\')">記上場結果</button>'
+      + '</div></div></div>';
+  }).join("");
+}
+function toggleCl(i){
+  var el = document.getElementById("cl" + i);
+  var was = el.classList.contains("open");
+  document.querySelectorAll(".cl").forEach(function(x){ x.classList.remove("open"); });
+  if (!was) el.classList.add("open");
+}
+renderClients();
+
+/* ── 練-1 演練場：場景照客戶卡的那一關出題；回饋講「為什麼」不只給答案 ── */
+var DRILLS = {
+  "王經理": {
+    scene: "1v1 收尾時他問：<b>「你這套，跟市面上其他顧問差在哪？」</b>",
+    moves: [
+      { t: "「我們有 12 塊肌肉的系統，市面上沒有人這樣拆。」", good: false,
+        fb: "這是在講你自己。他問「差在哪」，其實在問<b>「你懂不懂我」</b>——比較式回答會掉回專業自證，他聽完只會說「喔，滿特別的」。" },
+      { t: "「你會這樣問，是不是之前上過課，回去卻用不出來？」", good: true,
+        fb: "好——你把「差在哪」換成<b>「他卡在哪」</b>，這就是 L4 換框。問完他會開始講自己的經驗，話題就從比價變成他的處境。" },
+      { t: "「這問題很好，我先反問你：你希望三個月後不一樣的是什麼？」", good: false,
+        fb: "方向對，但「我先反問你」把招<b>宣告出來了</b>——招被看見就失效。拿掉宣告，直接問，效果差一倍以上。" }
+    ],
+    take: "「你會這樣問，是不是＿＿？」——把問題還給他的處境，他就會開始說。"
+  },
+  "郭夥伴": {
+    scene: "例會後他留下來，聊到一半嘆氣：<b>「最近團隊有點帶不動。」</b>",
+    moves: [
+      { t: "「帶團隊我很有經驗，我跟你說要怎麼做⋯⋯」", good: false,
+        fb: "他才剛開口，你就接走了舞台。「願意說」這一關要的是<b>讓他說完</b>——你一給答案，他就閉嘴了。" },
+      { t: "「帶不動⋯⋯最卡的是人，還是流程？」", good: true,
+        fb: "好——重複他的詞＋一個二選一的問題，<b>他不用想就能答</b>，答了就會繼續說。這是「讓他敢說」在動。" },
+      { t: "「加油，你一定可以的！」", good: false,
+        fb: "鼓勵沒有錯，但它是句點不是逗點——講完這句，話題就結束了。這一關你要的是他<b>多說一層</b>。" }
+    ],
+    take: "重複他的詞＋二選一的問題——「最卡的是人，還是流程？」"
+  },
+  "安": {
+    scene: "新朋友第一次喝咖啡，開場他客氣地問：<b>「你是做什麼的？」</b>",
+    moves: [
+      { t: "把名片上的頭銜和服務項目完整講一遍。", good: false,
+        fb: "資訊全對，但「想靠近」這一關他還<b>沒理由記住你</b>——頭銜人人有，故事才有臉。" },
+      { t: "「我幫人練一種東西——上週有個學員，第一次跟他爸好好講完一頓飯。」", good: true,
+        fb: "好——60 秒一個<b>有人因此變好</b>的故事，他會自己追問「怎麼做到的」。追問，就是被吸引。" },
+      { t: "「說來話長，改天約時間我完整跟你介紹。」", good: false,
+        fb: "把球推遲了——第一次見面的注意力是<b>當場</b>最高的，改天他就想不起來為什麼要約你。" }
+    ],
+    take: "60 秒一個「有人因此變好」的故事——講結果裡的人，不講你的頭銜。"
+  },
+  "爸爸": {
+    scene: "吃飯時爸爸難得主動說：<b>「最近工作有點煩。」</b>",
+    moves: [
+      { t: "「我跟你說，你應該要這樣處理⋯⋯」", good: false,
+        fb: "家人線最容易犯這個——他要的不是解法，是<b>有人聽</b>。你一給建議，下次他就不說了。" },
+      { t: "放下筷子：「怎麼了，說來聽聽。」", good: true,
+        fb: "好——動作（放下筷子）比語言誠實，他會感覺到你<b>真的在聽</b>。家人這條線，聽完就是贏。" },
+      { t: "「工作嘛，都是這樣啦。」", good: false,
+        fb: "這句把他的話<b>變小了</b>——他鼓起勇氣開口，你把門關上了。下次這扇門更難開。" }
+    ],
+    take: "放下手上的東西再回話——動作比語言誠實。"
+  }
+};
+var DR = { who: null, pick: null };
+function renderDrillWho(){
+  document.getElementById("drWho").innerHTML = CLIENTS.map(function(c){
+    return '<button class="chip' + (DR.who === c.n ? " on" : "") + '" onclick="pickWho(\'' + c.n + '\')">' + c.n + '</button>';
+  }).join("");
+}
+function pickWho(n){
+  DR.who = n; DR.pick = null;
+  renderDrillWho();
+  var d = DRILLS[n];
+  document.getElementById("drScene").style.display = "block";
+  document.getElementById("drSceneTxt").innerHTML = d.scene;
+  document.getElementById("drMoves").innerHTML = d.moves.map(function(m, i){
+    return '<button class="mv" id="mv' + i + '" onclick="pickMove(' + i + ')">' + m.t + '</button>';
+  }).join("");
+  document.getElementById("drFb").className = "fb";
+  document.getElementById("drTake").className = "take";
+}
+function pickMove(i){
+  DR.pick = i;
+  var d = DRILLS[DR.who], m = d.moves[i];
+  for (var j = 0; j < d.moves.length; j++) document.getElementById("mv" + j).classList.toggle("on", j === i);
+  var fb = document.getElementById("drFb");
+  fb.className = "fb show " + (m.good ? "good" : "warn");
+  fb.innerHTML = '<span class="fk">' + (m.good ? "教練：就是這個" : "教練：先停一下") + '</span>' + m.fb;
+  var tk = document.getElementById("drTake");
+  tk.className = "take show";
+  tk.innerHTML = "<small>帶上場的一句</small>" + d.take;
+}
+function gotoDrill(n){ go("drill"); pickWho(n); }
+renderDrillWho();
+
+/* ?pane=today|gravity|drill|review 直接開某分頁（截圖用，跟 pro.html 同慣例）；&who=王經理 預載演練 */
+(function(){
+  var q = new URLSearchParams(location.search);
+  var p = q.get("pane");
+  if (p && document.getElementById("p-" + p)) go(p);
+  var w = q.get("who");
+  if (w && DRILLS[w]) pickWho(w);
+})();
+</script>
+</body>
+</html>
