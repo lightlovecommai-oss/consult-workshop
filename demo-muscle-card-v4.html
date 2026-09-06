@@ -3,30 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DEMO · 統一能力值儀表板 v4（分層揭露）</title>
+<title>DEMO · 統一能力值儀表板 v4.1（三態＋分層揭露＋口袋卡）</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
-/* ═══ 統一能力值儀表板 v4（2026-09-06）═══
-   概念承接 demo-muscle-card.html v3（排排站＋橫 bar、肌肉語言、分層揭露、本週主力），
-   視覺全面改暖版白卡（30-App規範：#F7F1EC 底／白卡／四色原版填色＋深版文字）。
-   同一份測驗資料 → 四個等級的儀表板：quiz 結果頁 → visitor → member → pro。
-   錨＝每一級最上面都是同一條「已解鎖影響力 N/1000」。分數全部示意（真公式算，資料假）。 */
+/* ═══ 統一能力值儀表板 v4.1（2026-09-06 老師意見回改）═══
+   v4 → v4.1：①三態同一張卡（膠囊/標準/全圖＝HUD vs 背包）②大肌肉列標嵌進每一級的 12 格
+   ③地基上移到 12 塊之前（2→4→12 概念階梯）④tap 小肌肉跳口袋卡（MUSCLES＋DRILL 現成素材）
+   ⑤pro 走科技版配色＋大肌肉保留。分數全部示意（真公式算，資料假）。 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;padding:20px 16px 60px;}
 .wrap{max-width:460px;margin:0 auto;}
 .demo-banner{background:#2B2118;color:#F7F1EC;font-size:12px;text-align:center;padding:7px 10px;letter-spacing:1px;border-radius:10px;margin-bottom:18px;line-height:1.7;}
 
-.vh{font-size:12px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:26px 4px 9px;}
+.vh{font-size:12px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:26px 4px 9px;line-height:1.8;}
 .vh b{color:#993C1D;}
 
-/* 卡片：暖版白卡（visitor/member 同語彙） */
+/* 卡片：暖版白卡 */
 .card{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:17px 16px 15px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .hd{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;}
 .hd-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;}
 .hd-t{font-size:15px;font-weight:900;color:#4A1B0C;letter-spacing:1px;}
 .mock{margin-left:auto;font-size:10px;color:#B39C89;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;}
 
-/* 錨：已解鎖影響力（visitor .pot 同款）——四個等級都是同一條線 */
+/* 錨：已解鎖影響力 */
 .pot{border-bottom:1px dashed #E8DDD3;padding-bottom:12px;margin-bottom:13px;}
 .pot-k{font-size:11.5px;font-weight:700;color:#8A7266;letter-spacing:2px;}
 .pot-n{font-size:27px;font-weight:900;color:#8E682B;margin-top:1px;letter-spacing:.02em;}
@@ -34,105 +33,169 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:7px;overflow:hidden;}
 .pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
 
-/* 4 大肌肉：一列一肌肉（EN＋中文＋bar＋成數） */
-.d4{display:flex;align-items:center;gap:9px;padding:6px 0;}
-.d4-en{flex-shrink:0;width:100px;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
-.d4-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
-.d4-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
-.d4-bar i{display:block;height:100%;border-radius:4px;}
-.d4-v{flex-shrink:0;width:38px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+/* 地基：搬到 12 塊之前（2 → 4 → 12 概念階梯） */
+.base{margin-bottom:12px;border-bottom:1px dashed #E8DDD3;padding-bottom:11px;}
+.base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;margin-bottom:7px;}
+.core{display:flex;align-items:center;gap:10px;padding:4px 0;cursor:pointer;}
+.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#8E682B;}
+.core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.core-tag{flex-shrink:0;font-size:10px;font-weight:700;color:#993C1D;background:#FDF1E8;border:1px solid #EAC9B4;border-radius:20px;padding:1px 8px;}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+.card.tech .core-tag{color:#e6a93a;background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.45);}
 
-/* 12 塊小肌肉：3×4 格 */
-.g12{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px;}
-.m{position:relative;background:#F7F1EC;border:1px solid #EFE6DB;border-radius:12px;padding:9px 10px 8px;min-width:0;}
+/* 大肌肉列標：嵌在每組 3 格上方（消費者從熟詞接到 12 塊） */
+.dh{display:flex;align-items:center;gap:8px;margin:13px 0 7px;}
+.dh:first-of-type{margin-top:0;}
+.dh-en{flex-shrink:0;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
+.dh-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.dh-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
+.dh-bar i{display:block;height:100%;border-radius:4px;}
+.dh-v{flex-shrink:0;width:26px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+
+/* 12 塊小肌肉格 */
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.m{position:relative;background:#F7F1EC;border:1px solid #EFE6DB;border-radius:12px;padding:9px 10px 8px;min-width:0;cursor:pointer;}
 .m-n{font-size:12.5px;font-weight:700;color:#4A1B0C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .m-n i{font-style:normal;font-size:10px;font-weight:800;margin-right:3px;}
 .bar{height:5px;border-radius:3px;background:#E8DDD3;margin:7px 0 6px;overflow:hidden;}
 .bar i{display:block;height:100%;border-radius:3px;}
 .m-v{font-size:11px;font-weight:700;color:#8A7266;font-variant-numeric:tabular-nums;}
 .m-t{font-size:10.5px;color:#8A7266;margin-top:4px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* 等級 1：模糊偷看（quiz 結果頁的 12 格鉤子） */
+.m.peek{cursor:default;}
 .m.peek .bar,.m.peek .m-v{filter:blur(3px);user-select:none;}
-
-/* 等級 2：還沒點亮的格（灰、不是赤字） */
-.m.off{background:#FBF8F5;}
+.m.off{background:#FBF8F5;cursor:default;}
 .m.off .m-n{color:#B39C89;}
 .m.off .m-v{color:#C9BBAE;font-weight:600;}
-
-/* 本週主力／專屬招：磚橘角框＋暖底（金＝主力，低分＝先練這塊最有感） */
 .m.focus{background:#FDF1E8;border-color:#EAC9B4;}
 .m.focus:before,.m.focus:after{content:"";position:absolute;width:12px;height:12px;border:2px solid #C6603A;}
 .m.focus:before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:4px 0 0 0;}
 .m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
 .m.focus .m-v{color:#993C1D;}
 
-/* 地基：Story／Question 墊底 */
-.base{margin-top:13px;border-top:1px solid #E8DDD3;padding-top:11px;}
-.base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;margin-bottom:7px;}
-.core{display:flex;align-items:center;gap:10px;padding:4px 0;}
-.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#8E682B;}
-.core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
-.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+/* ═ 三態互動卡（提案）═ */
+.cap{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.cap-n{font-size:19px;font-weight:900;color:#8E682B;font-variant-numeric:tabular-nums;}
+.cap-bars{display:flex;gap:3px;flex-shrink:0;}
+.cap-bars span{width:20px;height:6px;border-radius:3px;background:#EFE6DB;overflow:hidden;display:block;}
+.cap-bars span i{display:block;height:100%;border-radius:3px;}
+.cap-f{font-size:12px;font-weight:700;color:#993C1D;margin-left:auto;white-space:nowrap;}
+.cap-c{font-size:12px;color:#B39C89;flex-shrink:0;}
+.expander{width:100%;border:0;background:none;color:#8A7266;font-size:12.5px;font-weight:700;letter-spacing:1px;padding:10px 0 2px;cursor:pointer;font-family:inherit;}
+.tri-hide{display:none;}
 
-/* 文字插槽：主視覺固定，下面接不同訊息 */
+/* ═ pro 科技版（私教的顏色）═ */
+.card.tech{background:linear-gradient(160deg,#0c131e 0%,#152233 100%);border:1px solid rgba(75,155,240,.30);box-shadow:0 8px 28px rgba(12,19,30,.45);}
+.card.tech .hd-k{color:#5d7692;}
+.card.tech .hd-t{color:#E6EDF5;}
+.card.tech .mock{color:#5d7692;border-color:#2a3c52;}
+.card.tech .pot{border-color:rgba(93,118,146,.35);}
+.card.tech .pot-k{color:#8fa6bd;}
+.card.tech .pot-n{color:#e6a93a;}
+.card.tech .pot-n span{color:#5d7692;}
+.card.tech .pot-bar{background:rgba(230,237,245,.10);}
+.card.tech .pot-bar i{background:linear-gradient(90deg,#e8734a,#e6a93a);}
+.card.tech .base{border-color:rgba(93,118,146,.35);}
+.card.tech .base-k{color:#5d7692;}
+.card.tech .core-en{color:#e6a93a;}
+.card.tech .core-zh{color:#E6EDF5;}
+.card.tech .core-bar{background:linear-gradient(90deg,#e8734a,#e6a93a);}
+.card.tech .dh-zh{color:#E6EDF5;}
+.card.tech .dh-bar{background:rgba(230,237,245,.10);}
+.card.tech .m{background:rgba(230,237,245,.06);border-color:rgba(93,118,146,.25);}
+.card.tech .m-n{color:#E6EDF5;}
+.card.tech .bar{background:rgba(230,237,245,.12);}
+.card.tech .m-v{color:#8fa6bd;}
+.card.tech .m-t{color:#5d7692;}
+.card.tech .m.focus{background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.45);}
+.card.tech .m.focus:before,.card.tech .m.focus:after{border-color:#e6a93a;}
+.card.tech .m.focus .m-v{color:#e6a93a;}
+
+/* 文字插槽 */
 .slot{margin-top:10px;background:#fff;border:1px solid #E8DDD3;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
 .slot-k{font-size:10.5px;letter-spacing:2px;font-weight:700;color:#B39C89;margin-bottom:4px;}
 .slot-t{font-size:14px;line-height:1.85;color:#4A1B0C;}
 .slot-t b{color:#993C1D;}
+
+/* ═ 口袋提示卡（bottom sheet）═ */
+.ov{position:fixed;inset:0;background:rgba(43,33,24,.45);display:none;z-index:50;}
+.ov.on{display:block;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:460px;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(43,33,24,.25);transform:translateY(105%);transition:transform .22s ease;max-height:82vh;overflow-y:auto;}
+.sheet.on{transform:translateY(0);}
+.sh-grab{width:40px;height:4px;border-radius:2px;background:#E8DDD3;margin:0 auto 12px;}
+.sh-hd{display:flex;align-items:baseline;gap:8px;}
+.sh-mk{font-size:12px;font-weight:900;}
+.sh-n{font-size:19px;font-weight:900;color:#4A1B0C;}
+.sh-dim{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A7266;}
+.sh-tech{font-size:13px;font-weight:700;color:#993C1D;margin-top:3px;}
+.sh-sec{margin-top:13px;}
+.sh-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#B39C89;margin-bottom:4px;}
+.sh-t{font-size:14.5px;line-height:1.85;color:#4A1B0C;}
+.sh-t b{color:#993C1D;}
+.sh-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.8;color:#5A3A2A;margin-top:5px;}
+.sh-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px;}
+.sh-two .sh-t{font-size:13px;line-height:1.75;}
 
 .note{margin-top:22px;font-size:12.5px;color:#8A7266;line-height:1.9;padding:0 4px;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="demo-banner">DEMO · 統一能力值儀表板 v4 · 分數全部示意<br>同一份測驗，四個等級的揭露程度：quiz → visitor → member → pro</div>
+  <div class="demo-banner">DEMO · 統一能力值儀表板 v4.1 · 分數全部示意<br>三態同一張卡＋四級分層揭露＋tap 小肌肉出口袋卡（亮著的格都可按）</div>
 
-  <div class="vh">等級 1 · <b>quiz 結果頁</b>（剛測完的路人：潛力＋4 條真分數，12 塊偷看）</div>
+  <div class="vh">提案 · <b>三態同一張卡</b>（遊戲化：HUD vs 背包——常駐一條，全圖是打開的動作）<br>👇 這張可以按：膠囊 → 標準 → 全圖 → 收合</div>
+  <div class="card" id="tri"></div>
+  <div class="slot"><div class="slot-k">每頁預設停在哪一態</div>
+    <div class="slot-t">練習頁常駐＝<b>膠囊</b>｜quiz 結果頁、visitor＝<b>標準</b>｜進步頁、週回顧、解盤＝<b>全圖</b>。</div></div>
+
+  <div class="vh">等級 1 · <b>quiz 結果頁</b>（大肌肉條真分數＋12 塊「名字露、分數模糊」偷看）</div>
   <div class="card" id="lv1"></div>
   <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
     <div class="slot-t">你的 12 塊肌肉都量出來了——<b>先練「讓他有感」最有感</b>，進館就從這塊開始點亮。</div></div>
 
-  <div class="vh">等級 2 · <b>visitor 免費體驗</b>（專屬招那塊亮，其他 11 塊還沒點亮）</div>
+  <div class="vh">等級 2 · <b>visitor 免費體驗</b>（輪替＝地基 2 核心技巧＋專屬招那塊；大肌肉條照給）</div>
   <div class="card" id="lv2"></div>
   <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
     <div class="slot-t">健檢說「讓他有感」先練最有感——<b>已經排進你的輪替</b>。其他 11 塊，會員一塊一塊點亮。</div></div>
 
-  <div class="vh">等級 3 · <b>member 會員</b>（4 大肌肉＋12 塊全點亮＋本週主力）</div>
+  <div class="vh">等級 3 · <b>member 會員</b>（地基→4 大肌肉→12 塊全點亮，每塊都可按）</div>
   <div class="card" id="lv3"></div>
   <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
     <div class="slot-t">這週你練了 <b>5 組</b>——「讓他敢說」又長了一截，下週換「讓他有感」接棒。</div></div>
 
-  <div class="vh">等級 4 · <b>pro 私教</b>（12 塊帶技巧名＋地基，解盤同一張圖）</div>
-  <div class="card" id="lv4"></div>
+  <div class="vh">等級 4 · <b>pro 私教</b>（科技版配色＝私教的顏色，大肌肉保留＋12 塊帶技巧名）</div>
+  <div class="card tech" id="lv4"></div>
   <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
     <div class="slot-t">教練備註：「讓他有感」卡在只講過程——<b>下次端一塊牛肉出來，講結果</b>，一週後回測這格。</div></div>
 
   <div class="note">
-    四個等級同一套視覺語言：暖版白卡、4 大肌肉一列一色、12 塊格＝名字＋橫 bar＋分數、
-    磚橘角框＝本週主力（先練這塊最有感）。最上面那條「已解鎖影響力」四級都在——
-    同一條線從測驗那天一路帶到私教。分數全從 atpi-core 真公式算（資料示意）：
-    大肌肉成數＝3 塊平均歸零換算 0–100，小肌肉＝1–5 原始分，兩把尺是同一把（0–100 ＝ 1–5 攤開）。
-    接真資料時只要傳「等級」參數，版型不用改。
+    閱讀順序改成 <b>2 地基 → 4 大肌肉 → 12 塊</b>（由粗到細的概念階梯）；大肌肉列標嵌在每組 3 格上方，
+    每一級都在。磚橘／金角框＝本週主力（先練這塊最有感）；灰格＝還沒點亮。
+    口袋卡素材全部現成：MUSCLES（技巧、一句話觀察）＋ DRILL（怎麼練七欄），版型不用新寫文案。
+    分數從 atpi-core 真公式算（資料示意）；接真資料時傳「等級＋態」兩個參數，版型不用改。
   </div>
 </div>
 
+<div class="ov" id="ov"></div>
+<div class="sheet" id="sheet"></div>
+
 <script src="atpi-core.js"></script>
+<script src="judgement.js"></script>
 <script>
-/* DIMS 由各專案自定（本 demo 用暖版）：color＝原版填色、textColor＝深版文字 */
-var DIMS = {
-  A:{en:"ATTRACT",zh:"吸引肌肉",color:"#C6603A",textColor:"#AF5433"},
-  T:{en:"TRUST",zh:"信任肌肉",color:"#6E8B77",textColor:"#5C7464"},
-  P:{en:"PROFESSIONAL",zh:"專業肌肉",color:"#6E8CA8",textColor:"#54718D"},
-  I:{en:"IMPACT",zh:"推進肌肉",color:"#C99A4E",textColor:"#8E682B"}
+/* DIMS 由各專案自定：暖版（quiz/visitor/member）＋科技版（pro 私教） */
+var PAL = {
+  warm:{A:{c:"#C6603A",t:"#AF5433"},T:{c:"#6E8B77",t:"#5C7464"},P:{c:"#6E8CA8",t:"#54718D"},I:{c:"#C99A4E",t:"#8E682B"}},
+  tech:{A:{c:"#e8734a",t:"#e8734a"},T:{c:"#33c495",t:"#33c495"},P:{c:"#4b9bf0",t:"#4b9bf0"},I:{c:"#e6a93a",t:"#e6a93a"}}
 };
-/* 示意資料（CLAUDE.md 測試組）——所有等級吃同一份，數字全由真公式算 */
+var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
+var DIM_ZH = {A:"吸引肌肉",T:"信任肌肉",P:"專業肌肉",I:"推進肌肉"};
+/* 示意資料——所有等級吃同一份，數字全由真公式算 */
 var MS = {A1:4,A2:2,A3:3, T1:4,T2:5,T3:4, P1:3,P2:1,P3:2, I1:3,I2:2,I3:4};
 var D5 = dimFromMuscles(MS);
 var PCT = {}; DORD.forEach(function(k){ PCT[k] = pctFromEval(D5[k]); });
 var POT = calcPotential(PCT).unlocked;
 var WK = weakestMuscles(MS,1)[0];
 
+function md(s){ return (s||"").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>"); }
 function potHTML(){
   return '<div class="pot"><div class="pot-k">已解鎖影響力</div>'
     + '<div class="pot-n">'+POT+'<span>/ 1000</span></div>'
@@ -141,43 +204,131 @@ function potHTML(){
 function hdHTML(t){
   return '<div class="hd"><span class="hd-k">ATPI</span><span class="hd-t">'+t+'</span><span class="mock">分數示意</span></div>';
 }
-function d4HTML(){
-  return DORD.map(function(k){ var d=DIMS[k];
-    return '<div class="d4"><span class="d4-en" style="color:'+d.textColor+';">'+d.en+'</span>'
-      + '<span class="d4-zh">'+d.zh+'</span>'
-      + '<span class="d4-bar"><i style="width:'+PCT[k]+'%;background:'+d.color+';"></i></span>'
-      + '<span class="d4-v" style="color:'+d.textColor+';">'+PCT[k]+'</span></div>';
+/* 地基＝2 核心技巧（講故事·問問題）：老師拍板階梯 2 核心 → 4 大肌肉 → 12 小肌肉。
+   visitor 的輪替練的就是這兩塊（＋專屬招），所以 own 模式帶「輪替中」標記；全等級可按出口袋卡。 */
+function baseHTML(mode){
+  var tag = mode === "own" ? '<span class="core-tag">輪替中</span>' : '';
+  return '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
+    + '<div class="core" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
+    + '<div class="core" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
+}
+/* 大肌肉列標＋該維 3 格。mode: peek｜own｜full｜pro */
+function sectionsHTML(mode, pal){
+  var P = PAL[pal||"warm"];
+  return DORD.map(function(k){
+    var head = '<div class="dh"><span class="dh-en" style="color:'+P[k].t+';">'+DIM_EN[k]+'</span>'
+      + '<span class="dh-zh">'+DIM_ZH[k]+'</span>'
+      + '<span class="dh-bar"><i style="width:'+PCT[k]+'%;background:'+P[k].c+';"></i></span>'
+      + '<span class="dh-v" style="color:'+P[k].t+';">'+PCT[k]+'</span></div>';
+    var tiles = musclesOfDim(k).map(function(mk){
+      var mu = MUSCLES[mk], v = MS[mk];
+      var cls = "m", extra = "", tap = ' onclick="pocket(\''+mk+'\')"';
+      var barW = Math.round((v-1)/4*100);
+      var val = v.toFixed(1);
+      if (mode === "peek") { cls += " peek"; tap = ""; }
+      if (mode === "own") {
+        if (mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
+        else { cls += " off"; barW = 0; val = "還沒點亮"; tap = ""; }
+      }
+      if ((mode === "full" || mode === "pro") && mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
+      if (mode === "pro") { extra = '<div class="m-t">'+mu.tech+'</div>'; }
+      return '<div class="'+cls+'"'+tap+'><div class="m-n"><i style="color:'+P[k].t+';">'+mk+'</i>'+mu.name+'</div>'
+        + '<div class="bar"><i style="width:'+barW+'%;background:'+P[k].c+';"></i></div>'
+        + '<div class="m-v">'+val+'</div>' + extra + '</div>';
+    }).join('');
+    return head + '<div class="row3">' + tiles + '</div>';
   }).join('');
 }
-/* mode: peek＝模糊偷看｜own＝只亮專屬招｜full＝全點亮｜pro＝全點亮＋技巧名 */
-function g12HTML(mode){
-  return '<div class="g12">' + MORD.map(function(mk){
-    var mu = MUSCLES[mk], d = DIMS[mu.dim], v = MS[mk];
-    var cls = "m", extra = "";
-    var barW = Math.round((v-1)/4*100), barC = d.color;
-    var val = v.toFixed(1);
-    if (mode === "peek") { cls += " peek"; }
-    if (mode === "own") {
-      if (mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
-      else { cls += " off"; barW = 0; val = "還沒點亮"; }
-    }
-    if ((mode === "full" || mode === "pro") && mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
-    if (mode === "pro") { extra = '<div class="m-t">'+mu.tech+'</div>'; }
-    return '<div class="'+cls+'"><div class="m-n"><i style="color:'+d.textColor+';">'+mk+'</i>'+mu.name+'</div>'
-      + '<div class="bar"><i style="width:'+barW+'%;background:'+barC+';"></i></div>'
-      + '<div class="m-v">'+val+'</div>' + extra + '</div>';
-  }).join('') + '</div>';
-}
-function baseHTML(){
-  return '<div class="base"><div class="base-k">FOUNDATION · 地基</div>'
-    + '<div class="core"><span class="core-en">STORY</span><span class="core-zh">講故事</span><span class="core-bar"></span></div>'
-    + '<div class="core"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span><span class="core-bar"></span></div></div>';
-}
 
-document.getElementById("lv1").innerHTML = hdHTML("影響力健檢 · 結果") + potHTML() + d4HTML() + g12HTML("peek");
-document.getElementById("lv2").innerHTML = hdHTML("影響力健身房 · 免費體驗") + potHTML() + g12HTML("own");
-document.getElementById("lv3").innerHTML = hdHTML("會員 · 影響力全圖") + potHTML() + d4HTML() + g12HTML("full") + baseHTML();
-document.getElementById("lv4").innerHTML = hdHTML("私教 · 解盤全圖") + potHTML() + g12HTML("pro") + baseHTML();
+/* ═ 三態互動卡 ═ */
+var triState = 0; /* 0 膠囊 1 標準 2 全圖 */
+function triHTML(){
+  var P = PAL.warm;
+  if (triState === 0) {
+    return '<div class="cap" onclick="triGo(1)">'
+      + '<span class="cap-n">'+POT+'</span>'
+      + '<span class="cap-bars">'+DORD.map(function(k){
+          return '<span><i style="width:'+PCT[k]+'%;background:'+P[k].c+';"></i></span>';
+        }).join('')+'</span>'
+      + '<span class="cap-f">本週主力 · '+MUSCLES[WK].name+'</span>'
+      + '<span class="cap-c">▾</span></div>';
+  }
+  var html = hdHTML("影響力肌肉") + potHTML()
+    + DORD.map(function(k){
+        return '<div class="dh"><span class="dh-en" style="color:'+P[k].t+';">'+DIM_EN[k]+'</span>'
+          + '<span class="dh-zh">'+DIM_ZH[k]+'</span>'
+          + '<span class="dh-bar"><i style="width:'+PCT[k]+'%;background:'+P[k].c+';"></i></span>'
+          + '<span class="dh-v" style="color:'+P[k].t+';">'+PCT[k]+'</span></div>';
+      }).join('');
+  if (triState === 1) {
+    html += '<button class="expander" onclick="triGo(2)">看 12 塊全圖 ▾</button>';
+  } else {
+    html = hdHTML("影響力肌肉全圖") + potHTML() + baseHTML() + sectionsHTML("full","warm")
+      + '<button class="expander" onclick="triGo(0)">收合 ▴</button>';
+  }
+  return html;
+}
+function triGo(s){ triState = s; document.getElementById("tri").innerHTML = triHTML(); }
+
+/* ═ 口袋提示卡 ═ */
+function drillHTML(dr){
+  if (!dr) return '';
+  return '<div class="sh-sec"><div class="sh-k">怎麼練（今天就能做）</div><div class="sh-t">'+md(dr.h)+'</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">對誰練</div><div class="sh-t">'+md(dr.who)+'</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">起手可以這樣說</div><div class="sh-t">'+md(dr.lead)+'</div>'
+    + '<div class="sh-line">「'+md(dr.line)+'」</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">關鍵一個字</div><div class="sh-t">'+md(dr.key)+'</div></div>'
+    + '<div class="sh-two">'
+    + '<div><div class="sh-k">怎樣算成了</div><div class="sh-t">'+md(dr.win)+'</div></div>'
+    + '<div><div class="sh-k">沒動靜怎麼辦</div><div class="sh-t">'+md(dr.retry)+'</div></div>'
+    + '</div>';
+}
+function sheetShow(html){
+  document.getElementById("sheet").innerHTML = '<div class="sh-grab"></div>' + html;
+  document.getElementById("ov").classList.add("on");
+  document.getElementById("sheet").classList.add("on");
+}
+function pocket(mk){
+  var mu = MUSCLES[mk], d = mu.dim, j = (typeof JUDGEMENT!=="undefined" && JUDGEMENT[mk]) || {};
+  var dr = (typeof DRILL!=="undefined" && DRILL[mk]) || null;
+  var P = PAL.warm;
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:'+P[d].t+';">'+mk+'</span>'
+    + '<span class="sh-n">'+mu.name+'</span>'
+    + '<span class="sh-dim">'+DIM_ZH[d]+' · 第 '+mk.charAt(1)+' 塊</span></div>'
+    + '<div class="sh-tech">技巧 · '+mu.tech+'</div>'
+    + '<div class="sh-sec"><div class="sh-k">這塊肌肉在練什麼</div><div class="sh-t">'+md(mu.ask)+'</div></div>';
+  if (dr) html += drillHTML(dr);
+  else if (j.homework) html += '<div class="sh-sec"><div class="sh-k">怎麼練</div><div class="sh-t">'+md(j.homework)+'</div></div>';
+  sheetShow(html);
+}
+function pocketCore(key){
+  var dr = (typeof CORE_DRILL!=="undefined" && CORE_DRILL[key]) || null;
+  if (!dr) return;
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:#8E682B;">'+(key==="story"?"STORY":"QUESTION")+'</span>'
+    + '<span class="sh-n">'+dr.n+'</span>'
+    + '<span class="sh-dim">核心技巧 · 12 塊的地基</span></div>'
+    + '<div class="sh-tech">這 2 個用得好，12 塊肌肉才用得好</div>'
+    + drillHTML(dr);
+  sheetShow(html);
+}
+document.getElementById("ov").addEventListener("click", function(){
+  document.getElementById("ov").classList.remove("on");
+  document.getElementById("sheet").classList.remove("on");
+});
+
+triGo(0);
+document.getElementById("lv1").innerHTML = hdHTML("影響力健檢 · 結果") + potHTML() + sectionsHTML("peek","warm");
+document.getElementById("lv2").innerHTML = hdHTML("影響力健身房 · 免費體驗") + potHTML() + baseHTML("own") + sectionsHTML("own","warm");
+document.getElementById("lv3").innerHTML = hdHTML("會員 · 影響力全圖") + potHTML() + baseHTML() + sectionsHTML("full","warm");
+document.getElementById("lv4").innerHTML = hdHTML("私教 · 解盤全圖") + potHTML() + baseHTML() + sectionsHTML("pro","tech");
+
+/* 截圖／展示用：?tri=1|2 直接開三態卡某一態、?pocket=P2 直接開口袋卡 */
+var q = new URLSearchParams(location.search);
+if (q.get("tri")) triGo(+q.get("tri"));
+if (q.get("pocket")) {
+  var pk = q.get("pocket");
+  (pk === "story" || pk === "ask") ? pocketCore(pk) : pocket(pk);
+}
 </script>
 </body>
 </html>
