@@ -160,6 +160,11 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .bone-q b{color:#E8C89A;}
 .bone-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
 .bone-end{font-size:14px;color:#4A1B0C;line-height:1.9;text-align:center;margin:24px 0 10px;padding:0 8px;}
+/* 引號層（2026-09-06 拍板）：只給品牌金句，大金引號＋署名；裝飾字符走襯線、內文仍無襯線 */
+.quote{margin:26px 14px 10px;}
+.quote-m{display:block;font-family:Georgia,"Times New Roman",serif;font-size:38px;color:#C99A4E;line-height:.7;}
+.quote-t{font-size:16px;color:#4A1B0C;line-height:2;font-weight:700;margin-top:4px;}
+.quote-by{margin-top:2px;font-size:12.5px;color:#9c7f6f;text-align:right;letter-spacing:.08em;}
 
 /* 大按鈕 */
 .go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 4px 12px rgba(198,96,58,.20);transition:transform .15s;}
@@ -868,7 +873,7 @@ function outHTML(){
       + '</div>';
   }
   h += demoP7_();
-  h += '<div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>';
+  h += '<div class="quote" style="text-align:center;"><span class="quote-m">❝</span><div class="quote-t">影響力的盡頭不是成交，<br>是有人因為你變好。</div><div class="quote-by" style="text-align:center;">—— 光頭</div></div>';
   return h;
 }
 
