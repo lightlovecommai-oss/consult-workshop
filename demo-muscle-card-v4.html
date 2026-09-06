@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DEMO · 統一能力值儀表板 v4（分層揭露）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ 統一能力值儀表板 v4（2026-09-06）═══
+   概念承接 demo-muscle-card.html v3（排排站＋橫 bar、肌肉語言、分層揭露、本週主力），
+   視覺全面改暖版白卡（30-App規範：#F7F1EC 底／白卡／四色原版填色＋深版文字）。
+   同一份測驗資料 → 四個等級的儀表板：quiz 結果頁 → visitor → member → pro。
+   錨＝每一級最上面都是同一條「已解鎖影響力 N/1000」。分數全部示意（真公式算，資料假）。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;padding:20px 16px 60px;}
+.wrap{max-width:460px;margin:0 auto;}
+.demo-banner{background:#2B2118;color:#F7F1EC;font-size:12px;text-align:center;padding:7px 10px;letter-spacing:1px;border-radius:10px;margin-bottom:18px;line-height:1.7;}
+
+.vh{font-size:12px;letter-spacing:2px;font-weight:700;color:#8A7266;margin:26px 4px 9px;}
+.vh b{color:#993C1D;}
+
+/* 卡片：暖版白卡（visitor/member 同語彙） */
+.card{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:17px 16px 15px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
+.hd{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;}
+.hd-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;}
+.hd-t{font-size:15px;font-weight:900;color:#4A1B0C;letter-spacing:1px;}
+.mock{margin-left:auto;font-size:10px;color:#B39C89;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;}
+
+/* 錨：已解鎖影響力（visitor .pot 同款）——四個等級都是同一條線 */
+.pot{border-bottom:1px dashed #E8DDD3;padding-bottom:12px;margin-bottom:13px;}
+.pot-k{font-size:11.5px;font-weight:700;color:#8A7266;letter-spacing:2px;}
+.pot-n{font-size:27px;font-weight:900;color:#8E682B;margin-top:1px;letter-spacing:.02em;}
+.pot-n span{font-size:13px;font-weight:700;color:#B39C89;margin-left:4px;letter-spacing:0;}
+.pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:7px;overflow:hidden;}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+
+/* 4 大肌肉：一列一肌肉（EN＋中文＋bar＋成數） */
+.d4{display:flex;align-items:center;gap:9px;padding:6px 0;}
+.d4-en{flex-shrink:0;width:100px;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
+.d4-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.d4-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
+.d4-bar i{display:block;height:100%;border-radius:4px;}
+.d4-v{flex-shrink:0;width:38px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+
+/* 12 塊小肌肉：3×4 格 */
+.g12{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px;}
+.m{position:relative;background:#F7F1EC;border:1px solid #EFE6DB;border-radius:12px;padding:9px 10px 8px;min-width:0;}
+.m-n{font-size:12.5px;font-weight:700;color:#4A1B0C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-n i{font-style:normal;font-size:10px;font-weight:800;margin-right:3px;}
+.bar{height:5px;border-radius:3px;background:#E8DDD3;margin:7px 0 6px;overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:3px;}
+.m-v{font-size:11px;font-weight:700;color:#8A7266;font-variant-numeric:tabular-nums;}
+.m-t{font-size:10.5px;color:#8A7266;margin-top:4px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* 等級 1：模糊偷看（quiz 結果頁的 12 格鉤子） */
+.m.peek .bar,.m.peek .m-v{filter:blur(3px);user-select:none;}
+
+/* 等級 2：還沒點亮的格（灰、不是赤字） */
+.m.off{background:#FBF8F5;}
+.m.off .m-n{color:#B39C89;}
+.m.off .m-v{color:#C9BBAE;font-weight:600;}
+
+/* 本週主力／專屬招：磚橘角框＋暖底（金＝主力，低分＝先練這塊最有感） */
+.m.focus{background:#FDF1E8;border-color:#EAC9B4;}
+.m.focus:before,.m.focus:after{content:"";position:absolute;width:12px;height:12px;border:2px solid #C6603A;}
+.m.focus:before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:4px 0 0 0;}
+.m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
+.m.focus .m-v{color:#993C1D;}
+
+/* 地基：Story／Question 墊底 */
+.base{margin-top:13px;border-top:1px solid #E8DDD3;padding-top:11px;}
+.base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;margin-bottom:7px;}
+.core{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#8E682B;}
+.core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+
+/* 文字插槽：主視覺固定，下面接不同訊息 */
+.slot{margin-top:10px;background:#fff;border:1px solid #E8DDD3;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.slot-k{font-size:10.5px;letter-spacing:2px;font-weight:700;color:#B39C89;margin-bottom:4px;}
+.slot-t{font-size:14px;line-height:1.85;color:#4A1B0C;}
+.slot-t b{color:#993C1D;}
+
+.note{margin-top:22px;font-size:12.5px;color:#8A7266;line-height:1.9;padding:0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="demo-banner">DEMO · 統一能力值儀表板 v4 · 分數全部示意<br>同一份測驗，四個等級的揭露程度：quiz → visitor → member → pro</div>
+
+  <div class="vh">等級 1 · <b>quiz 結果頁</b>（剛測完的路人：潛力＋4 條真分數，12 塊偷看）</div>
+  <div class="card" id="lv1"></div>
+  <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
+    <div class="slot-t">你的 12 塊肌肉都量出來了——<b>先練「讓他有感」最有感</b>，進館就從這塊開始點亮。</div></div>
+
+  <div class="vh">等級 2 · <b>visitor 免費體驗</b>（專屬招那塊亮，其他 11 塊還沒點亮）</div>
+  <div class="card" id="lv2"></div>
+  <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
+    <div class="slot-t">健檢說「讓他有感」先練最有感——<b>已經排進你的輪替</b>。其他 11 塊，會員一塊一塊點亮。</div></div>
+
+  <div class="vh">等級 3 · <b>member 會員</b>（4 大肌肉＋12 塊全點亮＋本週主力）</div>
+  <div class="card" id="lv3"></div>
+  <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
+    <div class="slot-t">這週你練了 <b>5 組</b>——「讓他敢說」又長了一截，下週換「讓他有感」接棒。</div></div>
+
+  <div class="vh">等級 4 · <b>pro 私教</b>（12 塊帶技巧名＋地基，解盤同一張圖）</div>
+  <div class="card" id="lv4"></div>
+  <div class="slot"><div class="slot-k">文字插槽 · 這一級接的訊息</div>
+    <div class="slot-t">教練備註：「讓他有感」卡在只講過程——<b>下次端一塊牛肉出來，講結果</b>，一週後回測這格。</div></div>
+
+  <div class="note">
+    四個等級同一套視覺語言：暖版白卡、4 大肌肉一列一色、12 塊格＝名字＋橫 bar＋分數、
+    磚橘角框＝本週主力（先練這塊最有感）。最上面那條「已解鎖影響力」四級都在——
+    同一條線從測驗那天一路帶到私教。分數全從 atpi-core 真公式算（資料示意）：
+    大肌肉成數＝3 塊平均歸零換算 0–100，小肌肉＝1–5 原始分，兩把尺是同一把（0–100 ＝ 1–5 攤開）。
+    接真資料時只要傳「等級」參數，版型不用改。
+  </div>
+</div>
+
+<script src="atpi-core.js"></script>
+<script>
+/* DIMS 由各專案自定（本 demo 用暖版）：color＝原版填色、textColor＝深版文字 */
+var DIMS = {
+  A:{en:"ATTRACT",zh:"吸引肌肉",color:"#C6603A",textColor:"#AF5433"},
+  T:{en:"TRUST",zh:"信任肌肉",color:"#6E8B77",textColor:"#5C7464"},
+  P:{en:"PROFESSIONAL",zh:"專業肌肉",color:"#6E8CA8",textColor:"#54718D"},
+  I:{en:"IMPACT",zh:"推進肌肉",color:"#C99A4E",textColor:"#8E682B"}
+};
+/* 示意資料（CLAUDE.md 測試組）——所有等級吃同一份，數字全由真公式算 */
+var MS = {A1:4,A2:2,A3:3, T1:4,T2:5,T3:4, P1:3,P2:1,P3:2, I1:3,I2:2,I3:4};
+var D5 = dimFromMuscles(MS);
+var PCT = {}; DORD.forEach(function(k){ PCT[k] = pctFromEval(D5[k]); });
+var POT = calcPotential(PCT).unlocked;
+var WK = weakestMuscles(MS,1)[0];
+
+function potHTML(){
+  return '<div class="pot"><div class="pot-k">已解鎖影響力</div>'
+    + '<div class="pot-n">'+POT+'<span>/ 1000</span></div>'
+    + '<div class="pot-bar"><i style="width:'+Math.max(2,Math.min(100,POT/10))+'%;"></i></div></div>';
+}
+function hdHTML(t){
+  return '<div class="hd"><span class="hd-k">ATPI</span><span class="hd-t">'+t+'</span><span class="mock">分數示意</span></div>';
+}
+function d4HTML(){
+  return DORD.map(function(k){ var d=DIMS[k];
+    return '<div class="d4"><span class="d4-en" style="color:'+d.textColor+';">'+d.en+'</span>'
+      + '<span class="d4-zh">'+d.zh+'</span>'
+      + '<span class="d4-bar"><i style="width:'+PCT[k]+'%;background:'+d.color+';"></i></span>'
+      + '<span class="d4-v" style="color:'+d.textColor+';">'+PCT[k]+'</span></div>';
+  }).join('');
+}
+/* mode: peek＝模糊偷看｜own＝只亮專屬招｜full＝全點亮｜pro＝全點亮＋技巧名 */
+function g12HTML(mode){
+  return '<div class="g12">' + MORD.map(function(mk){
+    var mu = MUSCLES[mk], d = DIMS[mu.dim], v = MS[mk];
+    var cls = "m", extra = "";
+    var barW = Math.round((v-1)/4*100), barC = d.color;
+    var val = v.toFixed(1);
+    if (mode === "peek") { cls += " peek"; }
+    if (mode === "own") {
+      if (mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
+      else { cls += " off"; barW = 0; val = "還沒點亮"; }
+    }
+    if ((mode === "full" || mode === "pro") && mk === WK) { cls += " focus"; val = v.toFixed(1)+" · 本週主力"; }
+    if (mode === "pro") { extra = '<div class="m-t">'+mu.tech+'</div>'; }
+    return '<div class="'+cls+'"><div class="m-n"><i style="color:'+d.textColor+';">'+mk+'</i>'+mu.name+'</div>'
+      + '<div class="bar"><i style="width:'+barW+'%;background:'+barC+';"></i></div>'
+      + '<div class="m-v">'+val+'</div>' + extra + '</div>';
+  }).join('') + '</div>';
+}
+function baseHTML(){
+  return '<div class="base"><div class="base-k">FOUNDATION · 地基</div>'
+    + '<div class="core"><span class="core-en">STORY</span><span class="core-zh">講故事</span><span class="core-bar"></span></div>'
+    + '<div class="core"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span><span class="core-bar"></span></div></div>';
+}
+
+document.getElementById("lv1").innerHTML = hdHTML("影響力健檢 · 結果") + potHTML() + d4HTML() + g12HTML("peek");
+document.getElementById("lv2").innerHTML = hdHTML("影響力健身房 · 免費體驗") + potHTML() + g12HTML("own");
+document.getElementById("lv3").innerHTML = hdHTML("會員 · 影響力全圖") + potHTML() + d4HTML() + g12HTML("full") + baseHTML();
+document.getElementById("lv4").innerHTML = hdHTML("私教 · 解盤全圖") + potHTML() + g12HTML("pro") + baseHTML();
+</script>
+</body>
+</html>
