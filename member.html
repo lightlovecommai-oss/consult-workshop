@@ -339,6 +339,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .n7q b{color:#E8C89A;}
 .n7go{display:block;text-align:center;margin-top:12px;background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);color:#fff;border-radius:16px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;min-height:48px;box-sizing:border-box;}
 .n7end{margin-top:13px;text-align:center;font-size:12.5px;color:#F3E2D2;}
+.n7book{margin-top:12px;text-align:center;font-size:12.5px;line-height:1.8;color:rgba(247,241,236,.85);}
+.n7book b{color:#E8C89A;font-weight:700;}
 .n7end b{color:#E8C89A;}
 .feedbox .cw{margin-bottom:10px;}
 .slim{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
@@ -915,7 +917,7 @@ function ctaCard(t){
   return '<div class="cw">'
     + '<div class="pill" style="margin-bottom:12px;background:#E8EEF4;color:#54718D;">會員才看得到</div>'
     + '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;">' + t + '</div>'
-    + '<a href="join.html" style="display:block;text-align:center;margin-top:13px;background:#AF5433;color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:600;text-decoration:none;min-height:44px;box-sizing:border-box;">看看會員方案 NT$99／月</a>'
+    + '<a href="join.html" style="display:block;text-align:center;margin-top:13px;background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;min-height:44px;box-sizing:border-box;">坐上會員席 NT$99／月</a>'
     + (FREE_TALK_URL
         ? '<a href="' + FREE_TALK_URL + '" style="display:block;text-align:center;margin-top:6px;color:#6E4A3C;font-size:13px;text-decoration:underline;padding:12px;min-height:44px;box-sizing:border-box;">還不確定？先來聽一場免費講座</a>'
         : '')
@@ -1212,7 +1214,10 @@ function n7HTML_(){
     + '<div class="n7li"><span>✦</span><span>12 塊小肌肉全開——技巧・心法・核心，三層練透</span></div>'
     + '<div class="n7li"><span>✦</span><span>專屬教練＋每週實戰教練課</span></div>'
     + '<div class="n7q">2 核心＋4 大肌肉，連成你的<b>「顧問變現路徑」</b>——用你最強的兩塊，長出自己的<b>「甜蜜成交路徑」</b>。</div>'
-    + (S.member ? '<a class="n7go" href="' + BOOK_URL + '">約教練聊聊你的下一塊 →</a>' : '')
+    + (S.member
+        ? '<div class="n7book">帶著你的<b>健檢報告</b>來——<br>教練陪你看，先練哪塊最有感。</div>'
+          + '<a class="n7go" href="' + BOOK_URL + '">約一次免費解盤 →</a>'
+        : '')
     + '</div>';
   var end = '<div class="n7end">影響力是肌肉，<b>只會越練越強</b>——'
     + (litN >= 12 ? '12 塊全點亮了' : '還有 ' + (12 - litN) + ' 塊等你點亮') + '。</div>';
@@ -1306,7 +1311,7 @@ function todayHTML(){
   /* v6 進-3（2026-09-05 老師拍板）：明日預告從進步頁搬回來，放「這週」卡下面 */
   h += demoM6_();
   h += demoM7_();
-  if (!S.member) h += ctaCard('你練的每一筆，會員都會<b style="color:#4A1B0C;">算進肌肉分數、教練都看得到</b>；每月還有 2 堂會員權益課，一堂練透一塊小肌群。');
+  if (!S.member) h += ctaCard('你剛練的這一筆，其實已經在長肌肉——只是還沒人幫你記。坐上會員席，<b style="color:#4A1B0C;">每一筆都算進肌肉分數、場邊教練隔天回你一句</b>——練到有人因為你，願意把心裡話說完。');
   return h;
 }
 
@@ -1328,10 +1333,10 @@ function demoM7_(){
     + '<div class="dm-upg-k">ATPIFIT · PRIVATE COACH · 私人教練席</div>'
     + '<div class="dm-upg-t">把影響力肌肉，<br>串成完整的成交流程</div>'
     + '<div class="dm-upg-li"><span>✓</span><span>甜蜜路徑四步全開——你最強兩塊組合出的變現打法</span></div>'
-    + '<div class="dm-upg-li"><span>✓</span><span>12 小肌群分數與判讀，教練陪你看</span></div>'
+    + '<div class="dm-upg-li"><span>✓</span><span>12 塊肌肉全部點亮，分數怎麼讀教練陪你看</span></div>'
     + '<div class="dm-upg-li"><span>✓</span><span>1v1 場邊教練，一週一次拆解你的真實對話</span></div>'
     + '<a class="dm-upg-b" href="pro.html?demo=1&pane=body">看看教練席長什麼樣 →</a>'
-    + '<div class="dm-upg-w">透過諮詢，協助營業額提升</div>'
+    + '<div class="dm-upg-w">成交只是果實——先成為那個<b>讓人認定就是你</b>的人</div>'
     + '</div></div>';
 }
 
