@@ -161,6 +161,16 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .n7go{display:block;text-align:center;margin-top:13px;background:#E8C89A;color:#4A1B0C;border-radius:12px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;}
 .n7go:active{transform:scale(.98);}
 
+/* 已解鎖影響力（數字連續性：quiz→visitor→member 同一條線） */
+.pot{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:16px;padding:14px 16px 13px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.pot-k{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;}
+.pot-n{font-size:28px;font-weight:900;color:#8E682B;margin-top:2px;letter-spacing:.02em;}
+.pot-n span{font-size:13px;font-weight:700;color:#B39C89;margin-left:4px;letter-spacing:0;}
+.pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:8px;overflow:hidden;}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+.pot-s{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.75;}
+.g.gown{background:rgba(201,154,78,.32);color:#F1DCB8;border:1px solid rgba(232,200,154,.55);}
+
 /* 骨層句＋頁尾四色收邊 */
 .bone{text-align:center;font-size:14px;color:#6E4A3C;line-height:2;padding:14px 20px 4px;}
 .bone b{color:#3E5546;}
@@ -185,6 +195,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
       <div class="sdots" id="sdots"></div>
       <span class="snum" id="snum">今天開始</span>
     </div>
+
+    <!-- 已解鎖影響力（有健檢基線才出現）＝quiz→visitor→member 同一條進度線 -->
+    <div id="potline"></div>
 
     <!-- 今日主卡：member 機制（只開 2 塊地基） -->
     <div class="hero" id="hero"></div>
@@ -264,11 +277,15 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   <div class="hero-rule"></div>
 
 </div>
+<script src="atpi-core.js"></script>
+<script src="common.js"></script>
 <script src="judgement.js"></script>
 <script>
 /* 今日主卡＝member 練習頁機制搬入：技巧名＋開場句＋技巧詳解（CORE_DRILL）＋
-   記錄流程（對誰→反應→寫一句→評語）。只開講故事/問問題 2 塊地基，
-   每次上線輪招＋換範例（seq）。紀錄存 localStorage，不打後端。 */
+   記錄流程（對誰→反應→寫一句→評語）。2 塊地基輪替，紀錄存 localStorage。
+   🔄 2026-09-06 老師核准「第三招＝專屬招」：帶 ?id= 進來且健檢基線讀得到時，
+   從最弱那塊小肌群拉 JUDGEMENT 的練習加進輪替（12 塊仍鎖、只亮他自己這塊），
+   並顯示「已解鎖影響力」＝quiz→visitor→member 同一條線（數字連續性）。 */
 var CORE = [
   { key:"story", name:"講故事",
     good:"道理他自己撿走了——地基就是這樣打的。",
@@ -322,18 +339,33 @@ function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 var st = load();
 var today = new Date();
 var seq = st.seq || 0;
-var mvIdx = seq % 2;
-var MV = CORE[mvIdx];
-var exN = Math.floor(seq / 2) % MV.exs.length;
-var EX = MV.exs[exN];
-var DR = (typeof CORE_DRILL !== "undefined") ? CORE_DRILL[MV.key] : null;
 st.seq = seq + 1; save(st);
+
+/* 專屬招＋數字連續性的資料源：?id=（路由帶進來）或上次記住的 cw_uid */
+var UID = "";
+try {
+  UID = new URLSearchParams(location.search).get("id") || localStorage.getItem("cw_uid") || "";
+  if (UID) localStorage.setItem("cw_uid", UID);
+} catch(e){}
+var OWN = null;   // {key:"own", mk, name, good, bad, exs} 從健檢最弱塊生成
+var POT = null;   // 已解鎖影響力（字典⑦ γ=0.6）
+
+var MOVES, mvIdx, MV, exN, EX, DR;
+function applyMoves(){
+  MOVES = OWN ? CORE.concat([OWN]) : CORE.slice();
+  mvIdx = seq % MOVES.length;
+  MV = MOVES[mvIdx];
+  exN = Math.floor(seq / MOVES.length) % MV.exs.length;
+  EX = MV.exs[exN];
+  DR = (MV.key !== "own" && typeof CORE_DRILL !== "undefined") ? CORE_DRILL[MV.key] : null;
+}
+applyMoves();
 
 var REC = { step:0, who:"", react:null, note:"" };
 
 function heroHTML(){
-  var h = '<div class="hero-eb">TODAY\'S DRILL · <b>今天的練習</b><i>範例 '+(exN+1)+'</i></div>'
-    + '<div class="kick">基本功 · 地基</div>'
+  var h = '<div class="hero-eb">TODAY\'S DRILL · <b>今天的練習</b>'+(MV.exs.length>1?'<i>範例 '+(exN+1)+'</i>':'')+'</div>'
+    + '<div class="kick">'+(MV.key==="own"?"專屬招 · 從你的影響力健檢來":"基本功 · 地基")+'</div>'
     + '<div class="p3big">'+MV.name+'</div>'
     + '<div class="p3how">'+EX.big+'</div>'
     + '<div class="p3q"><div class="p3q-k">'+esc(EX.lead)+'</div><div class="p3q-t">「'+esc(EX.line)+'」</div>'
@@ -399,21 +431,75 @@ function render(){
   while(st.days.indexOf(dstr(d))>-1){ n++; d.setDate(d.getDate()-1); }
   document.getElementById("snum").textContent = n>0 ? "連續 "+n+" 天" : "今天開始";
 
-  ["sk0","sk1"].forEach(function(id,i){
-    var isToday = (i===mvIdx);
-    document.getElementById(id).className = "sk "+(isToday?"today":"next");
+  /* 已解鎖影響力＝quiz→visitor→member 同一條線（沒基線就整塊不出現） */
+  var pl = document.getElementById("potline");
+  if (pl) pl.innerHTML = (POT == null) ? "" :
+    '<div class="pot"><div class="pot-k">UNLOCKED · 已解鎖影響力</div>'
+    + '<div class="pot-n">'+POT+'<span>/ 1000</span></div>'
+    + '<div class="pot-bar"><i style="width:'+Math.max(2, Math.min(100, POT/10))+'%"></i></div>'
+    + '<div class="pot-s">健檢那天量到的起點。影響力是肌肉，只會越練越強——這條線也是。</div></div>';
+
+  /* 專屬招列（插在 2 塊地基後、上鎖列前） */
+  if (OWN && !document.getElementById("sk2")) {
+    var DIMC = {A:"#AF5433", T:"#5C7464", P:"#54718D", I:"#8E682B"};
+    var lockEl = document.querySelector(".sk.lock");
+    var ownRow = document.createElement("div");
+    ownRow.className = "sk"; ownRow.id = "sk2";
+    ownRow.innerHTML = '<div class="sk-dot" style="background:'+DIMC[MUSCLES[OWN.mk].dim]+';">★</div>'
+      + '<div><div class="sk-n">'+OWN.name+'</div><div class="sk-s" id="sk2-s"></div></div>'
+      + '<span class="sk-badge" id="sk2-b"></span>';
+    lockEl.parentNode.insertBefore(ownRow, lockEl);
+  }
+  ["sk0","sk1","sk2"].forEach(function(id,i){
+    var el = document.getElementById(id); if (!el) return;
+    var key = i < 2 ? CORE[i].key : "own";
+    var isToday = (MV.key === key);
+    el.className = "sk "+(isToday?"today":"next");
     document.getElementById(id+"-b").textContent = isToday?"今天":"輪著練";
-    var c = st.cnt[CORE[i].key]||0;
-    document.getElementById(id+"-s").textContent = c>0 ? "已練 "+c+" 組" : "地基 · 12 塊肌肉都靠它";
+    var c = st.cnt[key]||0;
+    document.getElementById(id+"-s").textContent = c>0 ? "已練 "+c+" 組"
+      : (i < 2 ? "地基 · 12 塊肌肉都靠它" : "專屬招 · 從你的影響力健檢來");
   });
 
   document.getElementById("coreg").innerHTML = CORE.map(function(c){
     return '<div class="cg'+((st.cnt[c.key]||0)>0?" lit":"")+'">'+c.name+'</div>';
   }).join("");
-  document.getElementById("grid12").innerHTML = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"]
-    .map(function(mk){ return '<div class="g">'+mk+'</div>'; }).join("");
+  var mord = (typeof MORD !== "undefined") ? MORD : ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+  document.getElementById("grid12").innerHTML = mord.map(function(mk){
+    var own = OWN && mk === OWN.mk;
+    return '<div class="g'+(own?" gown":"")+'">'+(own?OWN.name:mk)+'</div>';
+  }).join("");
+  var hint = document.querySelector(".n7hint");
+  if (hint) hint.textContent = OWN
+    ? "健檢說「"+OWN.name+"」先練最有感——已經排進你的輪替。其他 11 塊，會員一塊一塊點亮。"
+    : "你在練的 2 塊地基，墊在這 12 塊肌肉下面。";
 }
 render();
+
+/* 讀健檢基線（quiz 寫進體測紀錄的 12 格 1–5）→ 生成專屬招＋已解鎖影響力。
+   拿不到 id、還沒測、或後端慢：畫面維持 2 塊地基，不多不少。 */
+if (UID && typeof loadBootstrap === "function") {
+  loadBootstrap(UID).then(function(d){
+    if (!d || !d.evals || !d.evals.length) return;
+    var ms = calcMuscleScores({ evalLog: d.evals });
+    var wk = weakestMuscles(ms, 1)[0];
+    if (wk && typeof JUDGEMENT !== "undefined" && JUDGEMENT[wk]) {
+      OWN = { key:"own", mk:wk, name:MUSCLES[wk].name,
+        good:"練對地方了——這塊每動一次，進步都最有感。",
+        bad:"這塊本來就是你現在在練的——同一招，明天換一個人再試一次。",
+        exs:[{ big: md(JUDGEMENT[wk].homework),
+               lead:"教練從你的健檢挑的，開口可以這樣起手：",
+               line: JUDGEMENT[wk].opener }] };
+    }
+    var d5 = dimFromMuscles(ms);
+    if (d5.A && d5.T && d5.P && d5.I) {
+      POT = calcPotential({ A:pctFromEval(d5.A), T:pctFromEval(d5.T),
+                            P:pctFromEval(d5.P), I:pctFromEval(d5.I) }).unlocked;
+    }
+    if (REC.step === 0) applyMoves();   // 記錄流程進行中就別換今天的招
+    render();
+  }).catch(function(e){ console.log("baseline error:", e); });
+}
 </script>
 </body>
 </html>

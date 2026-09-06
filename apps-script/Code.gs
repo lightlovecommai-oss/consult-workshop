@@ -39,7 +39,7 @@ var COLS = {
      member.html 的體驗客／會員內容。欄位在「(遊戲)開通名單」姓名跟團隊中間，人工維護，
      跟課程開通欄（workshopId 那些）是不同性質的旗標，不會被 computeConfig_() 的課程掃描讀到。 */
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"],
-              paidMember:["溝通健身房會員","paidMember"] },
+              paidMember:["溝通健身房會員","影響力健身房會員","paidMember"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
   checkins: { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], taskKey:["任務key","taskKey"],
               cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],

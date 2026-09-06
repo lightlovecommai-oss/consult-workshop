@@ -418,10 +418,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
    關掉的板塊（字典「兩種 TA 的贏法」鐵則②：別拿變現的尺量會員）：
      變現潛力／成交回報／市場驗證／愛的貨幣兌換／全域排行榜。
    核心不同：開練不是打勾，是**記下對方的反應**（低摩擦守則：必填只有兩下點擊）。
-   ⚠️ 尚未做的事（有意留白，見交接記錄）：demo.html 有一個 S.member（體驗客／會員）切換，
-   決定要不要秀 99 升級頁與社群完整內容——但後端目前沒有「是否已付 99」這個欄位
-   （學員分頁只有 lineId/姓名/團隊/enrolled），沒資料可以判斷就不亂猜，這裡先當作已入館
-   （跟改版前的行為一致），等後端補欄位再接上這個切換。 */
+   S.member（體驗客／會員）切換已接後端：開通名單「溝通健身房會員」手動勾選欄 →
+   Code.gs paidMember → loadStudents() → 下面 S.member。
+   2026-09-06 起路由層（index.html）就把未付 99 的人導去 visitor.html，
+   這裡的體驗客模式保留當防呆（直開網址不會壞）。 */
 var S = null, WID = null, PANE = "gym";
 /* ?pane=today|me 直接開某分頁（測試／截圖用，正式入口不帶就是預設夥伴頁） */
 try { var _p0 = new URLSearchParams(location.search).get("pane"); if (["gym","today","me"].indexOf(_p0) > -1) PANE = _p0; } catch (e) {}

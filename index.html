@@ -54,20 +54,23 @@
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script>
-/* ⭐ 2026-09-02 身分路由再收斂：showcase.html 從路由拿掉，所有人都進健身房——
-   不管在不在名單，一律讓他們進去，沒資料的人 member.html 自己會顯示空狀態
-   （還沒量過體格、還沒有片刻…），不需要另外一個「展示頁」擋在前面。
+/* ⭐ 2026-09-06 老師拍板漏斗全鏈：quiz → visitor → join → member →（付款手動開通）→ pro。
+   visitor.html 正式接進路由（原本是孤兒頁、路人全落 member 的體驗客模式）：
      · 有開通「超引力-顧問課」或「超引力-公眾演說」→ pro.html（私教學員層・新版科技版，
        另開一支檔案，不動 dashboard.html——天麗跟舊私教學員完全不受影響）
      · 有開通其他任一門課（一階/二階/三階/tenlead-1…） → dashboard.html（學員模式，舊版）
-     · 其餘所有人（含完全不在名單的）→ member.html（會員模式，體驗客/會員內容由 S.member 分）
+     · 已付 99（開通名單「溝通健身房會員」手動勾選欄 → paidMember）→ member.html（會員席）
+     · 其餘所有人（含完全不在名單的）→ visitor.html（體驗席）
+   member.html 內建的體驗客模式（S.member=false）保留當防呆——有人直開網址不會壞。
    showcase.html 這個檔案還留著（給行銷連結用），只是不再被自動路由指到。 */
 var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
 function routeFor(id) {
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
   var inPro = ENROLLMENTS.some(function(e){ return e.lineId === id && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
   if (inPro) return "pro.html?id=" + encodeURIComponent(id);
-  return (s && s.enrolled ? "dashboard.html?id=" : "member.html?id=") + encodeURIComponent(id);
+  if (s && s.enrolled) return "dashboard.html?id=" + encodeURIComponent(id);
+  if (s && s.paidMember) return "member.html?id=" + encodeURIComponent(id);
+  return "visitor.html?id=" + encodeURIComponent(id);
 }
 
 async function init() {
@@ -109,9 +112,9 @@ async function init() {
     if (savedId) { window.location.href = routeFor(savedId); return; }
   } catch (e) {}
 
-  /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）→ 直接進 member.html，
-     讓它自己走 LIFF 登入那條（跟 comconverttest 進健身房時同一招：沒有 userId 就不要帶 ?id=）。 */
-  window.location.href = "member.html";
+  /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）＝真路人 → 體驗席。
+     visitor.html 不需要 id 也能跑（紀錄存 localStorage）；付過錢的回頭客走上面 cw_uid 那條。 */
+  window.location.href = "visitor.html";
 }
 
 init();
