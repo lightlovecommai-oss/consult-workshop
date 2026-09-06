@@ -45,7 +45,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 
 /* 每維一個小節：維與維之間用虛線分隔＋留白（降視覺密度） */
 .dsec{margin-top:14px;padding-top:13px;border-top:1px dashed #E8DDD3;}
-.dsec:first-of-type{margin-top:2px;padding-top:0;border-top:0;}
+.dsec:first-of-type,.base + .dsec,.pot + .dsec{margin-top:2px;padding-top:0;border-top:0;}
 .card.tech .dsec{border-color:rgba(93,118,146,.35);}
 /* 大肌肉列標：嵌在每組 3 格上方（消費者從熟詞接到 12 塊） */
 .dh{display:flex;align-items:center;gap:8px;margin:6px 0 7px;}
