@@ -106,17 +106,71 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .stk-t{font-size:13px;color:#6E4A3C;}
 .stk-t b{color:#C6603A;font-weight:700;}
 
-/* 四塊肌肉：緊湊列（跟 demo.html 我頁一致，13px 全用——這是常駐儀表列不是初見大字） */
-.mrow{margin-bottom:14px;}
-.mrow:last-child{margin-bottom:0;}
-.mrow-top{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
-.mrow-n{font-size:13px;font-weight:600;color:#4A1B0C;}
-.mrow-s{font-size:13px;font-weight:600;}
-.mrow-v{margin-left:auto;font-size:13px;color:#4A1B0C;font-variant-numeric:tabular-nums;}
-.mrow-bar{height:8px;border-radius:4px;overflow:hidden;}
-.mrow-fill{height:8px;border-radius:4px;transition:width .4s;}
-.mrow-d{font-size:13px;color:#6E4A3C;margin-top:5px;}
-/* 進-3+6 合併左右滑卡：第一屏＝次數（今天就能動）、往左滑＝四塊肌肉（慢慢動） */
+/* ═ 統一能力值儀表板（規格＝demo-muscle-card-v4.html v4.2）：
+   進步頁全圖態＋練習頁常駐膠囊態。.mcore 取代 demo 的 .core（.p3c.core 撞名） ═ */
+.pot{border-bottom:1px dashed #E8DDD3;padding-bottom:12px;margin-bottom:13px;}
+.pot-k{font-size:11.5px;font-weight:700;color:#8A7266;letter-spacing:2px;}
+.pot-n{font-size:27px;font-weight:900;color:#8E682B;margin-top:1px;letter-spacing:.02em;}
+.pot-n span{font-size:13px;font-weight:700;color:#B39C89;margin-left:4px;letter-spacing:0;}
+.pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:7px;overflow:hidden;}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+.base{margin-bottom:12px;border-bottom:1px dashed #E8DDD3;padding-bottom:11px;}
+.base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;margin-bottom:7px;}
+.mcore{display:flex;align-items:center;gap:10px;padding:4px 0;cursor:pointer;}
+.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#8E682B;}
+.core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+.dsec{margin-top:14px;padding-top:13px;border-top:1px dashed #E8DDD3;}
+.base + .dsec{margin-top:2px;padding-top:0;border-top:0;}
+.dh{display:flex;align-items:center;gap:8px;margin:6px 0 7px;}
+.dh-en{flex-shrink:0;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
+.dh-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
+.dh-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
+.dh-bar i{display:block;height:100%;border-radius:4px;}
+.dh-v{flex-shrink:0;width:26px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.m{position:relative;background:#F7F1EC;border:1px solid #EFE6DB;border-radius:12px;padding:9px 10px 8px;min-width:0;}
+.m-n{font-size:12.5px;font-weight:700;color:#4A1B0C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-n i{font-style:normal;font-size:10px;font-weight:800;margin-right:3px;}
+.mbar{height:5px;border-radius:3px;background:#E8DDD3;margin:7px 0 6px;overflow:hidden;}
+.mbar i{display:block;height:100%;border-radius:3px;}
+.m-v{font-size:11px;font-weight:700;color:#8A7266;font-variant-numeric:tabular-nums;}
+.m.tap{cursor:pointer;}
+.m.off{background:#FBF8F5;}
+.m.off .m-n{color:#B39C89;}
+.m.off .m-v{color:#C9BBAE;font-weight:600;}
+.m.focus{background:#FDF1E8;border-color:#EAC9B4;}
+.m.focus:before,.m.focus:after{content:"";position:absolute;width:12px;height:12px;border:2px solid #C6603A;}
+.m.focus:before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:4px 0 0 0;}
+.m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
+.m.focus .m-v{color:#993C1D;}
+/* 膠囊態（練習頁常駐 HUD）＋展開鈕 */
+.cap{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.cap-n{font-size:19px;font-weight:900;color:#8E682B;font-variant-numeric:tabular-nums;}
+.cap-bars{display:flex;gap:3px;flex-shrink:0;}
+.cap-bars span{width:20px;height:6px;border-radius:3px;background:#EFE6DB;overflow:hidden;display:block;}
+.cap-bars span i{display:block;height:100%;border-radius:3px;}
+.cap-f{font-size:12px;font-weight:700;color:#993C1D;margin-left:auto;white-space:nowrap;}
+.cap-c{font-size:12px;color:#B39C89;flex-shrink:0;}
+.expander{width:100%;border:0;background:none;color:#8A7266;font-size:12.5px;font-weight:700;letter-spacing:1px;padding:10px 0 2px;cursor:pointer;font-family:inherit;}
+/* 口袋提示卡（幽靈浮層：半透明毛玻璃、可讀、再按一下就不見） */
+.ov{position:fixed;inset:0;background:rgba(43,33,24,.22);display:none;z-index:50;}
+.ov.on{display:block;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:460px;margin:0 auto;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:22px 22px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(43,33,24,.22);transform:translateY(105%);transition:transform .22s ease;max-height:82vh;overflow-y:auto;cursor:pointer;}
+.sheet.on{transform:translateY(0);}
+.sh-grab{width:40px;height:4px;border-radius:2px;background:#E8DDD3;margin:0 auto 12px;}
+.sh-hd{display:flex;align-items:baseline;gap:8px;}
+.sh-mk{font-size:12px;font-weight:900;}
+.sh-n{font-size:19px;font-weight:900;color:#4A1B0C;}
+.sh-dim{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A7266;}
+.sh-tech{font-size:13px;font-weight:700;color:#993C1D;margin-top:3px;}
+.sh-sec{margin-top:13px;}
+.sh-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#B39C89;margin-bottom:4px;}
+.sh-t{font-size:14.5px;line-height:1.85;color:#4A1B0C;}
+.sh-t b{color:#993C1D;}
+.sh-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.8;color:#5A3A2A;margin-top:5px;}
+.sh-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px;}
+.sh-two .sh-t{font-size:13px;line-height:1.75;}
 
 .wk{font-size:13px;color:#993C1D;background:#F0E3DB;border-radius:14px;padding:11px 13px;margin-top:12px;line-height:1.75;}
 
@@ -409,6 +463,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   <button class="nv" data-p="me" onclick="go('me')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 17.5l5.5-5.5 3.5 3.5 7.5-8"/><path d="M14.5 7.5H20V13"/></svg></span>進步</button>
 </div>
 
+<div class="ov" id="ov"></div>
+<div class="sheet" id="sheet"></div>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
@@ -559,7 +616,6 @@ function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
 /* \n→<br>：讓文案資料能手動指定斷行點（防詞組被自動換行切碎，如「講／結果」拆行） */
 function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
-function pct5(v){ return Math.max(0, Math.min(100, (v - 1) / 4 * 100)); }
 function timeAgo(dateStr){
   var ms = Date.now() - new Date(normDate(dateStr) + "T12:00:00").getTime();
   var days = Math.round(ms / 86400000);
@@ -607,7 +663,9 @@ function demoState() {
               {muscle:"T2",score:2,source:"self",date:ago(40),week:""},
               {muscle:"P1",score:3,source:"self",date:ago(6),week:""},
               {muscle:"P2",score:1,source:"coach",date:ago(6),week:""},
-              {muscle:"P3",score:3,source:"self",date:ago(6),week:""} ]
+              {muscle:"P3",score:3,source:"self",date:ago(6),week:""},
+              /* I 維留一筆就好：潛力值四維都要有才算得出（膠囊靠它），I2/I3 保持「還沒解鎖」示範鉤子 */
+              {muscle:"I1",score:2,source:"self",date:ago(6),week:""} ]
   };
 }
 
@@ -628,6 +686,9 @@ async function boot() {
     if (qs.get("review") === "1") { renderReview(); return; }
     el("nav").classList.remove("hide");
     render();
+    /* &pocket=T1|story|ask 直接開口袋卡（截圖驗收用，跟 demo-muscle-card 同慣例） */
+    var _pk = qs.get("pocket");
+    if (_pk) { if (_pk === "story" || _pk === "ask") pocketCore(_pk); else if (MUSCLES[_pk]) pocket(_pk); }
     return;
   }
   var uid = qs.get("id");
@@ -684,8 +745,7 @@ function renderReview(){
   el("joinday").textContent = "意見稿 " + RV_VER;
   var notes = rvLoad_();
   var out = document.createElement("div");
-  /* v4：按進去／摺疊裡的內容也要攤平——肌肉展開全開、詳解與圖例與 feed 強制展開 */
-  DORD.forEach(function(k){ ME_OPEN[k] = true; });
+  /* v4：按進去／摺疊裡的內容也要攤平——詳解與圖例與 feed 強制展開 */
   function rvOpenAll_(tmp){
     Array.prototype.forEach.call(tmp.querySelectorAll(".p3more"), function(x){ x.classList.add("open"); });
     /* feed box 在精修模式攤平全部卡片，不留內部捲軸 */
@@ -1186,7 +1246,9 @@ function todayHTML(){
   /* 練習頁 v3 第一屏（2026-09-04 拍板）：一次一技巧——大字技巧名＋開場句卡，
      教學細節收進「多看一點」摺疊；「換一個」縮成 ⟳ 小圖示不主張換。
      v9：整包收進一張 hero 卡（demo-visitor t-2 視覺）——eyebrow 雙語＋主鈕長在卡裡 */
-  var h = '<div class="hero"><div class="hero-eb">TODAY\'S DRILL · <b>今天的練習</b>'
+  /* 常駐膠囊態（demo v4.2）：能力值 HUD 收在最上面一條，點了才展開 */
+  var h = musCapHTML_();
+  h += '<div class="hero"><div class="hero-eb">TODAY\'S DRILL · <b>今天的練習</b>'
     + (S.member ? '<button class="p3swap" id="btnSwap" aria-label="換一個">⟳</button>' : '')
     + '</div>'
     + '<div class="p3kick" style="color:' + c + ';">' + esc_(core ? "基本功" : ((DIMS[m.dim] || {}).name || ""))
@@ -1449,48 +1511,134 @@ function bindPane(){
 
 /* ══ 分頁 3：進步（四塊肌肉狀態 + 累積 + 驗收）══
    數字露出政策（30-規範 §8）：會員只露分——狀態詞在前、分數在後；「比上次」只在真的有上次評分時出現。
-   v7 進-2（2026-09-05 老師拍板）：有分數就要顯示——教練評分優先、沒有就用測驗／打卡算出的分；
-   沒分數的塊叫「還沒解鎖」＝升級教練課的鉤子。12 個小肌群的分數仍不在這層打開（私教學員才看）。 */
+   v7 進-2（2026-09-05 老師拍板）：有分數就要顯示；沒分數的塊叫「還沒解鎖」＝升級教練課的鉤子。 */
 function dimStatusWord(v){
   if (v == null) return "還沒解鎖";
   if (v < 2.5) return "還沒開始練";
   if (v < 3.75) return "正在長";
   return "已經在長";
 }
-function dimHistory_(s, mk){
-  return (s.evalLog || []).filter(function(e){ return String(e.muscle).toUpperCase() === mk; })
-    .sort(function(a, b){ return normDate(a.date) < normDate(b.date) ? -1 : 1; });
-}
-function dimScoreNowPrev(s, dim){
-  var now = {}, prev = {};
-  musclesOfDim(dim).forEach(function(mk){
-    var hist = dimHistory_(s, mk);
-    if (hist.length) now[mk] = hist[hist.length - 1].score;
-    if (hist.length >= 2) prev[mk] = hist[hist.length - 2].score;
+/* ══ 統一能力值儀表板（2026-09-06 老師放行 demo-muscle-card-v4.html v4.2）：
+   進步頁＝全圖態（潛力錨＋地基 2 核心＋4 大肌肉列標＋12 塊）、練習頁＝常駐膠囊態（可展開）。
+   #40 尺度對齊：潛力線改用體格分（calcDimScores5→pctFromEval→calcPotential），
+   與 quiz／visitor 同一條「已解鎖影響力 N / 1000」。
+   12 塊體格分對會員打開＝v4.2 拍板，取代舊「小肌群分數私教學員才看」政策。 ══ */
+var PALV = {A:{c:"#C6603A",t:"#AF5433"},T:{c:"#6E8B77",t:"#5C7464"},P:{c:"#6E8CA8",t:"#54718D"},I:{c:"#C99A4E",t:"#8E682B"}};
+var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
+function musData_(){
+  var ms = calcMuscleScores(S), d5 = calcDimScores5(S), pct = {}, full = true;
+  DORD.forEach(function(k){
+    if (d5[k] == null) { pct[k] = null; full = false; }
+    else pct[k] = pctFromEval(d5[k]);
   });
-  var nowVals = Object.keys(now).map(function(k){ return now[k]; });
-  var prevVals = Object.keys(prev).map(function(k){ return prev[k]; });
-  return {
-    now: nowVals.length ? nowVals.reduce(function(a,b){return a+b;},0) / nowVals.length : null,
-    prev: prevVals.length ? prevVals.reduce(function(a,b){return a+b;},0) / prevVals.length : null
-  };
+  return { ms: ms, pct: pct, pot: full ? calcPotential(pct).unlocked : null };
 }
-/* ══ 進-4（2026-09-04 老師拍板）：獨立的 12 塊卡退役，併進四塊卡——點大肌肉展開它的 3 塊小肌群。
-   30-規範 §8 不變：12 塊給「有沒有在練」不給分數（小肌群分數是私教學員層才打開）。 ══ */
-var ME_OPEN = {};
-function toggleDim_(k){ if (!S.member) return; ME_OPEN[k] = !ME_OPEN[k]; render(); }
-function dimSubHTML_(k){
-  var sc = calcMuscleScores(S), fm = focusMuscle();
-  return '<div style="margin-top:9px;display:grid;gap:6px;animation:slidein .22s ease;">' + musclesOfDim(k).map(function(mk){
-    var m = MUSCLES[mk], n = muscleTrainCount(S, mk);
-    var measured = sc[mk] != null, focus = mk === fm;
-    var st = focus ? '這季主力' : n > 0 ? '練了 ' + n + ' 次' : measured ? '量過・還沒練' : '還沒解鎖';
-    return '<div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#4A1B0C;background:#F7F1EC;border-radius:10px;padding:8px 11px;">'
-      + '<span style="width:7px;height:7px;border-radius:50%;background:' + DIMS[k].color + ';flex-shrink:0;"></span>'
-      + '<span>' + esc_(m.name) + '</span>'
-      + '<span style="margin-left:auto;color:' + (focus ? dimTextColor(k) : '#8A7266') + ';' + (focus ? 'font-weight:700;' : '') + '">' + st + '</span></div>';
-  }).join('') + '</div>';
+function potHTML_(pot){
+  return '<div class="pot"><div class="pot-k">已解鎖影響力</div>'
+    + '<div class="pot-n">' + pot + '<span>/ 1000</span></div>'
+    + '<div class="pot-bar"><i style="width:' + Math.max(2, Math.min(100, pot / 10)) + '%;"></i></div></div>';
 }
+function dhHTML_(k, pc){
+  return '<div class="dh"><span class="dh-en" style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span>'
+    + '<span class="dh-zh">' + esc_(DIMS[k].name) + '</span>'
+    + '<span class="dh-bar"><i style="width:' + (pc == null ? 0 : pc) + '%;background:' + PALV[k].c + ';"></i></span>'
+    + (pc == null ? '' : '<span class="dh-v" style="color:' + PALV[k].t + ';">' + pc + '</span>')
+    + '</div>';
+}
+function musMapHTML_(){
+  var d = musData_(), fm = focusMuscle(), fmk = isCore_(fm) ? null : fm;
+  var h = d.pot != null ? potHTML_(d.pot) : '';
+  h += '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
+    + '<div class="mcore" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span><span class="core-bar"></span></div>'
+    + '<div class="mcore" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span><span class="core-bar"></span></div></div>';
+  h += DORD.map(function(k){
+    var tiles = musclesOfDim(k).map(function(mk){
+      var v = d.ms[mk], measured = v != null, focus = mk === fmk;
+      var cls = "m" + (focus ? " focus" : measured ? "" : " off");
+      var tap = (S.member && measured) ? ' onclick="pocket(\'' + mk + '\')"' : '';
+      if (tap) cls += " tap";
+      var barW = measured ? Math.round((v - 1) / 4 * 100) : 0;
+      var val = measured ? v.toFixed(1) + (focus ? " · 本週主力" : "") : "還沒解鎖";
+      return '<div class="' + cls + '"' + tap + '><div class="m-n"><i style="color:' + PALV[k].t + ';">' + mk + '</i>' + esc_(MUSCLES[mk].name) + '</div>'
+        + '<div class="mbar"><i style="width:' + barW + '%;background:' + PALV[k].c + ';"></i></div>'
+        + '<div class="m-v">' + val + '</div></div>';
+    }).join('');
+    return '<div class="dsec">' + dhHTML_(k, d.pct[k]) + '<div class="row3">' + tiles + '</div></div>';
+  }).join('');
+  return h;
+}
+/* 練習頁常駐膠囊（三態 0 膠囊／1 標準／2 全圖）——四維沒量齊算不出潛力就整卡不出現 */
+var MUS_TRI = 0;
+function musTri(s){ MUS_TRI = s; render(); }
+function musCapHTML_(){
+  var d = musData_();
+  if (d.pot == null) return '';
+  var fm = focusMuscle();
+  var fname = isCore_(fm) ? coreName_(fm) : ((MUSCLES[fm] || {}).name || '');
+  var inner;
+  if (MUS_TRI === 0) {
+    inner = '<div class="cap" onclick="musTri(1)">'
+      + '<span class="cap-n">' + d.pot + '</span>'
+      + '<span class="cap-bars">' + DORD.map(function(k){
+          return '<span><i style="width:' + d.pct[k] + '%;background:' + PALV[k].c + ';"></i></span>';
+        }).join('') + '</span>'
+      + '<span class="cap-f">本週主力 · ' + esc_(fname) + '</span>'
+      + '<span class="cap-c">▾</span></div>';
+  } else if (MUS_TRI === 1) {
+    inner = potHTML_(d.pot) + DORD.map(function(k){ return dhHTML_(k, d.pct[k]); }).join('')
+      + '<button class="expander" onclick="musTri(2)">看 12 塊全圖 ▾</button>';
+  } else {
+    inner = musMapHTML_() + '<button class="expander" onclick="musTri(0)">收合 ▴</button>';
+  }
+  return '<div class="cd" style="margin-bottom:14px;">' + inner + '</div>';
+}
+/* 口袋提示卡（幽靈浮層）＝demo v4.2 移植，素材全現成：MUSCLES＋DRILL＋CORE_DRILL */
+function drillHTML_(dr){
+  if (!dr) return '';
+  return '<div class="sh-sec"><div class="sh-k">怎麼練（今天就能做）</div><div class="sh-t">' + md_(dr.h) + '</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">對誰練</div><div class="sh-t">' + md_(dr.who) + '</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">起手可以這樣說</div><div class="sh-t">' + md_(dr.lead) + '</div>'
+    + '<div class="sh-line">「' + md_(dr.line) + '」</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">關鍵一個字</div><div class="sh-t">' + md_(dr.key) + '</div></div>'
+    + '<div class="sh-two">'
+    + '<div><div class="sh-k">怎樣算成了</div><div class="sh-t">' + md_(dr.win) + '</div></div>'
+    + '<div><div class="sh-k">沒動靜怎麼辦</div><div class="sh-t">' + md_(dr.retry) + '</div></div>'
+    + '</div>';
+}
+function sheetShow_(html){
+  el("sheet").innerHTML = '<div class="sh-grab"></div>' + html;
+  el("ov").classList.add("on");
+  el("sheet").classList.add("on");
+}
+function sheetHide_(){
+  el("ov").classList.remove("on");
+  el("sheet").classList.remove("on");
+}
+function pocket(mk){
+  var mu = MUSCLES[mk], dk = mu.dim;
+  var dr = (typeof DRILL !== "undefined" && DRILL[mk]) || null;
+  var j = (typeof JUDGEMENT !== "undefined" && JUDGEMENT[mk]) || {};
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:' + PALV[dk].t + ';">' + mk + '</span>'
+    + '<span class="sh-n">' + esc_(mu.name) + '</span>'
+    + '<span class="sh-dim">' + esc_(DIMS[dk].name) + ' · 第 ' + mk.charAt(1) + ' 塊</span></div>'
+    + '<div class="sh-tech">技巧 · ' + esc_(mu.tech) + '</div>'
+    + '<div class="sh-sec"><div class="sh-k">這塊肌肉在練什麼</div><div class="sh-t">' + md_(mu.ask) + '</div></div>';
+  if (dr) html += drillHTML_(dr);
+  else if (j.homework) html += '<div class="sh-sec"><div class="sh-k">怎麼練</div><div class="sh-t">' + md_(j.homework) + '</div></div>';
+  sheetShow_(html);
+}
+function pocketCore(key){
+  var dr = (typeof CORE_DRILL !== "undefined" && CORE_DRILL[key]) || null;
+  if (!dr) return;
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:#8E682B;">' + (key === "story" ? "STORY" : "QUESTION") + '</span>'
+    + '<span class="sh-n">' + esc_(dr.n) + '</span>'
+    + '<span class="sh-dim">核心技巧 · 12 塊的地基</span></div>'
+    + '<div class="sh-tech">這 2 個用得好，12 塊肌肉才用得好</div>'
+    + drillHTML_(dr);
+  sheetShow_(html);
+}
+el("ov").addEventListener("click", sheetHide_);
+el("sheet").addEventListener("click", sheetHide_);
 /* v4（2026-09-05 老師拍板）：甜蜜路徑卡退役（痛點不夠痛）——完整版留在 pro.html（p-4） */
 
 function meHTML(){
@@ -1501,27 +1649,6 @@ function meHTML(){
   /* 進-3+6 合併左右滑卡（2026-09-04 老師：兩張是同方向內容、合一張）：
      第一屏＝這個月的次數（今天就能動）、往左滑＝四塊肌肉狀態（慢慢動）——「先看右邊」變成「先看第一屏」 */
   var d5me = calcDimScores5(S);
-  var mrowsMe = DORD.map(function(k){
-    /* v7 進-2：教練評分（evalLog）優先；沒有評分就用測驗／打卡算出的分——有數值就要亮出來 */
-    var np = dimScoreNowPrev(S, k);
-    var v = np.now != null ? np.now : d5me[k];
-    var word = dimStatusWord(v);
-    var showDiff = np.now != null && np.prev != null;
-    var diff = showDiff ? Math.round((np.now - np.prev) * 10) / 10 : 0;
-    var open = S.member && ME_OPEN[k];
-    return '<div class="mrow"' + (S.member ? ' onclick="toggleDim_(\'' + k + '\')" style="cursor:pointer;"' : '') + '><div class="mrow-top">'
-      /* v7 進-1：四大肌肉名用各自的顏色標註 */
-      + '<span class="mrow-n" style="color:' + dimTextColor(k) + ';">' + esc_(DIMS[k].name) + '</span>'
-      + '<span class="mrow-s" style="color:' + (v == null ? "#8A7266" : dimTextColor(k)) + ';">' + word + '</span>'
-      + (v != null ? '<span class="mrow-v">' + v.toFixed(1) + ' / 滿分 5</span>' : '')
-      + (S.member ? '<span style="' + (v != null ? '' : 'margin-left:auto;') + 'align-self:center;flex-shrink:0;width:24px;height:24px;border-radius:50%;background:' + (open ? DIMS[k].soft : '#F7F1EC') + ';color:#993C1D;font-size:12px;display:flex;align-items:center;justify-content:center;">' + (open ? '▴' : '▾') + '</span>' : '')
-      + '</div>'
-      + '<div class="mrow-bar" style="background:' + (v == null ? "transparent" : DIMS[k].soft) + ';' + (v == null ? "border:1px dashed #E6DAD1;" : "") + '">'
-      + '<div class="mrow-fill" style="width:' + (v == null ? 0 : pct5(v)) + '%;background:' + DIMS[k].color + ';"></div></div>'
-      + (showDiff ? '<div class="mrow-d">' + (diff > 0 ? "比上次多了 " + diff : diff < 0 ? "比上次少了 " + Math.abs(diff) : "跟上次一樣") + '</div>' : "")
-      + (open ? dimSubHTML_(k) : "")
-      + '</div>';
-  }).join("");
   var anyMeasured = MORD.some(function(k){ return calcMuscleScores(S)[k] != null; });
   var valsMe = DORD.map(function(k){ return d5me[k]; }).filter(function(v){ return v != null; });
   var avgMe = valsMe.length ? valsMe.reduce(function(a, b){ return a + b; }, 0) / valsMe.length : null;
@@ -1538,7 +1665,8 @@ function meHTML(){
     + '<div style="font-size:17px;color:#4A1B0C;line-height:1.2;">' + dimStatusWord(avgMe) + '</div>'
     + '<div style="font-size:13px;color:#6E4A3C;margin-top:6px;">' + (avgMe != null ? avgMe.toFixed(1) + ' / 滿分 5' : '量了就有數字') + '</div></div></div>'
     + '<div style="font-size:13px;color:#6E4A3C;line-height:1.8;margin-top:12px;">次數你今天就能動，肌肉會慢慢跟上——<b style="color:#4A1B0C;">先顧次數。</b></div>';
-  var block2 = '<div style="margin-top:16px;border-top:1px solid #F0E3DB;padding-top:14px;">' + secH_("BIG FOUR", "你的四塊影響力肌肉") + mrowsMe
+  /* v10 進-2（2026-09-06 老師放行 demo v4.2）：BIG FOUR 四列換統一儀表板全圖態 */
+  var block2 = '<div style="margin-top:16px;border-top:1px solid #F0E3DB;padding-top:14px;">' + secH_("MUSCLE MAP", "影響力肌肉全圖") + musMapHTML_()
     + (anyMeasured
       ? '<div class="wk">還沒解鎖不等於 0 分——還沒解鎖的塊，就是教練陪你打開的下一塊。</div>'
       : '<div class="wk">還沒解鎖。<a href="https://quiz.atpifit.com" style="color:#993C1D;font-weight:700;">先做一次 ATPI 測驗 »</a>，或直接開始練——練了就會有數字。</div>')

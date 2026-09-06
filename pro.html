@@ -81,14 +81,67 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .rel-read b{color:#993C1D;}
 .empty{font-size:13px;color:#8A7266;line-height:1.85;text-align:center;padding:8px 4px;}
 
-/* 12 小肌群（demo pro-3 骨架：3 欄一體） */
-.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
-.mgc{background:#F7F1EC;border-radius:12px;padding:9px 8px;font-size:11.5px;color:#4A1B0C;line-height:1.5;border:1px solid transparent;}
-.mgc.focus{border-color:#C99A4E;background:#FBF4E4;font-weight:700;}
-.mgc.none{opacity:.55;}
-.mgc .bar{height:4px;border-radius:4px;background:#E6DAD1;margin-top:6px;overflow:hidden;}
-.mgc .bf{height:100%;border-radius:4px;}
-.mgc .v{font-size:10.5px;color:#8A7266;margin-top:4px;}
+/* ═ 統一能力值儀表板・科技版（規格＝demo-muscle-card-v4.html v4.2）＝私教的顏色：
+   深底卡＋霓虹主力發光。結構同 member 全圖態（pot/base/dh/row3），配色全走 tech。 ═ */
+.techcd{background:linear-gradient(160deg,#0c131e 0%,#152233 100%);border:1px solid rgba(75,155,240,.30);border-radius:16px;padding:17px 16px;margin-bottom:14px;box-shadow:0 8px 28px rgba(12,19,30,.45);}
+.techcd .sec{color:#8fa6bd;}
+.pot{border-bottom:1px dashed rgba(93,118,146,.35);padding-bottom:12px;margin-bottom:13px;}
+.pot-k{font-size:11.5px;font-weight:700;color:#8fa6bd;letter-spacing:2px;}
+.pot-n{font-size:27px;font-weight:900;color:#e6a93a;margin-top:1px;letter-spacing:.02em;}
+.pot-n span{font-size:13px;font-weight:700;color:#5d7692;margin-left:4px;letter-spacing:0;}
+.pot-bar{height:8px;background:rgba(230,237,245,.10);border-radius:6px;margin-top:7px;overflow:hidden;}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#e8734a,#e6a93a);}
+.base{margin-bottom:12px;border-bottom:1px dashed rgba(93,118,146,.35);padding-bottom:11px;}
+.base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#5d7692;margin-bottom:7px;}
+.mcore{display:flex;align-items:center;gap:10px;padding:4px 0;cursor:pointer;}
+.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#e6a93a;}
+.core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#E6EDF5;}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#e8734a,#e6a93a);}
+.dsec{margin-top:14px;padding-top:13px;border-top:1px dashed rgba(93,118,146,.35);}
+.base + .dsec{margin-top:2px;padding-top:0;border-top:0;}
+.dh{display:flex;align-items:center;gap:8px;margin:6px 0 7px;}
+.dh-en{flex-shrink:0;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
+.dh-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#E6EDF5;}
+.dh-bar{flex:1;height:7px;border-radius:4px;background:rgba(230,237,245,.10);overflow:hidden;}
+.dh-bar i{display:block;height:100%;border-radius:4px;}
+.dh-v{flex-shrink:0;width:26px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.m{position:relative;background:rgba(230,237,245,.06);border:1px solid rgba(93,118,146,.25);border-radius:12px;padding:9px 10px 8px;min-width:0;}
+.m.tap{cursor:pointer;}
+.m-n{font-size:12.5px;font-weight:700;color:#E6EDF5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-n i{font-style:normal;font-size:10px;font-weight:800;margin-right:3px;}
+.mbar{height:5px;border-radius:3px;background:rgba(230,237,245,.12);margin:7px 0 6px;overflow:hidden;}
+.mbar i{display:block;height:100%;border-radius:3px;}
+.m-v{font-size:11px;font-weight:700;color:#8fa6bd;font-variant-numeric:tabular-nums;}
+.m-t{font-size:10.5px;color:#5d7692;margin-top:4px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m.off{background:rgba(230,237,245,.03);}
+.m.off .m-n{color:#5d7692;}
+.m.off .m-v{color:#44586e;font-weight:600;}
+/* 科技版強調重點＝霓虹發光（v4.2 老師指定） */
+.m.focus{background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.55);box-shadow:0 0 16px rgba(230,169,58,.40),inset 0 0 10px rgba(230,169,58,.08);}
+.m.focus:before,.m.focus:after{content:"";position:absolute;width:12px;height:12px;border:2px solid #e6a93a;filter:drop-shadow(0 0 5px rgba(230,169,58,.9));}
+.m.focus:before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:4px 0 0 0;}
+.m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
+.m.focus .m-v{color:#e6a93a;text-shadow:0 0 9px rgba(230,169,58,.85);}
+.m.focus .m-n{text-shadow:0 0 8px rgba(230,169,58,.35);}
+/* 口袋提示卡（幽靈浮層・科技版跟色）：半透明毛玻璃、可讀、再按一下就不見 */
+.ov{position:fixed;inset:0;background:rgba(8,13,22,.45);display:none;z-index:50;}
+.ov.on{display:block;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:460px;margin:0 auto;background:rgba(14,22,35,.90);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:22px 22px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(12,19,30,.5);transform:translateY(105%);transition:transform .22s ease;max-height:82vh;overflow-y:auto;cursor:pointer;}
+.sheet.on{transform:translateY(0);}
+.sh-grab{width:40px;height:4px;border-radius:2px;background:#2a3c52;margin:0 auto 12px;}
+.sh-hd{display:flex;align-items:baseline;gap:8px;}
+.sh-mk{font-size:12px;font-weight:900;}
+.sh-n{font-size:19px;font-weight:900;color:#E6EDF5;}
+.sh-dim{margin-left:auto;font-size:11.5px;font-weight:700;color:#8fa6bd;}
+.sh-tech{font-size:13px;font-weight:700;color:#e6a93a;text-shadow:0 0 10px rgba(230,169,58,.55);margin-top:3px;}
+.sh-sec{margin-top:13px;}
+.sh-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#5d7692;margin-bottom:4px;}
+.sh-t{font-size:14.5px;line-height:1.85;color:#cfdcea;}
+.sh-t b{color:#e6a93a;text-shadow:0 0 10px rgba(230,169,58,.45);}
+.sh-line{background:rgba(230,237,245,.08);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.8;color:#cfdcea;margin-top:5px;}
+.sh-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px;}
+.sh-two .sh-t{font-size:13px;line-height:1.75;}
 
 /* 甜蜜路徑（demo pro-4：咖啡圓圈編號） */
 .step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13.5px;line-height:1.8;}
@@ -197,16 +250,6 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .dp-tb-cs{font-size:11.5px;color:rgba(247,241,236,.55);margin-top:1px;}
 .dp-tb-nx{margin-left:auto;text-align:right;font-size:11px;color:rgba(247,241,236,.55);line-height:1.6;flex-shrink:0;}
 .dp-tb-nx b{display:block;font-size:12.5px;color:#E8C89A;}
-.dp-hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
-.dp-hc{background:#182634;border-radius:10px;padding:9px 8px;font-size:11px;color:#eaf1fa;line-height:1.5;position:relative;}
-.dp-hc .bar{height:3px;border-radius:3px;background:#2a3a4d;margin-top:6px;overflow:hidden;}
-.dp-hc .bf{height:100%;border-radius:3px;}
-.dp-hc .v{font-size:10px;color:#7d90a3;margin-top:4px;}
-.dp-hc.lockon{background:#1a2434;}
-.dp-hc.lockon:before,.dp-hc.lockon:after{content:"";position:absolute;width:9px;height:9px;border:1.5px solid #e6a93a;}
-.dp-hc.lockon:before{top:-2px;left:-2px;border-right:0;border-bottom:0;}
-.dp-hc.lockon:after{bottom:-2px;right:-2px;border-left:0;border-top:0;}
-.dp-hc.lockon .v{color:#e6a93a;font-weight:700;}
 .dp-fp{position:relative;padding-left:24px;}
 .dp-fp:before{content:"";position:absolute;left:7px;top:12px;bottom:12px;width:2px;background:linear-gradient(180deg,#e8734a,#33c495,#4b9bf0,#e6a93a);border-radius:2px;box-shadow:0 0 8px rgba(232,115,74,.35);}
 .dp-wp{position:relative;padding:8px 0 8px 4px;font-size:13.5px;line-height:1.8;color:#eaf1fa;}
@@ -260,6 +303,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   <button class="nv" data-p="out" onclick="go('out')"><span class="nv-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></span>覆盤</button>
 </div>
 
+<div class="ov" id="ov"></div>
+<div class="sheet" id="sheet"></div>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
@@ -272,6 +318,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
    只有「路徑」的 L1-L8 進度是照這支課程（超引力-顧問課／超引力-公眾演說）算。 */
 var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
 var S = null, WID = null, PANE = "path";
+/* ?pane=path|body|out 直接開某分頁（測試／截圖用，跟 member.html 同慣例） */
+try { var _p0 = new URLSearchParams(location.search).get("pane"); if (["path","body","out"].indexOf(_p0) > -1) PANE = _p0; } catch (e) {}
 var REC = null;
 
 var REACT = [
@@ -286,10 +334,43 @@ var DIM_SHORT = { A:"吸引", T:"信任", P:"專業", I:"推進" };
 function el(id){ return document.getElementById(id); }
 function esc_(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
-function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function md_(t){ return esc_(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
+
+/* ── demo 模式（?demo=1，跟 member/visitor 同慣例）──
+   假資料全在前端、不寫 Sheet，驗收版面用——資料全是示意。
+   evalLog 刻意留 I2/I3 沒量：示範「還沒量」誠實顯示；P2 教練校準低分＝這季主力霓虹。 */
+function demoStatePro_(){
+  function ago(i){ var d = new Date(Date.now() - i * 86400000); return todayStr(d); }
+  function ev(mk, sc, src, i){ return { muscle: mk, score: sc, source: src, date: ago(i), week: "" }; }
+  function ck(mk, i, target, rel, reaction){
+    return { workshopId: PRO_WORKSHOPS[0], taskKey: "m_" + mk.toLowerCase(), cadence: "daily",
+             dim: mk.charAt(0), muscle: mk, pts: 1, date: ago(i), week: weekStr(new Date(ago(i))),
+             target: target || "", rel: rel || "", reaction: reaction || "", note: "" };
+  }
+  return {
+    lineId: "DEMO", name: "Kevin", team: "",
+    checkinLog: [ ck("P2",1,"張總","客戶","明顯有"), ck("P2",3,"張總","客戶","有一點"),
+                  ck("T2",5,"張總","客戶","超乎預期") ],
+    revenueLog: [],
+    evalLog: [ ev("A1",4,"coach",7), ev("A2",3,"self",7), ev("A3",3.5,"coach",7),
+               ev("T1",4,"coach",7), ev("T2",3,"self",7), ev("T3",4.5,"coach",7),
+               ev("P1",3,"coach",7), ev("P2",1.5,"coach",7), ev("P3",3,"self",7),
+               ev("I1",2,"coach",7) ]
+  };
+}
 
 async function boot() {
   var qs = new URLSearchParams(location.search);
+  if (qs.get("demo") === "1") {
+    postToSheet = function(){ return Promise.resolve(); };   // demo 不寫 Sheet
+    TASKS = []; S = demoStatePro_(); WID = PRO_WORKSHOPS[0];
+    el("nav").classList.remove("hide");
+    render();
+    /* &pocket=P2|story|ask 直接開口袋卡（截圖驗收用，跟 demo-muscle-card 同慣例） */
+    var _pk = qs.get("pocket");
+    if (_pk) { if (_pk === "story" || _pk === "ask") pocketCore(_pk); else if (MUSCLES[_pk]) pocket(_pk); }
+    return;
+  }
   var uid = qs.get("id");
   if (!uid) {
     try {
@@ -403,23 +484,8 @@ function demoP1_(){
     + '<div class="dp-tb-nx"><b>下次 1v1</b>9/12（五）14:00<span class="dp-mock">示意</span></div></div>'
     + '</div></div>';
 }
-function demoP3_(){
-  var cells = [
-    ["讓他想聽","70%","#e8734a","3.5",0], ["讓他心動","56%","#e8734a","2.8",0], ["讓他放心","80%","#e8734a","4.0",0],
-    ["讓他敢說","64%","#33c495","3.2",0], ["讓他信你","76%","#33c495","3.8",0], ["讓他懂你","60%","#33c495","3.0",0],
-    ["讓他服你","66%","#4b9bf0","3.3",0], ["讓他要你","50%","#4b9bf0","2.5",0], ["讓他行動","58%","#4b9bf0","2.9",0],
-    ["讓他跟隨","40%","#e6a93a","2.0 · 這季主力",1], ["讓他推薦","44%","#e6a93a","2.2",0], ["讓他回來","52%","#e6a93a","2.6",0]
-  ];
-  return '<div class="dp-blk"><span class="dp-tag">p-3</span>'
-    + '<div class="dp-cd"><div class="dp-sec">MUSCLE SCAN · <b>12 塊全開</b><span class="dp-mock">示意</span></div>'
-    + '<div class="dp-hgrid">' + cells.map(function(c){
-        return '<div class="dp-hc' + (c[4] ? ' lockon' : '') + '">' + c[0]
-          + '<div class="bar"><div class="bf" style="width:' + c[1] + ';background:' + c[2] + ';"></div></div>'
-          + '<div class="v dp-num">' + c[3] + '</div></div>';
-      }).join("") + '</div>'
-    + '<div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">分數是教練校準過的——低分不是問題，是<b style="color:#e6a93a;">先練這塊最有感</b>。</div>'
-    + '</div></div>';
-}
+/* demoP3_（p-3 示意 12 格）已退役——2026-09-06 被 techMapHTML_ 真資料科技版全圖取代，
+   連帶消滅示意格裡的作廢格名（讓他想聽／讓他心動…與 MUSCLES 十二格對不上）。 */
 function demoP4_(){
   return '<div class="dp-blk"><span class="dp-tag">p-4</span>'
     + '<div class="dp-cd"><div class="dp-sec">FLIGHT PATH · <b>你的變現甜蜜路徑</b><span class="dp-mock">示意</span></div>'
@@ -530,27 +596,104 @@ function archArcSection(){
 /* ══ 12 小肌群：全開，照上升空間最大的練（跟會員層相反——會員層不給看這個）。
    demo pro-3 骨架：3 欄 12 格一體、這季主力金框。分數＝真的 calcMuscleScores()，
    「還沒量」誠實顯示、不給預設值。 ══ */
-function bodyHTML(){
-  var scores = calcMuscleScores(S);
+/* ══ 統一能力值儀表板・科技版全圖（2026-09-06 老師放行 demo v4.2）：
+   pot 錨（已解鎖影響力 N/1000 同一條線）＋地基 2 核心＋4 大肌肉列標＋12 塊全開（帶技巧名）；
+   這季主力＝霓虹發光；每塊可按出科技版口袋卡。取代舊暖版 .mg 卡＋demoP3_ 示意塊。 ══ */
+var PALT = {A:"#e8734a", T:"#33c495", P:"#4b9bf0", I:"#e6a93a"};
+var DIM_EN = {A:"ATTRACT", T:"TRUST", P:"PROFESSIONAL", I:"IMPACT"};
+function techMapHTML_(){
+  var scores = calcMuscleScores(S), d5 = calcDimScores5(S);
   var focus = weakestThree(S)[0] || null;
   var measured = MORD.filter(function(k){ return scores[k] != null; }).length;
-  var h = '<div class="cd">'
-    + '<div style="display:flex;align-items:center;" class="sec">12 塊小肌群——全開，跟教練一起看'
-    + '<span style="margin-left:auto;font-weight:400;color:#8A7266;">' + measured + ' / 12 已量</span></div>'
-    + '<div class="mg">' + MORD.map(function(mk){
-        var m = MUSCLES[mk], v = scores[mk], d = m.dim;
-        var isFocus = mk === focus;
-        var cls = "mgc" + (isFocus ? " focus" : "") + (v == null ? " none" : "");
-        return '<div class="' + cls + '">'
-          + '<span style="color:' + dimTextColor(d) + ';font-weight:700;">' + mk + '</span> ' + esc_(m.name)
-          + '<div class="bar"><div class="bf" style="width:' + (v == null ? 0 : (v - 1) / 4 * 100) + '%;background:' + DIMS[d].color + ';"></div></div>'
-          + '<div class="v">' + (v == null ? '還沒量' : v.toFixed(1) + (isFocus ? ' · 這季主力' : '')) + '</div></div>';
-      }).join("") + '</div>'
-    + '<div style="font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;">分數是跟教練一起校準的——低分不是問題，是<b style="color:#993C1D;">先練這塊最有感</b>。這一層 12 格全開，照上升空間最大的練。</div></div>';
-  h += demoP3_();
-  h += sweetProHTML();
-  h += demoP4_();
+  var pct = {}, full = true;
+  DORD.forEach(function(k){
+    if (d5[k] == null) { pct[k] = null; full = false; }
+    else pct[k] = pctFromEval(d5[k]);
+  });
+  var h = '<div class="techcd">'
+    + '<div style="display:flex;align-items:center;" class="sec">MUSCLE MAP · 12 塊全開，跟教練一起看'
+    + '<span style="margin-left:auto;font-weight:400;color:#5d7692;">' + measured + ' / 12 已量</span></div>';
+  if (full) {
+    var pot = calcPotential(pct).unlocked;
+    h += '<div class="pot"><div class="pot-k">已解鎖影響力</div>'
+      + '<div class="pot-n">' + pot + '<span>/ 1000</span></div>'
+      + '<div class="pot-bar"><i style="width:' + Math.max(2, Math.min(100, pot / 10)) + '%;"></i></div></div>';
+  }
+  h += '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
+    + '<div class="mcore" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span><span class="core-bar"></span></div>'
+    + '<div class="mcore" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span><span class="core-bar"></span></div></div>';
+  h += DORD.map(function(k){
+    var pc = pct[k];
+    var head = '<div class="dh"><span class="dh-en" style="color:' + PALT[k] + ';">' + DIM_EN[k] + '</span>'
+      + '<span class="dh-zh">' + esc_(DIMS[k].name) + '</span>'
+      + '<span class="dh-bar"><i style="width:' + (pc == null ? 0 : pc) + '%;background:' + PALT[k] + ';"></i></span>'
+      + (pc == null ? '' : '<span class="dh-v" style="color:' + PALT[k] + ';">' + pc + '</span>')
+      + '</div>';
+    var tiles = musclesOfDim(k).map(function(mk){
+      var mu = MUSCLES[mk], v = scores[mk], isFocus = mk === focus;
+      var cls = "m" + (isFocus ? " focus" : v == null ? " off" : "");
+      var tap = v != null ? ' onclick="pocket(\'' + mk + '\')"' : '';
+      if (tap) cls += " tap";
+      var barW = v == null ? 0 : Math.round((v - 1) / 4 * 100);
+      var val = v == null ? '還沒量' : v.toFixed(1) + (isFocus ? ' · 這季主力' : '');
+      return '<div class="' + cls + '"' + tap + '><div class="m-n"><i style="color:' + PALT[k] + ';">' + mk + '</i>' + esc_(mu.name) + '</div>'
+        + '<div class="mbar"><i style="width:' + barW + '%;background:' + PALT[k] + ';"></i></div>'
+        + '<div class="m-v">' + val + '</div>'
+        + '<div class="m-t">' + esc_(mu.tech) + '</div></div>';
+    }).join('');
+    return '<div class="dsec">' + head + '<div class="row3">' + tiles + '</div></div>';
+  }).join('');
+  h += '<div style="font-size:12.5px;color:#8fa6bd;margin-top:12px;line-height:1.7;">分數是跟教練一起校準的——低分不是問題，是<b style="color:#e6a93a;">先練這塊最有感</b>。亮著的格都可以按。</div></div>';
   return h;
+}
+/* 口袋提示卡（幽靈浮層・科技版）＝demo v4.2 移植，素材全現成：MUSCLES＋DRILL＋CORE_DRILL */
+function drillHTML_(dr){
+  if (!dr) return '';
+  return '<div class="sh-sec"><div class="sh-k">怎麼練（今天就能做）</div><div class="sh-t">' + md_(dr.h) + '</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">對誰練</div><div class="sh-t">' + md_(dr.who) + '</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">起手可以這樣說</div><div class="sh-t">' + md_(dr.lead) + '</div>'
+    + '<div class="sh-line">「' + md_(dr.line) + '」</div></div>'
+    + '<div class="sh-sec"><div class="sh-k">關鍵一個字</div><div class="sh-t">' + md_(dr.key) + '</div></div>'
+    + '<div class="sh-two">'
+    + '<div><div class="sh-k">怎樣算成了</div><div class="sh-t">' + md_(dr.win) + '</div></div>'
+    + '<div><div class="sh-k">沒動靜怎麼辦</div><div class="sh-t">' + md_(dr.retry) + '</div></div>'
+    + '</div>';
+}
+function sheetShow_(html){
+  el("sheet").innerHTML = '<div class="sh-grab"></div>' + html;
+  el("ov").classList.add("on");
+  el("sheet").classList.add("on");
+}
+function sheetHide_(){
+  el("ov").classList.remove("on");
+  el("sheet").classList.remove("on");
+}
+function pocket(mk){
+  var mu = MUSCLES[mk], dk = mu.dim;
+  var dr = (typeof DRILL !== "undefined" && DRILL[mk]) || null;
+  var j = (typeof JUDGEMENT !== "undefined" && JUDGEMENT[mk]) || {};
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:' + PALT[dk] + ';">' + mk + '</span>'
+    + '<span class="sh-n">' + esc_(mu.name) + '</span>'
+    + '<span class="sh-dim">' + esc_(DIMS[dk].name) + ' · 第 ' + mk.charAt(1) + ' 塊</span></div>'
+    + '<div class="sh-tech">技巧 · ' + esc_(mu.tech) + '</div>'
+    + '<div class="sh-sec"><div class="sh-k">這塊肌肉在練什麼</div><div class="sh-t">' + md_(mu.ask) + '</div></div>';
+  if (dr) html += drillHTML_(dr);
+  else if (j.homework) html += '<div class="sh-sec"><div class="sh-k">怎麼練</div><div class="sh-t">' + md_(j.homework) + '</div></div>';
+  sheetShow_(html);
+}
+function pocketCore(key){
+  var dr = (typeof CORE_DRILL !== "undefined" && CORE_DRILL[key]) || null;
+  if (!dr) return;
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:#e6a93a;">' + (key === "story" ? "STORY" : "QUESTION") + '</span>'
+    + '<span class="sh-n">' + esc_(dr.n) + '</span>'
+    + '<span class="sh-dim">核心技巧 · 12 塊的地基</span></div>'
+    + '<div class="sh-tech">這 2 個用得好，12 塊肌肉才用得好</div>'
+    + drillHTML_(dr);
+  sheetShow_(html);
+}
+
+function bodyHTML(){
+  return techMapHTML_() + sweetProHTML() + demoP4_();
 }
 
 /* ══ 甜蜜路徑（pro 版）：同 member.html sweetPathHTML 的來源（atpi-core.js COMBO_PATH 查表），
@@ -817,6 +960,8 @@ pathHTML = function(){
   return _pathHTML() + practiceCard;
 };
 
+el("ov").addEventListener("click", sheetHide_);
+el("sheet").addEventListener("click", sheetHide_);
 boot();
 </script>
 </body>
