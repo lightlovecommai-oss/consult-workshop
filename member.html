@@ -76,9 +76,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .gobtn{display:block;width:100%;background:#C6603A;color:#fff;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;font-family:inherit;min-height:56px;box-sizing:border-box;margin-bottom:16px;}
 .gobtn:active{transform:scale(.98);}
 .gobtn.done{background:#DCE7DE;color:#3E5546;cursor:default;}
-/* v7 夥-3／練-6：行動主鈕漸層改用四主色裡的兩色——磚橘(想行動)→金(高級感)。
-   雙 class 選擇器＝壓過寫在後面的 .p3go 底色（v6 沒顯示漸層的原因就是被它蓋掉） */
-.gobtn.go4,.p3go.go4{background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);}
+/* CTA 三層（2026-09-06 裁決）：練習鈕 .go4＝磚橘同色系柔漸層（質感留著、金色訊號讓給錢鈕）；
+   錢鈕 .money＝磚橘→金漸層＋影，一頁一顆。雙 class 選擇器＝壓過寫在後面的 .p3go 底色 */
+.gobtn.go4,.p3go.go4{background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);box-shadow:0 4px 12px rgba(198,96,58,.20);}
+.gobtn.money{background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);}
 .strip{display:flex;align-items:center;gap:10px;padding:2px 3px 20px;}
 /* 夥-2（2026-09-04 老師拍板）：跑馬燈改大字 */
 /* v6 夥-1：標語上下留白一致——上方 padding 16px、下方交給 hero-rule 的 margin-top 16px。
@@ -336,7 +337,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .n7li span:first-child{color:#E8C89A;flex-shrink:0;}
 .n7q{margin-top:11px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 12px;font-size:13px;line-height:1.85;color:rgba(247,241,236,.92);}
 .n7q b{color:#E8C89A;}
-.n7go{display:block;text-align:center;margin-top:12px;background:#E8C89A;color:#4A1B0C;border-radius:12px;padding:13px;font-size:14.5px;font-weight:700;text-decoration:none;}
+.n7go{display:block;text-align:center;margin-top:12px;background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);color:#fff;border-radius:16px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;min-height:48px;box-sizing:border-box;}
 .n7end{margin-top:13px;text-align:center;font-size:12.5px;color:#F3E2D2;}
 .n7end b{color:#E8C89A;}
 .feedbox .cw{margin-bottom:10px;}
@@ -425,7 +426,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .dm-upg-t{font-size:19px;font-weight:900;margin-top:9px;line-height:1.6;}
 .dm-upg-li{display:flex;gap:9px;font-size:13.5px;line-height:1.85;margin-top:10px;color:rgba(247,241,236,.92);}
 .dm-upg-li span:first-child{color:#E8C89A;flex-shrink:0;}
-.dm-upg-b{display:block;text-align:center;margin-top:15px;background:#E8C89A;color:#4A1B0C;border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;}
+/* 參觀鈕＝幽靈框、邊框跟下一階識別色（pro＝科技藍）——下一關的顏色先漏出來 */
+.dm-upg-b{display:block;text-align:center;margin-top:15px;background:transparent;border:2px solid #4b9bf0;color:#cfe4fb;border-radius:14px;padding:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 0 12px rgba(75,155,240,.22);box-sizing:border-box;}
 .dm-upg-w{font-size:11.5px;color:rgba(247,241,236,.5);text-align:center;margin-top:9px;}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
@@ -1177,7 +1179,7 @@ function lockedHTML(){
   return '<div class="cd">' + secH_("MEMBER SEAT", "🔒 會員席才開的", "#54718D")
     + '<div style="font-size:15px;color:#4A1B0C;line-height:1.9;margin-bottom:6px;">為什麼要有人陪？因為練的路上一定會講錯——<b>錯了，有人接住你</b>，你才敢一直講下去。三則戰報的共同點：練的時候有教練在旁邊。</div>'
     + '<div style="font-size:13px;color:#6E4A3C;line-height:1.85;padding:11px 0 2px;border-top:1px solid #F0E3DB;margin-top:10px;">教練解析你的影響力健檢 · 每筆紀錄算進肌肉分數 · 會員權益課每月 2 堂 · 秘訣自己挑、可以換</div>'
-    + '<a class="gobtn" style="margin:14px 0 0;" href="join.html">坐上會員席 NT$99／月</a>'
+    + '<a class="gobtn money" style="margin:14px 0 0;" href="join.html">坐上會員席 NT$99／月</a>'
     + (FREE_TALK_URL
         ? '<a href="' + FREE_TALK_URL + '" style="display:block;text-align:center;margin-top:6px;color:#6E4A3C;font-size:13px;text-decoration:underline;padding:12px;min-height:44px;box-sizing:border-box;">還不確定？先來聽一場免費講座</a>'
         : '')
@@ -1328,7 +1330,7 @@ function demoM7_(){
     + '<div class="dm-upg-li"><span>✓</span><span>甜蜜路徑四步全開——你最強兩塊組合出的變現打法</span></div>'
     + '<div class="dm-upg-li"><span>✓</span><span>12 小肌群分數與判讀，教練陪你看</span></div>'
     + '<div class="dm-upg-li"><span>✓</span><span>1v1 場邊教練，一週一次拆解你的真實對話</span></div>'
-    + '<a class="dm-upg-b" href="demo-pro.html">看看教練席長什麼樣 →</a>'
+    + '<a class="dm-upg-b" href="pro.html?demo=1&pane=body">看看教練席長什麼樣 →</a>'
     + '<div class="dm-upg-w">透過諮詢，協助營業額提升</div>'
     + '</div></div>';
 }

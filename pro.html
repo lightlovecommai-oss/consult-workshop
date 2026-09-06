@@ -162,7 +162,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .bone-end{font-size:14px;color:#4A1B0C;line-height:1.9;text-align:center;margin:24px 0 10px;padding:0 8px;}
 
 /* 大按鈕 */
-.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s;}
+.go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 4px 12px rgba(198,96,58,.20);transition:transform .15s;}
 .go:active{transform:scale(.97);}
 
 /* 口袋卡（L1-L4 打基礎的提示・回家演練） */
@@ -205,7 +205,17 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .opt-h{font-size:13px;color:#8A7266;margin-bottom:9px;line-height:1.7;}
 .ta{width:100%;background:#fff;border:1px solid #E6DAD1;border-radius:14px;padding:11px;font-size:17px;color:#4A1B0C;font-family:inherit;line-height:1.6;min-height:64px;resize:vertical;}
 .ta:focus{outline:none;border-color:#C6603A;}
-.sub{width:100%;background:#C6603A;color:#fff;border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:15px;font-family:inherit;min-height:44px;box-shadow:0 4px 14px rgba(198,96,58,.22);}
+/* CTA 三層（2026-09-06 裁決）：練習鈕＝磚橘同色系柔漸層；錢鈕（升單卡）＝磚橘→金漸層一頁一顆 */
+.sub{width:100%;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#fff;border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:15px;font-family:inherit;min-height:44px;box-shadow:0 4px 12px rgba(198,96,58,.20);}
+.upg{margin-top:18px;background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:19px 18px;color:#F7F1EC;}
+.upg-k{font-size:12px;letter-spacing:2px;color:#E8C89A;font-weight:700;}
+.upg-t{font-size:19px;font-weight:900;margin-top:9px;line-height:1.6;}
+.upg-li{display:flex;gap:9px;font-size:13.5px;line-height:1.85;margin-top:10px;color:rgba(247,241,236,.92);}
+.upg-li span:first-child{color:#E8C89A;flex-shrink:0;}
+.upg-bone{margin-top:12px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 12px;font-size:13px;line-height:1.85;color:rgba(247,241,236,.92);}
+.upg-bone b{color:#E8C89A;}
+.upg-b{display:block;text-align:center;margin-top:15px;background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);color:#fff;border-radius:16px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;min-height:48px;box-sizing:border-box;}
+.upg-w{font-size:11.5px;color:rgba(247,241,236,.5);text-align:center;margin-top:9px;}
 .sub[disabled]{background:#E6DAD1;color:#8A7266;box-shadow:none;}
 .ok{text-align:center;padding:10px 0 4px;}
 .ok-e{font-size:32px;margin-bottom:14px;}
@@ -843,6 +853,20 @@ function outHTML(){
     + '<div class="bone-k">這三個月，你的想法動了什麼？</div>'
     + '<div class="bone-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>'
     + '<div class="bone-quote">下次月覆盤，把你最有感的那句說出來——教練幫你記在這裡。</div></div>';
+  /* 升單卡（CTA 三層 2026-09-06）：顧問課學員的下一段＝超引力-公眾演說；
+     放覆盤頁尾＝看完自己成果數字的瞬間；緊跟改觀句骨層卡＝骨與皮同場。
+     已是公眾演說學員＝到頂，不顯示。高價不做硬賣鈕，走人對人（約教練聊）。 */
+  if (WID !== "超引力-公眾演說") {
+    h += '<div class="upg">'
+      + '<div class="upg-k">ATPIFIT · NEXT STAGE · 超引力-公眾演說</div>'
+      + '<div class="upg-t">把你的影響力，<br>從 1 對 1 帶到 1 對 N</div>'
+      + '<div class="upg-li"><span>✦</span><span>吸引＋信任開場——開口就讓台下想聽</span></div>'
+      + '<div class="upg-li"><span>✦</span><span>專業體驗感＋推進收單——一場講完，有人主動來找你</span></div>'
+      + '<div class="upg-bone">台上那個人不是在賣——<b>是讓更多人因為一場演說，開始變好</b>。</div>'
+      + '<a class="upg-b" href="https://time.atpifit.com">跟教練聊 1 對 N 的路 →</a>'
+      + '<div class="upg-w">下一段路，先跟教練確認你準備好了沒</div>'
+      + '</div>';
+  }
   h += demoP7_();
   h += '<div class="bone-end">影響力的盡頭不是成交，<br>是有人因為你變好。</div>';
   return h;
