@@ -43,9 +43,12 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
 .card.tech .core-tag{color:#e6a93a;background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.45);}
 
+/* 每維一個小節：維與維之間用虛線分隔＋留白（降視覺密度） */
+.dsec{margin-top:14px;padding-top:13px;border-top:1px dashed #E8DDD3;}
+.dsec:first-of-type{margin-top:2px;padding-top:0;border-top:0;}
+.card.tech .dsec{border-color:rgba(93,118,146,.35);}
 /* 大肌肉列標：嵌在每組 3 格上方（消費者從熟詞接到 12 塊） */
-.dh{display:flex;align-items:center;gap:8px;margin:13px 0 7px;}
-.dh:first-of-type{margin-top:0;}
+.dh{display:flex;align-items:center;gap:8px;margin:6px 0 7px;}
 .dh-en{flex-shrink:0;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
 .dh-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
 .dh-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
@@ -106,9 +109,11 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .card.tech .bar{background:rgba(230,237,245,.12);}
 .card.tech .m-v{color:#8fa6bd;}
 .card.tech .m-t{color:#5d7692;}
-.card.tech .m.focus{background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.45);}
-.card.tech .m.focus:before,.card.tech .m.focus:after{border-color:#e6a93a;}
-.card.tech .m.focus .m-v{color:#e6a93a;}
+/* 科技版強調重點＝霓虹發光 */
+.card.tech .m.focus{background:rgba(230,169,58,.10);border-color:rgba(230,169,58,.55);box-shadow:0 0 16px rgba(230,169,58,.40),inset 0 0 10px rgba(230,169,58,.08);}
+.card.tech .m.focus:before,.card.tech .m.focus:after{border-color:#e6a93a;filter:drop-shadow(0 0 5px rgba(230,169,58,.9));}
+.card.tech .m.focus .m-v{color:#e6a93a;text-shadow:0 0 9px rgba(230,169,58,.85);}
+.card.tech .m.focus .m-n{text-shadow:0 0 8px rgba(230,169,58,.35);}
 
 /* 文字插槽 */
 .slot{margin-top:10px;background:#fff;border:1px solid #E8DDD3;border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
@@ -116,11 +121,21 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .slot-t{font-size:14px;line-height:1.85;color:#4A1B0C;}
 .slot-t b{color:#993C1D;}
 
-/* ═ 口袋提示卡（bottom sheet）═ */
-.ov{position:fixed;inset:0;background:rgba(43,33,24,.45);display:none;z-index:50;}
+/* ═ 口袋提示卡（幽靈浮層：半透明毛玻璃、可讀、再按一下就不見）═ */
+.ov{position:fixed;inset:0;background:rgba(43,33,24,.22);display:none;z-index:50;}
 .ov.on{display:block;}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:460px;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(43,33,24,.25);transform:translateY(105%);transition:transform .22s ease;max-height:82vh;overflow-y:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:460px;margin:0 auto;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:22px 22px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(43,33,24,.22);transform:translateY(105%);transition:transform .22s ease;max-height:82vh;overflow-y:auto;cursor:pointer;}
 .sheet.on{transform:translateY(0);}
+/* 科技版口袋卡：顏色跟著科技版走 */
+.sheet.tech{background:rgba(14,22,35,.90);box-shadow:0 -10px 40px rgba(12,19,30,.5);}
+.sheet.tech .sh-grab{background:#2a3c52;}
+.sheet.tech .sh-n{color:#E6EDF5;}
+.sheet.tech .sh-dim{color:#8fa6bd;}
+.sheet.tech .sh-tech{color:#e6a93a;text-shadow:0 0 10px rgba(230,169,58,.55);}
+.sheet.tech .sh-k{color:#5d7692;}
+.sheet.tech .sh-t{color:#cfdcea;}
+.sheet.tech .sh-t b{color:#e6a93a;text-shadow:0 0 10px rgba(230,169,58,.45);}
+.sheet.tech .sh-line{background:rgba(230,237,245,.08);color:#cfdcea;}
 .sh-grab{width:40px;height:4px;border-radius:2px;background:#E8DDD3;margin:0 auto 12px;}
 .sh-hd{display:flex;align-items:baseline;gap:8px;}
 .sh-mk{font-size:12px;font-weight:900;}
@@ -206,15 +221,16 @@ function hdHTML(t){
 }
 /* 地基＝2 核心技巧（講故事·問問題）：老師拍板階梯 2 核心 → 4 大肌肉 → 12 小肌肉。
    visitor 的輪替練的就是這兩塊（＋專屬招），所以 own 模式帶「輪替中」標記；全等級可按出口袋卡。 */
-function baseHTML(mode){
+function baseHTML(mode, pal){
   var tag = mode === "own" ? '<span class="core-tag">輪替中</span>' : '';
+  var p = pal || "warm";
   return '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
-    + '<div class="core" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
-    + '<div class="core" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
+    + '<div class="core" onclick="pocketCore(\'story\',\''+p+'\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
+    + '<div class="core" onclick="pocketCore(\'ask\',\''+p+'\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
 }
-/* 大肌肉列標＋該維 3 格。mode: peek｜own｜full｜pro */
+/* 大肌肉列標＋該維 3 格，每維包一個 .dsec（維間分隔）。mode: peek｜own｜full｜pro */
 function sectionsHTML(mode, pal){
-  var P = PAL[pal||"warm"];
+  var p = pal || "warm", P = PAL[p];
   return DORD.map(function(k){
     var head = '<div class="dh"><span class="dh-en" style="color:'+P[k].t+';">'+DIM_EN[k]+'</span>'
       + '<span class="dh-zh">'+DIM_ZH[k]+'</span>'
@@ -222,7 +238,7 @@ function sectionsHTML(mode, pal){
       + '<span class="dh-v" style="color:'+P[k].t+';">'+PCT[k]+'</span></div>';
     var tiles = musclesOfDim(k).map(function(mk){
       var mu = MUSCLES[mk], v = MS[mk];
-      var cls = "m", extra = "", tap = ' onclick="pocket(\''+mk+'\')"';
+      var cls = "m", extra = "", tap = ' onclick="pocket(\''+mk+'\',\''+p+'\')"';
       var barW = Math.round((v-1)/4*100);
       var val = v.toFixed(1);
       if (mode === "peek") { cls += " peek"; tap = ""; }
@@ -236,7 +252,7 @@ function sectionsHTML(mode, pal){
         + '<div class="bar"><i style="width:'+barW+'%;background:'+P[k].c+';"></i></div>'
         + '<div class="m-v">'+val+'</div>' + extra + '</div>';
     }).join('');
-    return head + '<div class="row3">' + tiles + '</div>';
+    return '<div class="dsec">' + head + '<div class="row3">' + tiles + '</div></div>';
   }).join('');
 }
 
@@ -283,15 +299,21 @@ function drillHTML(dr){
     + '<div><div class="sh-k">沒動靜怎麼辦</div><div class="sh-t">'+md(dr.retry)+'</div></div>'
     + '</div>';
 }
-function sheetShow(html){
-  document.getElementById("sheet").innerHTML = '<div class="sh-grab"></div>' + html;
+function sheetShow(html, pal){
+  var sh = document.getElementById("sheet");
+  sh.innerHTML = '<div class="sh-grab"></div>' + html;
+  sh.classList.toggle("tech", pal === "tech");
   document.getElementById("ov").classList.add("on");
-  document.getElementById("sheet").classList.add("on");
+  sh.classList.add("on");
 }
-function pocket(mk){
+function sheetHide(){
+  document.getElementById("ov").classList.remove("on");
+  document.getElementById("sheet").classList.remove("on");
+}
+function pocket(mk, pal){
   var mu = MUSCLES[mk], d = mu.dim, j = (typeof JUDGEMENT!=="undefined" && JUDGEMENT[mk]) || {};
   var dr = (typeof DRILL!=="undefined" && DRILL[mk]) || null;
-  var P = PAL.warm;
+  var P = PAL[pal||"warm"];
   var html = '<div class="sh-hd"><span class="sh-mk" style="color:'+P[d].t+';">'+mk+'</span>'
     + '<span class="sh-n">'+mu.name+'</span>'
     + '<span class="sh-dim">'+DIM_ZH[d]+' · 第 '+mk.charAt(1)+' 塊</span></div>'
@@ -299,22 +321,21 @@ function pocket(mk){
     + '<div class="sh-sec"><div class="sh-k">這塊肌肉在練什麼</div><div class="sh-t">'+md(mu.ask)+'</div></div>';
   if (dr) html += drillHTML(dr);
   else if (j.homework) html += '<div class="sh-sec"><div class="sh-k">怎麼練</div><div class="sh-t">'+md(j.homework)+'</div></div>';
-  sheetShow(html);
+  sheetShow(html, pal);
 }
-function pocketCore(key){
+function pocketCore(key, pal){
   var dr = (typeof CORE_DRILL!=="undefined" && CORE_DRILL[key]) || null;
   if (!dr) return;
-  var html = '<div class="sh-hd"><span class="sh-mk" style="color:#8E682B;">'+(key==="story"?"STORY":"QUESTION")+'</span>'
+  var html = '<div class="sh-hd"><span class="sh-mk" style="color:'+(pal==="tech"?"#e6a93a":"#8E682B")+';">'+(key==="story"?"STORY":"QUESTION")+'</span>'
     + '<span class="sh-n">'+dr.n+'</span>'
     + '<span class="sh-dim">核心技巧 · 12 塊的地基</span></div>'
     + '<div class="sh-tech">這 2 個用得好，12 塊肌肉才用得好</div>'
     + drillHTML(dr);
-  sheetShow(html);
+  sheetShow(html, pal);
 }
-document.getElementById("ov").addEventListener("click", function(){
-  document.getElementById("ov").classList.remove("on");
-  document.getElementById("sheet").classList.remove("on");
-});
+/* 幽靈卡：按遮罩或卡片本身都關掉 */
+document.getElementById("ov").addEventListener("click", sheetHide);
+document.getElementById("sheet").addEventListener("click", sheetHide);
 
 triGo(0);
 document.getElementById("lv1").innerHTML = hdHTML("影響力健檢 · 結果") + potHTML() + sectionsHTML("peek","warm");
@@ -326,8 +347,8 @@ document.getElementById("lv4").innerHTML = hdHTML("私教 · 解盤全圖") + po
 var q = new URLSearchParams(location.search);
 if (q.get("tri")) triGo(+q.get("tri"));
 if (q.get("pocket")) {
-  var pk = q.get("pocket");
-  (pk === "story" || pk === "ask") ? pocketCore(pk) : pocket(pk);
+  var pk = q.get("pocket"), pp = q.get("pal") || "warm";
+  (pk === "story" || pk === "ask") ? pocketCore(pk, pp) : pocket(pk, pp);
 }
 </script>
 </body>
