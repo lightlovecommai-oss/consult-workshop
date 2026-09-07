@@ -110,9 +110,15 @@ function funnelStage_() {
   } catch (e) { return ""; }
 }
 
+/* 回頭客在 GTM 設定代碼發射的當下就該是「已認得的人」——
+   等 setTrackUser() 才給值，每次進站的前幾個事件都會缺 user_id。 */
 var TRACK_UID = "";
+try { TRACK_UID = localStorage.getItem("cw_uid") || ""; } catch (e) {}
+
 function setTrackUser(uid) {
-  TRACK_UID = uid || "";
+  if (!uid || uid === TRACK_UID) return;
+  TRACK_UID = uid;
+  try { (window.dataLayer = window.dataLayer || []).push({ line_user_id: TRACK_UID }); } catch (e) {}
   /* user_id 一送出去就會綁住之後所有事件，所以拿到身分的第一時間就要送 */
   track("session_source", {});
 }
@@ -142,6 +148,10 @@ function track(name, params) {
     window.dataLayer = window.dataLayer || [];
     var h = location.hostname;
     if (!h || h === "localhost" || h === "127.0.0.1") { console.log("[track] 本機環境，不載入 GTM"); return; }
+    /* 先鋪好身分／來源，GTM 的設定代碼一發射就讀得到，不用等第一個事件 */
+    window.dataLayer.push({
+      line_user_id: TRACK_UID, session_id: trackSessionId(), funnel_stage: funnelStage_()
+    });
     window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
     var f = document.getElementsByTagName("script")[0];
     var j = document.createElement("script");
