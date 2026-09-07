@@ -97,7 +97,13 @@ var out = {
     }),
     tag: tag,
     trigger: trigger,
-    variable: variable
+    variable: variable,
+    /* 沒列出來的內建變數，匯入時會被 GTM 當成「不要」而停用。
+       首次匯入就踩過這個坑（Event／Page URL 等五個全被關掉）。 */
+    builtInVariable: ["EVENT", "PAGE_HOSTNAME", "PAGE_PATH", "PAGE_URL", "REFERRER"].map(function (t) {
+      return base({ type: t, name: { EVENT: "Event", PAGE_HOSTNAME: "Page Hostname",
+        PAGE_PATH: "Page Path", PAGE_URL: "Page URL", REFERRER: "Referrer" }[t] });
+    })
   }
 };
 
