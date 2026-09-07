@@ -865,7 +865,8 @@ function render(){
 }
 function greet(){
   var hh = new Date().getHours();
-  return hh < 11 ? "早安" : hh < 18 ? "午安" : "晚安";
+  /* 17:00 就算晚上——原本切在 18，五點多還跳「午安」被抓包 */
+  return hh < 11 ? "早安" : hh < 17 ? "午安" : "晚安";
 }
 
 /* 核心技巧（2026-09-04 老師拍板架構：影響力溝通 > 2 核心技巧 > 4 大肌肉 > 12 小肌肉 > 無數技巧）
@@ -1062,7 +1063,11 @@ function gymHTML(){
   if (!S.member && lastD && (Date.now() - new Date(lastD + "T12:00:00").getTime()) / 86400000 >= 7) {
     sub = '你上次練是 <b style="color:#C6603A;">' + esc_(timeAgo(lastD)) + '</b>——影響力是肌肉，它不會自己長，但<b>只要練，就只會越練越強</b>。';
   }
-  var total = (typeof GYM_MONTH_TOTAL !== "undefined" ? GYM_MONTH_TOTAL : 0);
+  /* 「全館累計」＝開館以來全部打卡（不分月、不分 workshop）。
+     曾經接的是本月數，標籤與算法對不起來——882 筆的表只顯示 68。
+     舊後端沒回 gymTotal 才退回本月數。 */
+  var total = (typeof GYM_TOTAL !== "undefined" && GYM_TOTAL > 0) ? GYM_TOTAL
+            : (typeof GYM_MONTH_TOTAL !== "undefined" ? GYM_MONTH_TOTAL : 0);
   /* v5 夥-1：數字要有往上跳動的翻頁感——render 後 bignumAnim_() 從低處滾上來。
      v7 夥-1（2026-09-05 老師拍板）：改標示「全館累計 44次 鍛鍊數」，「次 鍛鍊數」不換行 */
   var statH = (total > 0 && total >= thisMonth)
@@ -1084,7 +1089,8 @@ function gymHTML(){
   var topM = (typeof GYM_MONTH_TOP !== "undefined") ? GYM_MONTH_TOP : null;
   var stripTxt = topM
     ? '這個月大家練最多的是 <b style="color:' + dimTextColor(topM.dim) + ';">' + esc_((DIMS[topM.dim] || {}).name || topM.muscle) + '</b>'
-      + (GYM_MONTH_PEOPLE > 1 ? '<br>' + GYM_MONTH_PEOPLE + ' 位夥伴一起在練' : '')
+      + (GYM_PEOPLE > 1 ? '<br>館裡有 ' + GYM_PEOPLE + ' 位夥伴一起在練'
+         : GYM_MONTH_PEOPLE > 1 ? '<br>' + GYM_MONTH_PEOPLE + ' 位夥伴一起在練' : '')
     : '夥伴都在練<span class="mock">示意</span> · 你的紀錄會同步到館裡';
   /* strip 整條可點→練習頁；v5 夥-3（2026-09-05 老師拍板）：右側「去鍛鍊 »」小連結拿掉，主鈕就是入口 */
   h += '<div class="strip" onclick="go(\'today\')" style="cursor:pointer;"><div class="avs">'

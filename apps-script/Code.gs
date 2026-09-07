@@ -707,10 +707,16 @@ function computeGymSlim_(limit) {
 function monthStats_() {
   var ym = normDateStr_(new Date()).slice(0, 7);
   var total = 0, people = {}, byMuscle = {}, dimOf = {}, byDim = {};
+  var allTotal = 0, allPeople = {};
   rows_(TABS.checkins).forEach(function(r){
+    var uid0 = String(pick_(r, COLS.checkins.lineId) || "");
+    /* 「全館累計」是開館以來的總數，不分月份也不分 workshop（天麗那批也在同一張表）。
+       月統計仍留著，共同焦點「這個月大家練最多的是 X」要的是當下訊號。 */
+    allTotal++;
+    if (uid0) allPeople[uid0] = 1;
     if (normDateStr_(pick_(r, COLS.checkins.date)).slice(0, 7) !== ym) return;
     total++;
-    var uid = String(pick_(r, COLS.checkins.lineId) || "");
+    var uid = uid0;
     if (uid) people[uid] = 1;
     var dk = String(pick_(r, COLS.checkins.dim) || "").toUpperCase().split(",")[0].trim();
     if (dk) byDim[dk] = (byDim[dk] || 0) + 1;
@@ -721,7 +727,8 @@ function monthStats_() {
   /* muscle 是 v2 欄位，舊列全空——退回用維度欄統計，共同焦點行照樣有真資料 */
   var topDim = top ? (dimOf[top] || top.charAt(0))
                    : (Object.keys(byDim).sort(function(a, b){ return byDim[b] - byDim[a]; })[0] || "");
-  return { total: total, people: Object.keys(people).length, topMuscle: top, topDim: topDim };
+  return { total: total, people: Object.keys(people).length, topMuscle: top, topDim: topDim,
+           allTotal: allTotal, allPeople: Object.keys(allPeople).length };
 }
 function computeLogs_(uid) {
   var checkins = rows_(TABS.checkins).filter(function(r){ return String(pick_(r, COLS.checkins.lineId)) === uid; }).map(function(r){
@@ -887,6 +894,7 @@ function doGet(e) {
       var ms = monthStats_();
       return json_({ status: "ok", posts: computeGymPosts_(Number(p.limit) || 12), slim: computeGymSlim_(8),
                      monthTotal: ms.total, monthPeople: ms.people,
+                     gymTotal: ms.allTotal, gymPeople: ms.allPeople,
                      monthTop: { muscle: ms.topMuscle, dim: ms.topDim } });
     }
 

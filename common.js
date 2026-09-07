@@ -424,6 +424,8 @@ function postCheckin(lineId, task, workshopId, dateStr, extra) {
    後端只回傳 share=true 且有 reaction 的最近幾筆，對象已經匿名（只留 rel 關係類型，
    不回傳 target 姓名）——不然「分享到館裡」變成把別人的名字公開給陌生人看。 */
 var GYM_MONTH_TOTAL = 0;   // 全館本月打卡總數（gymPosts 附帶回傳；舊後端沒這欄位＝維持 0，前端自己退回個人數字）
+var GYM_TOTAL = 0;         // 全館開館以來累計打卡總數（hero 大數字用的就是這個）
+var GYM_PEOPLE = 0;        // 全館累計有練過的人數（distinct lineId）
 var GYM_SLIM = [];         // 純點擊那層（沒打字沒勾分享）——一行小卡，只有名字＋肌肉＋反應
 var GYM_MONTH_TOP = null;  // 本月練最多的肌肉 {muscle, dim}（沒資料＝null，前端退回示意行）
 var GYM_MONTH_PEOPLE = 0;  // 本月有練的人數（distinct lineId）
@@ -433,6 +435,8 @@ async function loadGymPosts(limit) {
     var d = await r.json();
     if (d.status !== "ok") return [];
     GYM_MONTH_TOTAL = Number(d.monthTotal) || 0;
+    GYM_TOTAL = Number(d.gymTotal) || 0;
+    GYM_PEOPLE = Number(d.gymPeople) || 0;
     GYM_SLIM = d.slim || [];
     /* 舊制打卡只有維度沒有小肌群——有 dim 就算有真資料 */
     GYM_MONTH_TOP = (d.monthTop && (d.monthTop.dim || d.monthTop.muscle)) ? d.monthTop : null;
