@@ -12,6 +12,11 @@ var DLV = [
   "screen", "cta_id", "task_key", "dim", "muscle"
 ];
 
+/* GA4 把 session_id 列為保留字，建不了自訂維度。
+   改名只發生在送去 GA4 這一段——資料層與 Google Sheet 欄位仍叫 session_id，
+   兩邊是同一個值，回頭要對照時直接對得起來。 */
+var PARAM_ALIAS = { session_id: "cw_session_id" };
+
 var EVENT_REGEX = "^(quiz_.*|result_.*|lead_.*|gym_.*|secret_view|consult_.*|"
   + "checkin_complete|muscle_eval_submit|workshop_register|purchase|"
   + "cta_click|scroll_depth|screen_view|session_source)$";
@@ -70,7 +75,7 @@ var tag = [
       {
         type: "LIST", key: "eventSettingsTable",
         list: DLV.map(function (n) {
-          return map([tpl("parameter", n), tpl("parameterValue", "{{DLV - " + n + "}}")]);
+          return map([tpl("parameter", PARAM_ALIAS[n] || n), tpl("parameterValue", "{{DLV - " + n + "}}")]);
         })
       },
       { type: "TAG_REFERENCE", key: "measurementId", value: CONFIG_TAG_NAME }
