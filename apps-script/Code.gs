@@ -38,8 +38,12 @@ var COLS = {
   /* paidMember＝手動勾選欄「溝通健身房會員」（誰付了 99），2026-09-01 起用來區分
      member.html 的體驗客／會員內容。欄位在「(遊戲)開通名單」姓名跟團隊中間，人工維護，
      跟課程開通欄（workshopId 那些）是不同性質的旗標，不會被 computeConfig_() 的課程掃描讀到。 */
+  /* seat＝手動指定席位（2026-09-07）。空白＝走 index.html 的自動規則；填了就直接蓋過去。
+     合法值（中英都收，前端 SEAT_MAP 對照）：體驗席／會員席／私教席／舊版／健檢。
+     用一欄下拉而不是四個打勾欄＝一個人不可能同時被指定兩個地方，表上一眼看得出他落在哪。 */
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"],
-              paidMember:["溝通健身房會員","影響力健身房會員","paidMember"] },
+              paidMember:["溝通健身房會員","影響力健身房會員","paidMember"],
+              seat:["指定席位","seat"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
   checkins: { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], taskKey:["任務key","taskKey"],
               cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],
@@ -467,7 +471,8 @@ function computeStudent_(uid) {
   rows_(TABS.students).forEach(function(r) {
     var id = String(pick_(r, COLS.students.lineId));
     if (id === uid) st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
-                            paidMember: granted_(pick_(r, COLS.students.paidMember)) };
+                            paidMember: granted_(pick_(r, COLS.students.paidMember)),
+                            seat: String(pick_(r, COLS.students.seat) || "").trim() };
   });
   return st;
 }
@@ -768,7 +773,8 @@ function doGet(e) {
       var students = rows_(TABS.students).map(function(r) {
         var id = String(pick_(r, COLS.students.lineId));
         return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)),
-                 enrolled: !!enrolledSet[id], paidMember: granted_(pick_(r, COLS.students.paidMember)) };
+                 enrolled: !!enrolledSet[id], paidMember: granted_(pick_(r, COLS.students.paidMember)),
+                 seat: String(pick_(r, COLS.students.seat) || "").trim() };
       }).filter(function(s){ return s.lineId; });
       return json_({ status: "ok", students: students });
     }
@@ -1348,6 +1354,32 @@ function upsertRewards() {
     else { sh.getRange(sh.getLastRow() + 1, 1, 1, headers.length).setValues([line]); added++; }
   }
   return "兌換品項 upsert 完成：新增 " + added + "、更新 " + updated + " 項（等比例 200元/愛的貨幣）";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   「指定席位」欄：手動蓋過自動路由。在 Apps Script 選 setupSeatColumn → 執行一次。
+   會做兩件事：① 在「(遊戲)開通名單」補上「指定席位」欄 ② 掛上下拉選單（含空白＝自動）。
+   可重複執行；已經有欄位就只重掛驗證，不會動到已填的值。
+   ⚠️ 這欄是「例外處理」用的，不是常態。常態請維護課程開通欄與「影響力健身房會員」勾選欄，
+      讓自動規則自己判斷；每多一個手動指定，就多一個之後會忘記為什麼這樣設的地方。
+   ═══════════════════════════════════════════════════════════ */
+var SEAT_OPTIONS = ["體驗席", "會員席", "私教席", "舊版", "健檢"];
+function setupSeatColumn() {
+  ensureColumn_(TABS.students, "指定席位");
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return "找不到「" + TABS.students + "」分頁";
+  var lastCol = sh.getLastColumn();
+  var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
+  var c = h.indexOf("指定席位");
+  if (c < 0) return "補欄失敗：找不到「指定席位」欄";
+  var lastRow = Math.max(sh.getLastRow(), 2);
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(SEAT_OPTIONS, true).setAllowInvalid(false)
+    .setHelpText("空白＝自動路由；填了就直接指定他進哪一頁").build();
+  sh.getRange(2, c + 1, lastRow - 1, 1).setDataValidation(rule);
+  sh.getRange(1, c + 1).setNote("手動指定席位。空白＝走自動規則（天麗→舊版、有開通課或會員→會員席、其餘→體驗席）。"
+    + "填了就直接蓋過去：" + SEAT_OPTIONS.join("／"));
+  return "「指定席位」欄已就緒（第 " + (c + 1) + " 欄），下拉選項＝" + SEAT_OPTIONS.join("／") + "，空白＝自動。";
 }
 
 /* ═══════════════════════════════════════════════════════════

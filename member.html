@@ -710,7 +710,14 @@ async function boot() {
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
   if (d.tasks) TASKS = d.tasks;
   var st = d.student || {};
-  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "", member: !!st.paidMember,
+  /* 會員身分＝付了 99（paidMember）**或**有開通任何一門課（2026-09-07 補）。
+     課程學員付的比 99 多得多，卻因為只看 paidMember 而被當成體驗客——
+     路由把一階/二階/三階從舊版 dashboard 搬過來之後才會踩到，所以一起修。
+     開通名單「指定席位」欄手動填會員席時也算——不然手動指定了還是看到體驗客畫面。 */
+  var hasCourse = (d.enrollments || []).some(function(e){ return e.lineId === (st.lineId || uid); });
+  var seatMember = ["會員席","會員","member"].indexOf(String(st.seat || "").trim().toLowerCase()) > -1
+                || ["會員席","會員"].indexOf(String(st.seat || "").trim()) > -1;
+  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "", member: !!(st.paidMember || hasCourse || seatMember),
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   WID = d.defaultWorkshop || "";
   S.visits = bumpVisitCount_(S.lineId);

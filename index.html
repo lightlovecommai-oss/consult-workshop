@@ -58,19 +58,46 @@
    visitor.html 正式接進路由（原本是孤兒頁、路人全落 member 的體驗客模式）：
      · 有開通「超引力-顧問課」或「超引力-公眾演說」→ pro.html（私教學員層・新版科技版，
        另開一支檔案，不動 dashboard.html——天麗跟舊私教學員完全不受影響）
-     · 有開通其他任一門課（一階/二階/三階/tenlead-1…） → dashboard.html（學員模式，舊版）
+     · 天麗共訓營（tenlead-1）→ dashboard.html（學員模式，舊版）
+     · 有開通其他任一門課（一階/二階/三階…）→ member.html（新版會員席）
      · 已付 99（開通名單「溝通健身房會員」手動勾選欄 → paidMember）→ member.html（會員席）
      · 其餘所有人（含完全不在名單的）→ visitor.html（體驗席）
    member.html 內建的體驗客模式（S.member=false）保留當防呆——有人直開網址不會壞。
-   showcase.html 這個檔案還留著（給行銷連結用），只是不再被自動路由指到。 */
+   showcase.html 這個檔案還留著（給行銷連結用），只是不再被自動路由指到。
+
+   ⭐ 2026-09-07 老師裁決：舊版 dashboard.html **只留給天麗那一批**。
+      原本是「有開通任何課 → dashboard.html」，導致做完測驗的舊學員一律被送回舊版介面，
+      新的影響力健身房（visitor／member／pro）等於只有完全沒開通課的人看得到。
+      改成白名單制：只有 LEGACY_WORKSHOPS 裡的課走舊版，其餘全部進新版。
+      ⚠️ dashboard.html 本身一個像素都沒動——天麗「加到主畫面」的捷徑是
+         dashboard.html?id=…&addhome=1 的直接網址，繞過本頁，所以他們完全不受影響。
+      日後天麗那一梯結束、要收掉舊版時，把 LEGACY_WORKSHOPS 清空即可。 */
 var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
+var LEGACY_WORKSHOPS = ["tenlead-1"];
+
+/* 手動指定席位（2026-09-07）：開通名單的「指定席位」欄一填，就蓋過下面所有自動規則。
+   跑 Code.gs 的 setupSeatColumn() 會把這欄跟下拉選單建好。中英文都收，免得手打對不上。
+   「健檢」＝把他丟回測驗重測一次（跨站，所以是絕對網址）。 */
+var SEAT_MAP = {
+  "體驗席":"visitor.html", "體驗客":"visitor.html", "visitor":"visitor.html",
+  "會員席":"member.html",  "會員":"member.html",   "member":"member.html",
+  "私教席":"pro.html",     "私教":"pro.html",      "pro":"pro.html",
+  "舊版":"dashboard.html", "學員":"dashboard.html", "dashboard":"dashboard.html",
+  "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
+};
 function routeFor(id) {
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
-  var inPro = ENROLLMENTS.some(function(e){ return e.lineId === id && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
-  if (inPro) return "pro.html?id=" + encodeURIComponent(id);
-  if (s && s.enrolled) return "dashboard.html?id=" + encodeURIComponent(id);
-  if (s && s.paidMember) return "member.html?id=" + encodeURIComponent(id);
-  return "visitor.html?id=" + encodeURIComponent(id);
+  var q = "?id=" + encodeURIComponent(id);
+
+  var seat = s && s.seat ? SEAT_MAP[String(s.seat).trim().toLowerCase()] || SEAT_MAP[String(s.seat).trim()] : "";
+  if (seat) return seat + q;
+
+  var mine = ENROLLMENTS.filter(function(e){ return e.lineId === id; });
+  var has = function(list){ return mine.some(function(e){ return list.indexOf(e.workshopId) > -1; }); };
+  if (has(PRO_WORKSHOPS)) return "pro.html" + q;
+  if (has(LEGACY_WORKSHOPS)) return "dashboard.html" + q;
+  if (s && (s.enrolled || s.paidMember)) return "member.html" + q;
+  return "visitor.html" + q;
 }
 
 async function init() {
