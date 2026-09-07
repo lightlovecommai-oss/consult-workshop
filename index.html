@@ -86,9 +86,13 @@ var SEAT_MAP = {
   "舊版":"dashboard.html", "學員":"dashboard.html", "dashboard":"dashboard.html",
   "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
 };
+/* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
+var FROM = "";
+try { FROM = new URLSearchParams(window.location.search).get("from") || ""; } catch(e){}
+function fromQ_(){ return FROM ? "&from=" + encodeURIComponent(FROM) : ""; }
 function routeFor(id) {
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
-  var q = "?id=" + encodeURIComponent(id);
+  var q = "?id=" + encodeURIComponent(id) + fromQ_();
 
   var seat = s && s.seat ? SEAT_MAP[String(s.seat).trim().toLowerCase()] || SEAT_MAP[String(s.seat).trim()] : "";
   if (seat) return seat + q;
@@ -144,7 +148,7 @@ async function init() {
 
   /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）＝真路人 → 體驗席。
      visitor.html 不需要 id 也能跑（紀錄存 localStorage）；付過錢的回頭客走上面 cw_uid 那條。 */
-  window.location.href = "visitor.html";
+  window.location.href = "visitor.html" + (FROM ? "?from=" + encodeURIComponent(FROM) : "");
 }
 
 init();

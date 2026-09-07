@@ -91,7 +91,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .skipb{width:100%;margin-top:8px;background:none;border:0;color:#8A7266;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
 /* 完成頁：✓＋評語＋回放 */
 .done-ring{width:64px;height:64px;margin:14px auto 10px;border-radius:50%;background:conic-gradient(#6E8B77 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
-.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:19px;font-weight:900;color:#5C7464;}
+.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:15px;font-weight:900;color:#5C7464;white-space:nowrap;}
 .ok-t{font-size:17px;font-weight:800;text-align:center;}
 .ok-s{font-size:13.5px;color:#6E4A3C;margin-top:5px;line-height:1.85;text-align:center;}
 .playback{background:#fff;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;color:#4A1B0C;line-height:1.75;}
@@ -133,8 +133,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .coach-av{width:44px;height:44px;border-radius:50%;background:#FDF9F0;border:1.5px dashed #C99A4E;display:flex;align-items:center;justify-content:center;color:#8E682B;font-size:12px;font-weight:700;flex-shrink:0;}
 .coach-t{font-size:15px;font-weight:800;color:#4A1B0C;}
 .coach-s{font-size:12px;color:#8A7266;margin-top:2px;}
-.coach-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:#5A3A2A;filter:blur(3px);user-select:none;}
-.mock{font-size:11px;color:#B4A695;border:1px dashed #D8C9BC;padding:1px 7px;border-radius:20px;margin-left:6px;font-style:normal;}
+.coach-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:#5A3A2A;}
 .coach-go{display:block;text-align:center;margin-top:13px;background:transparent;border:2px solid #C6603A;color:#AF5433;border-radius:14px;padding:12px;font-size:15px;font-weight:700;letter-spacing:1px;text-decoration:none;min-height:48px;box-sizing:border-box;}
 .coach-go:active{transform:scale(.98);}
 
@@ -200,6 +199,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
 .m.focus .m-v{color:#993C1D;}
 .mushint{margin-top:12px;font-size:12px;color:#8A7266;text-align:center;line-height:1.8;}
+.mus-cta{display:block;text-align:center;margin:0 0 12px;padding:12px;border:1.5px dashed #C6603A;border-radius:14px;color:#AF5433;font-size:14px;font-weight:700;text-decoration:none;}
+.mus-cta:active{transform:scale(.98);}
+.fromq{background:#FDF9F0;border:1.5px solid #C99A4E;border-radius:14px;padding:11px 14px;font-size:13.5px;line-height:1.8;color:#5A3A2A;margin-bottom:12px;}
+.fromq b{color:#8E682B;}
 
 /* 口袋提示卡（幽靈浮層：半透明毛玻璃、可讀、再按一下就不見） */
 .ov{position:fixed;inset:0;background:rgba(43,33,24,.22);display:none;z-index:50;}
@@ -221,8 +224,11 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sh-two .sh-t{font-size:13px;line-height:1.75;}
 
 /* 骨層句＋頁尾四色收邊 */
-.bone{text-align:center;font-size:14px;color:#6E4A3C;line-height:2;padding:14px 20px 4px;}
-.bone b{color:#3E5546;}
+/* 品牌金句（❝ 走襯線＝介面無襯線的唯一例外；n7 深底所以吃亮字） */
+.quote{margin:16px 4px 14px;}
+.quote-m{display:block;font-family:Georgia,"Times New Roman",serif;font-size:36px;color:#C99A4E;line-height:.7;}
+.quote-t{font-size:15px;color:#F7F1EC;line-height:2;font-weight:700;margin-top:4px;}
+.quote-by{margin-top:2px;font-size:12px;color:#C9A87A;text-align:right;letter-spacing:.08em;}
 .hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin:18px 20px 0;}
 </style>
 </head>
@@ -239,6 +245,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
 
   <div class="bd">
+
+    <!-- 剛從 quiz 過來的人（?from=quiz）：先接住他，說健檢結果已經接上了 -->
+    <div id="fromquiz"></div>
 
     <div class="streak">
       <div class="sdots" id="sdots"></div>
@@ -297,7 +306,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
         <div class="coach-av">空位</div>
         <div><div class="coach-t">場邊教練席</div><div class="coach-s">會員開放 · 他會看你每一組紀錄</div></div>
       </div>
-      <div class="coach-line">你這句丟得不錯，他多說了兩句——明天試著把問句放在最後，停三秒再……<i class="mock">示意</i></div>
+      <div class="coach-line">會員每記一組，場邊教練會逐筆看過——哪句丟得好、下一組先調哪裡，一筆一筆回。</div>
       <a class="coach-go" href="member.html?demo=1">參觀「會員席位」 →</a>
     </div>
 
@@ -319,12 +328,12 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
         <div class="cmp-r"><div class="cmp-k">練多深</div><div class="cmp-v">—</div><div class="cmp-m">每招拆到<br>你講得出口</div></div>
       </div>
       <div class="n7id">練影響力最難的不是方法——是有人陪你練下去。</div>
+      <div class="quote"><span class="quote-m">❝</span><div class="quote-t">這裡練的不是話術，<br>是讓身邊的人因為你的存在，多說了一點真心話。</div><div class="quote-by">—— 光頭</div></div>
       <a class="n7go" href="join.html">升級席位 · 解鎖你的第一塊大肌肉 →</a>
     </div>
 
   </div>
 
-  <div class="bone">這裡練的不是話術，<br>是讓身邊的人因為你的存在，<b>多說了一點真心話</b>。</div>
   <div class="hero-rule"></div>
 
 </div>
@@ -406,6 +415,9 @@ var OWN = null;   // {key:"own", mk, name, good, bad, exs} 從健檢最弱塊生
 var POT = null;   // 已解鎖影響力（字典⑦ γ=0.6）
 var MS12 = null;  // 健檢 12 格 1–5（儀表板用；沒基線＝null）
 var PCTV = null;  // 4 大肌肉成數 0–100（歸零換算）
+var QUIZ_URL = "https://lightlovecommai-oss.github.io/comconverttest/";
+var FROMQ = false;
+try { FROMQ = new URLSearchParams(location.search).get("from") === "quiz"; } catch(e){}
 
 /* 統一儀表板色盤（暖版；DIMS 由各專案自定） */
 var PALV = {A:{c:"#C6603A",t:"#AF5433"},T:{c:"#6E8B77",t:"#5C7464"},P:{c:"#6E8CA8",t:"#54718D"},I:{c:"#C99A4E",t:"#8E682B"}};
@@ -458,8 +470,8 @@ function heroHTML(){
       + (REC.react!=null ? '<button class="skipb" onclick="document.getElementById(\'recnote\').value=\'\';finishRec()">跳過文字，直接記 →</button>' : '');
   } else {
     var good = REC.react >= 2;
-    h += '<div class="done-ring"><i>+1</i></div>'
-      + '<div class="ok-t">每天進步一點點。</div>'
+    h += '<div class="done-ring"><i>+1 組</i></div>'
+      + '<div class="ok-t">這招你練了第 '+(st.cnt[MV.key]||1)+' 組。</div>'
       + '<div class="ok-s">'+(good ? MV.good : '沒回應不代表白講。<br>'+MV.bad)+'</div>'
       + (REC.note ? '<div class="playback">你記下的：「'+esc(REC.note)+'」<small>文字留得住感覺，分數留不住。</small></div>' : '')
       + '<div class="again" onclick="REC={step:0,who:\'\',react:null,note:\'\'};render()">點一下，回到練習 ›</div>';
@@ -510,6 +522,12 @@ function finishRec(){
 }
 
 function render(){
+  /* 剛測完的招呼卡：基線到了念得出他的專屬招；還沒到（Sheet 寫入有時差）先講地基 */
+  var fq = document.getElementById("fromquiz");
+  if (fq) fq.innerHTML = !FROMQ ? "" : (OWN
+    ? '<div class="fromq">剛測完？你的健檢說「'+OWN.name+'」先練最有感——<b>已經排進你的輪替</b>。</div>'
+    : '<div class="fromq">剛測完？你的專屬招正在生成——先從 2 塊地基熱身。</div>');
+
   document.getElementById("hero").innerHTML = heroHTML();
 
   var dots="", n=0, d=new Date(today);
@@ -562,6 +580,8 @@ function musHTML(){
   var h = '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
     + '<div class="core" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
     + '<div class="core" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
+  /* 沒基線＝12 格全暗：開一個回測驗的口（很少人直開 visitor，但開了就別讓他撞牆） */
+  if (!MS12) h += '<a class="mus-cta" href="'+QUIZ_URL+'" onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'})">先做 3 分鐘影響力健檢，點亮你的第一塊 →</a>';
   h += DORD.map(function(k){
     var pc = PCTV ? PCTV[k] : null;
     var head = '<div class="dh"><span class="dh-en" style="color:'+PALV[k].t+';">'+DIM_EN[k]+'</span>'
@@ -572,7 +592,8 @@ function musHTML(){
     var tiles = musclesOfDim(k).map(function(mk){
       var own = OWN && mk === OWN.mk;
       var cls = "m" + (own ? " focus" : " off");
-      var tap = own ? ' onclick="pocket(\''+mk+'\')"' : '';
+      var tap = own ? ' onclick="pocket(\''+mk+'\')"'
+        : (!MS12 ? ' onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'});location.href=QUIZ_URL"' : '');
       var barW = (own && MS12) ? Math.round((MS12[mk]-1)/4*100) : 0;
       var val = (own && MS12) ? MS12[mk].toFixed(1)+" · 本週主力" : "還沒點亮";
       return '<div class="'+cls+'"'+tap+'><div class="m-n"><i style="color:'+PALV[k].t+';">'+mk+'</i>'+MUSCLES[mk].name+'</div>'
