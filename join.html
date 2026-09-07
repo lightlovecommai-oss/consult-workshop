@@ -160,6 +160,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
 </div>
 
+<script src="track.js"></script>
 <script>
 /* ⚠️ 這裡先放空字串——不知道 PayUni 要用哪種產品（收款連結/一頁式API）之前，
    不假裝按了會付款。你如果已經在 PayUni 後台生出一個「收款連結」，把網址貼進來，
@@ -169,10 +170,13 @@ var PAYUNI_URL = "";
 function bindPay(){
   var btn = document.getElementById("btnPay"), note = document.getElementById("devNotice");
   if (PAYUNI_URL) {
-    btn.onclick = function(){ location.href = PAYUNI_URL; };
+    btn.onclick = function(){ track("cta_click", { cta_id: "join_pay", cta_position: "bottom" }); location.href = PAYUNI_URL; };
     note.style.display = "none";
   } else {
     btn.onclick = function(){
+      /* 金流還沒接，但這顆按鈕的**點擊意願**現在就要量——
+         等 PayUni 接上時才知道「有多少人想付但當時付不了」。 */
+      track("cta_click", { cta_id: "join_pay", cta_position: "bottom", payment_ready: false });
       note.textContent = "還沒接金流連結——這顆按鈕先讓你看畫面，PayUni 連結給我之後就會真的可以按。";
       note.style.display = "block";
     };

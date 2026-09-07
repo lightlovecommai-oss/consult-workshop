@@ -471,6 +471,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 <div class="sheet" id="sheet"></div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="track.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script src="judgement.js"></script>
@@ -695,17 +696,10 @@ async function boot() {
     if (_pk) { if (_pk === "story" || _pk === "ask") pocketCore(_pk); else if (MUSCLES[_pk]) pocket(_pk); }
     return;
   }
-  var uid = qs.get("id");
-  if (!uid) {
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) { liff.login(); return; }
-      uid = (await liff.getProfile()).userId;
-    } catch (e) {
-      el("bd").innerHTML = '<div class="loading">請從 LINE 進入，或在網址加上 ?id=你的 LINE userId</div>';
-      return;
-    }
-  }
+  /* 身分交給 common.js 的 resolveLineId：外部瀏覽器不會被推去打 LINE 密碼，
+     而是看到「用 LINE 開啟」的橋（回傳 null＝橋已經畫好了）。 */
+  var uid = await resolveLineId("bd");
+  if (!uid) return;
   var d = await loadBootstrap(uid, "");
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
   if (d.tasks) TASKS = d.tasks;
@@ -721,6 +715,7 @@ async function boot() {
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   WID = d.defaultWorkshop || "";
   S.visits = bumpVisitCount_(S.lineId);
+  if (S.visits === 1) track("gym_first_open", { member: S.member });
   el("nav").classList.remove("hide");
   render();
   loadGymPosts(6).then(function(posts){ GYM_POSTS = posts || []; if (PANE === "gym") render(); });
@@ -851,6 +846,9 @@ function go(p){
   });
   window.scrollTo(0, 0);
   render();
+  /* 切分頁不會換網址，GTM 自動的 page_view 抓不到——不自己發，
+     報表上會看起來「所有人都只看了一頁就走」。 */
+  track("screen_view", { screen: p, member: !!(S && S.member) });
 }
 
 function render(){

@@ -51,6 +51,7 @@
 })();
 </script>
 
+<script src="track.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script>
@@ -110,6 +111,7 @@ async function init() {
     await loadConfig();  // 帶出 ENROLLMENTS，routeFor() 才能判斷是不是超引力那兩門課
 
     if (urlId) {
+      rememberUid_(urlId);   // 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程
       window.location.href = routeFor(urlId);
       return;
     }
@@ -122,6 +124,7 @@ async function init() {
 
     if (liff.isLoggedIn()) {
       var p = await liff.getProfile();
+      rememberUid_(p.userId);
       window.location.href = routeFor(p.userId);
       return;
     } else if (liff.isInClient()) {

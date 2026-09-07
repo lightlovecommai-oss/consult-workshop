@@ -86,6 +86,53 @@ var COLS = {
               Q7:["Q7","P1"], Q8:["Q8","P2"], Q9:["Q9","P3"], Q10:["Q10","I1"], Q11:["Q11","I2"], Q12:["Q12","I3"] }
 };
 
+/* ═══════════════════════════════════════════════════════════
+   身分縫合欄位（2026-09-07，規範＝productkit 31 §3-1）
+
+   為什麼這是整份追蹤規範裡最急的一步：**沒存下來的歸因，事後花錢也買不回來。**
+   顧問課 3.28 萬是三個月後在線下 1v1 談成的，那一刻瀏覽器早就關了。
+   要能回頭說「這單來自那支廣告」，唯一的辦法是**當初寫進 Sheet 的那一列就帶著廣告識別碼**。
+
+   七個欄位全部可空（低摩擦守則：缺值絕不擋寫入），有值時一定要存：
+   · session_id     前端產的 UUID，存 localStorage。他還沒登入 LINE 前逛了什麼，靠這支補得回來
+   · ga_client_id   GA4 的 cookie，回灌離線轉換時對得回 GA4 的 session
+   · fbc / fbp      Meta 的廣告點擊碼／瀏覽器碼，回灌時對得回**那支廣告**
+   · utm_*          三個活動參數，人工看報表時最直覺的那組
+
+   ⚠️ 這裡刻意用英文欄名（不翻中文）——它們是機器欄位，
+      名稱要跟 GA4／Meta 官方參數一字不差，翻譯過去對接時會對不上。
+   ⚠️ 體測紀錄分頁不加：它是 append 固定六欄的寫法，而且規範 §3-1 只點名
+      「測驗結果／打卡紀錄／成交紀錄」三張。少動一張就少一個壞掉的機會。
+   ═══════════════════════════════════════════════════════════ */
+var TRACK_HEADERS = ["session_id", "ga_client_id", "fbc", "fbp", "utm_source", "utm_medium", "utm_campaign"];
+var TRACK_COLS = {
+  sessionId:  ["session_id", "quiz_session_id"], gaClientId: ["ga_client_id"],
+  fbc:        ["fbc"],        fbp:         ["fbp"],
+  utmSource:  ["utm_source"], utmMedium:   ["utm_medium"], utmCampaign: ["utm_campaign"]
+};
+[COLS.checkins, COLS.revenue, COLS.quizWrite].forEach(function(m){
+  for (var k in TRACK_COLS) m[k] = TRACK_COLS[k];
+});
+
+/* 把前端送來的 body.track 攤成欄位值，合併進要寫入的那一列。
+   前端沒送（舊版頁面、bot、本機測試）就是七個空字串，不影響任何既有行為。 */
+function withTrack_(values, body) {
+  var t = (body && body.track) || {};
+  for (var k in TRACK_COLS) values[k] = String(t[k] || "");
+  return values;
+}
+
+/* 在三張分頁補上這七欄。在編輯器選 setupTrackingColumns → 執行，跑一次就好（可重複執行）。 */
+function setupTrackingColumns() {
+  var out = [];
+  [TABS.quiz, TABS.checkins, TABS.revenue].forEach(function(tab){
+    if (!ss_().getSheetByName(tab)) { out.push(tab + "：找不到分頁，略過"); return; }
+    TRACK_HEADERS.forEach(function(h){ ensureColumn_(tab, h); });
+    out.push(tab + "：七個追蹤欄已就緒");
+  });
+  return out.join("\n");
+}
+
 /* 測驗分頁補欄位（可重複執行，已存在就跳過）。改完 COLS.quizWrite 之後在編輯器跑一次。
    ⚠️ 只補欄名，不動既有資料；補完之後 comconverttest 送來的情境座標才寫得進去。 */
 function migrateQuizCols() {
@@ -339,28 +386,45 @@ function appendMapped_(tab, colmap, values) {
 }
 
 /* 同 appendMapped_，但依 keyField 找既有列：找到就更新那一列、找不到才新增。用於一人一列（測驗可重送不重複）。 */
-function upsertMapped_(tab, colmap, keyField, values) {
+/* preserveEmpty＝「這幾個欄位如果這次沒帶值，就保留原本格子裡的東西，不要覆蓋成空白」。
+   為的是**首次接觸的廣告歸因**：他兩個月後重測一次時，網址上早就沒有 utm 了，
+   照原本的寫法會把當初帶他進來的那支廣告直接抹掉——而那正是三個月後成交時要回頭認的東西。 */
+function upsertMapped_(tab, colmap, keyField, values, preserveEmpty) {
   var sh = ss_().getSheetByName(tab);
   if (!sh) throw new Error("找不到分頁：" + tab);
   var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
   var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
-  var line = headers.map(function(h) {
-    for (var f in values) if (colmap[f] && colmap[f].indexOf(h) > -1) return values[f];
-    return "";
-  });
+
   var keyAliases = colmap[keyField] || [];
   var keyCol = -1;
   for (var c = 0; c < headers.length; c++) if (keyAliases.indexOf(headers[c]) > -1) { keyCol = c; break; }
-  var keyVal = values[keyField];
+
+  /* 先找到既有那一列，才有辦法在組新列時保留舊值 */
+  var hitRow = -1, keyVal = values[keyField];
   if (keyCol > -1 && lastRow > 1 && keyVal !== undefined && keyVal !== "") {
     var colVals = sh.getRange(2, keyCol + 1, lastRow - 1, 1).getValues();
     for (var i = 0; i < colVals.length; i++) {
-      if (String(colVals[i][0]) === String(keyVal)) {
-        sh.getRange(i + 2, 1, 1, line.length).setValues([line]);
-        return "updated";
-      }
+      if (String(colVals[i][0]) === String(keyVal)) { hitRow = i + 2; break; }
     }
   }
+  var old = hitRow > -1 ? sh.getRange(hitRow, 1, 1, lastCol).getValues()[0] : null;
+  var keepHeader = {};
+  (preserveEmpty || []).forEach(function(f){
+    (colmap[f] || []).forEach(function(h){ keepHeader[h] = true; });
+  });
+
+  var line = headers.map(function(h, idx) {
+    for (var f in values) {
+      if (colmap[f] && colmap[f].indexOf(h) > -1) {
+        var v = values[f];
+        var blank = (v === "" || v === undefined || v === null);
+        return (old && keepHeader[h] && blank) ? old[idx] : v;
+      }
+    }
+    return "";
+  });
+
+  if (hitRow > -1) { sh.getRange(hitRow, 1, 1, line.length).setValues([line]); return "updated"; }
   sh.appendRow(line);
   return "appended";
 }
@@ -899,14 +963,14 @@ function doPost(e) {
     var body = JSON.parse(e.postData.contents);
     var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
     if (body.action === "checkin") {
-      appendMapped_(TABS.checkins, COLS.checkins, {
+      appendMapped_(TABS.checkins, COLS.checkins, withTrack_({
         lineId: body.lineId, workshopId: body.workshopId || "", taskKey: body.taskKey,
         cadence: body.cadence || body.taskType || "daily", dim: body.dim || "",
         muscle: String(body.muscle || "").toUpperCase(), pts: body.pts || 0, date: body.date || today,
         /* v2 會員模式：低摩擦守則——這三欄全部可空，不擋打卡 */
         reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || "",
         share: body.share ? true : false
-      });
+      }, body));
       return json_({ status: "ok" });
     }
     /* v2 體測：一次寫多筆小肌群評分。evals＝[{muscle:"A1", score:3}, ...]
@@ -927,10 +991,10 @@ function doPost(e) {
       return json_({ status: "ok", written: evList.length });
     }
     if (body.action === "revenue") {
-      appendMapped_(TABS.revenue, COLS.revenue, {
+      appendMapped_(TABS.revenue, COLS.revenue, withTrack_({
         lineId: body.lineId, workshopId: body.workshopId || "", amount: body.amount || 0, date: body.date || today,
         note: body.note || "", A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0
-      });
+      }, body));
       return json_({ status: "ok" });
     }
     if (body.action === "honorEvent") {  // 榮譽解鎖事件：一人一榮譽只記一次（去重）
@@ -1012,7 +1076,9 @@ function doPost(e) {
       };
       var qraw = String(body.rawAnswers || "").split(",");  // "3,2,4,..." → Q1..Q12 ＝ A1..I3 的 1–5
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
-      upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals);  // 同 userId 更新那列，重測/重開不重複
+      withTrack_(qvals, body);
+      /* 重測時保留首次接觸的廣告歸因（那時的 utm 才是把他帶進來的那一支） */
+      upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS));  // 同 userId 更新那列，重測/重開不重複
       ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,

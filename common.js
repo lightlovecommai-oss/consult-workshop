@@ -1,3 +1,10 @@
+/* track.js 沒載到時的空殼（部署空窗、CDN 被擋、本機少複製一個檔）。
+   低摩擦守則：追蹤壞掉絕不可以讓分頁切換或打卡跟著壞掉。 */
+if (typeof window !== "undefined" && typeof window.track !== "function") {
+  window.track = function(){};
+  window.setTrackUser = window.setTrackUser || function(){};
+}
+
 var LIFF_ID = "2010316474-wmb1ODe0";
 var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
 
@@ -358,6 +365,12 @@ function doCheckin(s, task, workshopId, extra) {
     share: !!extra.share
   });
   postCheckin(s.lineId, task, workshopId, d, extra);
+  /* 留存命脈指標（規範 §4-C）。has_reaction＝有沒有寫下對方的反應——
+     只打勾跟真的觀察到反應是兩種投入深度，之後判讀留存要分得開。 */
+  if (typeof track === "function") {
+    track("checkin_complete", { task_key: task.key, dim: task.dim || "", muscle: task.muscle || "",
+                                has_reaction: !!extra.reaction, workshop_id: workshopId || "" });
+  }
 }
 
 /* ── 回報成交（金額 + 當下四維快照，供走勢圖）──
@@ -380,8 +393,14 @@ function revenueTrendPoints(s) {
   return s.revenueLog.map(function(e){ return {label:e.date, A:e.A, T:e.T, P:e.P, I:e.I, income: Math.round(e.amount/1000)/10}; });
 }
 
-/* ── 寫入 Google Sheet：text/plain 避開 CORS 預檢；樂觀更新，下次載入以 Sheet 為準 ── */
+/* ── 寫入 Google Sheet：text/plain 避開 CORS 預檢；樂觀更新，下次載入以 Sheet 為準 ──
+   每一筆都自動夾帶廣告識別碼（track.js 的 trackPayload）。掛在這裡而不是各別端點，
+   是因為漏一個端點就是漏一段歸因，而漏掉的事後補不回來。
+   沒載入 track.js 的頁面（demo、報表台）照樣能寫，只是那幾欄空著。 */
 function postToSheet(payload) {
+  try {
+    if (typeof trackPayload === "function" && payload && !payload.track) payload.track = trackPayload();
+  } catch (e) {}
   return fetch(SHEET_API, {
     method: "POST",
     headers: {"Content-Type": "text/plain;charset=utf-8"},
@@ -431,6 +450,7 @@ function postMuscleEval(lineId, evals, source) {
     return { muscle: String(e.muscle).toUpperCase(), score: Number(e.score) };
   });
   if (!list.length) return Promise.resolve();
+  if (typeof track === "function") track("muscle_eval_submit", { source: source || "self", count: list.length });
   return postToSheet({
     action: "eval", lineId: lineId, source: source || "self",
     date: todayStr(), week: weekStr(), evals: list
@@ -683,6 +703,98 @@ async function loadHonorFeed(limit) {
   } catch (e) { console.log("loadHonorFeed error:", e); return []; }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   進 LINE 的橋（2026-09-07）
+
+   外部瀏覽器**不要**走 liff.login()。那條路會跳到 access.line.me 要帳號密碼，
+   而八成的人根本記不得自己的 LINE 密碼——他不是不想進來，是被鎖在門外。
+   改成 deep link 回 LINE App：他在 App 裡本來就登入著，一次密碼都不用打。
+
+   liff.line.me 這條網址**不含任何個資**（userId 是進了 LINE 之後才由 LIFF 給的），
+   所以拿去出 QR code 給桌機掃也安全，符合 31 規範 §6。
+   ═══════════════════════════════════════════════════════════ */
+var LIFF_URL = "https://liff.line.me/" + LIFF_ID;
+
+function rememberUid_(uid) {
+  try { if (uid) localStorage.setItem("cw_uid", uid); } catch (e) {}
+  /* 一拿到身分就綁進追蹤：在這之前發生的事件靠 session_id 串，
+     綁上之後才接得起「同一個人跨測驗站與健身房站」的完整旅程（規範 §3）。 */
+  try { if (uid && typeof setTrackUser === "function") setTrackUser(uid); } catch (e) {}
+}
+
+/* 取得使用者身分。回傳 lineId，或 null＝已經接手畫了橋接畫面，呼叫端直接 return 就好。
+   順序：?id= → LIFF 已登入 →（只在 LINE 內）自動登入 → 這台瀏覽器記過的 cw_uid → 橋接畫面。 */
+async function resolveLineId(bodyElId) {
+  var uid = new URLSearchParams(location.search).get("id");
+  if (uid) { rememberUid_(uid); return uid; }
+
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) {
+      uid = (await liff.getProfile()).userId;
+      rememberUid_(uid);
+      return uid;
+    }
+    /* 只有在 LINE 內才自動登入——那是無縫的，不會要密碼。外部瀏覽器故意不走這裡。 */
+    if (liff.isInClient()) { liff.login(); return null; }
+  } catch (e) {}
+
+  try {
+    var saved = localStorage.getItem("cw_uid");
+    if (saved) { rememberUid_(saved); return saved; }   // 這台瀏覽器來過，認得出他是誰，就不用逼他回 LINE
+  } catch (e) {}
+
+  renderLineBridge(bodyElId);
+  return null;
+}
+
+/* 橋接畫面。骨層一句擺在最上面——這一屏是他跟我們的第一次接觸，不能只有「請登入」。
+   會員席是暖底、私教席是深底（科技版），所以文字顏色**從實際底色推**，
+   不是寫死一組——寫死的話有一頁一定看不見字。 */
+function renderLineBridge(bodyElId) {
+  var host = document.getElementById(bodyElId || "bd");
+  if (!host) { location.href = LIFF_URL; return; }
+  var dark = isDarkBg_();
+  var c1 = dark ? "#DCE7F0" : "#4A1B0C";   // 主句
+  var c2 = dark ? "#7D92A8" : "#9C8873";   // 註解
+  var wide = window.innerWidth >= 700;     // 桌機才需要 QR；手機直接點按鈕最快
+  host.innerHTML =
+    '<div style="text-align:center;padding:2.5rem 1.25rem;">'
+    + '<div style="font-size:17px;font-weight:500;color:' + c1 + ';line-height:1.85;">你的紀錄都還在<br>只是要從 LINE 進來，我們才認得出你</div>'
+    + '<div style="margin:14px auto 0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);"></div>'
+    + '<a href="' + LIFF_URL + '" style="display:block;margin:28px 0 10px;background:linear-gradient(135deg,#C6603A,#A94E2C);color:#fff;border-radius:26px;padding:15px;font-size:17px;font-weight:500;text-decoration:none;">用 LINE 開啟 →</a>'
+    + '<div style="font-size:13px;color:' + c2 + ';line-height:1.8;">在手機上點一下就會跳進 LINE，<br>不用輸入密碼。</div>'
+    + (wide ? '<div id="lnqr" style="margin:22px auto 0;display:inline-block;padding:12px;background:#fff;border-radius:14px;"></div>'
+            + '<div style="font-size:13px;color:' + c2 + ';margin-top:8px;">用手機掃這個 QR code 也可以</div>' : '')
+    + '</div>';
+  if (wide) loadQR_();
+}
+
+function isDarkBg_() {
+  try {
+    var m = getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+    if (!m) return false;
+    return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) < 128;
+  } catch (e) { return false; }
+}
+
+/* QR 只在桌機、只在需要時才載——載不到就當沒這回事，上面的按鈕本來就夠用了。
+   追蹤與輔助功能一律不可以擋住使用者往下走（低摩擦守則）。 */
+function loadQR_() {
+  var box = document.getElementById("lnqr");
+  if (!box) return;
+  var draw = function(){
+    try { new QRCode(box, { text: LIFF_URL, width: 150, height: 150, colorDark: "#4A1B0C", colorLight: "#ffffff" }); }
+    catch (e) { box.style.display = "none"; }
+  };
+  if (window.QRCode) return draw();
+  var sc = document.createElement("script");
+  sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  sc.onload = draw;
+  sc.onerror = function(){ box.style.display = "none"; };
+  document.head.appendChild(sc);
+}
+
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];
 async function loadStudents() {
@@ -696,6 +808,7 @@ async function loadStudents() {
         team:   s.team   || s["團隊"],
         enrolled: !!s.enrolled,
         paidMember: !!s.paidMember,  // 「影響力健身房會員」手動勾選欄——member.html 拿這個分體驗客／會員
+        seat: s.seat || "",          // 「指定席位」手動蓋台欄——index.html 的 routeFor 用它蓋過自動規則
         checkinLog: [], revenueLog: [], evalLog: [], selfEval: null
       };
     });

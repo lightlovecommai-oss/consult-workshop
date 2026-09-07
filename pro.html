@@ -323,6 +323,7 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 <div class="sheet" id="sheet"></div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="track.js"></script>
 <script src="atpi-core.js"></script>
 <script src="common.js"></script>
 <script src="judgement.js"></script>
@@ -387,17 +388,9 @@ async function boot() {
     if (_pk) { if (_pk === "story" || _pk === "ask") pocketCore(_pk); else if (MUSCLES[_pk]) pocket(_pk); }
     return;
   }
-  var uid = qs.get("id");
-  if (!uid) {
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) { liff.login(); return; }
-      uid = (await liff.getProfile()).userId;
-    } catch (e) {
-      el("bd").innerHTML = '<div class="loading">請從 LINE 進入，或在網址加上 ?id=你的 LINE userId</div>';
-      return;
-    }
-  }
+  /* 同 member.html：外部瀏覽器走「用 LINE 開啟」的橋，不推去打 LINE 密碼。 */
+  var uid = await resolveLineId("bd");
+  if (!uid) return;
   var d = await loadBootstrap(uid, "");
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
   if (d.tasks) TASKS = d.tasks;
@@ -414,6 +407,7 @@ async function boot() {
 function go(p){ PANE = p; REC = null;
   Array.prototype.forEach.call(document.querySelectorAll(".nv"), function(b){ b.classList.toggle("on", b.getAttribute("data-p") === p); });
   window.scrollTo(0, 0); render();
+  track("screen_view", { screen: p, seat: "pro" });   // 切分頁不換網址，不自己發就看不到
 }
 function render(){
   el("joinday").textContent = "第 " + daysSinceJoin(S) + " 天";
