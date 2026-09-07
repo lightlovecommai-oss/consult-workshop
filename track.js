@@ -103,6 +103,8 @@ function trackPayload() {
 /* ── 漏斗階段：從檔名推，不用每頁自己填 ── */
 function funnelStage_() {
   try {
+    /* 兩個站都有 index.html，光看檔名會把測驗跟健身房入口算成同一階段 */
+    if (/^quiz\./.test(location.hostname)) return "quiz";
     var p = (location.pathname.split("/").pop() || "index").replace(".html", "");
     var map = { "": "entry", index: "entry", visitor: "visitor", join: "join",
                 member: "member", pro: "pro", dashboard: "legacy", showcase: "showcase" };
