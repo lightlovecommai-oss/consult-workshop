@@ -468,6 +468,24 @@ function heroHTML(){
 
 function md(t){ return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>"); }
 
+/* 這一筆要記到哪塊肌肉上（欄位口徑跟 member 完全一致，兩邊寫進同一張打卡紀錄）：
+   · 專屬招＝從健檢最弱那格來的，taskKey 沿用 fallbackMove() 的 m_xx，直接記進該小肌群
+   · 地基招（講故事／問問題）是 12 塊共通的底，不占任何一格——只歸大肌肉，跟 member 的
+     focusTaskInfo() 同一招：掛在目前量到最弱的那塊大肌肉上。 */
+function visitorTask(){
+  if (MV.key === "own" && OWN) {
+    var mk = OWN.mk;
+    return { key:"m_"+mk.toLowerCase(), cadence:"daily", dim:MUSCLES[mk].dim, muscle:mk, pts:1 };
+  }
+  var dim = "A";
+  if (MS12) {
+    var d5 = dimFromMuscles(MS12);
+    var measured = ["A","T","P","I"].filter(function(k){ return d5[k]; });
+    if (measured.length) dim = measured.sort(function(a,b){ return d5[a] - d5[b]; })[0];
+  }
+  return { key:"core_"+MV.key, cadence:"daily", dim:dim, muscle:"", pts:1 };
+}
+
 function finishRec(){
   var n = document.getElementById("recnote");
   REC.note = n ? n.value.trim() : "";
@@ -475,6 +493,17 @@ function finishRec(){
   if (st.days.indexOf(ds) < 0) st.days.push(ds);
   st.cnt[MV.key] = (st.cnt[MV.key]||0) + 1;
   save(st);
+
+  /* 有 id 才寫 Sheet（2026-09-07 老師裁決）：從 quiz／LINE 進來的人有 userId，體驗席練的每一筆
+     都跟著他進會員席，付了 99 之後連續天數與紀錄不會歸零；直開網址的真路人沒有 id，
+     維持只存 localStorage，等他之後帶 id 回來。寫失敗不擋畫面——本機那筆已經存好了。 */
+  if (UID && typeof postCheckin === "function") {
+    postCheckin(UID, visitorTask(), "", ds, {
+      reaction: (REACT_V[REC.react] || {}).t || "",
+      target: "", rel: REC.who || "", note: REC.note, share: false
+    });
+  }
+
   REC.step = 3;
   render();
 }
@@ -611,7 +640,16 @@ render();
    拿不到 id、還沒測、或後端慢：畫面維持 2 塊地基，不多不少。 */
 if (UID && typeof loadBootstrap === "function") {
   loadBootstrap(UID).then(function(d){
-    if (!d || !d.evals || !d.evals.length) return;
+    if (!d) return;
+
+    /* 連續天數以 Sheet 為準再併回本機：換手機、或他已經在會員席練過，這條線都不該從零開始。 */
+    var merged = false;
+    (d.checkins || []).forEach(function(c){
+      if (c.date && st.days.indexOf(c.date) < 0) { st.days.push(c.date); merged = true; }
+    });
+    if (merged) { save(st); render(); }
+
+    if (!d.evals || !d.evals.length) return;
     var ms = calcMuscleScores({ evalLog: d.evals });
     var wk = weakestMuscles(ms, 1)[0];
     if (wk && typeof JUDGEMENT !== "undefined" && JUDGEMENT[wk]) {

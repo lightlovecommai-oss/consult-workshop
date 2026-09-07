@@ -1060,6 +1060,82 @@ function migrateV2_() {
 function migrateV2() { migrateV2_(); }
 
 /* ═══════════════════════════════════════════════════════════
+   任務 → 12 小肌群對照（2026-09-07 回填）
+   對照真相＝productkit《1-手冊（內部）/22-技巧對小肌群對應與練習庫》§一 定案技巧表。
+
+   ⚠️ 兩條紀律，改這張表時要守住：
+   ① **muscle 必須跟該列既有的 dim 同一族**（A1–A3 配 dim=A，依此類推）。
+      對不上的（例：一階 d3「英雄之旅」照 §一 是 A3，但分頁裡 dim=T）一律留空，
+      等老師拍板要改 dim 還是改對照，不自己動 dim——dim 動了會改到已開課學員的大肌肉計分。
+   ② **出席／作業／看影片／寫名單這類任務不掛小肌群**，留空是正確答案，不是漏填。
+      小肌群量的是「對人做了什麼、對方有什麼反應」，行政動作硬掛會把投入分灌成假的。
+   留空的代價很小：computeConfig_ 回空字串，前端 logMuscles_ 只計大肌肉，畫面不會壞。
+
+   「超引力-顧問課」不寫在這裡——它由 CHAOYINLI_TASKS 自帶 muscle 欄，
+   下面會自動併進來，避免同一組值維護兩份。
+   ═══════════════════════════════════════════════════════════ */
+var TASK_MUSCLE_MAP = {
+  "一階": {
+    d1:"A2", d2:"A2", d4:"T2", d5:"T2", d6:"P2", d7:"I1",
+    wk1:"A2,A3", wk2:"T2", wk3:"T1", wk4:"P2", wk5:"I3",
+    sp_beef:"A2", sp_dig:"T2", sp_invite:"I3", social1:"A3", social3:"T1"
+    /* 留空：d3 英雄之旅（§一＝A3，分頁 dim=T，待拍板）／social2 推薦光頭／pre_* 影片／w*・hw* 出席作業 */
+  },
+  "二階": {
+    d3:"T2", d4:"A2,A3", d5:"T2", d6:"P2,P3", d7:"I1",
+    wk1:"A1", wk2:"T2", wk3:"T1", wk4:"P2", wk5:"I3", social1:"A3"
+    /* 留空：d1 七一一四（§一已判定退場＝大格局非技巧）／d2 對齊內心（對自己不對人）／
+             social2・social3 分享心得／w*・hw* 出席作業 */
+  },
+  "tenlead-1": {
+    tl_praise:"A1", tl_care:"T1", tl_os:"T1", tl_sellresult:"P3", tl_feel:"I2",
+    tl_post:"A3", tl_understand:"T2", tl_firstsale:"I3", tl_signdownline:"I3"
+    /* 留空：tl_newlead 開名單（§一＝A1，分頁 dim=I，待拍板）／tl_story 先講故事（§一＝A3，dim=T，待拍板）／
+             tl_learn 精進知識・tl_call_mentor 通電話・tl_updatelist 更新名單・tl_goal 寫目標・
+             tl_abcd 寫名單・tl_comm5・tl_comm10 溝通則數／tl_micro*・tl_ws* 出席 */
+  }
+};
+
+/* 只寫 muscle 這一欄、依 workshopId+taskKey 對位——不像 setup() 會整張重寫，
+   所以老師手改過的 locked／name／desc 全部原封不動。安全可重複執行。
+   在 Apps Script 編輯器選 fillTaskMuscles → 執行，看回傳訊息驗收。 */
+function fillTaskMuscles() {
+  ensureColumn_(TABS.tasks, "muscle");
+  var sh = ss_().getSheetByName(TABS.tasks);
+  if (!sh) return "找不到「" + TABS.tasks + "」分頁";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2) return "任務分頁沒有資料列";
+  var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
+  var wC = h.indexOf("workshopId"), kC = h.indexOf("taskKey"), mC = h.indexOf("muscle");
+  if (wC < 0 || kC < 0 || mC < 0) return "任務分頁缺 workshopId / taskKey / muscle 其中一欄";
+
+  /* 超引力自帶 muscle：直接從 CHAOYINLI_TASKS 讀進來當同一份對照，不另抄一份 */
+  var map = {};
+  Object.keys(TASK_MUSCLE_MAP).forEach(function(w){ map[w] = TASK_MUSCLE_MAP[w]; });
+  var ch = CHAOYINLI_TASKS[0], cw = ch.indexOf("workshopId"), ck = ch.indexOf("taskKey"), cm = ch.indexOf("muscle");
+  for (var c = 1; c < CHAOYINLI_TASKS.length; c++) {
+    var cr = CHAOYINLI_TASKS[c], cwid = String(cr[cw]);
+    if (!map[cwid]) map[cwid] = {};
+    map[cwid][String(cr[ck])] = String(cr[cm] || "");
+  }
+
+  var body = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  var col = sh.getRange(2, mC + 1, lastRow - 1, 1).getValues();
+  var filled = 0, already = 0, left = [];
+  for (var i = 0; i < body.length; i++) {
+    var wid = String(body[i][wC]).trim(), key = String(body[i][kC]).trim();
+    if (!wid || !key) continue;
+    var want = (map[wid] || {})[key] || "";
+    var now = String(col[i][0]).trim();
+    if (want) { if (now === want) already++; else { col[i][0] = want; filled++; } }
+    else if (!now) left.push(wid + "/" + key);
+  }
+  sh.getRange(2, mC + 1, col.length, 1).setValues(col);
+  return "muscle 回填：新寫入 " + filled + " 列、本來就對的 " + already + " 列、刻意留空 "
+       + left.length + " 列（出席/作業/行政類）→ " + left.join("、");
+}
+
+/* ═══════════════════════════════════════════════════════════
    一鍵初始化：在 Apps Script 編輯器選 setup → 按「執行」一次即可。
    會自動：① 幫打卡/成交分頁補「課程」欄　② 建好 (設定)課程 / (設定)任務並填資料。
    第一次執行會跳授權，按「審查權限 → 允許」。不用再手動加欄位或匯入 CSV。
@@ -1067,7 +1143,6 @@ function migrateV2() { migrateV2_(); }
 function setup() {
   ensureColumn_(TABS.checkins, "課程");
   ensureColumn_(TABS.revenue, "課程");
-  migrateV2_();
   /* ⚠️ workshopId 的「一階／二階／三階」是 Google Sheet 既有資料鍵，不能改；
         2026-08-28 正典只換「顯示名 name」，對照如下：
           一階＝鍛鍊段 L1–L4｜二階＝放大段 L5–L8｜三階＝演說段 L9–L13
@@ -1084,9 +1159,14 @@ function setup() {
     ["短影音實戰", "工作坊-短影音實戰", true, true]
   ]);
   writeSheet_(TABS.tasks, TASKS_SEED);
+  /* ⚠️ 順序有意義：writeSheet_ 會 clearContents() 把任務分頁整張重寫，
+     migrateV2_() 補的 muscle 欄若在它之前跑會被洗掉（12 小肌群投入分因此一路是 0）。
+     一律「先寫種子、再補欄、最後回填 muscle」。 */
+  migrateV2_();
+  var m = fillTaskMuscles();
   var e = ensureEnrollmentSheet_();
   var r = ensureRewardsSheet_();
-  return "初始化完成；" + e + "；" + r;
+  return "初始化完成；" + e + "；" + r + "；" + m;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1268,6 +1348,67 @@ function upsertRewards() {
     else { sh.getRange(sh.getLastRow() + 1, 1, 1, headers.length).setValues([line]); added++; }
   }
   return "兌換品項 upsert 完成：新增 " + added + "、更新 " + updated + " 項（等比例 200元/愛的貨幣）";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   舊測驗（2026-09-01 之前）的四大肌肉分數 → 12 小肌群基線，讓第一批人不用重測。
+   在 Apps Script 選 backfillQuizMuscles → 執行。可重複執行、只補不覆蓋。
+
+   ⚠️ 為什麼「攤平成同分」是對的做法，不是偷懶：
+   舊測驗一樣是每維三題，但那三題的軸是「1對1／群體／社群」（通路），
+   新的 A1/A2/A3 是「讓他開口／追問／記得」（對方反應的階段）——兩個軸沒有對應關係。
+   舊列的 Q1..Q12 就算能逐格搬過來，搬過來的起伏也是「舊軸的起伏」，
+   會讓 weakestThree 派錯專屬招——比沒有起伏更糟。所以這裡只搬「站得住的那一層」：
+   大肌肉分數。三格同分＝誠實地說「我們只知道你這塊的整體水位」。
+
+   ✅ 大肌肉層完全接得起來：舊分＝三題總分/15×100，所以 1–5 平均 ＝ 舊分/20。
+      把平均寫進三格，calcDimScores5 平均回來一模一樣 →
+      雷達圖、甜蜜路徑、已解鎖影響力 N/1000 立刻有數字，跟新測驗同一把尺。
+   ⚠️ 老師會看到的差異：舊結果頁的百分比會變低（例：60% → 50%）。那不是資料掉了，
+      是 2026-09-03 字典把換算改成「先歸零再算成數」（pctFromEval），全站同一把尺，
+      新舊測驗的人都用新公式重算，所以比較得起來。
+
+   source 寫 "quiz"（不另立 legacy 來源）＝讓 evaledThisWeek() 照樣把他們算成「還沒自評」，
+   進 App 第一週就會被邀請做一次 12 題自評，用新軸的真資料自動覆蓋掉這份攤平基線。
+   ═══════════════════════════════════════════════════════════ */
+function backfillQuizMuscles() {
+  var MORD_ = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+  var qrows = rows_(TABS.quiz);
+  if (!qrows.length) return "測驗分頁「" + TABS.quiz + "」讀到 0 筆。";
+
+  /* 已經有任何體測紀錄的人一律跳過——新測驗寫的 quiz 基線、教練校準、週自評都不能被蓋掉 */
+  var has = {};
+  rows_(TABS.evals).forEach(function(r){
+    var id = String(pick_(r, COLS.evals.lineId)).trim(); if (id) has[id] = true;
+  });
+
+  var out = [], done = {}, filled = 0, skipped = 0, bad = 0;
+  var today_ = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy-MM-dd");
+  qrows.forEach(function(q){
+    var uid = String(pick_(q, COLS.quiz.lineId)).trim();
+    if (!uid || done[uid]) return;
+    if (has[uid]) { skipped++; return; }
+    var sc = { A: Number(pick_(q, COLS.quiz.A)), T: Number(pick_(q, COLS.quiz.T)),
+               P: Number(pick_(q, COLS.quiz.P)), I: Number(pick_(q, COLS.quiz.I)) };
+    var ok = true;
+    ["A","T","P","I"].forEach(function(k){ if (!(sc[k] > 0 && sc[k] <= 100)) ok = false; });
+    if (!ok) { bad++; return; }
+    done[uid] = true;
+    MORD_.forEach(function(mk){
+      /* 舊分 0–100 → 1–5 平均：/20，夾在 1–5（calcMuscleScores 只收 1–5，超出會被整筆丟掉） */
+      var v = Math.min(5, Math.max(1, Math.round(sc[mk.charAt(0)] / 20 * 10) / 10));
+      out.push([uid, mk, v, "quiz", today_, ""]);
+    });
+    filled++;
+  });
+
+  if (out.length) {
+    var sh = evalSheet_();
+    sh.getRange(sh.getLastRow() + 1, 1, out.length, 6).setValues(out);
+  }
+  return "舊測驗基線回填：" + filled + " 人 × 12 格＝" + out.length + " 列；"
+       + "已有體測紀錄跳過 " + skipped + " 人；分數不完整略過 " + bad + " 列。"
+       + "（三格同分＝只搬大肌肉水位，等他們在 App 做一次自評就會被新軸覆蓋）";
 }
 
 /* ═══════════════════════════════════════════════════════════

@@ -483,54 +483,35 @@ function weeklyReviewCard(){
     + '<div style="font-size:13px;color:#8ea1b6;margin-top:8px;line-height:1.8;">一週一次，場邊教練陪你把這週的片刻拆開看——會員層沒有這個時段。</div></div>';
 }
 function pathHTML(){
-  return demoP1_() + heroHTML() + archArcSection() + weeklyReviewCard();
+  return proTopbar_() + heroHTML() + archArcSection() + weeklyReviewCard();
 }
 
-/* ── 三頁大demo搬入（2026-09-04 老師指示：先把相近元素放一起，之後再整合）──
-   demoP1_~demoP7_＝demo-pro.html 的 p-1/p-3/p-4/p-6/p-7 板塊，資料全是示意（標「示意」）、
-   樣式用 dp- 前綴不與正式版打架。p-2 引力場（SVG 軌道）留在 demo-pro.html 沒搬。 */
-function demoP1_(){
-  return '<div class="dp-blk" style="margin:0 0 18px;"><span class="dp-tag" style="top:8px;right:8px;">p-1</span>'
+/* ── 私教席頂條（原 demo p-1，2026-09-07 拆掉示意接真資料）──
+   「第 N 天」＝從他第一筆紀錄算到今天，沒有紀錄就不印數字（第 0 天不是激勵是打臉）。
+   原本的「下次 1v1 9/12（五）14:00」拿掉了：Sheet 裡沒有任何欄位存 1v1 時段，
+   印出來一定是假的；改成常駐的預約入口，反正真相就是「要約自己點」。
+   demoP4_/P6_/P7_ 同日刪除——它們各自的真版本（sweetProHTML／outHTML 的市場驗證列／
+   bone-card 改觀句邀請）本來就緊接在同一頁，留著只是同一件事顯示兩次、還帶假數字。 */
+function proTopbar_(){
+  var days = 0;
+  (S.checkinLog || []).forEach(function(e){
+    var d = normDate(e.date); if (!d) return;
+    var n = Math.floor((Date.now() - new Date(d + "T00:00:00").getTime()) / 86400000) + 1;
+    if (n > days) days = n;
+  });
+  return '<div class="dp-blk" style="margin:0 0 18px;">'
     + '<div class="dp-tb">'
     + '<div class="dp-tb-k">ATPIFIT · PRIVATE COACH</div>'
     + '<div class="dp-tb-t">私人教練席</div>'
-    + '<div class="dp-tb-s">超引力成交學 · 第 47 天<span class="dp-mock">示意</span></div>'
+    + '<div class="dp-tb-s">' + esc_(WID || "超引力成交學")
+    + (days ? ' · 第 ' + days + ' 天' : ' · 今天開始') + '</div>'
     + '<div class="dp-tb-coach"><div class="dp-tb-av">光</div>'
     + '<div><div class="dp-tb-cn">光頭教練</div><div class="dp-tb-cs">看著你的每一筆紀錄</div></div>'
-    + '<div class="dp-tb-nx"><b>下次 1v1</b>9/12（五）14:00<span class="dp-mock">示意</span></div></div>'
+    + '<a class="dp-tb-nx" href="https://time.atpifit.com" style="text-decoration:none;"><b>1v1 覆盤</b>約時段 →</a></div>'
     + '</div></div>';
 }
 /* demoP3_（p-3 示意 12 格）已退役——2026-09-06 被 techMapHTML_ 真資料科技版全圖取代，
    連帶消滅示意格裡的作廢格名（讓他想聽／讓他心動…與 MUSCLES 十二格對不上）。 */
-function demoP4_(){
-  return '<div class="dp-blk"><span class="dp-tag">p-4</span>'
-    + '<div class="dp-cd"><div class="dp-sec">FLIGHT PATH · <b>你的變現甜蜜路徑</b><span class="dp-mock">示意</span></div>'
-    + '<div class="dp-fp">'
-    + '<div class="dp-wp lit">先用故事讓他看見你在做的事<small>✓ 已走過 · BNI 例會 60 秒</small></div>'
-    + '<div class="dp-wp lit">用問題帶他說出自己的卡點<small>✓ 已走過 · 「最卡的是人還是流程？」</small></div>'
-    + '<div class="dp-wp">把你的方法放進他的框架裡講一次<small>下一站——這次 1v1 演練這裡</small></div>'
-    + '<div class="dp-wp">約下一次——讓他認定你就是那個人</div>'
-    + '</div></div></div>';
-}
-function demoP6_(){
-  return '<div class="dp-blk"><span class="dp-tag">p-6</span>'
-    + '<div class="dp-cd"><div class="dp-sec">EXTERNAL SIGNAL · <b>市場驗證</b><span class="dp-mock">示意</span></div>'
-    + '<div class="dp-gauge">'
-    + '<div class="dp-gg"><div class="dp-gg-v dp-num">3 筆</div><div class="dp-gg-l">成交回報</div></div>'
-    + '<div class="dp-gg"><div class="dp-gg-v dp-num">21.6 萬</div><div class="dp-gg-l">累計金額</div></div>'
-    + '<div class="dp-gg"><div class="dp-gg-v dp-num">7%</div><div class="dp-gg-l">對齊 300 萬錨點</div></div>'
-    + '</div>'
-    + '<div style="font-size:12px;color:#7d90a3;margin-top:10px;line-height:1.7;">成交是外部驗證變項——獨立顯示，不回饋進能力分數。</div>'
-    + '</div></div>';
-}
-function demoP7_(){
-  return '<div class="dp-blk" style="margin-top:18px;"><span class="dp-tag">p-7</span>'
-    + '<div class="dp-vault">'
-    + '<div class="dp-vault-k">這三個月，你的想法動了什麼？</div>'
-    + '<div class="dp-vault-q">技巧會忘，改觀不會。這裡只放<b>你自己說出來的那句</b>。</div>'
-    + '<div class="dp-vault-quote">「我以前覺得成交是說服——現在我覺得成交是他終於放心了。」<small>7/28 · 月覆盤時你說的<span class="dp-mock" style="background:rgba(247,241,236,.18);color:rgba(247,241,236,.7);">示意</span></small></div>'
-    + '</div></div>';
-}
 
 /* ══ 關係軌跡：持續存在的功能（不是驗收才出現），讀真的 e.reaction，
    soft(家人/朋友)一樣只到「願意說」不推向成交——規則跟 member.html 一致，這裡不因為
@@ -709,7 +690,7 @@ function pocketCore(key){
 }
 
 function bodyHTML(){
-  return techMapHTML_() + sweetProHTML() + demoP4_();
+  return techMapHTML_() + sweetProHTML();
 }
 
 /* ══ 甜蜜路徑（pro 版）：同 member.html sweetPathHTML 的來源（atpi-core.js COMBO_PATH 查表），
@@ -850,7 +831,6 @@ function outHTML(){
     + '<div style="font-size:13px;color:#7d90a3;line-height:1.75;margin-top:6px;">成交是<b style="color:#8ea1b6;">外部驗證變項</b>，獨立顯示、不回饋進能力分數。拿成交回推分數、再用分數預測成交＝循環論證。</div>'
     + (!S.revenueLog.length ? '<div class="empty" style="margin-top:8px;">還沒有成交紀錄。這裡會隨你回報成交自動更新。</div>' : '')
     + '</div>';
-  h += demoP6_();
   h += '<a class="go" href="https://time.atpifit.com">預約場邊教練覆盤 →</a>'
     + '<div style="font-size:13px;color:#7d90a3;text-align:center;margin-top:8px;">場邊教練陪跑・一週一次拆解</div>';
   /* 改觀句・骨層卡（骨層三問：這一格就是「為什麼」）。沒有後端欄位存改觀句，
@@ -873,7 +853,6 @@ function outHTML(){
       + '<div class="upg-w">下一段路，先跟教練確認你準備好了沒</div>'
       + '</div>';
   }
-  h += demoP7_();
   h += '<div class="quote" style="text-align:center;"><span class="quote-m">❝</span><div class="quote-t">影響力的盡頭不是成交，<br>是有人因為你變好。</div><div class="quote-by" style="text-align:center;">—— 光頭</div></div>';
   return h;
 }
