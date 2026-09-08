@@ -1,0 +1,39 @@
+# app.atpifit.com — 影響力健身房
+# 只開放公開的入口與體驗席。會員／私教席要 LINE 登入，內部工作檔與 demo 畫面不進索引。
+
+User-agent: *
+Allow: /
+Disallow: /CLAUDE.md
+Disallow: /demo-
+Disallow: /demo.html
+Disallow: /design-canvas/
+Disallow: /apps-script/
+Disallow: /gtm-
+Disallow: /practice-v3-demo.html
+Disallow: /pro-v3-demo.html
+Disallow: /og-image.html
+Disallow: /member.html
+Disallow: /pro.html
+Disallow: /dashboard.html
+Disallow: /report.html
+Disallow: /v2-archive/
+
+# AI 搜尋的爬蟲跟一般爬蟲分開宣告，預設 allow 不見得被當成明示同意。
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://app.atpifit.com/sitemap.xml
