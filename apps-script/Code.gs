@@ -502,6 +502,31 @@ function sendToLaunChill_(payload) {
   }
 }
 
+/* 「完整影響力報告」頁的網址（信裡那顆鈕）。
+   報告頁不存資料庫，整份報告是從網址上的 ms= 現算出來的——12 個 1–5 分、MORD 順序，
+   跟結果頁「進館連結」的 ms= 是同一種格式，兩邊共用不另發明。
+   sc= 送場景**名字**（不是索引）：這裡只有試算表的 targetNeed 字串，
+   報告頁兩種都收，所以後端不必維護一份順序對照表，場景順序日後調整也不會錯位。
+   12 格沒填滿就回空字串——寧可信裡不放鈕，也不要給一條打開是壞掉的連結。 */
+function quizReportUrl_(qraw, body) {
+  try {
+    var ms = [];
+    for (var i = 0; i < 12; i++) {
+      var v = parseFloat(qraw[i]);
+      if (!(v >= 1 && v <= 5)) return "";
+      ms.push(v);
+    }
+    var u = "https://quiz.atpifit.com/full-report.html?ms=" + ms.join(",");
+    if (body.targetNeed) u += "&sc=" + encodeURIComponent(body.targetNeed);
+    if (body.name)       u += "&n="  + encodeURIComponent(String(body.name).slice(0, 20));
+    if (body.userId)     u += "&id=" + encodeURIComponent(body.userId);   // 有 LINE 身份就讓報告的出口直接接上體格單
+    return u;
+  } catch (uerr) {
+    Logger.log("報告連結組裝失敗: " + uerr);
+    return "";
+  }
+}
+
 /* 測驗完自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
    已存在同 userId 就不動，避免重複。 */
 function ensureRosterRow_(lineId, name) {
@@ -1136,7 +1161,8 @@ function doPost(e) {
         score_p: body.scoreP || 0, score_i: body.scoreI || 0,
         weak_muscle: body.targetKeyMuscle || "",                     // 最弱大肌肉（例：推進肌肉）
         scene: body.targetNeed || "",                                // 他選的場景（職場與家人／一對一銷售／一對多演講）
-        line_id: hasLineId ? quid : ""
+        line_id: hasLineId ? quid : "",
+        report_url: quizReportUrl_(qraw, body)                       // 信裡那顆鈕要指的地方（12 格分數都在網址上）
       });
       return json_({ status: "ok" });
     }
