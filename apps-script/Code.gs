@@ -486,18 +486,18 @@ function addToKit_(email, firstName, fields) {
    網址不寫死在這裡——repo 是公開的，寫死等於任何人都能灌假名單觸發寄信。
    沒設屬性時整段直接跳過；任何失敗只記 log，不影響寫入 Sheet。 */
 function sendToLaunChill_(payload) {
-  /* 每次都印 log（不只失敗才印）：debug「有沒有送、送了什麼、對方回什麼」。
+  /* 每次都印 log + 回傳結果物件（給 quiz action 塞進 response，繞開 Cloud Logging 壞掉時看不到 log 的情境）。
      成功也印一行 2xx，才能從執行記錄一眼看出「第二次到底有沒有 POST」。 */
   try {
     var email = String(payload.email || "").trim();
     if (!email || email.indexOf("@") < 0) {
       Logger.log("LaunChill 略過：無 email（payload.email=" + JSON.stringify(payload.email) + "）");
-      return;
+      return { skipped: "no_email", email: payload.email };
     }
     var url = PropertiesService.getScriptProperties().getProperty("LAUNCHILL_WEBHOOK_URL");
     if (!url) {
       Logger.log("LaunChill 略過：LAUNCHILL_WEBHOOK_URL 未設定");
-      return;
+      return { skipped: "no_url" };
     }
     Logger.log("LaunChill 送出：email=" + email + " payload=" + JSON.stringify(payload));
     var r = UrlFetchApp.fetch(url, {
@@ -511,8 +511,10 @@ function sendToLaunChill_(payload) {
     } else {
       Logger.log("LaunChill webhook 成功 " + code + ": " + body);
     }
+    return { sent: true, code: code, body: body, email: email };
   } catch (lerr) {
     Logger.log("LaunChill 串接例外: " + lerr);                       // 絕不讓 LaunChill 影響主流程
+    return { error: String(lerr) };
   }
 }
 
@@ -1168,7 +1170,7 @@ function doPost(e) {
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
         main_ability: body.mainAbility || "", income_level: body.incomeLevel || "", job: body.job || ""
       });
-      sendToLaunChill_({                                             // LaunChill：建聯絡人＋觸發「完整影響力報告」信
+      var launchillResult = sendToLaunChill_({                       // LaunChill：建聯絡人＋觸發「完整影響力報告」信
         email: body.email || "", first_name: body.name || body.displayName || "",
         job: body.job || "",
         score_a: body.scoreA || 0, score_t: body.scoreT || 0,
@@ -1178,7 +1180,9 @@ function doPost(e) {
         line_id: hasLineId ? quid : "",
         report_url: quizReportUrl_(qraw, body)                       // 信裡那顆鈕要指的地方（12 格分數都在網址上）
       });
-      return json_({ status: "ok" });
+      /* debug：把 LaunChill 呼叫結果塞回 response——Cloud Logging 壞著時用這個看。
+         Network 分頁看這條 doPost 的 response body，launchill 欄會告訴你送出/略過/失敗＋回應碼＋body。 */
+      return json_({ status: "ok", launchill: launchillResult || null });
     }
     return json_({ status: "error", message: "unknown action" });
   } catch (err) {
