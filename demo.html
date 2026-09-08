@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#4A1B0C">
 <link rel="apple-touch-icon" href="icon2-180.png">
 <link rel="icon" type="image/png" href="icon2-192.png">
-<title>溝通健身房 互動原型</title>
+<title>影響力健身房 互動原型</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="溝通健身房 互動原型">
-<meta property="og:description" content="溝通是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
+<meta property="og:title" content="影響力健身房 互動原型">
+<meta property="og:description" content="影響力是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
 <meta property="og:image" content="https://app.atpifit.com/og-image.png">
 <meta property="og:url" content="https://app.atpifit.com/demo.html">
 <meta name="twitter:card" content="summary_large_image">
@@ -77,7 +77,7 @@ body{margin:0;background:var(--pg);color:var(--pgi);
 
 <div class="bar">
   <div>
-    <div class="bar-t">溝通健身房 · 互動原型</div>
+    <div class="bar-t">影響力健身房 · 互動原型</div>
     <div class="bar-s" id="mode">訪客模式 · 還沒付 99</div>
   </div>
   <div class="btns">
@@ -103,7 +103,7 @@ body{margin:0;background:var(--pg);color:var(--pgi);
      館   → app 裡叫「夥伴」；Skool 叫「社群」
      開練 → 「練溝通」
      動作 → 「一個秘訣」
-     體格 → 「溝通肌肉」／「你的四塊溝通肌肉」
+     體格 → 「影響力肌肉」／「你的四塊影響力肌肉」
      體測 → 「週回顧」（自評）；教練帶的仍叫「溝通健檢」
      一組 → 退場（UI 直接說「今天這一件」）
      器材 → 只留內部，UI 不出現
@@ -138,7 +138,7 @@ function logo(w){w=w||38;var h=Math.round(w*0.75);
 function head(sub,right){
  return '<div style="padding:16px 16px 13px;flex-shrink:0;background:'+C.grd+';">'
   +'<div style="display:flex;align-items:center;gap:11px;">'+logo(40)
-  +'<div><div style="font-size:17px;font-weight:700;color:'+C.ink+';letter-spacing:.04em;">溝通健身房</div>'
+  +'<div><div style="font-size:17px;font-weight:700;color:'+C.ink+';letter-spacing:.04em;">影響力健身房</div>'
   +'<div style="font-size:13px;color:'+C.act+';margin-top:4px;letter-spacing:.02em;">影響力是肌肉，練了就有</div></div>'
   +(right?'<div style="margin-left:auto;font-size:13px;color:'+C.fnt+';align-self:flex-start;">'+right+'</div>':'')+'</div>'
   +(sub?'<div style="font-size:13px;color:'+C.mut+';margin-top:10px;">'+sub+'</div>':'')
@@ -366,7 +366,7 @@ SC.quiz=function(){
 
  /* ② 四塊肌肉 */
  +'<div style="background:'+C.card+';border-radius:20px;padding:24px 19px;margin-bottom:16px;">'
-  +'<div style="font-size:17px;font-weight:700;color:'+C.ink+';margin-bottom:22px;">你的四塊溝通肌肉</div>'
+  +'<div style="font-size:17px;font-weight:700;color:'+C.ink+';margin-bottom:22px;">你的四塊影響力肌肉</div>'
   +'<div style="display:flex;flex-direction:column;gap:26px;">'
   +d.map(function(x){return '<div>'
     +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">'
@@ -406,7 +406,7 @@ SC.quiz=function(){
   /* ⭐ A3 補法：秘訣署名，讓他記得是誰教的（老師 2026-09-01） */
   +'<div style="display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid '+C.line+';">'
    +logo(30)
-   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.7;">這是<b style="color:'+C.ink+';">溝通健身房的第一個秘訣</b>。<br>裡面還有兩個。</div></div>'
+   +'<div style="font-size:13px;color:'+C.mut+';line-height:1.7;">這是<b style="color:'+C.ink+';">影響力健身房的第一個秘訣</b>。<br>裡面還有兩個。</div></div>'
  +'</div>'
 
  +btnDark("gym","進去看看，今天有誰在練　→","免費，不用填資料。裡面有人跟你練同一塊。")
@@ -493,7 +493,7 @@ SC.today=function(){
    +'<div style="font-size:15px;color:'+C.mut+';line-height:2.05;margin-top:12px;">'+tip.note+'</div>'
    /* ⭐ A3「讓他記得你這個人」的補法（老師 2026-09-01）：秘訣要署名，不然它是無主的。 */
    +'<div style="display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid '+C.line+';">'
-    +logo(26)+'<div style="font-size:13px;color:'+C.mut+';">溝通健身房的第 '+n+' 個秘訣</div></div>'
+    +logo(26)+'<div style="font-size:13px;color:'+C.mut+';">影響力健身房的第 '+n+' 個秘訣</div></div>'
    +(doneToday
      ? '<div style="margin-top:18px;background:'+C.gbg+';color:'+C.gfg+';border-radius:14px;padding:15px;text-align:center;font-size:15px;font-weight:600;">今天已經練過了 ✓</div>'
      : '<div style="margin-top:18px;">'+btnDark("rec1","練溝通")+'</div>'
@@ -579,7 +579,7 @@ SC.me=function(){
  +(S.member?coachCard():'')
  +(S.member?reviewCard():'')
  +card('<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">'
-   +'<span style="font-size:13px;font-weight:700;color:'+C.ink+';">你的四塊溝通肌肉</span></div>'
+   +'<span style="font-size:13px;font-weight:700;color:'+C.ink+';">你的四塊影響力肌肉</span></div>'
    +'<div style="font-size:13px;color:'+C.mut+';margin-bottom:14px;">四塊肌肉，每週都會動。上次量：8 月 12 日</div>'
    +'<div style="display:flex;flex-direction:column;gap:14px;">'
    +ms.map(function(m){
@@ -626,7 +626,7 @@ SC.join=function(){
  return '<div class="body" style="padding:0;">'
  +'<div style="background:'+C.card+';min-height:100%;padding-bottom:26px;">'
  +'<div style="padding:20px 22px 0;display:flex;align-items:center;gap:12px;">'+logo(52)
-  +'<div><div style="font-size:17px;font-weight:500;letter-spacing:2px;color:'+C.ink+';">溝通健身房</div>'
+  +'<div><div style="font-size:17px;font-weight:500;letter-spacing:2px;color:'+C.ink+';">影響力健身房</div>'
   +'<div style="font-size:10px;letter-spacing:2px;color:'+C.mut+';">ATPIFit · 基礎會員</div></div>'
   +'<button data-go="gym" style="margin-left:auto;background:none;border:0;color:'+C.mut+';font-size:22px;cursor:pointer;font-family:inherit;min-height:44px;">✕</button></div>'
  +'<div style="padding:18px 22px 15px;">'

@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>溝通健身房・成長儀表板</title>
-<meta name="apple-mobile-web-app-title" content="溝通健身房">
+<title>影響力健身房・成長儀表板</title>
+<meta name="apple-mobile-web-app-title" content="影響力健身房">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#e8734a">
 <link rel="apple-touch-icon" href="icon2-180.png">
 <link rel="icon" type="image/png" href="icon2-192.png">
 <link rel="manifest" href="manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:title" content="溝通健身房・成長儀表板">
-<meta property="og:description" content="溝通是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
+<meta property="og:title" content="影響力健身房・成長儀表板">
+<meta property="og:description" content="影響力是肌肉，練了就有。四大肌肉．十二小肌群，可量測、可練、練了會變現。">
 <meta property="og:image" content="https://app.atpifit.com/og-image.png">
 <meta property="og:url" content="https://app.atpifit.com/dashboard.html">
 <meta name="twitter:card" content="summary_large_image">
@@ -173,7 +173,7 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
     <!-- 頂部 bar（三分頁共用）：只開通一門課＝顯示品牌標題；開通多門課＝直接在這切換 -->
     <div class="dash-topbar">
-      <div class="dash-topbar-title" id="topbar-title">溝通健身房</div>
+      <div class="dash-topbar-title" id="topbar-title">影響力健身房</div>
       <div class="topbar-ws-wrap" id="ws-switch" style="display:none;">
         <select class="topbar-ws-select" id="ws-select"></select>
         <span class="topbar-ws-arrow">▾</span>
@@ -403,8 +403,8 @@ details.foldcard .foldbody{padding:0 14px 14px;}
 
       <!-- 隨時隨地打開（一組一致的入口鈕；裝成 App 或已在電腦上時整組隱藏）-->
       <div id="open-anywhere-card" style="background:#fff8f4;border:0.5px solid #f0ddcb;border-radius:14px;padding:12px 14px;margin-top:4px;">
-        <div style="font-size:13px;font-weight:600;color:#9a6b3e;margin-bottom:10px;">📌 隨時隨地打開溝通健身房</div>
-        <button id="btn-addhome" onclick="addToHomeGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;">📲 把溝通健身房加到手機桌面</button>
+        <div style="font-size:13px;font-weight:600;color:#9a6b3e;margin-bottom:10px;">📌 隨時隨地打開影響力健身房</div>
+        <button id="btn-addhome" onclick="addToHomeGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;">📲 把影響力健身房加到手機桌面</button>
         <button id="btn-desktop" onclick="openOnDesktopGuide()" style="display:block;width:100%;background:#e8734a;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;">🖥 在電腦上開啟</button>
         <div style="font-size:13px;color:#9a8a76;margin-top:9px;line-height:1.6;">加到桌面：一點就進、不用再開 LINE 找。電腦：複製專屬連結貼上就能開。</div>
       </div>
@@ -765,7 +765,7 @@ function dimLabel(dimStr) {
   if (!ds.length) return "—";
   return ds.map(function(k){ return (DIMS[k] || {name:k}).name; }).join("・");
 }
-/* 把說明裡的網址變成可點連結（管理端自填內容，例如先修課的溝通健身房 LIFF）。 */
+/* 把說明裡的網址變成可點連結（管理端自填內容，例如先修課的影響力健身房 LIFF）。 */
 function linkify_(t) {
   return String(t).replace(/(https?:\/\/[^\s，。、）)]+)/g,
     '<a href="$1" target="_blank" rel="noopener" style="color:#e8734a;text-decoration:underline;word-break:break-all;">$1</a>');
@@ -1552,7 +1552,7 @@ function openOnDesktopGuide(){
     if(window.liff&&liff.isApiAvailable&&liff.isApiAvailable("shareTargetPicker")){
       sh.style.display="block";
       sh.onclick=function(){
-        liff.shareTargetPicker([{type:"text",text:"我的溝通健身房儀表板（在電腦打開）：\n"+url}]).catch(function(e){console.log("share error:",e);});
+        liff.shareTargetPicker([{type:"text",text:"我的影響力健身房儀表板（在電腦打開）：\n"+url}]).catch(function(e){console.log("share error:",e);});
       };
     } else { sh.style.display="none"; }
   }catch(e){ sh.style.display="none"; }

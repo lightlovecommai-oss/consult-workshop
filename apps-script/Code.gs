@@ -1872,7 +1872,7 @@ var TASKS_SEED = [
   ["一階", "sp_invite", "once", "I", 3, "勇敢邀請一次", "🚀", false, "對一個已經聊過的人，發出一次明確的下一步邀請（見面／體驗／合作），練習臨門一腳、不逃避推進。", false],
 
   /* 先修課（special，開課即開放，看完影片自行打卡）*/
-  ["一階", "pre_method",  "special", "P", 2, "先修課｜L1.L2影片", "🎬", false, "看完 2 隻「學習方法」先修影片後，到『溝通健身房』打卡 https://liff.line.me/2010316474-wmb1ODe0", false],
+  ["一階", "pre_method",  "special", "P", 2, "先修課｜L1.L2影片", "🎬", false, "看完 2 隻「學習方法」先修影片後，到『影響力健身房』打卡 https://liff.line.me/2010316474-wmb1ODe0", false],
   ["一階", "pre_skill",   "special", "T", 2, "先修課｜L3.L4影片", "🎬", false, "看完 2 隻「問問題」的技法＋心法影片後打卡，並實際落地用一次。", false],
   ["一階", "pre_mindset", "special", "T", 2, "先修課｜L5.L6影片", "🎬", false, "看完 2 隻「講故事」的技法＋心法影片後打卡，並實際落地用一次。", false],
 
