@@ -26,7 +26,8 @@ var TABS = {
   quiz:        "(漏斗)能力測驗",       // 自評來源（comconverttest 寫入）：LINE userId + ATPI 分數
   rewards:     "(設定)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
   redemptions: "(遊戲)兌換紀錄",       // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
-  pending:     "(遊戲)待審核"          // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
+  pending:     "(遊戲)待審核",         // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
+  subscribe:   "(漏斗)電子報訂閱"      // 官網訂閱表單（atpifit.com）：時間 | Email | 姓名 | 來源 | 頁面 + 七個追蹤欄（程式自動建立）
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。
@@ -83,7 +84,10 @@ var COLS = {
               targetKeyMuscle:["情境最吃哪塊","targetKeyMuscle"],
               /* Q1..Q12 ＝ 12 小肌群 A1..I3 的 1–5 原始分（別名寫在後面，之後改標題也讀得到） */
               Q1:["Q1","A1"], Q2:["Q2","A2"], Q3:["Q3","A3"], Q4:["Q4","T1"], Q5:["Q5","T2"], Q6:["Q6","T3"],
-              Q7:["Q7","P1"], Q8:["Q8","P2"], Q9:["Q9","P3"], Q10:["Q10","I1"], Q11:["Q11","I2"], Q12:["Q12","I3"] }
+              Q7:["Q7","P1"], Q8:["Q8","P2"], Q9:["Q9","P3"], Q10:["Q10","I1"], Q11:["Q11","I2"], Q12:["Q12","I3"] },
+  /* 官網電子報訂閱：只收 Email、姓名與來源。訂閱的人多半還沒做過測驗，這裡不放分數。 */
+  subscribe:{ time:["時間","timestamp"], email:["Email","email"], name:["姓名","name"],
+              source:["來源","source"], page:["頁面","page"] }
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -110,7 +114,7 @@ var TRACK_COLS = {
   fbc:        ["fbc"],        fbp:         ["fbp"],
   utmSource:  ["utm_source"], utmMedium:   ["utm_medium"], utmCampaign: ["utm_campaign"]
 };
-[COLS.checkins, COLS.revenue, COLS.quizWrite].forEach(function(m){
+[COLS.checkins, COLS.revenue, COLS.quizWrite, COLS.subscribe].forEach(function(m){
   for (var k in TRACK_COLS) m[k] = TRACK_COLS[k];
 });
 
@@ -482,10 +486,11 @@ function addToKit_(email, firstName, fields) {
 
    設定：Apps Script →「專案設定 → 指令碼屬性」新增一把：
      LAUNCHILL_WEBHOOK_URL = workflow Inbound Webhook 的專屬網址
+     LAUNCHILL_SUBSCRIBE_WEBHOOK_URL = 官網電子報訂閱用的另一把（沒設就整段跳過，不會誤寄測驗報告信）
      （https://services.leadconnectorhq.com/hooks/... 開頭那條）
    網址不寫死在這裡——repo 是公開的，寫死等於任何人都能灌假名單觸發寄信。
    沒設屬性時整段直接跳過；任何失敗只記 log，不影響寫入 Sheet。 */
-function sendToLaunChill_(payload) {
+function sendToLaunChill_(payload, propKey) {
   /* 每次都印 log + 回傳結果物件（給 quiz action 塞進 response，繞開 Cloud Logging 壞掉時看不到 log 的情境）。
      成功也印一行 2xx，才能從執行記錄一眼看出「第二次到底有沒有 POST」。 */
   try {
@@ -494,10 +499,13 @@ function sendToLaunChill_(payload) {
       Logger.log("LaunChill 略過：無 email（payload.email=" + JSON.stringify(payload.email) + "）");
       return { skipped: "no_email", email: payload.email };
     }
-    var url = PropertiesService.getScriptProperties().getProperty("LAUNCHILL_WEBHOOK_URL");
+    /* 沒指定就用測驗那把。訂閱走另一把，因為那支 workflow 寄的是「完整影響力報告」，
+       對一個沒做過測驗的訂閱者寄出去，整封信的分數會是空的。 */
+    var key = propKey || "LAUNCHILL_WEBHOOK_URL";
+    var url = PropertiesService.getScriptProperties().getProperty(key);
     if (!url) {
-      Logger.log("LaunChill 略過：LAUNCHILL_WEBHOOK_URL 未設定");
-      return { skipped: "no_url" };
+      Logger.log("LaunChill 略過：" + key + " 未設定");
+      return { skipped: "no_url", key: key };
     }
     Logger.log("LaunChill 送出：email=" + email + " payload=" + JSON.stringify(payload));
     var r = UrlFetchApp.fetch(url, {
@@ -1184,10 +1192,46 @@ function doPost(e) {
          Network 分頁看這條 doPost 的 response body，launchill 欄會告訴你送出/略過/失敗＋回應碼＋body。 */
       return json_({ status: "ok", launchill: launchillResult || null });
     }
+    /* 官網電子報訂閱（atpifit.com 的 Newsletter 表單）。
+       只有 Email 是必要欄位——低摩擦守則，姓名空白照收。 */
+    if (body.action === "subscribe") {
+      var subEmail = String(body.email || "").trim().toLowerCase();
+      if (!subEmail || subEmail.indexOf("@") < 0) return json_({ status: "error", message: "missing email" });
+      ensureSubscribeSheet_();
+      var svals = withTrack_({
+        time: body.timestamp || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        email: subEmail, name: body.name || "", source: body.source || "web", page: body.page || ""
+      }, body);
+      /* 以 Email 為鍵 upsert：同一個人重複訂閱只更新那一列，不長出重複名單。
+         preserveEmpty 保住首次接觸的姓名與廣告歸因——第二次多半是從別的頁裸送一個 Email。 */
+      upsertMapped_(TABS.subscribe, COLS.subscribe, "email", svals,
+        Object.keys(TRACK_COLS).concat(["name", "source"]));
+      /* 刻意用另一把 webhook：沒設 LAUNCHILL_SUBSCRIBE_WEBHOOK_URL 就不寄，
+         寧可只留名單在 Sheet，也不要把測驗報告信寄給沒做過測驗的人。 */
+      var subResult = sendToLaunChill_({
+        event: "subscribe", email: subEmail, first_name: body.name || "",
+        source: body.source || "web", page: body.page || ""
+      }, "LAUNCHILL_SUBSCRIBE_WEBHOOK_URL");
+      return json_({ status: "ok", launchill: subResult || null });
+    }
     return json_({ status: "error", message: "unknown action" });
   } catch (err) {
     return json_({ status: "error", message: String(err) });
   }
+}
+
+/* 訂閱分頁不存在就自動建立（含表頭與七個追蹤欄）。
+   upsertMapped_ 找不到分頁會丟例外，所以寫入前一定要先過這裡。 */
+function ensureSubscribeSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.subscribe);
+  if (!sh) {
+    sh = ss.insertSheet(TABS.subscribe);
+    var headers = ["時間", "Email", "姓名", "來源", "頁面"].concat(TRACK_HEADERS);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sh.setFrozenRows(1);
+  }
+  return sh;
 }
 
 /* 簡易觸發器：導師在「(遊戲)待審核」把某列「通過」打勾 → 自動寫進打卡紀錄給分、狀態改已通過。
