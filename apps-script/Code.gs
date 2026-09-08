@@ -476,6 +476,32 @@ function addToKit_(email, firstName, fields) {
   }
 }
 
+/* ── LaunChill (GHL 白牌) 電子報串接 ──────────────────────────
+   2026-09-08 老師拍板：Email 工具用 LaunChill。測驗留 Email 的人
+   POST 進 LaunChill workflow 的 Inbound Webhook → 那邊建聯絡人＋寄「完整影響力報告」。
+
+   設定：Apps Script →「專案設定 → 指令碼屬性」新增一把：
+     LAUNCHILL_WEBHOOK_URL = workflow Inbound Webhook 的專屬網址
+     （https://services.leadconnectorhq.com/hooks/... 開頭那條）
+   網址不寫死在這裡——repo 是公開的，寫死等於任何人都能灌假名單觸發寄信。
+   沒設屬性時整段直接跳過；任何失敗只記 log，不影響寫入 Sheet。 */
+function sendToLaunChill_(payload) {
+  try {
+    var email = String(payload.email || "").trim();
+    if (!email || email.indexOf("@") < 0) return;                    // 沒 email 寄不了報告，跳過
+    var url = PropertiesService.getScriptProperties().getProperty("LAUNCHILL_WEBHOOK_URL");
+    if (!url) return;                                                // 未設定＝不串
+    var r = UrlFetchApp.fetch(url, {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+    if (r.getResponseCode() >= 300)
+      Logger.log("LaunChill webhook 失敗 " + r.getResponseCode() + ": " + r.getContentText());
+  } catch (lerr) {
+    Logger.log("LaunChill 串接例外: " + lerr);                       // 絕不讓 LaunChill 影響主流程
+  }
+}
+
 /* 測驗完自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
    已存在同 userId 就不動，避免重複。 */
 function ensureRosterRow_(lineId, name) {
@@ -1102,6 +1128,15 @@ function doPost(e) {
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
         main_ability: body.mainAbility || "", income_level: body.incomeLevel || "", job: body.job || ""
+      });
+      sendToLaunChill_({                                             // LaunChill：建聯絡人＋觸發「完整影響力報告」信
+        email: body.email || "", first_name: body.name || body.displayName || "",
+        job: body.job || "",
+        score_a: body.scoreA || 0, score_t: body.scoreT || 0,
+        score_p: body.scoreP || 0, score_i: body.scoreI || 0,
+        weak_muscle: body.targetKeyMuscle || "",                     // 最弱大肌肉（例：推進肌肉）
+        scene: body.targetNeed || "",                                // 他選的場景（職場與家人／一對一銷售／一對多演講）
+        line_id: hasLineId ? quid : ""
       });
       return json_({ status: "ok" });
     }
