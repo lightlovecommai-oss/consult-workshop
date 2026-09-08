@@ -1068,6 +1068,11 @@ function doPost(e) {
     }
     if (body.action === "quiz") {  // 測驗結果寫入（comconverttest 送來）：附加一列到「(引流.A)能力測驗」分頁
       var quid = String(body.userId || body.lineId || "");
+      /* 2026-09-08：LINE 外開測驗拿不到 userId（LIFF 不強制登入），以前這裡直接退件，
+         連人家填好的 Email 都丟了。改成：有 Email 就照收，用 "web:"+email 當去重鍵；
+         兩個都沒有才退（沒身份沒聯絡方式，這列存了也找不回人）。 */
+      var hasLineId = !!quid;
+      if (!quid && body.email) quid = "web:" + String(body.email).trim().toLowerCase();
       if (!quid) return json_({ status: "error", message: "missing userId" });
       var qvals = {
         time: body.timestamp || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
@@ -1087,7 +1092,7 @@ function doPost(e) {
       withTrack_(qvals, body);
       /* 重測時保留首次接觸的廣告歸因（那時的 utm 才是把他帶進來的那一支） */
       upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS));  // 同 userId 更新那列，重測/重開不重複
-      ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）
+      if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）；web:xxx 假身份進不了館，不進名單
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
         main_ability: body.mainAbility || "", income_level: body.incomeLevel || "", job: body.job || ""
