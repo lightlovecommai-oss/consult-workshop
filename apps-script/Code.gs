@@ -486,17 +486,31 @@ function addToKit_(email, firstName, fields) {
    網址不寫死在這裡——repo 是公開的，寫死等於任何人都能灌假名單觸發寄信。
    沒設屬性時整段直接跳過；任何失敗只記 log，不影響寫入 Sheet。 */
 function sendToLaunChill_(payload) {
+  /* 每次都印 log（不只失敗才印）：debug「有沒有送、送了什麼、對方回什麼」。
+     成功也印一行 2xx，才能從執行記錄一眼看出「第二次到底有沒有 POST」。 */
   try {
     var email = String(payload.email || "").trim();
-    if (!email || email.indexOf("@") < 0) return;                    // 沒 email 寄不了報告，跳過
+    if (!email || email.indexOf("@") < 0) {
+      Logger.log("LaunChill 略過：無 email（payload.email=" + JSON.stringify(payload.email) + "）");
+      return;
+    }
     var url = PropertiesService.getScriptProperties().getProperty("LAUNCHILL_WEBHOOK_URL");
-    if (!url) return;                                                // 未設定＝不串
+    if (!url) {
+      Logger.log("LaunChill 略過：LAUNCHILL_WEBHOOK_URL 未設定");
+      return;
+    }
+    Logger.log("LaunChill 送出：email=" + email + " payload=" + JSON.stringify(payload));
     var r = UrlFetchApp.fetch(url, {
       method: "post", contentType: "application/json",
       payload: JSON.stringify(payload), muteHttpExceptions: true
     });
-    if (r.getResponseCode() >= 300)
-      Logger.log("LaunChill webhook 失敗 " + r.getResponseCode() + ": " + r.getContentText());
+    var code = r.getResponseCode();
+    var body = r.getContentText();
+    if (code >= 300) {
+      Logger.log("LaunChill webhook 失敗 " + code + ": " + body);
+    } else {
+      Logger.log("LaunChill webhook 成功 " + code + ": " + body);
+    }
   } catch (lerr) {
     Logger.log("LaunChill 串接例外: " + lerr);                       // 絕不讓 LaunChill 影響主流程
   }
