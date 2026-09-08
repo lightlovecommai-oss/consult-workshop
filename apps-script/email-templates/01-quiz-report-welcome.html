@@ -1,0 +1,108 @@
+<!--
+  信件模板：測驗完成後第一封「影響力健檢報告」
+  貼進 LaunChill → workflow → Email node → 切到 HTML／原始碼模式 → 全選貼上
+
+  變數要在 LaunChill 端替換：
+    {{contact.first_name}}   —— 收件人名字（來自 sendToLaunChill_ payload 的 first_name）
+    [[REPORT_URL]]           —— 完整報告網址（來自 payload 的 report_url），改成 LaunChill 對應的 merge tag
+                                （通常是 {{inbound_webhook.report_url}} 或 {{trigger.report_url}}，看你 workflow 設定）
+    {{unsubscribe_url}}      —— LaunChill 的取消訂閱連結（不同版可能叫 {{unsubscribe_link}}）
+
+  設計對齊測驗結果頁：深棕 header (#4A1B0C) + 米底 (#FDF6EF) + 磚橘漸層 CTA (#C6603A→#AF5433)。
+  用 table 排版＋inline style，Gmail／Outlook／Apple Mail 都吃。
+-->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>影響力健檢報告</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f0eb;font-family:'PingFang TC','Microsoft JhengHei','Helvetica Neue',Arial,sans-serif;color:#2a1810;line-height:1.7;-webkit-font-smoothing:antialiased;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f0eb;padding:24px 12px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#FDF6EF;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(74,27,12,0.08);">
+
+        <!-- Header：深棕塊 -->
+        <tr>
+          <td style="background:#4A1B0C;padding:28px 32px;text-align:center;">
+            <div style="color:#C9A87A;font-size:11px;letter-spacing:3px;font-weight:bold;">ATPIFIT · MUSCLE CHECK</div>
+            <div style="color:#FDF6EF;font-size:22px;font-weight:bold;margin-top:8px;letter-spacing:1px;">影響力健檢報告</div>
+          </td>
+        </tr>
+
+        <!-- Greeting -->
+        <tr>
+          <td style="padding:32px 32px 8px;">
+            <div style="font-size:17px;color:#2a1810;font-weight:bold;">{{contact.first_name}} 你好，</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:12px 32px 24px;">
+            <p style="margin:0;font-size:15px;line-height:1.85;color:#3d2a1f;">
+              這是你剛做完的<strong style="color:#4A1B0C;">影響力健檢完整報告</strong>——<br>
+              12 塊小肌群的分數全開，還有你已經有的力量、現在卡在哪、先練哪塊最有感。
+            </p>
+          </td>
+        </tr>
+
+        <!-- 主 CTA：看報告 -->
+        <tr>
+          <td style="padding:8px 32px 28px;text-align:center;">
+            <a href="[[REPORT_URL]]" style="display:inline-block;background:#C6603A;background-image:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#ffffff !important;text-decoration:none;padding:15px 36px;border-radius:999px;font-size:16px;font-weight:bold;letter-spacing:1px;box-shadow:0 3px 10px rgba(198,96,58,0.3);">
+              👉 看我的完整報告
+            </a>
+          </td>
+        </tr>
+
+        <!-- 分隔線 -->
+        <tr><td style="padding:0 32px;"><div style="border-top:1px solid #E8DFD3;"></div></td></tr>
+
+        <!-- 骨層句 -->
+        <tr>
+          <td style="padding:24px 32px 16px;">
+            <p style="margin:0;font-size:15px;color:#6E5A47;line-height:1.85;font-style:italic;">
+              練這個不是為了贏過誰，<br>是為了讓身邊的人因為你變好。
+            </p>
+          </td>
+        </tr>
+
+        <!-- 次 CTA：進健身房 -->
+        <tr>
+          <td style="padding:8px 32px 24px;text-align:center;">
+            <a href="https://app.atpifit.com/?utm_source=email&utm_medium=welcome&utm_campaign=quiz_report" style="display:inline-block;background:#FDF6EF;color:#4A1B0C !important;text-decoration:none;padding:12px 28px;border:2px solid #4A1B0C;border-radius:999px;font-size:14px;font-weight:bold;">
+              進影響力健身房 →
+            </a>
+          </td>
+        </tr>
+
+        <!-- Reply prompt + Signature -->
+        <tr>
+          <td style="padding:16px 32px 8px;">
+            <p style="margin:0 0 16px;font-size:14px;color:#6E5A47;">看完有問題，直接回這封信。</p>
+            <p style="margin:0;font-size:15px;color:#4A1B0C;font-weight:bold;">—— 平凡人光頭</p>
+          </td>
+        </tr>
+
+        <!-- 底 padding -->
+        <tr><td style="padding:16px;"></td></tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#4A1B0C;padding:18px 32px;text-align:center;">
+            <div style="color:#C9A87A;font-size:11px;letter-spacing:2px;">ATPIFIT · 影響力健身房</div>
+            <div style="margin-top:8px;">
+              <a href="{{unsubscribe_url}}" style="color:#C9A87A;font-size:11px;text-decoration:underline;">取消訂閱 · Unsubscribe</a>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
