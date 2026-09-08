@@ -1091,7 +1091,13 @@ function doPost(e) {
       for (var qi = 1; qi <= 12; qi++) qvals["Q" + qi] = (qraw[qi - 1] !== undefined ? qraw[qi - 1] : "");
       withTrack_(qvals, body);
       /* 重測時保留首次接觸的廣告歸因（那時的 utm 才是把他帶進來的那一支） */
-      upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS));  // 同 userId 更新那列，重測/重開不重複
+      /* preserveEmpty 加上個資與漏斗欄（2026-09-08）：空值進來不洗掉舊資料。
+         兩個來源會送空欄：①重測時跳過留資（以前會把上次填的 Email 洗掉）
+         ②健身房入口的 ms= 回頭補寫（只有分數，沒有姓名/Email）。
+         targetDistance/targetRank 刻意不保護——那兩欄已收掉，就是要被清空。 */
+      upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS).concat(
+        ["displayName","pictureUrl","name","email","job","income","goalIncome","customerSource",
+         "targetContext","targetNeed","targetKeyMuscle"]));  // 同 userId 更新那列，重測/重開不重複
       if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）；web:xxx 假身份進不了館，不進名單
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,

@@ -87,9 +87,53 @@ var SEAT_MAP = {
   "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
 };
 /* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
-var FROM = "";
-try { FROM = new URLSearchParams(window.location.search).get("from") || ""; } catch(e){}
+var FROM = "", MSQ = "";
+try {
+  var sp_ = new URLSearchParams(window.location.search);
+  FROM = sp_.get("from") || "";
+  MSQ = sp_.get("ms") || "";   // LINE 外測完的 12 格分數（quiz 夾帶過來，MORD 序、1–5）
+} catch(e){}
 function fromQ_(){ return FROM ? "&from=" + encodeURIComponent(FROM) : ""; }
+
+/* ⭐ 2026-09-08 接住「LINE 外測驗的孤兒結果」：
+   在 LINE 外開測驗拿不到 userId，quiz 那站寫不進試算表；他點「進健身房」時 quiz 把
+   12 格分數夾在 ?ms= 帶過來。這裡在拿到身份（LIFF／?id=／記住的 cw_uid）的那一刻，
+   回頭補寫「能力測驗一列＋體測基線 12 列」——人跟分數就接上了。
+   · 同一組 (id, ms) 只送一次（localStorage 簽名防重複，體測是 append 不能疊）
+   · 用 sendBeacon（頁面馬上要跳走，fetch 會被砍）；沒有就退回 keepalive fetch
+   · 補寫的列姓名/Email 是空的——Code.gs 的 quiz upsert 已設「空值不洗掉舊資料」 */
+function sendQuizBaseline_(id, name) {
+  if (!MSQ || !id) return;
+  var parts = MSQ.split(",").map(Number);
+  if (parts.length !== MORD.length || parts.some(function(v){ return !(v >= 1 && v <= 5); })) return;
+  var sig = id + "|" + MSQ;
+  try { if (localStorage.getItem("cw_msq_sent_v1") === sig) return; } catch(e){}
+  var ms = {}; MORD.forEach(function(m, i){ ms[m] = parts[i]; });
+  var d5 = dimFromMuscles(ms), pct = {};
+  DORD.forEach(function(k){ pct[k] = pctFromEval(d5[k]); });
+  var sk = DORD.reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
+  var uk = DORD.filter(function(k){ return k !== sk; }).reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
+  var quiz = { action: "quiz", userId: id, displayName: name || "", name: "", email: "", job: "",
+    scoreA: pct.A, scoreT: pct.T, scoreP: pct.P, scoreI: pct.I,
+    rawAnswers: parts.join(","), mainAbility: DIMS[sk].name, subAbility: DIMS[uk].name,
+    timestamp: new Date().toISOString() };
+  var ev = { action: "eval", lineId: id, source: "quiz",
+    evals: MORD.map(function(m){ return { muscle: m, score: ms[m] }; }) };
+  var sent = false;
+  try {
+    if (navigator.sendBeacon) {
+      var blob = function(o){ return new Blob([JSON.stringify(o)], { type: "text/plain;charset=utf-8" }); };
+      sent = navigator.sendBeacon(SHEET_API, blob(quiz)) && navigator.sendBeacon(SHEET_API, blob(ev));
+    }
+  } catch(e){}
+  if (!sent) {
+    try {
+      fetch(SHEET_API, { method: "POST", body: JSON.stringify(quiz), headers: { "Content-Type": "text/plain;charset=utf-8" }, keepalive: true });
+      fetch(SHEET_API, { method: "POST", body: JSON.stringify(ev), headers: { "Content-Type": "text/plain;charset=utf-8" }, keepalive: true });
+    } catch(e){}
+  }
+  try { localStorage.setItem("cw_msq_sent_v1", sig); } catch(e){}
+}
 function routeFor(id) {
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
   var q = "?id=" + encodeURIComponent(id) + fromQ_();
@@ -116,6 +160,7 @@ async function init() {
 
     if (urlId) {
       rememberUid_(urlId);   // 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程
+      sendQuizBaseline_(urlId, "");
       window.location.href = routeFor(urlId);
       return;
     }
@@ -129,6 +174,7 @@ async function init() {
     if (liff.isLoggedIn()) {
       var p = await liff.getProfile();
       rememberUid_(p.userId);
+      sendQuizBaseline_(p.userId, p.displayName || "");
       window.location.href = routeFor(p.userId);
       return;
     } else if (liff.isInClient()) {
@@ -143,7 +189,7 @@ async function init() {
   /* 桌面捷徑若沒帶 id，用上次記住的 id 進場（同樣走身分路由，未開通的人才不會被 dashboard 再彈一次） */
   try {
     var savedId = localStorage.getItem("cw_uid");
-    if (savedId) { window.location.href = routeFor(savedId); return; }
+    if (savedId) { sendQuizBaseline_(savedId, ""); window.location.href = routeFor(savedId); return; }
   } catch (e) {}
 
   /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）＝真路人 → 體驗席。
