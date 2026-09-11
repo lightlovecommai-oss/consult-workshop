@@ -86,6 +86,16 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* 週薄片列（正式版週圓環改成薄片語言：淡填=練過・實色=今天練了・虛線=還沒到） */
 .wk{margin-top:16px;border-top:1px dashed #E8DDD3;padding-top:12px;}
 .wk .slbl span{font-size:11px;}
+/* THIS WEEK 卡（正式版功能搬入）：練了幾天＋沒練不扣＋週回顧展開 */
+.wkline{font-size:15px;}
+.wkline b{font-size:24px;font-weight:900;color:#AF5433;font-variant-numeric:tabular-nums;margin:0 2px;}
+.wkline span{display:block;font-size:12.5px;color:#8A7266;margin-top:2px;}
+/* 明天預告卡（正式版功能搬入） */
+.tmr{display:flex;align-items:center;gap:14px;}
+.tmr-chip{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:#FAF3EA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#AF5433;line-height:1.2;}
+.tmr-chip span{font-size:10.5px;font-weight:700;color:#8A7266;letter-spacing:1px;}
+.tmr-t{font-size:15.5px;font-weight:800;}
+.tmr-s{font-size:13px;color:#8A7266;margin-top:3px;line-height:1.7;}
 
 /* 里程碑（正式版首亮徽章：慶祝的理由=他前進了） */
 .mile{margin-top:14px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:12px;padding:11px 13px;font-size:14.5px;font-weight:700;text-align:left;}
@@ -165,7 +175,25 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
 .lock-note.lk{background:#EFE6DB;border-radius:10px;padding:9px 12px;color:#6E4A3C;margin-top:10px;font-weight:600;}
 
-/* 夥伴頁 feed */
+/* 夥伴頁（正式版元素搬入：問候／金句／頭像列／課程乾貨卡，去鍛鍊鈕拿掉） */
+.hi{font-size:22px;font-weight:900;margin-bottom:8px;}
+.gymq{margin-top:14px;text-align:center;font-size:15.5px;font-weight:700;line-height:1.9;color:#6B3018;}
+.gymq::before{content:"❝";font-family:Georgia,serif;color:#C99A4E;font-size:26px;display:block;line-height:1;}
+.avrow{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid #F0E3DB;border-radius:14px;margin-bottom:14px;}
+.avs{display:flex;flex-shrink:0;}
+.av{width:30px;height:30px;border-radius:50%;color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;margin-left:-8px;}
+.av:first-child{margin-left:0;}
+.av-t{font-size:13px;line-height:1.7;color:#5A3A2A;}
+.av-t b{color:#5C7464;}
+.res{display:flex;gap:10px;margin-top:14px;}
+.resc{flex:1;border-radius:16px;padding:15px 14px;}
+.resc.lite{background:#fff;border:1px solid #E8DDD3;}
+.resc.dark{background:linear-gradient(135deg,#4A1B0C,#6B3018);color:#F7F1EC;}
+.resc-t{font-size:15px;font-weight:800;}
+.resc-s{font-size:12.5px;margin-top:5px;line-height:1.7;color:#8A7266;}
+.resc.dark .resc-s{color:rgba(247,241,236,.8);}
+.resc-a{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:#AF5433;text-decoration:none;border-bottom:1.5px solid #AF5433;padding-bottom:1px;}
+.resc.dark .resc-a{color:#E8C89A;border-color:#E8C89A;}
 .slim{background:#fff;border:1px solid #F0E3DB;border-radius:14px;padding:11px 13px;margin-bottom:8px;}
 .slim-top{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;}
 .slim-b{font-size:14px;line-height:1.8;margin-top:6px;color:#5A3A2A;}
@@ -348,6 +376,39 @@ function weekStripHTML(){
   });
   return '<div class="wk">' + slRow(items) + '</div>';
 }
+/* THIS WEEK 卡：這週練了幾天（沒練不扣）＋週薄片列＋週回顧展開 */
+var OPEN_WEEK = false;
+function toggleWeek(){ OPEN_WEEK = !OPEN_WEEK; render(); }
+function weekCardHTML(){
+  var dow = (new Date().getDay() + 6) % 7;
+  var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
+  var n = 0; for (var i = 0; i <= dow; i++) if (dset[ago(i)]) n++;
+  return '<div class="cd"><div class="sec">THIS WEEK · <b>這週</b></div>'
+    + '<div class="wkline">這週練了<b>' + n + '</b>天。<span>沒練的日子不扣。</span></div>'
+    + weekStripHTML()
+    + '<button class="drill-tg" onclick="toggleWeek()">週回顧——這週的每一筆 ' + (OPEN_WEEK ? "▴" : "▾") + '</button>'
+    + (OPEN_WEEK ? weekListHTML() : '') + '</div>';
+}
+function weekListHTML(){
+  var dow = (new Date().getDay() + 6) % 7, min = ago(dow);
+  var days = ["一","二","三","四","五","六","日"];
+  var es = LOG.filter(function(e){ return e.date >= min; });
+  if (!es.length) return '<div class="wall-note">這週還沒有紀錄——今天記第一筆。</div>';
+  return '<div class="drill">' + es.map(function(e){
+    var s = STAGES[stageIdx(e.stage)];
+    var dl = e.date === ago(0) ? "今天" : "週" + days[(new Date(e.date + "T00:00:00").getDay() + 6) % 7];
+    return '<div class="dr"><div class="dr-k">' + dl + ' · ' + MUSCLES[e.muscle].name + ' → ' + e.target + '</div>'
+      + '<div class="dr-v"><span class="fbc" style="color:' + s.t + ';background:' + (s.tint || "#EFE6DB") + ';">' + s.full + '</span>'
+      + (e.note ? ' ' + e.note : '') + '</div></div>';
+  }).join("") + '</div>';
+}
+/* 明天預告卡：接著今天練的，明天打開就從這裡開始 */
+function tomorrowHTML(){
+  var nk = MORD[(MORD.indexOf(FOCUS) + 1) % MORD.length], m = MUSCLES[nk];
+  return '<div class="cd tmr"><div class="tmr-chip">明<span>預告</span></div>'
+    + '<div><div class="tmr-t">明天換練「' + m.name + '」</div>'
+    + '<div class="tmr-s">接著今天練的，明天打開就從這裡開始。</div></div></div>';
+}
 function goPane(p){ REC = null; PANE = p; window.scrollTo(0,0); render(); }
 /* 簡版膠囊 HUD：同一支 slRow，縮到只剩高度和顏色 */
 function hudHTML(){
@@ -373,9 +434,8 @@ function todayHTML(){
     + (DONE_TODAY
         ? '<button class="gobtn done">今天記好了 ✓</button>'
         : '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>')
-    + weekStripHTML()
-    + '<div class="rule4"></div></div>';
-  return h + seatPathHTML();
+    + '<div class="rule4" style="margin-top:16px;"></div></div>';
+  return h + weekCardHTML() + tomorrowHTML() + seatPathHTML();
 }
 
 /* ═══ 開練流程（反饋當主角）═══ */
@@ -566,9 +626,18 @@ var FEED = [
 var CHEERED = {};
 function cheer(i){ if (CHEERED[i]) return; CHEERED[i] = 1; FEED[i].cheer++; render(); }
 function gymHTML(){
-  var h = '<div class="hero"><div class="kick" style="color:#5C7464;">GYM · 全館這個月</div>'
-    + '<div class="stat">大家一起記下了 <b>412</b> 次客戶反應</div>'
-    + '<div class="sub-t">最多人練到的一步：<b style="color:#5C7464;">他信了</b></div><div class="rule4"></div></div>';
+  var hr = new Date().getHours(), greet = hr < 5 ? "晚安" : hr < 11 ? "早安" : hr < 18 ? "午安" : "晚安";
+  var h = '<div class="hero"><div class="kick" style="color:#5C7464;">GYM FLOOR · 全館這個月</div>'
+    + '<div class="hi">' + greet + '，Amy。</div>'
+    + '<div class="stat">全館累計 <b>412</b> 次鍛鍊</div>'
+    + '<div class="gymq">先付出愛，產生貢獻，<br>金錢自然會來。</div>'
+    + '<div class="rule4"></div></div>';
+  h += '<div class="avrow"><div class="avs">'
+    + '<span class="av" style="background:#C6603A;">陳</span>'
+    + '<span class="av" style="background:#6E8B77;">林</span>'
+    + '<span class="av" style="background:#6E8CA8;">王</span>'
+    + '<span class="av" style="background:#C99A4E;">+</span></div>'
+    + '<div class="av-t">這個月大家練最多的是 <b>信任肌肉</b><br>13 位夥伴一起在練</div></div>';
   h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
   h += FEED.map(function(f, i){
     var s = STAGES[stageIdx(f.stage)];
@@ -578,6 +647,9 @@ function gymHTML(){
       + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
       + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
   }).join("");
+  h += '<div class="res">'
+    + '<div class="resc lite"><div class="resc-t">免費月度課程</div><div class="resc-s">每月 2 堂，在社群裡開</div><a class="resc-a" href="#">進社群上課 →</a></div>'
+    + '<div class="resc dark"><div class="resc-t">更多練肌肉乾貨</div><div class="resc-s">秘訣、練法、課程回放</div><a class="resc-a" href="#">看乾貨 →</a></div></div>';
   return h + seatPathHTML();
 }
 
@@ -598,6 +670,7 @@ function render(){
   if (q.get("drill")) OPEN_DRILL = true;
   if (q.get("wall")) WALL_FULL = true;
   if (q.get("pocket")) POCKET = q.get("pocket");
+  if (q.get("week")) OPEN_WEEK = true;
 })();
 render();
 </script>
