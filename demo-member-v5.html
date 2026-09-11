@@ -53,8 +53,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .slv{display:flex;gap:7px;padding:0 4px;}
 .slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
 
-/* 席位路徑條（全貌感常駐・§3.8 招8 的薄片實作）：整條路一次露出＋終點骨層句 */
-.seatpath{background:#fff;border:1px solid #E8DDD3;border-radius:16px;padding:13px 14px 11px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+/* 席位路徑＝頁尾次要 CTA（幽靈框描下一階識別色）：整條路一次露出＋按了參觀下一階 */
+.seatpath{background:transparent;border:1.5px solid #C99A4E;border-radius:16px;padding:13px 14px 12px;margin:18px 0 4px;cursor:pointer;}
+.sp-cta{margin-top:10px;border-top:1px dashed #E8C89A;padding-top:10px;text-align:center;font-size:14px;font-weight:800;color:#8E682B;}
 .sp-row{display:flex;align-items:flex-end;gap:6px;border-bottom:2px solid rgba(74,27,12,.22);padding:2px 2px 0;}
 .sp{border-radius:5px 5px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
 .sp.past{background:#DCE7DE;}
@@ -274,9 +275,10 @@ function slRow(items, opt){
     + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>');
 }
 
-/* ── 全貌感席位路徑（每個分頁常駐）：走過淡填・現在實色・還沒虛線＋終點骨層句 ── */
+/* ── 席位路徑（頁尾次要 CTA）：走過淡填・現在實色・還沒虛線＋終點骨層句。
+   按了先去進步頁升單卡；pro demo 做好後這裡改成直連下一階 demo。 ── */
 function seatPathHTML(){
-  return '<div class="seatpath">'
+  return '<div class="seatpath" onclick="goPane(\'me\')">'
     + '<div class="sp-row">'
     + '<div class="sp past" style="flex:1;height:26px;"></div>'
     + '<div class="sp now"  style="flex:1;height:44px;"></div>'
@@ -288,7 +290,8 @@ function seatPathHTML(){
     + '<span style="flex:1;text-align:center;color:#54718D;">會員席<div class="sp-here">YOU’RE HERE</div></span>'
     + '<span style="flex:1;text-align:center;color:#B4A695;">私教席<div class="sp-here" style="color:#B4A695;">還沒解鎖</div></span>'
     + '<span style="flex:1.6;"></span>'
-    + '</div></div>';
+    + '</div>'
+    + '<div class="sp-cta">參觀下一站「私教席」 →</div></div>';
 }
 
 /* ── 某個人的 ATPI 軌跡（打卡完成頁主圖形；pro CRM 的同一支原語）──
@@ -351,7 +354,7 @@ function hudHTML(){
 }
 function todayHTML(){
   var m = MUSCLES[FOCUS], d = DRILL[FOCUS];
-  var h = seatPathHTML() + hudHTML();
+  var h = hudHTML();
   h += '<div class="hero"><div class="kick" style="color:#5C7464;">TODAY · 今天練一塊</div>'
     + '<div class="big-t">' + m.name + '——<em>' + m.tech.split("・")[0] + '</em></div>'
     + '<div class="sub-t">' + DIM_RESULT[m.dim] + '。練完不是打勾——是記下<b>他走到哪了</b>。</div>'
@@ -363,7 +366,7 @@ function todayHTML(){
         : '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>')
     + weekStripHTML()
     + '<div class="rule4"></div></div>';
-  return h;
+  return h + seatPathHTML();
 }
 
 /* ═══ 開練流程（反饋當主角）═══ */
@@ -478,7 +481,7 @@ function fbChips(dimOrMk){
   return out || '<span class="fbc">還沒有人給過反應——今天就去試一次</span>';
 }
 function meHTML(){
-  var h = seatPathHTML();
+  var h = "";
   var focusDim = MUSCLES[FOCUS].dim;
   h += '<div class="cd"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
     + '<div class="wall-pot"><div class="pot-k">已解鎖影響力</div><div class="pot-n">205<span>/ 1000</span></div></div>'
@@ -549,8 +552,7 @@ var FEED = [
 var CHEERED = {};
 function cheer(i){ if (CHEERED[i]) return; CHEERED[i] = 1; FEED[i].cheer++; render(); }
 function gymHTML(){
-  var h = seatPathHTML();
-  h += '<div class="hero"><div class="kick" style="color:#5C7464;">GYM · 全館這個月</div>'
+  var h = '<div class="hero"><div class="kick" style="color:#5C7464;">GYM · 全館這個月</div>'
     + '<div class="stat">大家一起記下了 <b>412</b> 次客戶反應</div>'
     + '<div class="sub-t">最多人練到的一步：<b style="color:#5C7464;">他信了</b></div><div class="rule4"></div></div>';
   h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
@@ -562,7 +564,7 @@ function gymHTML(){
       + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
       + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
   }).join("");
-  return h;
+  return h + seatPathHTML();
 }
 
 /* ═══ render ═══ */
