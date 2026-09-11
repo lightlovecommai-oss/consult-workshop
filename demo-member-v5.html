@@ -638,6 +638,9 @@ function gymHTML(){
     + '<span class="av" style="background:#6E8CA8;">王</span>'
     + '<span class="av" style="background:#C99A4E;">+</span></div>'
     + '<div class="av-t">這個月大家練最多的是 <b>信任肌肉</b><br>13 位夥伴一起在練</div></div>';
+  h += '<div class="res" style="margin:0 0 4px;">'
+    + '<div class="resc lite"><div class="resc-t">免費月度課程</div><div class="resc-s">每月 2 堂，在社群裡開</div><a class="resc-a" href="#">進社群上課 →</a></div>'
+    + '<div class="resc dark"><div class="resc-t">更多練肌肉乾貨</div><div class="resc-s">秘訣、練法、課程回放</div><a class="resc-a" href="#">看乾貨 →</a></div></div>';
   h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
   h += FEED.map(function(f, i){
     var s = STAGES[stageIdx(f.stage)];
@@ -647,9 +650,6 @@ function gymHTML(){
       + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
       + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
   }).join("");
-  h += '<div class="res">'
-    + '<div class="resc lite"><div class="resc-t">免費月度課程</div><div class="resc-s">每月 2 堂，在社群裡開</div><a class="resc-a" href="#">進社群上課 →</a></div>'
-    + '<div class="resc dark"><div class="resc-t">更多練肌肉乾貨</div><div class="resc-s">秘訣、練法、課程回放</div><a class="resc-a" href="#">看乾貨 →</a></div></div>';
   return h + seatPathHTML();
 }
 
