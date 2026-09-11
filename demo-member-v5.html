@@ -73,6 +73,34 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .howq-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
 .howq-t{font-size:15px;line-height:1.8;}
 
+/* 口袋卡摺疊（正式版 DRILL 展開腳本搬入，視覺照本 demo 的卡語言） */
+.drill-tg{width:100%;background:none;border:0;color:#AF5433;font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
+.drill{margin-top:8px;border-top:1px dashed #E8DDD3;}
+.dr{padding:10px 2px 9px;border-bottom:1px dashed #F0E3DB;}
+.dr:last-child{border-bottom:0;}
+.dr-k{font-size:11.5px;color:#8A7266;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;}
+.dr-v{font-size:14px;line-height:1.85;}
+.dr-v b{color:#AF5433;}
+
+/* 週薄片列（正式版週圓環改成薄片語言：淡填=練過・實色=今天練了・虛線=還沒到） */
+.wk{margin-top:16px;border-top:1px dashed #E8DDD3;padding-top:12px;}
+.wk .slbl span{font-size:11px;}
+
+/* 里程碑（正式版首亮徽章：慶祝的理由=他前進了） */
+.mile{margin-top:14px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:12px;padding:11px 13px;font-size:14.5px;font-weight:700;text-align:left;}
+.mile span{display:block;font-size:12.5px;color:#8A7266;font-weight:400;margin-top:3px;}
+.fwwrap{position:relative;width:64px;height:64px;margin:0 auto;}
+.fw{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;animation:fly .9s ease-out both;}
+@keyframes fly{0%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.35);opacity:0;}}
+
+/* 分享到館＋鼓勵（正式版 feed 互動搬入） */
+.share-tg{display:block;width:100%;margin-top:12px;font-size:13.5px;padding:12px 16px;border-radius:14px;border:1.5px dashed #C9B4A4;background:none;color:#6E4A3C;cursor:pointer;font-family:inherit;min-height:44px;text-align:left;}
+.share-tg.on{border:1.5px solid #5C7464;background:#DCE7DE;color:#3E5546;font-weight:600;}
+.slim-ft{display:flex;align-items:center;margin-top:9px;}
+.cheer{font-size:12.5px;padding:6px 13px;border-radius:16px;border:1px solid #E6DAD1;background:#fff;color:#6E4A3C;cursor:pointer;font-family:inherit;min-height:32px;}
+.cheer.on{background:#F3D9CD;border-color:#C6603A;color:#AF5433;font-weight:700;}
+.mine-tag{margin-left:auto;font-size:11.5px;font-weight:700;letter-spacing:1px;color:#54718D;}
+
 /* 開練流程 */
 .rec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .rec-bk{background:none;border:0;color:#6E4A3C;font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;}
@@ -165,6 +193,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 </div>
 
 <script src="atpi-core.js"></script>
+<script src="judgement.js"></script>
 <script>
 /* ── 反饋階梯（2026-09-11 老師拍板「可以試試看」）：
    打卡記的不是「我做了」，是「他走到哪」——沒反應→被吸引(A)→信了(T)→服了(P)→行動了(I)。
@@ -214,10 +243,12 @@ function slRow(items, opt){
       if (it.dimKey==="I") cls += " gold"; /* I 金紅線：淡底＋深版描邊，不鋪實色 */
       else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
     } else if (it.state==="past") sty += "background:" + p.tint + ";";
+    if (it.state==="todo" && it.hot) sty += "border-color:#C6603A;"; /* 今天還沒記：虛線亮行動色邀請點 */
     return '<div class="' + cls + '" style="' + sty + '"' + (it.onclick ? ' onclick="' + it.onclick + '"' : '') + '></div>';
   }).join("");
   var lbls = items.map(function(it){
     var p = PALV[it.dimKey] || {};
+    if (it.hot) return '<span style="color:#AF5433;font-weight:800;">' + it.lbl + '</span>';
     return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
       + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
       + it.lbl + '</span>';
@@ -261,22 +292,52 @@ function personPathHTML(name, todayStage){
 }
 
 /* ═══ 練習頁 ═══ */
+var OPEN_DRILL = false;
+function toggleDrill(){ OPEN_DRILL = !OPEN_DRILL; render(); }
+function md_(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
+function drillHTML(d){
+  function row(k, v){ return '<div class="dr"><div class="dr-k">' + k + '</div><div class="dr-v">' + md_(v) + '</div></div>'; }
+  return '<div class="drill">'
+    + row("練什麼", d.h) + row("找誰", d.who)
+    + row("怎麼開口", d.lead + '<br>「' + md_(d.line) + '」')
+    + row("重點", d.key)
+    + row("🌱 怎麼算成了", d.win)
+    + row("🌾 沒成怎麼辦", d.retry) + '</div>';
+}
+/* 週薄片列（週圓環的薄片版）：淡填＝練過・實色＝今天記了・虛線＝還沒到 */
+function weekStripHTML(){
+  var days = ["一","二","三","四","五","六","日"];
+  var dow = (new Date().getDay() + 6) % 7;
+  var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
+  var dim = MUSCLES[FOCUS].dim;
+  var items = days.map(function(d, i){
+    var off = dow - i;
+    var done = off >= 0 && !!dset[ago(off)];
+    var state = i === dow ? (done ? "now" : "todo") : (done ? "past" : "todo");
+    return {h: done ? 26 : 17, state: state, dimKey: dim, lbl: i === dow ? "今天" : d,
+            hot: i === dow && !done, onclick: i === dow && !done ? "openRec()" : null};
+  });
+  return '<div class="wk">' + slRow(items) + '</div>';
+}
 function todayHTML(){
-  var m = MUSCLES[FOCUS];
+  var m = MUSCLES[FOCUS], d = DRILL[FOCUS];
   var h = seatPathHTML();
   h += '<div class="hero"><div class="kick" style="color:#5C7464;">TODAY · 今天練一塊</div>'
     + '<div class="big-t">' + m.name + '——<em>' + m.tech.split("・")[0] + '</em></div>'
     + '<div class="sub-t">' + DIM_RESULT[m.dim] + '。練完不是打勾——是記下<b>他走到哪了</b>。</div>'
-    + '<div class="howq"><div class="howq-k">起手可以這樣</div><div class="howq-t">先把自己心裡沒說的講出來一句，對方才會開始給。</div></div>'
+    + '<div class="howq"><div class="howq-k">開口就用這句</div><div class="howq-t">「' + md_(d.line) + '」</div></div>'
+    + '<button class="drill-tg" onclick="toggleDrill()">怎麼練・完整詳解 ' + (OPEN_DRILL ? "▴" : "▾") + '</button>'
+    + (OPEN_DRILL ? drillHTML(d) : '')
     + (DONE_TODAY
         ? '<button class="gobtn done">今天記好了 ✓</button>'
         : '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>')
+    + weekStripHTML()
     + '<div class="rule4"></div></div>';
   return h;
 }
 
 /* ═══ 開練流程（反饋當主角）═══ */
-function openRec(){ REC = {who:null, rel:null, stage:null, note:"", step:1}; window.scrollTo(0,0); render(); }
+function openRec(){ REC = {who:null, rel:null, stage:null, note:"", share:false, step:1}; window.scrollTo(0,0); render(); }
 function closeRec(){ REC = null; render(); }
 function recHTML(){
   var m = MUSCLES[FOCUS];
@@ -304,15 +365,20 @@ function recHTML(){
           ? '<div class="q" style="margin-top:16px;">發生什麼？<span class="qs">寫一句就好</span></div>'
             + '<textarea class="ta" id="recnote" placeholder="' + (stageIdx(REC.stage)>=2 ? "他放下手機看著我：「你怎麼突然這麼會講話？」" : "我問了他週末去哪，他只嗯了一聲") + '"></textarea>'
           : '')
+      + (REC.stage!=null && REC.stage!=="none"
+          ? '<button class="share-tg' + (REC.share?" on":"") + '" onclick="toggleShare()">' + (REC.share?"✓ 會放到館裡":"也放到館裡") + '——讓夥伴看見這一步</button>'
+          : '')
       + '<button class="sub" ' + (REC.stage==null?"disabled":"") + ' onclick="recDone()">' + (REC.stage==null?"先點一片":"記下來") + '</button>'
       + (REC.stage!=null ? '<button class="skip" onclick="recDone()">跳過文字，直接記 →</button>' : '');
   } else {
     var st = STAGES[stageIdx(REC.stage)];
-    h += '<div class="ok"><div class="p3check">✓</div>'
+    h += '<div class="ok">'
+      + (REC.mile ? '<div class="fwwrap"><div class="p3check">✓</div>' + fwHTML() + '</div>' : '<div class="p3check">✓</div>')
       + '<div class="ok-t">每天進步一點點。</div>'
       + '<div class="ok-s">' + (REC.stage==="none"
           ? '沒反應不代表白講——這一筆也是他軌跡的一部分。'
           : '你練的是「' + m.name + '」，<br>他給你的回答是——<b style="color:' + st.t + ';">' + st.full + '</b>。') + '</div></div>'
+      + (REC.mile ? '<div class="mile">🎉 ' + REC.who + ' 第一次走到「' + st.zh + '」<span>這一步是他的里程碑，也是你的。</span></div>' : '')
       + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>' : '')
       + personPathHTML(REC.who, REC.stage)
       + '<div class="bone" onclick="closeRec()">影響力的盡頭不是成交，是有人因為你變好。</div>'
@@ -327,10 +393,30 @@ function pickStage(k){
   REC.stage = k; render();
   var t = document.getElementById("recnote"); if (t && REC.note) t.value = REC.note;
 }
+function toggleShare(){
+  var ta = document.getElementById("recnote");
+  if (ta) REC.note = ta.value;
+  REC.share = !REC.share; render();
+  var t = document.getElementById("recnote"); if (t && REC.note) t.value = REC.note;
+}
+function fwHTML(){
+  var cols = ["#C6603A","#6E8B77","#6E8CA8","#C99A4E"], out = "";
+  for (var i=0;i<12;i++){
+    var a = Math.PI*2*i/12, r = 44 + (i%2)*16;
+    out += '<span class="fw" style="background:' + cols[i%4] + ';--dx:' + Math.round(Math.cos(a)*r) + 'px;--dy:' + Math.round(Math.sin(a)*r) + 'px;animation-delay:' + (0.15 + (i%3)*0.08) + 's;"></span>';
+  }
+  return out;
+}
 function recDone(){
   var ta = document.getElementById("recnote");
   if (ta) REC.note = ta.value.trim();
+  /* 里程碑＝這個人第一次走到新的一階（慶祝的理由是他前進了，不是你打卡了） */
+  var prevHi = 0;
+  LOG.forEach(function(e){ if (e.target===REC.who) prevHi = Math.max(prevHi, stageIdx(e.stage)); });
+  REC.mile = REC.stage!=="none" && stageIdx(REC.stage) > prevHi;
   LOG.unshift({muscle:FOCUS, target:REC.who, rel:REC.rel, stage:REC.stage, date:ago(0), note:REC.note});
+  if (REC.share && REC.stage!=="none")
+    FEED.unshift({n:"你", stage:REC.stage, t: REC.note || ('練「' + MUSCLES[FOCUS].name + '」——' + STAGES[stageIdx(REC.stage)].full), cheer:0, mine:true});
   DONE_TODAY = true; REC.step = 3; window.scrollTo(0,0); render();
 }
 
@@ -406,23 +492,27 @@ function rxListHTML(){
 }
 
 /* ═══ 夥伴頁 ═══ */
+var FEED = [
+  {n:"J",  stage:"I", t:"沒想賣課，把課程真心分享給她——她就報名了", cheer:5},
+  {n:"N",  stage:"T", t:"發現他一直要明牌，其實是怕自己判斷錯", cheer:3},
+  {n:"M",  stage:"T", t:"第一次在別人面前講出內心真實的想法", cheer:2},
+  {n:"佳", stage:"none", t:"演練卡住——太尊重對方的自主，反而不容易多說什麼", cheer:6}
+];
+var CHEERED = {};
+function cheer(i){ if (CHEERED[i]) return; CHEERED[i] = 1; FEED[i].cheer++; render(); }
 function gymHTML(){
   var h = seatPathHTML();
   h += '<div class="hero"><div class="kick" style="color:#5C7464;">GYM · 全館這個月</div>'
     + '<div class="stat">大家一起記下了 <b>412</b> 次客戶反應</div>'
     + '<div class="sub-t">最多人練到的一步：<b style="color:#5C7464;">他信了</b></div><div class="rule4"></div></div>';
   h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
-  var feed = [
-    {n:"J",  stage:"I", t:"沒想賣課，把課程真心分享給她——她就報名了"},
-    {n:"N",  stage:"T", t:"發現他一直要明牌，其實是怕自己判斷錯"},
-    {n:"M",  stage:"T", t:"第一次在別人面前講出內心真實的想法"},
-    {n:"佳", stage:"none", t:"演練卡住——太尊重對方的自主，反而不容易多說什麼"}
-  ];
-  h += feed.map(function(f){
+  h += FEED.map(function(f, i){
     var s = STAGES[stageIdx(f.stage)];
     return '<div class="slim"><div class="slim-top"><span>' + f.n + '</span>'
       + '<span class="rx-st" style="margin-left:auto;background:' + (f.stage==="none" ? "#B4A695" : f.stage==="I" ? "#F1E5CC" : s.c) + ';' + (f.stage==="I" ? "color:#8E682B;border:1.5px solid #8E682B;" : "") + '">' + (f.stage==="none" ? "還在練" : "對方" + s.zh) + '</span></div>'
-      + '<div class="slim-b">' + f.t + '</div></div>';
+      + '<div class="slim-b">' + f.t + '</div>'
+      + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
+      + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
   }).join("");
   return h;
 }
@@ -439,8 +529,9 @@ function render(){
 /* demo 專用：?rec=2&who=妹妹&rel=家人&stage=T 直接跳進打卡某一步（截圖驗收用） */
 (function(){
   var q = new URLSearchParams(location.search);
-  if (q.get("rec")) REC = {who:q.get("who")||"陳大哥", rel:q.get("rel")||"工作", stage:q.get("stage"), note:q.get("note")||"", step:+q.get("rec")};
+  if (q.get("rec")) REC = {who:q.get("who")||"陳大哥", rel:q.get("rel")||"工作", stage:q.get("stage"), note:q.get("note")||"", share:false, mile:q.get("mile")==="1", step:+q.get("rec")};
   if (q.get("dim")) OPEN_DIM = q.get("dim");
+  if (q.get("drill")) OPEN_DRILL = true;
 })();
 render();
 </script>
