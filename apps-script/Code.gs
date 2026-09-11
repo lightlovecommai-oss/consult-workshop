@@ -11,7 +11,9 @@
       單一真相＝TENLEAD_TASKS / TENLEAD_HONORS / TENLEAD_TEAMS。
    ═══════════════════════════════════════════════════════════ */
 
-var SS_ID = "";  // 留空＝用這支腳本所綁定的試算表；若腳本是獨立的，填試算表 ID
+/* 2026-09-11 後端搬家後改成獨立專案：試算表 ID 走指令碼屬性 SS_ID（repo 公開、不寫死）。
+   屬性沒設＝退回「綁定的試算表」模式（容器綁定專案適用）。 */
+var SS_ID = PropertiesService.getScriptProperties().getProperty("SS_ID") || "";
 
 var TABS = {
   students:    "(遊戲)開通名單",       // 人主檔（含身份+開通）：LINE userId | 姓名 | 團隊 | 各課開通欄
