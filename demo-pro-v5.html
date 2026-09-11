@@ -54,6 +54,8 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.20);padding:6px 4px 0;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 .sl.todo{background:transparent!important;border:1.5px dashed #3d5268;border-bottom:0;}
+.sl.sel{outline:2px solid #E8C89A;outline-offset:2px;animation:selpop .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes selpop{0%{transform:skewX(-12deg) scale(.92);}60%{transform:skewX(-12deg) scale(1.08);}100%{transform:skewX(-12deg) scale(1);}}
 .sl.now.gold{background:rgba(230,169,58,.18)!important;border:2px solid #e6a93a;border-bottom:0;box-shadow:0 0 14px rgba(230,169,58,.45);}
 .slbl{display:flex;gap:7px;padding:7px 4px 0;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#cfdcea;line-height:1.45;}
@@ -569,7 +571,7 @@ function starHTML(){
     if (l.st==="now") { cls += " now"; sty += "background:" + p.c + ";box-shadow:0 0 14px " + p.c + "66;"; }
     else if (l.st==="done") { cls += " past"; sty += "background:" + p.tint + ";"; }
     else cls += " todo";
-    if (l.L===SEL_L) sty += "outline:1.5px solid #E8C89A;outline-offset:2px;";
+    if (l.L===SEL_L) cls += " sel"; /* 點一片→彈跳＋粗金框（回饋要看得見） */
     return '<div class="' + cls + '" style="' + sty + '" onclick="pickL(' + l.L + ')"></div>';
   }).join("");
   var lbls = LESSONS.map(function(l){
@@ -814,19 +816,30 @@ function seatPathHTML(){
 }
 
 /* ═══ render ═══ */
+var ANIM = true; /* 進頁/切分頁時薄片從基線長上來一次；頁內重繪（點星圖等）不重播 */
 function render(){
   var h = REC ? recHTML() : (PANE==="crm" ? crmHTML() : PANE==="out" ? outHTML() : mapHTML());
   document.getElementById("bd").innerHTML = h;
+  if (ANIM) {
+    ANIM = false;
+    document.querySelectorAll("#bd .sl").forEach(function(el){
+      var hv = el.style.height;
+      el.style.transition = "none"; el.style.height = "0px";
+      void el.offsetHeight; /* 強制 reflow，讓 0→目標高吃到 .4s transition */
+      el.style.transition = ""; el.style.height = hv;
+    });
+  }
   document.querySelectorAll(".nv").forEach(function(b){
     b.className = "nv" + (b.getAttribute("data-pane")===PANE ? " on" : "");
-    b.onclick = function(){ REC = null; PANE = b.getAttribute("data-pane"); window.scrollTo(0,0); render(); };
+    b.onclick = function(){ REC = null; PANE = b.getAttribute("data-pane"); ANIM = true; window.scrollTo(0,0); render(); };
   });
 }
-/* demo 專用：?rec=2&who=張總&stage=P／?drill=1（截圖驗收用，同 member demo 慣例） */
+/* demo 專用：?rec=2&who=張總&stage=P／?drill=1／?selL=3（截圖驗收用，同 member demo 慣例） */
 (function(){
   var q = new URLSearchParams(location.search);
   if (q.get("rec")) REC = {who:q.get("who")||"張總", rel:q.get("rel")||"客戶", stage:q.get("stage"), note:q.get("note")||"", mile:q.get("mile")==="1", step:+q.get("rec"), mk:q.get("mk")||FOCUS};
   if (q.get("drill")) OPEN_DRILL = true;
+  if (q.get("selL")) SEL_L = +q.get("selL");
 })();
 render();
 </script>
