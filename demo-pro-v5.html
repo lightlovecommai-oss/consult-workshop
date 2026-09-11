@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
 /* ═══ pro 大改版 demo v5・三分頁版（2026-09-11 老師拍板）═══
-   三分頁：①課程地圖＝甜蜜路徑（照強項自動生＋教練可改）＋課程星圖（解鎖總開關：
+   三分頁：①課程地圖＝甜蜜路徑（最強兩維定人設×三狀態定下一步、教練可改）＋課程星圖（解鎖總開關：
    L 亮→肌肉出迷霧→儀表板開）＋公眾演說階梯（10.8萬、迷霧鎖）
    ②客戶管理＝引力場（圈層＝圈層階梯、位置只由資料決定）＋客戶卡（軌跡＋教練判讀
    ＋COACH SIGNAL：停 ≥14 天→帶去 1v1 演練，v1 不宣稱教練已讀）
@@ -184,7 +184,17 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .lockbar b{color:#cfdcea;}
 .linknote{background:rgba(230,169,58,.10);border-radius:10px;padding:9px 12px;color:#E8C89A;margin-top:12px;font-weight:600;font-size:12.5px;line-height:1.7;}
 
-/* 甜蜜路徑站：一站＝一塊招牌肌肉（系統照強項生、教練可改） */
+/* 甜蜜路徑：人設（最強兩維）＋工具鏈站（強項實色、弱項虛線＝用工具繞過）＋三狀態 */
+.pers{display:flex;align-items:center;gap:12px;margin:16px 0 2px;}
+.pers-code{display:flex;align-items:center;gap:2px;font-size:15px;font-weight:900;background:rgba(230,237,245,.07);border:1px solid #2a3c52;border-radius:10px;padding:8px 11px;flex-shrink:0;}
+.pers-code i{font-style:normal;color:#5d7692;font-weight:700;}
+.pers-n{font-size:17px;font-weight:900;color:#F7F1EC;}
+.pers-tag{font-size:12.5px;color:#8ea1b6;margin-top:3px;line-height:1.6;}
+.ph-row{display:flex;gap:8px;margin-top:16px;}
+.ph{flex:1;text-align:center;border-radius:10px;padding:8px 4px;font-size:12px;font-weight:800;letter-spacing:.5px;}
+.ph.past{background:rgba(51,196,149,.10);border:1px solid rgba(51,196,149,.35);color:#5fd8b0;}
+.ph.now{background:rgba(230,169,58,.14);border:1.5px solid #e6a93a;color:#eec06a;box-shadow:0 0 10px rgba(230,169,58,.35);}
+.ph.todo{background:transparent;border:1px dashed #3d5268;color:#5d7692;}
 .fp-st{display:flex;gap:10px;padding:11px 2px 10px;border-bottom:1px dashed rgba(93,118,146,.25);}
 .fp-st:last-child{border-bottom:0;}
 .fp-b{width:26px;height:26px;border-radius:8px;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
@@ -288,10 +298,29 @@ var SPEECH = [
   {L:9,  zh:"舞台開場"}, {L:10, zh:"乾貨體驗感"}, {L:11, zh:"銷講收單"},
   {L:12, zh:"三種銷講稿"}, {L:13, zh:"大師之路"}
 ];
-/* ── 甜蜜變現路徑：系統照四維最強的小肌肉自動生（A→T→P→I），教練可改站。
-   coach:true＝教練改過站（正式版存 coach 欄位）；證據句從 LOG 自動對上。 ── */
-var FLIGHT = {A:"A1", T:"T3", P:"P1", I:"I2"};
-var FLIGHT_COACH = {P:"原本是 P3，教練調成 P1——你的客戶都吃這套"};
+/* ── 甜蜜變現路徑（真相＝10-ATPI導航手冊）：
+   甜蜜路徑＝強項組合（走哪條）×所處階段（現在動哪一步）。
+   最強兩維→六種人設之一→那條最省力的工具鏈；弱項不硬練，用工具/環境繞過（別補弱）。
+   三狀態口訣：跑通用兩個強項｜優化補第三維｜創造練最弱維。
+   demo 假資料落在 A+T；正式版照 dimScore 取最強兩維查六人設表（教練可改人設），
+   狀態照 checkinLog 判：還沒穩定成交＝跑通、有了＝優化、創造由教練拍板。 ── */
+var PERSONA = {
+  code:"A+T", name:"社群關係經營者", tag:"人自然往你靠，聊著聊著就成交",
+  chain:[
+    {dim:"A", strong:true,  tool:"IG／Threads 養粉",          role:"帶流量"},
+    {dim:"T", strong:true,  tool:"LINE 私訊聊到底",            role:"養信任"},
+    {dim:"P", strong:false, tool:"一頁「我是怎麼幫到人的」",   role:"方法感用一頁紙給，不硬講理論"},
+    {dim:"I", strong:false, tool:"限時報名表單",               role:"截止日替你開口，不用自己逼單"}
+  ]
+};
+var PHASES = [
+  {k:"run",    zh:"① 跑通", line:"用兩個強項，拿到第一筆穩定成交"},
+  {k:"opt",    zh:"② 優化", line:"補第三維，堵住漏水那格"},
+  {k:"create", zh:"③ 創造", line:"練最弱維，開第二條路徑"}
+];
+var PHASE = "opt";
+var PATH_NEXT = "補 P（專業）——在私訊裡加一頁「我是怎麼幫到人的」方法感，讓聊得來的人也看得見你的解法。這季主力是 P2，就是從這一步來的。";
+var PATH_COACH = "系統照分數判你走這條，教練看過你的客戶後拍板：優化先補 P、不補 I——你的客單高，方法感比逼單有用。";
 
 var PANE = (new URLSearchParams(location.search).get("pane")) || "map";
 var REC = null;
@@ -465,8 +494,8 @@ function drillHTML(d){
     + row("🌱 怎麼算成了", d.win)
     + row("🌾 沒成怎麼辦", d.retry) + '</div>';
 }
-function fpEvidence(mk){
-  var es = LOG.filter(function(e){ return e.muscle===mk; })
+function fpEvidence(dim){
+  var es = LOG.filter(function(e){ return (MUSCLES[e.muscle]||{}).dim===dim; })
               .sort(function(a,b){ return a.date > b.date ? -1 : 1; });
   if (!es.length) return '這站還沒出手——出手一次，證據自己長上來。';
   var e = es[0], s = STAGES[stageIdx(e.stage)];
@@ -474,17 +503,36 @@ function fpEvidence(mk){
     + (e.note ? '，' + e.note : '。');
 }
 function flightHTML(){
-  var h = '<div class="hero"><div class="kick">FLIGHT PATH · 變現甜蜜路徑</div>'
-    + '<div class="big-t">你不用樣樣強——<em>照你最強的路打</em>。</div>'
-    + '<div class="sub-t">系統照你四維<b>最強的那塊</b>自動排出這條路（A→T→P→I），教練看過你的客戶後可以改站。這是你的招牌打法。</div>';
-  h += DORD.map(function(k){
-    var mk = FLIGHT[k], m = MUSCLES[mk], p = PALV[k];
-    return '<div class="fp-st"><div class="fp-b" style="background:' + p.c + ';">' + k + '</div>'
-      + '<div><div class="fp-n">' + m.name + '<span>' + mk + ' · 你的' + DIMS[k].name.replace("肌肉","") + '強項</span></div>'
-      + '<div class="fp-e">' + fpEvidence(mk) + '</div>'
-      + (FLIGHT_COACH[k] ? '<div class="fp-c">教練改過站 · ' + FLIGHT_COACH[k] + '</div>' : '')
+  var ds = DORD.map(function(k){ return {k:k, v:dimScore(k)}; })
+               .sort(function(a,b){ return b.v - a.v; });
+  var pi = 0; PHASES.forEach(function(p,i){ if (p.k===PHASE) pi = i; });
+  var deals = LOG.filter(function(e){ return e.amt; }).length;
+  var h = '<div class="hero"><div class="kick">SWEET PATH · 變現甜蜜路徑</div>'
+    + '<div class="big-t">你不用樣樣強——<em>最強的兩塊，就是你的路</em>。</div>'
+    + '<div class="sub-t">甜蜜路徑＝<b>走哪條</b>（最強兩維定人設）×<b>現在動哪一步</b>（三個狀態）。弱項不硬練，用工具繞過。</div>';
+  h += '<div class="pers"><span class="pers-code">'
+    + PERSONA.code.split("+").map(function(k){ return '<b style="color:' + PALV[k].t + ';">' + k + '</b>'; }).join('<i>+</i>')
+    + '</span><div><div class="pers-n">' + PERSONA.name + '</div>'
+    + '<div class="pers-tag">「' + PERSONA.tag + '」 · 你最強：' + ds[0].k + ' ' + ds[0].v.toFixed(1) + '、' + ds[1].k + ' ' + ds[1].v.toFixed(1) + '</div></div></div>';
+  h += PERSONA.chain.map(function(st){
+    var p = PALV[st.dim];
+    var b = st.strong
+      ? '<div class="fp-b" style="background:' + p.c + ';">' + st.dim + '</div>'
+      : '<div class="fp-b" style="background:transparent;border:1.5px dashed ' + p.c + '99;color:' + p.t + ';">' + st.dim + '</div>';
+    return '<div class="fp-st">' + b
+      + '<div><div class="fp-n"' + (st.strong ? '' : ' style="color:#8ea1b6;"') + '>' + st.tool
+      + '<span>' + (st.strong ? '你的強項 · ' + st.role : '弱項 · 用工具繞過') + '</span></div>'
+      + '<div class="fp-e">' + (st.strong ? fpEvidence(st.dim) : st.role + '。') + '</div>'
       + '</div></div>';
   }).join("");
+  h += '<div class="ph-row">' + PHASES.map(function(p,i){
+    var cls = i < pi ? "past" : i===pi ? "now" : "todo";
+    return '<div class="ph ' + cls + '">' + p.zh + (i < pi ? ' ✓' : '') + '</div>';
+  }).join("") + '</div>'
+    + '<div class="glegend" style="margin-top:8px;">狀態照紀錄判：你已有 <b>' + deals + ' 筆成交</b>——跑通完成，現在在「優化」。口訣：跑通用兩個強項｜優化補第三維｜創造練最弱維。</div>';
+  h += '<div class="howq"><div class="howq-k">現在動哪一步 · ' + PHASES[pi].zh.slice(2) + '——' + PHASES[pi].line + '</div>'
+    + '<div class="howq-t">' + PATH_NEXT + '</div></div>';
+  h += '<div class="fp-c" style="margin-top:12px;">教練拍板 · ' + PATH_COACH + '</div>';
   h += '<div class="rule4" style="margin-top:14px;"></div></div>';
   return h;
 }
