@@ -1272,6 +1272,8 @@ function ensureSignupSheet_() {
     sh.getRange(1, 1, 1, headers.length).setValues([headers]);
     sh.setFrozenRows(1);
   }
+  /* LINE ID 與電話鎖純文字，否則 0900... 會被當成數字、開頭的 0 不見。 */
+  sh.getRange(2, 3, sh.getMaxRows() - 1, 2).setNumberFormat("@");
   return sh;
 }
 
