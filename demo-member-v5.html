@@ -161,6 +161,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sheet-s{font-size:12.5px;color:#8A7266;}
 .sheet-x{margin-left:auto;background:none;border:0;font-size:18px;color:#8A7266;cursor:pointer;font-family:inherit;padding:2px 6px;min-height:32px;}
 .lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
+/* 沒開放的排整排上迷霧（去彩＋降透明），鎖說明改灰底條才看得到 */
+.lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
+.lock-note.lk{background:#EFE6DB;border-radius:10px;padding:9px 12px;color:#6E4A3C;margin-top:10px;font-weight:600;}
 
 /* 夥伴頁 feed */
 .slim{background:#fff;border:1px solid #F0E3DB;border-radius:14px;padding:11px 13px;margin-bottom:8px;}
@@ -523,17 +526,18 @@ function toggleWall(){ WALL_FULL = !WALL_FULL; render(); }
 function dimDetailHTML(k){
   var ks = MORD.filter(function(mk){ return MUSCLES[mk].dim===k; });
   var open = k === MUSCLES[FOCUS].dim;
-  return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span> · <b>' + DIMS[k].name + '・3 小塊</b></div>'
-    + slRow(ks.map(function(mk){
+  var inner = slRow(ks.map(function(mk){
         var v = EVAL[mk];
         return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70), state: v==null ? "todo" : (mk===FOCUS ? "now" : "past"),
                 dimKey:k, vTop: v==null ? "" : v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk,
                 onclick: open ? "openPocket('" + mk + "')" : null};
       }), {vals:true})
+    + '<div class="fbchips">' + fbChips(k) + '</div>';
+  return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span> · <b>' + DIMS[k].name + '・3 小塊</b></div>'
     + (open
-        ? '<div class="lock-note">本週主力——點一小塊，看完整怎麼練。</div>'
-        : '<div class="lock-note">🔒 詳解跟著主力開放——會員版一次開 3 塊。</div>')
-    + '<div class="fbchips">' + fbChips(k) + '</div></div>';
+        ? inner + '<div class="lock-note">本週主力——點一小塊，看完整怎麼練。</div>'
+        : '<div class="lockwrap">' + inner + '</div><div class="lock-note lk">🔒 詳解跟著主力開放——會員版一次開 3 塊。</div>')
+    + '</div>';
 }
 
 /* ── 口袋卡（bottom sheet）：詳細版點一小塊 → 完整技巧詳解＋直接開練 ── */
