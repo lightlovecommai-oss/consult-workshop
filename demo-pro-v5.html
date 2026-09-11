@@ -12,9 +12,12 @@
 /* ═══ pro 大改版 demo v5・三分頁版（2026-09-11 老師拍板）═══
    三分頁：①課程地圖＝甜蜜路徑（最強兩維定人設×三狀態定下一步、教練可改）＋課程星圖（解鎖總開關：
    L 亮→肌肉出迷霧→儀表板開）＋公眾演說階梯（10.8萬、迷霧鎖）
-   ②客戶管理＝引力場（圈層＝圈層階梯、位置只由資料決定）＋客戶卡（軌跡＋教練判讀
-   ＋COACH SIGNAL：停 ≥14 天→帶去 1v1 演練，v1 不宣稱教練已讀）
-   ③市場數字＝肌肉儀表板＋被拉近一圈／出手／成交金額（上場演練不分，每筆可記金額）＋金庫
+   ②客戶管理＝引力場（圈層＝圈層階梯、位置只由資料決定）＋客戶卡（排序＝今天該動誰：
+   卡住＞要找你＞其他＞家人朋友；軌跡＋教練判讀＋COACH SIGNAL：停 ≥14 天→自動排進
+   這週 1v1 議程，v1 不宣稱教練已讀）
+   ③市場數字＝本月數字（被拉近一圈／出手／成交金額，上場演練不分）＋肌肉儀表板＋金庫
+   （只收客戶原話——打卡 note 一鍵存，見證不代擬的制度版）
+   分頁預設開客戶管理：每天打開的理由是「今天該動誰」；課程地圖每週看、市場數字覆盤看。
    圈層用語拍板版：沒反應→想靠近→願意說→要找你→認定你（member/visitor 同步）。
    一片薄片＝一次出手（顏色＝用哪塊肌肉、高度＝他走到哪）；霓虹深底＋咖啡金識別、§3.9 薄片。
    純前端假資料 demo（資料全是示意），驗過才回寫 pro.html。 */
@@ -231,8 +234,8 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
   <div class="bd" id="bd"></div>
   <div class="nav">
-    <button class="nv" data-pane="map">課程地圖</button>
     <button class="nv" data-pane="crm">客戶管理</button>
+    <button class="nv" data-pane="map">課程地圖</button>
     <button class="nv" data-pane="out">市場數字</button>
   </div>
 </div>
@@ -280,6 +283,10 @@ var LOG = [
 ];
 var EVAL = {A1:4,A2:3,A3:3.5,T1:4,T2:3,T3:4.5,P1:3,P2:1.5,P3:3,I1:2,I2:2.5,I3:2};
 var FOCUS = "P2"; /* 這季主力＝教練校準後上升空間最大的那塊 */
+/* 改觀句金庫：只收客戶原話——打卡 note 一鍵存進來（見證不代擬的制度版，正式版落 vaultLog） */
+var VAULT = [
+  {q:"你幫我把數字拉出來看，我才發現卡的不是價格。", who:"張總", tag:"走到「要找你」那天（示意）"}
+];
 
 /* ── 課程星圖（真相＝productkit 15：顧問課＝鍛鍊段 L1–L4 一課一塊肌肉＋放大段 L5–L8；
    公眾演說課＝演說段 L9–L13）。st: done＝上過亮色｜now＝下一堂｜todo＝還沒到｜lock＝另一張門票。
@@ -322,7 +329,7 @@ var PHASE = "opt";
 var PATH_NEXT = "補 P（專業）——在私訊裡加一頁「我是怎麼幫到人的」方法感，讓聊得來的人也看得見你的解法。這季主力是 P2，就是從這一步來的。";
 var PATH_COACH = "系統照分數判你走這條，教練看過你的客戶後拍板：優化先補 P、不補 I——你的客單高，方法感比逼單有用。";
 
-var PANE = (new URLSearchParams(location.search).get("pane")) || "map";
+var PANE = (new URLSearchParams(location.search).get("pane")) || "crm";
 var REC = null;
 
 /* 教練判讀（pro 的產品）：照他現在走到哪，判下一步推哪塊 */
@@ -463,8 +470,15 @@ function gravityHTML(){
     + '<div class="gfield">' + rings + '<div class="gme">你</div>' + dots + '</div>'
     + '<div class="glegend">越內圈＝他離你越近，位置只看他的<b>真實反應</b>。<b>虛線＝停超過 14 天</b>——那筆會出現在客戶卡的 COACH SIGNAL。點一個人，直接記下這一步。</div></div>';
 }
+/* 客戶卡排序＝今天該動誰：卡住的最上＞「要找你」離成交最近＞其他＞家人朋友墊底（不往成交排） */
+function clientOrder(c){
+  if (SOFT_REL.indexOf(c.rel) > -1) return 3;
+  if (coachSignal(c)) return 0;
+  if (clientHi(c.name) === 3) return 1;
+  return 2;
+}
 function crmHTML(){
-  var cs = clientList();
+  var cs = clientList().sort(function(a,b){ return clientOrder(a) - clientOrder(b); });
   var onTrack = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; }).length;
   var high = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0 && clientHi(c.name) >= 3; }).length;
   var h = coachHTML();
@@ -475,9 +489,18 @@ function crmHTML(){
     + '<div class="rule4"></div></div>';
   h += gravityHTML();
   h += cs.map(clientCardHTML).join("");
-  h += '<div class="cd"><div class="sec">WEEKLY · <b>每週覆盤演練</b></div>'
-    + '<div style="font-size:19px;font-weight:800;line-height:1.5;">這週拆解：L4 推進</div>'
-    + '<div class="wall-note" style="margin-top:6px;">一週一次，場邊教練陪你把這週的片刻拆開看——會員席沒有這個時段。</div></div>';
+  /* 這週 1v1 議程：COACH SIGNAL 的筆自動排進來（是「你帶去」，v1 不宣稱教練已讀） */
+  var agenda = cs.filter(function(c){ return coachSignal(c); });
+  h += '<div class="cd"><div class="sec">WEEKLY · <b>這週 1v1 議程</b></div>'
+    + (agenda.length
+        ? agenda.map(function(c){
+            var hi = clientHi(c.name), s = STAGES[hi];
+            return '<div class="fp-st"><div class="fp-b" style="background:' + (hi===0 ? "#5d7692" : s.c) + ';">' + c.name.slice(0,1) + '</div>'
+              + '<div><div class="fp-n">' + c.name + '<span>停在「' + (hi===0 ? "沒反應" : s.zh) + '」' + stallDays(c.name) + ' 天</span></div>'
+              + '<div class="fp-e">把這筆帶去演練——他卡住的那一步，就是這週要練的那塊肌肉。</div></div></div>';
+          }).join("")
+        : '<div class="fp-e">這週沒有卡住的筆——把最近成的那筆帶來拆，成的也要知道為什麼成。</div>')
+    + '<div class="wall-note" style="margin-top:8px;">一週一次，場邊教練陪你把卡住的片刻拆開看——會員席沒有這個時段。</div></div>';
   return h + seatPathHTML();
 }
 
@@ -588,7 +611,8 @@ function focusHTML(){
     + '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button></div>';
 }
 function mapHTML(){
-  return coachHTML() + flightHTML() + starHTML() + focusHTML() + seatPathHTML();
+  /* 卡序＝因果鏈不斷：甜蜜路徑說「補 P」→ 這季主力 P2 怎麼練＋打卡鈕 → 星圖查閱 */
+  return coachHTML() + flightHTML() + focusHTML() + starHTML() + seatPathHTML();
 }
 
 /* ═══ 開練流程（打卡標準＝這個客戶走到哪）═══ */
@@ -609,7 +633,13 @@ function recHTML(){
   if (REC.step === 1) {
     h += '<div class="q">推進誰？<span class="qs">點一下就好</span></div><div class="opts">'
       + clientList().map(function(c){ return '<button class="op' + (REC.who===c.name?" on":"") + '" onclick="pickWho(\'' + c.name + '\',\'' + c.rel + '\')">' + c.name + '</button>'; }).join("")
-      + '<button class="op" onclick="pickWho(\'新對象\',\'客戶\')">＋ 新對象</button></div>';
+      + '<button class="op' + (REC.adding?" on":"") + '" onclick="addWho()">＋ 新對象</button></div>'
+      + (REC.adding
+          ? '<input class="ta" style="min-height:auto;margin-top:14px;" id="recwho" placeholder="他叫什麼？（例：王姐）" value="' + (REC.whoDraft||"") + '">'
+            + '<div class="q" style="margin-top:16px;">他是你的？</div><div class="opts">'
+            + ["客戶","同事","朋友","家人"].map(function(r){ return '<button class="op' + (REC.rel===r?" on":"") + '" onclick="pickRel(\'' + r + '\')">' + r + '</button>'; }).join("")
+            + '</div><button class="sub" onclick="newWhoDone()">就是他</button>'
+          : '');
   } else if (REC.step === 2) {
     var soft = SOFT_REL.indexOf(REC.rel) > -1;
     h += '<div class="q">' + REC.who + ' 走到哪了？<span class="qs">點一片</span></div>'
@@ -641,7 +671,11 @@ function recHTML(){
           : '你出手「' + m.name + '」，<br>他的回答是——<b style="color:' + st.t + ';">' + st.full + '</b>。') + '</div></div>'
       + (REC.mile ? '<div class="mile">🎉 ' + REC.who + ' 第一次走到「' + st.zh + '」<span>這一步是他的里程碑，也是你的。</span></div>' : '')
       + (REC.amt ? '<div class="mile">💰 記了 $' + REC.amt.toLocaleString() + '——進市場數字了。<span>成交是副作用——他先因為你變好。</span></div>' : '')
-      + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>' : '')
+      + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>'
+          + (REC.vaulted
+              ? '<div class="fp-c" style="margin-top:10px;">✓ 存進金庫了——改觀句只從真話長出來</div>'
+              : '<button class="drill-tg" onclick="saveVault()">這句是他的原話？存進改觀句金庫 ＋</button>')
+        : '')
       + '<div class="cd" style="margin-top:16px;padding-right:30px;text-align:left;">'
       + '<div class="sec">CLIENT PATH · <b>' + REC.who + ' 的軌跡</b></div>'
       + runRowHTML(REC.who)
@@ -652,6 +686,24 @@ function recHTML(){
   return h + '</div>';
 }
 function pickWho(n, r){ REC.who=n; REC.rel=r; REC.step=2; render(); }
+function addWho(){ REC.adding = true; if (!REC.rel) REC.rel = "客戶"; render(); }
+function pickRel(r){
+  var w = document.getElementById("recwho");
+  if (w) REC.whoDraft = w.value;
+  REC.rel = r; render();
+}
+function newWhoDone(){
+  var w = document.getElementById("recwho");
+  var n = w ? w.value.trim() : "";
+  if (!n) { if (w) w.focus(); return; }
+  REC.who = n; REC.step = 2; render();
+}
+function saveVault(){
+  if (!REC || !REC.note || REC.vaulted) return;
+  var tag = REC.stage==="none" ? "還沒反應的那筆" : '走到「' + STAGES[stageIdx(REC.stage)].zh + '」那天';
+  VAULT.unshift({q:REC.note, who:REC.who, tag:tag});
+  REC.vaulted = true; render();
+}
 function pickStage(k){
   var ta = document.getElementById("recnote");
   if (ta) REC.note = ta.value;
@@ -698,8 +750,21 @@ function fbChips(dim){
   return out || '<span class="fbc">這個維度還沒有人給過反應</span>';
 }
 function outHTML(){
+  /* 卡序：分頁叫市場數字，打開先看到數字——牆是數字的來源，第二張；金庫收尾（骨層） */
+  var deals = LOG.filter(function(e){ return e.amt; });
+  var dsum = deals.reduce(function(a,e){ return a + e.amt; }, 0);
+  var pulls = 0, hiMap = {};
+  LOG.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).forEach(function(e){
+    var s = stageIdx(e.stage);
+    if (s > (hiMap[e.target]||0)) { pulls++; hiMap[e.target] = s; }
+  });
+  var h = '<div class="cd"><div class="sec">MARKET · <b>市場數字</b></div>'
+    + '<div class="stat-row"><div class="stat-v" style="color:#e6a93a;">' + pulls + '</div><div class="stat-l">次客戶被拉近一圈</div><div class="stat-r">這才是主角——<br>圈圈往內縮的次數</div></div>'
+    + '<div class="stat-row"><div class="stat-v">' + LOG.length + '</div><div class="stat-l">筆出手</div><div class="stat-r">每一筆都長在<br>某個人的軌跡上</div></div>'
+    + '<div class="stat-row"><div class="stat-v" style="color:#5fd8b0;">$' + (dsum/10000) + ' 萬</div><div class="stat-l">成交金額</div><div class="stat-r">來自 ' + deals.length + ' 筆走到「認定你」<br>的紀錄</div></div>'
+    + '<div class="wall-note">金額只是記錄，不回饋分數——牆只長在真實反應上，成交是副作用。</div></div>';
   var focusDim = MUSCLES[FOCUS].dim;
-  var h = '<div class="cd" style="padding-right:30px;"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
+  h += '<div class="cd" style="padding-right:30px;"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
     + '<div class="wall-pot"><div class="pot-k">已解鎖影響力</div><div class="pot-n">612<span>/ 1000</span></div></div>'
     + slRow(DORD.map(function(k){
         var v = dimScore(k);
@@ -709,22 +774,12 @@ function outHTML(){
     + '<div class="open-note">私教席 12 塊全開（L1–L4 都點亮了，牆跟課走）——教練校準分數，照上升空間最大的練。</div>'
     + DORD.map(function(k){ return dimDetailHTML(k); }).join("")
     + '</div>';
-  /* 市場數字全部從 LOG 長出來：上場演練不分——每一筆都能記金額 */
-  var deals = LOG.filter(function(e){ return e.amt; });
-  var dsum = deals.reduce(function(a,e){ return a + e.amt; }, 0);
-  var pulls = 0, hiMap = {};
-  LOG.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).forEach(function(e){
-    var s = stageIdx(e.stage);
-    if (s > (hiMap[e.target]||0)) { pulls++; hiMap[e.target] = s; }
-  });
-  h += '<div class="cd"><div class="sec">MARKET · <b>市場數字</b></div>'
-    + '<div class="stat-row"><div class="stat-v" style="color:#e6a93a;">' + pulls + '</div><div class="stat-l">次客戶被拉近一圈</div><div class="stat-r">這才是主角——<br>圈圈往內縮的次數</div></div>'
-    + '<div class="stat-row"><div class="stat-v">' + LOG.length + '</div><div class="stat-l">筆出手</div><div class="stat-r">每一筆都長在<br>某個人的軌跡上</div></div>'
-    + '<div class="stat-row"><div class="stat-v" style="color:#5fd8b0;">$' + (dsum/10000) + ' 萬</div><div class="stat-l">成交金額</div><div class="stat-r">來自 ' + deals.length + ' 筆走到「認定你」<br>的紀錄</div></div>'
-    + '<div class="wall-note">金額只是記錄，不回饋分數——牆只長在真實反應上，成交是副作用。</div></div>';
   h += '<div class="vault"><div class="vault-k">VAULT · 改觀句金庫</div>'
     + '<div class="vault-q">成交是副作用——<b>他先因為你變好</b>。</div>'
-    + '<div class="vault-quote">「你幫我把數字拉出來看，我才發現卡的不是價格。」<small>張總 · 走到「要找你」那天（示意）</small></div></div>';
+    + VAULT.map(function(v){
+        return '<div class="vault-quote">「' + v.q + '」<small>' + v.who + ' · ' + v.tag + '</small></div>';
+      }).join("")
+    + '<div class="wall-note" style="margin-top:10px;color:rgba(247,241,236,.55);">金庫只收他的原話——打卡記下的那句，一鍵存進來，不代擬。</div></div>';
   return h + seatPathHTML();
 }
 function dimDetailHTML(k){
