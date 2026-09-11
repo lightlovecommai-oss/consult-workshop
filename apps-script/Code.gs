@@ -29,7 +29,8 @@ var TABS = {
   rewards:     "(設定)兌換品項",       // 代幣可兌換的獎勵（各 workshop 共用一個代幣錢包）：rewardId | name | desc | cost | value | icon | active
   redemptions: "(遊戲)兌換紀錄",       // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
   pending:     "(遊戲)待審核",         // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
-  subscribe:   "(漏斗)電子報訂閱"      // 官網訂閱表單（atpifit.com）：時間 | Email | 姓名 | 來源 | 頁面 + 七個追蹤欄（程式自動建立）
+  subscribe:   "(漏斗)電子報訂閱",     // 官網訂閱表單（atpifit.com）：時間 | Email | 姓名 | 來源 | 頁面 + 七個追蹤欄（程式自動建立）
+  signup:      "(漏斗)複訓報名"        // 官網複訓報名表（/courses/retrain）：時間 | 姓名 | LINE ID | 電話 | Email | 報名梯次 | 同意守則 | 狀態 + 七個追蹤欄（程式自動建立）
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。
@@ -89,7 +90,11 @@ var COLS = {
               Q7:["Q7","P1"], Q8:["Q8","P2"], Q9:["Q9","P3"], Q10:["Q10","I1"], Q11:["Q11","I2"], Q12:["Q12","I3"] },
   /* 官網電子報訂閱：只收 Email、姓名與來源。訂閱的人多半還沒做過測驗，這裡不放分數。 */
   subscribe:{ time:["時間","timestamp"], email:["Email","email"], name:["姓名","name"],
-              source:["來源","source"], page:["頁面","page"] }
+              source:["來源","source"], page:["頁面","page"] },
+  /* 複訓報名：保證金是人工對帳（沒串金流），所以「狀態」欄留給光頭自己填（待匯款／已收款／已退款）。 */
+  signup:   { time:["時間","timestamp"], name:["姓名","name"], lineId:["LINE ID","lineIdText"],
+              phone:["電話","phone"], email:["Email","email"], cohort:["報名梯次","cohort"],
+              agree:["同意守則","agree"], status:["狀態","status"] }
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -116,7 +121,7 @@ var TRACK_COLS = {
   fbc:        ["fbc"],        fbp:         ["fbp"],
   utmSource:  ["utm_source"], utmMedium:   ["utm_medium"], utmCampaign: ["utm_campaign"]
 };
-[COLS.checkins, COLS.revenue, COLS.quizWrite, COLS.subscribe].forEach(function(m){
+[COLS.checkins, COLS.revenue, COLS.quizWrite, COLS.subscribe, COLS.signup].forEach(function(m){
   for (var k in TRACK_COLS) m[k] = TRACK_COLS[k];
 });
 
@@ -1216,6 +1221,26 @@ function doPost(e) {
       }, "LAUNCHILL_SUBSCRIBE_WEBHOOK_URL");
       return json_({ status: "ok", launchill: subResult || null });
     }
+    /* 複訓報名（atpifit.com/courses/retrain）。保證金人工對帳，這裡只收名單。
+       必要欄位只有姓名跟梯次——Email 可能記錯、電話是選填，低摩擦守則不拿它們擋報名。 */
+    if (body.action === "signup") {
+      var suName = String(body.name || "").trim();
+      var suCohort = String(body.cohort || "").trim();
+      if (!suName || !suCohort) return json_({ status: "error", message: "missing name or cohort" });
+      ensureSignupSheet_();
+      var suEmail = String(body.email || "").trim().toLowerCase();
+      var suvals = withTrack_({
+        time: body.timestamp || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        name: suName, lineId: body.lineIdText || "", phone: body.phone || "",
+        email: suEmail, cohort: suCohort, agree: body.agree ? "是" : "", status: ""
+      }, body);
+      /* 以姓名為鍵 upsert：同一個人改梯次時改那一列，不長出第二筆讓對帳分不清報哪梯。
+         status 永遠送空字串＋列進 preserve＝這欄只給人工填（空白＝保證金還沒到），
+         學員重送表單不會把光頭標好的「已收款」洗掉。 */
+      upsertMapped_(TABS.signup, COLS.signup, "name", suvals,
+        Object.keys(TRACK_COLS).concat(["status", "phone", "lineId", "email"]));
+      return json_({ status: "ok" });
+    }
     return json_({ status: "error", message: "unknown action" });
   } catch (err) {
     return json_({ status: "error", message: String(err) });
@@ -1230,6 +1255,20 @@ function ensureSubscribeSheet_() {
   if (!sh) {
     sh = ss.insertSheet(TABS.subscribe);
     var headers = ["時間", "Email", "姓名", "來源", "頁面"].concat(TRACK_HEADERS);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+/* 複訓報名分頁不存在就自動建立（含表頭與七個追蹤欄），理由同上。
+   「狀態」是人工欄：空白＝保證金還沒到，收到就自己填「已收款」，退款時填「已退款」。 */
+function ensureSignupSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(TABS.signup);
+  if (!sh) {
+    sh = ss.insertSheet(TABS.signup);
+    var headers = ["時間", "姓名", "LINE ID", "電話", "Email", "報名梯次", "同意守則", "狀態"].concat(TRACK_HEADERS);
     sh.getRange(1, 1, 1, headers.length).setValues([headers]);
     sh.setFrozenRows(1);
   }
