@@ -214,8 +214,12 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .gring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:1.5px dashed;}
 .gring i{position:absolute;left:50%;top:-9px;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:800;letter-spacing:1px;background:#131f2b;padding:0 6px;white-space:nowrap;}
 .gme{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:2px solid #e6a93a;box-shadow:0 0 18px rgba(230,169,58,.55);color:#E8C89A;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2;}
-.gdot{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:1;cursor:pointer;}
+.gorbit{position:absolute;inset:0;animation:gspin 80s linear infinite;} /* 星系慢轉；點反向轉保持正面 */
+@keyframes gspin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes gspinrev{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(-360deg);}}
+.gdot{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:1;cursor:pointer;animation:gspinrev 80s linear infinite;}
 .gdot.stall{background:transparent!important;border:2px dashed;}
+.gmore{position:absolute;transform:translate(-50%,-50%);font-size:11px;font-weight:800;padding:4px 9px;border-radius:20px;background:#131f2b;border:1.5px solid;z-index:1;animation:gspinrev 80s linear infinite;}
 .glegend{font-size:12px;color:#7d90a3;line-height:1.8;margin-top:6px;}
 .glegend b{color:#cfdcea;font-weight:700;}
 
@@ -285,6 +289,14 @@ var LOG = [
 ];
 var EVAL = {A1:4,A2:3,A3:3.5,T1:4,T2:3,T3:4.5,P1:3,P2:1.5,P3:3,I1:2,I2:2.5,I3:2};
 var FOCUS = "P2"; /* 這季主力＝教練校準後上升空間最大的那塊 */
+/* ?many=1：模擬 30 人引力場——demo 假人只進引力場，不進客戶卡/LOG */
+var MANY = false;
+var GHOST_SURNAMES = ["王","李","陳","林","黃","吳","劉","蔡","楊","許","鄭","謝","郭","洪","曾","邱","廖","賴","趙","徐","蘇","葉","呂","高"];
+var GHOST_STAGES = ["none","none","none","none","none","A","A","A","A","A","A","A","A","T","T","T","T","T","T","T","P","P","P","I"];
+function ghostClients(){
+  return GHOST_SURNAMES.map(function(s,i){ return {name:s + ["哥","姐","總"][i%3], stage:GHOST_STAGES[i]}; });
+}
+
 /* 改觀句金庫：只收客戶原話——打卡 note 一鍵存進來（見證不代擬的制度版，正式版落 vaultLog） */
 var VAULT = [
   {q:"你幫我把數字拉出來看，我才發現卡的不是價格。", who:"張總", tag:"走到「要找你」那天（示意）"}
@@ -447,30 +459,53 @@ function clientCardHTML(c){
     + '<div class="read"><div class="cv">光</div><div>' + read + '</div></div>'
     + '<div class="cl-go">推進他——記下這一步 →</div></div>';
 }
-/* 引力場：圈層＝圈層階梯（越內圈越近），角度照名字釘住、位置只由資料決定 */
+/* 引力場：圈層＝圈層階梯（越內圈越近）。每圈只掛最該動的 7 顆（卡住優先），其餘收進「+N」——場的工作是「一眼看出今天該動誰」，完整名單在下面客戶卡 */
 var GRING = {none:{r:158,zh:"沒反應"}, A:{r:132,zh:"想靠近"}, T:{r:100,zh:"願意說"}, P:{r:68,zh:"要找你"}, I:{r:38,zh:"認定你"}};
+var GSTART = {none:-90, A:-58, T:-26, P:6, I:38};
 function gravityHTML(){
   var rings = ["A","T","P","I"].map(function(k){
     var s = STAGES[stageIdx(k)], d = GRING[k].r * 2;
     return '<div class="gring" style="width:' + d + 'px;height:' + d + 'px;border-color:' + s.c + '66;">'
       + '<i style="color:' + s.t + ';">' + s.zh + '</i></div>';
   }).join("");
-  var dots = clientList().map(function(c){
+  var byRing = {none:[], A:[], T:[], P:[], I:[]};
+  clientList().forEach(function(c){
     var hi = clientHi(c.name), s = STAGES[hi];
     var hiK = s.k, soft = SOFT_REL.indexOf(c.rel) > -1;
     if (soft && hi > 2) hiK = "T"; /* 家人朋友的引力停在「願意說」圈——踩煞車 */
-    var r = GRING[hiK].r;
-    var seed = 0; for (var i=0;i<c.name.length;i++) seed += c.name.charCodeAt(i);
-    var a = (seed * 137 % 360) * Math.PI / 180;
-    var x = Math.round(Math.cos(a) * r), y = Math.round(Math.sin(a) * r);
     var stall = !soft && hi < 4 && stallDays(c.name) >= 14;
-    var sty = 'left:calc(50% + ' + x + 'px);top:calc(50% + ' + y + 'px);'
-      + (stall ? 'border-color:' + s.c + ';color:' + s.t + ';' : 'background:' + (hi===0 ? "#5d7692" : s.c) + ';');
-    return '<div class="gdot' + (stall ? " stall" : "") + '" style="' + sty + '" onclick="openRecFor(\'' + c.name + '\')">' + c.name.slice(0,1) + '</div>';
-  }).join("");
+    byRing[hiK].push({name:c.name, hi:hi, s:s, stall:stall, real:true});
+  });
+  if (MANY) ghostClients().forEach(function(g){
+    var hi = stageIdx(g.stage);
+    byRing[g.stage].push({name:g.name, hi:hi, s:STAGES[hi], stall:false, real:false});
+  });
+  var CAP = 7, orbit = "";
+  Object.keys(byRing).forEach(function(k){
+    var arr = byRing[k];
+    arr.sort(function(a,b){ return (b.stall - a.stall) || (b.real - a.real); });
+    var vis = arr.slice(0, CAP), more = arr.length - vis.length;
+    var slots = vis.length + (more > 0 ? 1 : 0), r = GRING[k].r;
+    vis.forEach(function(d, i){
+      var a = (GSTART[k] + i * (360 / slots)) * Math.PI / 180;
+      var x = Math.round(Math.cos(a) * r), y = Math.round(Math.sin(a) * r);
+      var sty = 'left:calc(50% + ' + x + 'px);top:calc(50% + ' + y + 'px);'
+        + (d.stall ? 'border-color:' + d.s.c + ';color:' + d.s.t + ';' : 'background:' + (d.hi===0 ? "#5d7692" : d.s.c) + ';')
+        + (d.real ? '' : 'opacity:.55;');
+      orbit += '<div class="gdot' + (d.stall ? " stall" : "") + '" style="' + sty + '"'
+        + (d.real ? ' onclick="openRecFor(\'' + d.name + '\')"' : '') + '>' + d.name.slice(0,1) + '</div>';
+    });
+    if (more > 0) {
+      var a2 = (GSTART[k] + vis.length * (360 / slots)) * Math.PI / 180;
+      var x2 = Math.round(Math.cos(a2) * r), y2 = Math.round(Math.sin(a2) * r);
+      var cc = k==="none" ? "#5d7692" : STAGES[stageIdx(k)].c;
+      var ct = k==="none" ? "#7d90a3" : STAGES[stageIdx(k)].t;
+      orbit += '<div class="gmore" style="left:calc(50% + ' + x2 + 'px);top:calc(50% + ' + y2 + 'px);border-color:' + cc + '88;color:' + ct + ';">+' + more + '</div>';
+    }
+  });
   return '<div class="cd"><div class="sec">GRAVITY FIELD · <b>引力場</b></div>'
-    + '<div class="gfield">' + rings + '<div class="gme">你</div>' + dots + '</div>'
-    + '<div class="glegend">越內圈＝他離你越近，位置只看他的<b>真實反應</b>。<b>虛線＝停超過 14 天</b>——那筆會出現在客戶卡的 COACH SIGNAL。點一個人，直接記下這一步。</div></div>';
+    + '<div class="gfield">' + rings + '<div class="gme">你</div><div class="gorbit">' + orbit + '</div></div>'
+    + '<div class="glegend">越內圈＝他離你越近，位置只看他的<b>真實反應</b>。<b>虛線＝停超過 14 天</b>——卡住的優先掛出來，每圈最多 7 顆，其餘收進 <b>+N</b>；完整名單就在下面的客戶卡。點一個人，直接記下這一步。</div></div>';
 }
 /* 客戶卡排序＝今天該動誰：卡住的最上＞「要找你」離成交最近＞其他＞家人朋友墊底（不往成交排） */
 function clientOrder(c){
@@ -481,7 +516,8 @@ function clientOrder(c){
 }
 function crmHTML(){
   var cs = clientList().sort(function(a,b){ return clientOrder(a) - clientOrder(b); });
-  var onTrack = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; }).length;
+  var onTrack = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; }).length
+    + (MANY ? ghostClients().length : 0);
   var high = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0 && clientHi(c.name) >= 3; }).length;
   var h = coachHTML();
   h += '<div class="hero"><div class="kick">GRAVITY CRM · 超引力客戶管理</div>'
@@ -834,12 +870,13 @@ function render(){
     b.onclick = function(){ REC = null; PANE = b.getAttribute("data-pane"); ANIM = true; window.scrollTo(0,0); render(); };
   });
 }
-/* demo 專用：?rec=2&who=張總&stage=P／?drill=1／?selL=3（截圖驗收用，同 member demo 慣例） */
+/* demo 專用：?rec=2&who=張總&stage=P／?drill=1／?selL=3／?many=1（截圖驗收用，同 member demo 慣例） */
 (function(){
   var q = new URLSearchParams(location.search);
   if (q.get("rec")) REC = {who:q.get("who")||"張總", rel:q.get("rel")||"客戶", stage:q.get("stage"), note:q.get("note")||"", mile:q.get("mile")==="1", step:+q.get("rec"), mk:q.get("mk")||FOCUS};
   if (q.get("drill")) OPEN_DRILL = true;
   if (q.get("selL")) SEL_L = +q.get("selL");
+  if (q.get("many")) MANY = true;
 })();
 render();
 </script>
