@@ -314,9 +314,9 @@ function slRow(items, opt){
 }
 
 /* ── 席位路徑（頁尾次要 CTA）：走過淡填・現在實色・還沒虛線＋終點骨層句。
-   按了先去進步頁升單卡；pro demo 做好後這裡改成直連下一階 demo。 ── */
+   直連下一階 pro demo（參觀鏈：每席的 demo 連到下一席的 demo）。 ── */
 function seatPathHTML(){
-  return '<div class="seatpath" onclick="goPane(\'me\')">'
+  return '<div class="seatpath" onclick="location.href=\'demo-pro-v5.html\'">'
     + '<div class="sp-row">'
     + '<div class="sp past" style="flex:1;height:26px;"></div>'
     + '<div class="sp now"  style="flex:1;height:44px;"></div>'
@@ -485,7 +485,7 @@ function recHTML(){
       + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>' : '')
       + personPathHTML(REC.who, REC.stage)
       + (REC.mile && (REC.stage==="P" || REC.stage==="I")
-          ? '<div class="soft-pro" onclick="goPane(\'me\')">這種時刻，私教席的教練會陪你看下一步推哪 →</div>'
+          ? '<div class="soft-pro" onclick="location.href=\'demo-pro-v5.html\'">這種時刻，私教席的教練會陪你看下一步推哪 →</div>'
           : '')
       + '<div class="bone" onclick="closeRec()">影響力的盡頭不是成交，是有人因為你變好。</div>'
       + '<div class="tapback" onclick="closeRec()">點一下，回到練習 ›</div>';
@@ -578,7 +578,7 @@ function meHTML(){
     + '<div class="upg-s">你現在記的每一筆反應，到私教席都會長在客戶的軌跡上——誰走到哪、下一步推哪塊，教練陪你看。</div>'
     + '<div class="upg-bone">你影響的人多了，才需要一張地圖。</div>'
     + '<a class="upg-money" href="#">跟教練約 30 分鐘・免費解盤</a>'
-    + '<a class="upg-b2" href="#">先參觀私人教練席 →</a></div>';
+    + '<a class="upg-b2" href="demo-pro-v5.html">先參觀私人教練席 →</a></div>';
   return h;
 }
 var WALL_FULL = false;
