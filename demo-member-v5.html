@@ -131,7 +131,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .skip{width:100%;margin-top:8px;background:none;border:0;color:#8A7266;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
 
 /* 反應階梯（打卡第二步的主圖形）：點選哪片，那片實色、之前淡填、之後虛線 */
-.ladder{margin-top:6px;}
+.ladder{margin-top:6px;padding-right:14px;} /* 最高片 118px 的斜角呼吸位 */
 .ladder .sl{cursor:pointer;}
 .lad-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
 
@@ -205,7 +205,8 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .upg-k{font-size:12px;letter-spacing:2px;color:#E8C89A;font-weight:700;}
 .upg-t{font-size:17px;font-weight:900;margin-top:9px;line-height:1.65;}
 .upg-s{font-size:13.5px;line-height:1.85;margin-top:10px;color:rgba(247,241,236,.92);}
-.upg-demo{background:#FDF9F4;border-radius:12px;padding:12px 12px 10px;margin-top:13px;color:#4A1B0C;}
+/* 右內距加大＝斜切薄片的呼吸位：最高片 102px × tan12° ≈ 22px，不留會戳破右框 */
+.upg-demo{background:#FDF9F4;border-radius:12px;padding:12px 30px 10px 12px;margin-top:13px;color:#4A1B0C;}
 .upg-demo-k{font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:#8A7266;margin-bottom:4px;}
 .upg-coach{font-size:12.5px;color:#6E4A3C;margin-top:9px;line-height:1.75;border-top:1px dashed #E8DDD3;padding-top:8px;}
 .upg-bone{margin-top:13px;font-size:14.5px;color:#F1E5CC;font-weight:600;line-height:1.7;}
@@ -343,7 +344,7 @@ function personPathHTML(name, todayStage){
     if (todayStage==="none") state = i<=hi && hi>0 ? "past" : "todo";
     return {h:s.h-16, state:state, dimKey:s.k, lbl:s.zh, lbl2:s.k};
   });
-  return '<div style="background:#fff;border-radius:16px;padding:14px 14px 12px;margin-top:16px;box-shadow:0 8px 30px rgba(74,27,12,.08);text-align:left;">'
+  return '<div style="background:#fff;border-radius:16px;padding:14px 30px 12px 14px;margin-top:16px;box-shadow:0 8px 30px rgba(74,27,12,.08);text-align:left;">'
     + '<div class="sec">CLIENT PATH · <b>' + name + ' 走到哪了</b></div>'
     + slRow(items) + '</div>';
 }
