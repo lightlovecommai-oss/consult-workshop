@@ -148,13 +148,19 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .fbc b{font-weight:800;}
 .wall-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
 
-/* 反應總覽（進步頁第二卡）：這個月客戶都走到哪 */
-.rx{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid #F0E3DB;font-size:14px;}
-.rx:first-of-type{border-top:0;}
-.rx-av{width:30px;height:30px;border-radius:50%;background:#6E8CA8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
-.rx-n{font-weight:700;}
-.rx-s{font-size:12px;color:#8A7266;}
+/* 反應標籤（夥伴頁 feed 用） */
 .rx-st{margin-left:auto;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;color:#fff;flex-shrink:0;}
+
+/* 口袋卡（技巧詳解 bottom sheet）：詳細版點小塊肌肉打開 */
+.ovl{position:fixed;inset:0;background:rgba(74,27,12,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;}
+.sheet{background:#F7F1EC;border-radius:20px 20px 0 0;max-width:460px;width:100%;max-height:82vh;overflow-y:auto;padding:18px 18px 28px;animation:sheetup .3s cubic-bezier(.4,0,.2,1);}
+@keyframes sheetup{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.sheet-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px dashed #E8DDD3;}
+.sheet-k{font-size:12px;font-weight:800;letter-spacing:1px;}
+.sheet-t{font-size:18px;font-weight:900;}
+.sheet-s{font-size:12.5px;color:#8A7266;}
+.sheet-x{margin-left:auto;background:none;border:0;font-size:18px;color:#8A7266;cursor:pointer;font-family:inherit;padding:2px 6px;min-height:32px;}
+.lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
 
 /* 夥伴頁 feed */
 .slim{background:#fff;border:1px solid #F0E3DB;border-radius:14px;padding:11px 13px;margin-bottom:8px;}
@@ -456,9 +462,7 @@ function recDone(){
   DONE_TODAY = true; REC.step = 3; window.scrollTo(0,0); render();
 }
 
-/* ═══ 進步頁 ═══ */
-var OPEN_DIM = null;
-function toggleDim(k){ OPEN_DIM = OPEN_DIM===k ? null : k; render(); }
+/* ═══ 進步頁（儀表一次最多兩級：中＝4 大肌肉牆・詳＝展開 12 塊；簡版膠囊只住練習頁）═══ */
 function dimScore(k){
   var ks = MORD.filter(function(mk){ return MUSCLES[mk].dim===k; });
   var vs = ks.map(function(mk){ return EVAL[mk]; }).filter(function(v){ return v!=null; });
@@ -489,13 +493,12 @@ function meHTML(){
         var v = dimScore(k);
         var state = v==null ? "todo" : (k===focusDim ? "now" : "past");
         return {h: v==null ? 34 : Math.round(24 + (v-1)/4*96), state:state, dimKey:k,
-                vTop: v==null ? "" : v.toFixed(1), lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k], onclick:"toggleDim('" + k + "')"};
+                vTop: v==null ? "" : v.toFixed(1), lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k], onclick:"toggleWall()"};
       }), {vals:true})
-    + '<div class="wall-note">實色＝本週主力・淡色＝練過・虛線＝還沒解鎖。<br>點一塊肌肉，看它的 3 小塊。</div>'
-    + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : (OPEN_DIM ? dimDetailHTML(OPEN_DIM) : ''))
+    + '<div class="wall-note">實色＝本週主力・淡色＝練過・虛線＝還沒解鎖。</div>'
+    + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : '')
     + '<button class="drill-tg" onclick="toggleWall()">' + (WALL_FULL ? "收合 ▴" : "展開 12 塊・詳細 ▾") + '</button>'
     + '</div>';
-  h += '<div class="cd"><div class="sec">CLIENT ECHO · <b>他們走到哪了</b></div>' + rxListHTML() + '</div>';
   /* 升單卡：軌跡預覽當主角（personPath 同一支原語）＋錢鈕一頁一顆 */
   var pv = [
     {h:36, state:"past", dimKey:"A", lbl:"被吸引", lbl2:"A"},
@@ -515,31 +518,38 @@ function meHTML(){
   return h;
 }
 var WALL_FULL = false;
-function toggleWall(){ WALL_FULL = !WALL_FULL; OPEN_DIM = null; render(); }
+function toggleWall(){ WALL_FULL = !WALL_FULL; render(); }
+/* 詳細版帶資料開放邏輯：會員＝2 核心＋主力大肌肉的 3 個技巧 → 詳解只開主力那排 */
 function dimDetailHTML(k){
   var ks = MORD.filter(function(mk){ return MUSCLES[mk].dim===k; });
+  var open = k === MUSCLES[FOCUS].dim;
   return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span> · <b>' + DIMS[k].name + '・3 小塊</b></div>'
     + slRow(ks.map(function(mk){
         var v = EVAL[mk];
         return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70), state: v==null ? "todo" : (mk===FOCUS ? "now" : "past"),
-                dimKey:k, vTop: v==null ? "" : v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk};
+                dimKey:k, vTop: v==null ? "" : v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk,
+                onclick: open ? "openPocket('" + mk + "')" : null};
       }), {vals:true})
+    + (open
+        ? '<div class="lock-note">本週主力——點一小塊，看完整怎麼練。</div>'
+        : '<div class="lock-note">🔒 詳解跟著主力開放——會員版一次開 3 塊。</div>')
     + '<div class="fbchips">' + fbChips(k) + '</div></div>';
 }
-function rxListHTML(){
-  var seen = {}, ppl = [];
-  LOG.forEach(function(e){
-    if (!e.target || seen[e.target]) return; seen[e.target]=1;
-    var hi = 0; LOG.forEach(function(x){ if (x.target===e.target) hi = Math.max(hi, stageIdx(x.stage)); });
-    ppl.push({n:e.target, rel:e.rel, hi:hi});
-  });
-  return ppl.map(function(p){
-    var s = STAGES[p.hi];
-    var soft = SOFT_REL.indexOf(p.rel) > -1;
-    return '<div class="rx"><div class="rx-av">' + p.n.charAt(0) + '</div>'
-      + '<div><div class="rx-n">' + p.n + '</div><div class="rx-s">' + p.rel + (soft ? '・到「信了」就夠' : '') + '</div></div>'
-      + '<span class="rx-st" style="background:' + (p.hi===0 ? "#B4A695" : s.c) + ';' + (p.hi===4 ? 'background:#F1E5CC;color:#8E682B;border:1.5px solid #8E682B;' : '') + '">' + (p.hi===0 ? "還沒反應" : s.full) + '</span></div>';
-  }).join("");
+
+/* ── 口袋卡（bottom sheet）：詳細版點一小塊 → 完整技巧詳解＋直接開練 ── */
+var POCKET = null;
+function openPocket(mk){ POCKET = mk; render(); }
+function closePocket(){ POCKET = null; render(); }
+function pocketGo(mk){ FOCUS = mk; POCKET = null; openRec(); }
+function pocketHTML(){
+  var mk = POCKET, m = MUSCLES[mk], p = PALV[m.dim];
+  return '<div class="ovl" onclick="closePocket()"><div class="sheet" onclick="event.stopPropagation()">'
+    + '<div class="sheet-hd"><span class="sheet-k" style="color:' + p.t + ';">' + mk + '</span>'
+    + '<span class="sheet-t">' + m.name + '</span><span class="sheet-s">' + m.tech + '</span>'
+    + '<button class="sheet-x" onclick="closePocket()">✕</button></div>'
+    + drillHTML(DRILL[mk])
+    + '<button class="gobtn" onclick="pocketGo(\'' + mk + '\')">就練這塊——記下他的反應</button>'
+    + '</div></div>';
 }
 
 /* ═══ 夥伴頁 ═══ */
@@ -570,6 +580,7 @@ function gymHTML(){
 /* ═══ render ═══ */
 function render(){
   var h = REC ? recHTML() : (PANE==="today" ? todayHTML() : PANE==="me" ? meHTML() : gymHTML());
+  if (POCKET) h += pocketHTML();
   document.getElementById("bd").innerHTML = h;
   document.querySelectorAll(".nv").forEach(function(b){
     b.className = "nv" + (b.getAttribute("data-pane")===PANE ? " on" : "");
@@ -580,9 +591,9 @@ function render(){
 (function(){
   var q = new URLSearchParams(location.search);
   if (q.get("rec")) REC = {who:q.get("who")||"陳大哥", rel:q.get("rel")||"工作", stage:q.get("stage"), note:q.get("note")||"", share:false, mile:q.get("mile")==="1", step:+q.get("rec")};
-  if (q.get("dim")) OPEN_DIM = q.get("dim");
   if (q.get("drill")) OPEN_DRILL = true;
   if (q.get("wall")) WALL_FULL = true;
+  if (q.get("pocket")) POCKET = q.get("pocket");
 })();
 render();
 </script>
