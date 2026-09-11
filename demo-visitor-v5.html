@@ -215,10 +215,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
    visitor 版差別＝記完之後的「判讀」（為什麼停、下一步練哪塊）鎖在會員席——這就是鉤子。 */
 var STAGES = [
   {k:"none", zh:"沒反應",  full:"他沒什麼反應",   c:"#B4A695", t:"#8A7266", tint:"#EFE6DB", h:30},
-  {k:"A",    zh:"被吸引",  full:"他被吸引了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
-  {k:"T",    zh:"信了",    full:"他信了",         c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
-  {k:"P",    zh:"服了",    full:"他服了",         c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
-  {k:"I",    zh:"行動了",  full:"他行動了",       c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
+  {k:"A",    zh:"想靠近",  full:"他想靠近了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
+  {k:"T",    zh:"願意說",  full:"他願意說了",     c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
+  {k:"P",    zh:"要找你",  full:"他要找你了",     c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
+  {k:"I",    zh:"認定你",  full:"他認定你了",     c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
 ];
 function stageIdx(k){ for (var i=0;i<STAGES.length;i++) if (STAGES[i].k===k) return i; return -1; }
 var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
@@ -401,7 +401,7 @@ function recHTML(){
           var state = REC.stage==null ? "todo" : (s.k===REC.stage ? "now" : (i < sel ? "past" : "todo"));
           return {h:s.h, state:state, dimKey:s.k==="none" ? null : s.k, lbl:s.zh, lbl2:s.k==="none" ? "" : s.k, onclick:"pickStage('" + s.k + "')"};
         }).filter(Boolean)) + '</div>'
-      + (soft ? '<div class="brake">家人朋友走到「信了」就夠——<br>這裡我們刻意踩煞車，不往成交推。</div>' : '')
+      + (soft ? '<div class="brake">家人朋友走到「願意說」就夠——<br>這裡我們刻意踩煞車，不往成交推。</div>' : '')
       + (REC.stage!=null
           ? '<div class="q" style="margin-top:16px;">發生什麼？<span class="qs">寫一句就好</span></div>'
             + '<textarea class="ta" id="recnote" placeholder="' + (stageIdx(REC.stage)>=2 ? "他放下手機看著我：「你怎麼突然這麼會講話？」" : "我問了他週末去哪，他只嗯了一聲") + '"></textarea>'
@@ -505,12 +505,12 @@ function meHTML(){
     + '<div class="upg-t">在會員席，每個反應都有人幫你判讀。</div>'
     + '<div class="upg-demo"><div class="upg-demo-k">PREVIEW · 你記的反應，變成判讀（示意）</div>'
     + slRow([
-        {h:36, state:"past", dimKey:"A", lbl:"被吸引", lbl2:"A"},
-        {h:58, state:"now",  dimKey:"T", lbl:"信了",   lbl2:"T"},
-        {h:80, state:"todo", dimKey:"P", lbl:"服了",   lbl2:"P"},
-        {h:102, state:"todo", dimKey:"I", lbl:"行動了", lbl2:"I"}
+        {h:36, state:"past", dimKey:"A", lbl:"想靠近", lbl2:"A"},
+        {h:58, state:"now",  dimKey:"T", lbl:"願意說", lbl2:"T"},
+        {h:80, state:"todo", dimKey:"P", lbl:"要找你", lbl2:"P"},
+        {h:102, state:"todo", dimKey:"I", lbl:"認定你", lbl2:"I"}
       ])
-    + '<div class="upg-coach">教練陪你看：「小美信了你，停在信了——下一步練「讓他釐清」，帶她看清楚她真正要的。」</div></div>'
+    + '<div class="upg-coach">教練陪你看：「小美願意跟你說了，停在這——下一步練「讓他釐清」，帶她看清楚她真正要的。」</div></div>'
     + '<div class="upg-s">你在體驗席記的每一筆反應，到會員席都會有下文——他為什麼停在那、下一步練哪塊，教練陪你看。</div>'
     + '<div class="upg-bone">終點不是成交——有人因為你變好。</div>'
     + '<a class="upg-money" href="' + MEMBER_URL + '">加入會員席・開 12 塊肌肉</a>'

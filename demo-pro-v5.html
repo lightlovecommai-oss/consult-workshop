@@ -9,11 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
-/* ═══ pro 大改版 demo v5（2026-09-11 老師拍板：pro＝超引力客戶 CRM）═══
-   ① 主軸＝打卡標準是「一個客戶 ATPI 跑的順序跟結果」：客戶卡＝軌跡繞著人，
-      一片薄片＝一次出手（顏色＝用哪塊肌肉、高度＝他走到哪）
-   ② 顏色照 pro 自己的（霓虹深底＋咖啡金識別），圖形用一致薄片語言（§3.9）
-   ③ 教練判讀做在每張客戶卡上——這就是 member 看不到的那一段
+/* ═══ pro 大改版 demo v5・三分頁版（2026-09-11 老師拍板）═══
+   三分頁：①課程地圖＝甜蜜路徑（照強項自動生＋教練可改）＋課程星圖（解鎖總開關：
+   L 亮→肌肉出迷霧→儀表板開）＋公眾演說階梯（10.8萬、迷霧鎖）
+   ②客戶管理＝引力場（圈層＝圈層階梯、位置只由資料決定）＋客戶卡（軌跡＋教練判讀
+   ＋COACH SIGNAL：停 ≥14 天→帶去 1v1 演練，v1 不宣稱教練已讀）
+   ③市場數字＝肌肉儀表板＋被拉近一圈／出手／成交金額（上場演練不分，每筆可記金額）＋金庫
+   圈層用語拍板版：沒反應→想靠近→願意說→要找你→認定你（member/visitor 同步）。
+   一片薄片＝一次出手（顏色＝用哪塊肌肉、高度＝他走到哪）；霓虹深底＋咖啡金識別、§3.9 薄片。
    純前端假資料 demo（資料全是示意），驗過才回寫 pro.html。 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;}
@@ -175,6 +178,32 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .vault-quote{margin-top:13px;background:rgba(247,241,236,.08);border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.85;color:rgba(247,241,236,.92);}
 .vault-quote small{display:block;margin-top:5px;font-size:11px;color:#C9A87A;}
 
+/* 課程星圖：迷霧鎖＝整排 grayscale＋灰底條（12條清單⑦⑧：照樣渲染完整，看得到吃不到） */
+.lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
+.lockbar{background:rgba(230,237,245,.07);border-radius:10px;padding:9px 12px;font-size:12.5px;color:#8ea1b6;margin-top:10px;line-height:1.75;}
+.lockbar b{color:#cfdcea;}
+.linknote{background:rgba(230,169,58,.10);border-radius:10px;padding:9px 12px;color:#E8C89A;margin-top:12px;font-weight:600;font-size:12.5px;line-height:1.7;}
+
+/* 甜蜜路徑站：一站＝一塊招牌肌肉（系統照強項生、教練可改） */
+.fp-st{display:flex;gap:10px;padding:11px 2px 10px;border-bottom:1px dashed rgba(93,118,146,.25);}
+.fp-st:last-child{border-bottom:0;}
+.fp-b{width:26px;height:26px;border-radius:8px;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.fp-n{font-size:14.5px;font-weight:800;color:#F7F1EC;}
+.fp-n span{font-size:12px;font-weight:600;color:#7d90a3;margin-left:6px;}
+.fp-e{font-size:12.5px;color:#8ea1b6;margin-top:3px;line-height:1.7;}
+.fp-e b{color:#cfdcea;font-weight:600;}
+.fp-c{display:inline-block;font-size:11px;font-weight:700;color:#E8C89A;background:rgba(232,200,154,.12);border:1px solid rgba(232,200,154,.4);border-radius:20px;padding:2px 9px;margin-top:5px;}
+
+/* 引力場：圈層＝他跟你的距離（越內圈越近），一點＝一個客戶，停 14 天描虛線 */
+.gfield{position:relative;height:330px;margin-top:4px;}
+.gring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:1.5px dashed;}
+.gring i{position:absolute;left:50%;top:-9px;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:800;letter-spacing:1px;background:#131f2b;padding:0 6px;white-space:nowrap;}
+.gme{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4A1B0C,#6B3018);border:2px solid #e6a93a;box-shadow:0 0 18px rgba(230,169,58,.55);color:#E8C89A;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2;}
+.gdot{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:1;cursor:pointer;}
+.gdot.stall{background:transparent!important;border:2px dashed;}
+.glegend{font-size:12px;color:#7d90a3;line-height:1.8;margin-top:6px;}
+.glegend b{color:#cfdcea;font-weight:700;}
+
 /* 導覽 */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:460px;margin:0 auto;background:rgba(15,25,38,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;padding:8px 0 max(11px,env(safe-area-inset-bottom));}
 .nav::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#e8734a,#33c495,#4b9bf0,#e6a93a);box-shadow:0 0 8px rgba(232,115,74,.35);}
@@ -192,23 +221,23 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
   </div>
   <div class="bd" id="bd"></div>
   <div class="nav">
-    <button class="nv" data-pane="crm">客戶</button>
-    <button class="nv" data-pane="today">練習</button>
-    <button class="nv" data-pane="out">成果</button>
+    <button class="nv" data-pane="map">課程地圖</button>
+    <button class="nv" data-pane="crm">客戶管理</button>
+    <button class="nv" data-pane="out">市場數字</button>
   </div>
 </div>
 
 <script src="atpi-core.js"></script>
 <script src="judgement.js"></script>
 <script>
-/* ── 反饋階梯：跟 member demo 同一把尺（沒反應→被吸引→信了→服了→行動了），
-   色盤換霓虹（pro 顏色照自己的、形狀共用）。 ── */
+/* ── 圈層階梯（2026-09-11 拍板用語，member/visitor 同步）：
+   沒反應→想靠近→願意說→要找你→認定你。色盤霓虹（pro 顏色照自己的、形狀共用）。 ── */
 var STAGES = [
   {k:"none", zh:"沒反應", full:"他沒什麼反應", c:"#5d7692", t:"#8ea1b6", tint:"rgba(125,144,163,.18)", h:30},
-  {k:"A", zh:"被吸引", full:"他被吸引了", c:"#e8734a", t:"#f08a63", tint:"rgba(232,115,74,.22)", h:52},
-  {k:"T", zh:"信了",   full:"他信了",     c:"#33c495", t:"#5fd8b0", tint:"rgba(51,196,149,.22)", h:74},
-  {k:"P", zh:"服了",   full:"他服了",     c:"#4b9bf0", t:"#7ab5f5", tint:"rgba(75,155,240,.22)", h:96},
-  {k:"I", zh:"行動了", full:"他行動了",   c:"#e6a93a", t:"#eec06a", tint:"rgba(230,169,58,.22)", h:118}
+  {k:"A", zh:"想靠近", full:"他想靠近了", c:"#e8734a", t:"#f08a63", tint:"rgba(232,115,74,.22)", h:52},
+  {k:"T", zh:"願意說", full:"他願意說了", c:"#33c495", t:"#5fd8b0", tint:"rgba(51,196,149,.22)", h:74},
+  {k:"P", zh:"要找你", full:"他要找你了", c:"#4b9bf0", t:"#7ab5f5", tint:"rgba(75,155,240,.22)", h:96},
+  {k:"I", zh:"認定你", full:"他認定你了", c:"#e6a93a", t:"#eec06a", tint:"rgba(230,169,58,.22)", h:118}
 ];
 function stageIdx(k){ for (var i=0;i<STAGES.length;i++) if (STAGES[i].k===k) return i; return -1; }
 var PALV = {
@@ -223,6 +252,7 @@ var SOFT_REL = ["家人","朋友"];
 
 /* ── demo 假資料（資料全是示意）：LOG＝出手紀錄，客戶軌跡由這裡長出來 ── */
 function ago(i){ var d=new Date(Date.now()-i*86400000); return d.toISOString().slice(0,10); }
+/* amt＝這一筆的成交金額（上場演練不分——每一筆都能記金額，市場數字從這裡長出來） */
 var LOG = [
   {muscle:"I1", target:"張總",   rel:"客戶", stage:"P",    date:ago(1),  note:"「你幫我把數字拉出來看。」"},
   {muscle:"P2", target:"張總",   rel:"客戶", stage:"P",    date:ago(3),  note:""},
@@ -230,21 +260,49 @@ var LOG = [
   {muscle:"T2", target:"張總",   rel:"客戶", stage:"T",    date:ago(12), note:""},
   {muscle:"T1", target:"林經理", rel:"客戶", stage:"A",    date:ago(2),  note:"他說先看看資料，改天約"},
   {muscle:"A2", target:"林經理", rel:"客戶", stage:"A",    date:ago(6),  note:""},
-  {muscle:"A1", target:"周姐",   rel:"客戶", stage:"none", date:ago(4),  note:"只回「謝謝分享」"},
-  {muscle:"T2", target:"妹妹",   rel:"家人", stage:"T",    date:ago(5),  note:"她說了工作上的委屈"}
+  {muscle:"A1", target:"周姐",   rel:"客戶", stage:"none", date:ago(16), note:"只回「謝謝分享」"},
+  {muscle:"T2", target:"妹妹",   rel:"家人", stage:"T",    date:ago(5),  note:"她說了工作上的委屈"},
+  {muscle:"A2", target:"陳老闆", rel:"客戶", stage:"A",    date:ago(26), note:""},
+  {muscle:"T1", target:"陳老闆", rel:"客戶", stage:"T",    date:ago(22), note:""},
+  {muscle:"P1", target:"陳老闆", rel:"客戶", stage:"P",    date:ago(16), note:""},
+  {muscle:"I2", target:"陳老闆", rel:"客戶", stage:"I",    date:ago(9),  note:"當場簽了年約", amt:180000},
+  {muscle:"I1", target:"Amy",   rel:"客戶", stage:"I",    date:ago(20), note:"介紹來的，一次就成", amt:60000}
 ];
 var EVAL = {A1:4,A2:3,A3:3.5,T1:4,T2:3,T3:4.5,P1:3,P2:1.5,P3:3,I1:2,I2:2.5,I3:2};
 var FOCUS = "P2"; /* 這季主力＝教練校準後上升空間最大的那塊 */
-var PANE = (new URLSearchParams(location.search).get("pane")) || "crm";
+
+/* ── 課程星圖（真相＝productkit 15：顧問課＝鍛鍊段 L1–L4 一課一塊肌肉＋放大段 L5–L8；
+   公眾演說課＝演說段 L9–L13）。st: done＝上過亮色｜now＝下一堂｜todo＝還沒到｜lock＝另一張門票。
+   解鎖是總開關：L 亮一堂 → 那課的演練包＋對應肌肉出迷霧（正式版接 lessonLog）。 ── */
+var LESSONS = [
+  {L:1, zh:"吸引肌肉・3% 的秘密",   dim:"A",  st:"done"},
+  {L:2, zh:"信任肌肉・完整溝通三步", dim:"T",  st:"done"},
+  {L:3, zh:"專業肌肉・開口前攻心",   dim:"P",  st:"done"},
+  {L:4, zh:"推進肌肉・成交大絕招",   dim:"I",  st:"done"},
+  {L:5, zh:"1v1 顧問腳本",          dim:null, st:"done"},
+  {L:6, zh:"甜蜜變現路徑",          dim:null, st:"now"},
+  {L:7, zh:"北極星＋燈塔",          dim:null, st:"todo"},
+  {L:8, zh:"力量的副作用",          dim:null, st:"todo"}
+];
+var SPEECH = [
+  {L:9,  zh:"舞台開場"}, {L:10, zh:"乾貨體驗感"}, {L:11, zh:"銷講收單"},
+  {L:12, zh:"三種銷講稿"}, {L:13, zh:"大師之路"}
+];
+/* ── 甜蜜變現路徑：系統照四維最強的小肌肉自動生（A→T→P→I），教練可改站。
+   coach:true＝教練改過站（正式版存 coach 欄位）；證據句從 LOG 自動對上。 ── */
+var FLIGHT = {A:"A1", T:"T3", P:"P1", I:"I2"};
+var FLIGHT_COACH = {P:"原本是 P3，教練調成 P1——你的客戶都吃這套"};
+
+var PANE = (new URLSearchParams(location.search).get("pane")) || "map";
 var REC = null;
 
 /* 教練判讀（pro 的產品）：照他現在走到哪，判下一步推哪塊 */
 var NEXT = {
-  none:{mk:"A2", line:"他還沒被吸引——先別給內容，回頭練「<b>讓他想聽</b>」，用一件事勾住他。"},
-  A:{mk:"T2", line:"他被吸引了，還沒交心——下一步「<b>讓他願意說</b>」，先聽他的事，別急著講方案。"},
-  T:{mk:"P1", line:"他信了你這個人——下一步「<b>讓他要找你</b>」，讓他看見你就是那個解法。"},
-  P:{mk:"I1", line:"他服了——下一步「<b>讓他想要</b>」，帶他確認他要的結果，別替他決定。"},
-  I:{mk:null, line:"他行動了——接下來陪他變好。<b>見證不用要，會自己長出來。</b>"}
+  none:{mk:"A2", line:"他還沒想靠近——先別給內容，回頭練「<b>讓他想聽</b>」，用一件事勾住他。"},
+  A:{mk:"T2", line:"他想靠近了，還沒交心——下一步「<b>讓他願意說</b>」，先聽他的事，別急著講方案。"},
+  T:{mk:"P1", line:"他願意說了——下一步「<b>讓他要找你</b>」，讓他看見你就是那個解法。"},
+  P:{mk:"I1", line:"他要找你了——下一步「<b>讓他想要</b>」，帶他確認他要的結果，別替他決定。"},
+  I:{mk:null, line:"他認定你了——接下來陪他變好。<b>見證不用要，會自己長出來。</b>"}
 };
 var SOFT_READ = "這段不用走完——他願意跟你說真話，就已經是你要的了。這裡我們刻意踩煞車。";
 
@@ -315,6 +373,18 @@ function weeksSpan(name){
   var ms = new Date(run[run.length-1].date) - new Date(run[0].date);
   return Math.max(1, Math.floor(ms/6048e5) + 1);
 }
+function stallDays(name){
+  var run = clientRun(name);
+  return Math.floor((Date.now() - new Date(run[run.length-1].date)) / 864e5);
+}
+/* COACH SIGNAL 規則：非家人朋友＋同一圈停 ≥14 天＋還沒認定你（v1 不宣稱教練已讀） */
+function coachSignal(c){
+  var hi = clientHi(c.name);
+  if (SOFT_REL.indexOf(c.rel) > -1 || hi >= 4) return null;
+  var d = stallDays(c.name);
+  if (d < 14) return null;
+  return 'COACH SIGNAL · 停在「' + (hi===0 ? "沒反應" : STAGES[hi].zh) + '」' + d + ' 天了——把這筆帶去這次 1v1 演練。';
+}
 
 /* ═══ 客戶頁（CRM 主頁）═══ */
 function coachHTML(){
@@ -335,24 +405,54 @@ function clientCardHTML(c){
     + '<span class="cl-st" style="color:' + hiS.t + ';background:' + hiS.tint + ';">' + (hi===0 ? "還沒反應" : "走到「" + hiS.zh + "」") + '</span></div>'
     + runRowHTML(c.name)
     + (last.note ? '<div class="cl-m" style="margin-top:9px;">最近一筆 · ' + last.note + '</div>' : '')
+    + (coachSignal(c) ? '<div class="fp-c" style="margin-top:10px;">' + coachSignal(c) + '</div>' : '')
     + '<div class="read"><div class="cv">光</div><div>' + read + '</div></div>'
     + '<div class="cl-go">推進他——記下這一步 →</div></div>';
+}
+/* 引力場：圈層＝圈層階梯（越內圈越近），角度照名字釘住、位置只由資料決定 */
+var GRING = {none:{r:158,zh:"沒反應"}, A:{r:132,zh:"想靠近"}, T:{r:100,zh:"願意說"}, P:{r:68,zh:"要找你"}, I:{r:38,zh:"認定你"}};
+function gravityHTML(){
+  var rings = ["A","T","P","I"].map(function(k){
+    var s = STAGES[stageIdx(k)], d = GRING[k].r * 2;
+    return '<div class="gring" style="width:' + d + 'px;height:' + d + 'px;border-color:' + s.c + '66;">'
+      + '<i style="color:' + s.t + ';">' + s.zh + '</i></div>';
+  }).join("");
+  var dots = clientList().map(function(c){
+    var hi = clientHi(c.name), s = STAGES[hi];
+    var hiK = s.k, soft = SOFT_REL.indexOf(c.rel) > -1;
+    if (soft && hi > 2) hiK = "T"; /* 家人朋友的引力停在「願意說」圈——踩煞車 */
+    var r = GRING[hiK].r;
+    var seed = 0; for (var i=0;i<c.name.length;i++) seed += c.name.charCodeAt(i);
+    var a = (seed * 137 % 360) * Math.PI / 180;
+    var x = Math.round(Math.cos(a) * r), y = Math.round(Math.sin(a) * r);
+    var stall = !soft && hi < 4 && stallDays(c.name) >= 14;
+    var sty = 'left:calc(50% + ' + x + 'px);top:calc(50% + ' + y + 'px);'
+      + (stall ? 'border-color:' + s.c + ';color:' + s.t + ';' : 'background:' + (hi===0 ? "#5d7692" : s.c) + ';');
+    return '<div class="gdot' + (stall ? " stall" : "") + '" style="' + sty + '" onclick="openRecFor(\'' + c.name + '\')">' + c.name.slice(0,1) + '</div>';
+  }).join("");
+  return '<div class="cd"><div class="sec">GRAVITY FIELD · <b>引力場</b></div>'
+    + '<div class="gfield">' + rings + '<div class="gme">你</div>' + dots + '</div>'
+    + '<div class="glegend">越內圈＝他離你越近，位置只看他的<b>真實反應</b>。<b>虛線＝停超過 14 天</b>——那筆會出現在客戶卡的 COACH SIGNAL。點一個人，直接記下這一步。</div></div>';
 }
 function crmHTML(){
   var cs = clientList();
   var onTrack = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; }).length;
   var high = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0 && clientHi(c.name) >= 3; }).length;
   var h = coachHTML();
-  h += '<div class="hero"><div class="kick">CLIENT MAP · 超引力客戶地圖</div>'
+  h += '<div class="hero"><div class="kick">GRAVITY CRM · 超引力客戶管理</div>'
     + '<div class="big-t">每個客戶，<em>都有自己的軌跡</em>。</div>'
     + '<div class="sub-t">你出手的每一筆都長在他的地圖上——<b>顏色＝你用哪塊肌肉，高度＝他走到哪</b>。順序＋結果，下一步教練陪你判。</div>'
-    + '<div class="sub-t" style="margin-top:10px;"><b>' + onTrack + '</b> 個客戶在軌道上 · <b>' + high + '</b> 個走到「服了」以上</div>'
+    + '<div class="sub-t" style="margin-top:10px;"><b>' + onTrack + '</b> 個客戶在引力場裡 · <b>' + high + '</b> 個走到「要找你」以上</div>'
     + '<div class="rule4"></div></div>';
+  h += gravityHTML();
   h += cs.map(clientCardHTML).join("");
+  h += '<div class="cd"><div class="sec">WEEKLY · <b>每週覆盤演練</b></div>'
+    + '<div style="font-size:19px;font-weight:800;line-height:1.5;">這週拆解：L4 推進</div>'
+    + '<div class="wall-note" style="margin-top:6px;">一週一次，場邊教練陪你把這週的片刻拆開看——會員席沒有這個時段。</div></div>';
   return h + seatPathHTML();
 }
 
-/* ═══ 練習頁 ═══ */
+/* ═══ 課程地圖頁：甜蜜路徑（自動生＋教練可改）＋課程星圖（解鎖總開關）＋公眾演說階梯 ═══ */
 var OPEN_DRILL = false;
 function toggleDrill(){ OPEN_DRILL = !OPEN_DRILL; render(); }
 function md_(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
@@ -365,21 +465,82 @@ function drillHTML(d){
     + row("🌱 怎麼算成了", d.win)
     + row("🌾 沒成怎麼辦", d.retry) + '</div>';
 }
-function todayHTML(){
+function fpEvidence(mk){
+  var es = LOG.filter(function(e){ return e.muscle===mk; })
+              .sort(function(a,b){ return a.date > b.date ? -1 : 1; });
+  if (!es.length) return '這站還沒出手——出手一次，證據自己長上來。';
+  var e = es[0], s = STAGES[stageIdx(e.stage)];
+  return '最近一次：' + e.target + '——<b style="color:' + s.t + ';">' + s.full + '</b>'
+    + (e.note ? '，' + e.note : '。');
+}
+function flightHTML(){
+  var h = '<div class="hero"><div class="kick">FLIGHT PATH · 變現甜蜜路徑</div>'
+    + '<div class="big-t">你不用樣樣強——<em>照你最強的路打</em>。</div>'
+    + '<div class="sub-t">系統照你四維<b>最強的那塊</b>自動排出這條路（A→T→P→I），教練看過你的客戶後可以改站。這是你的招牌打法。</div>';
+  h += DORD.map(function(k){
+    var mk = FLIGHT[k], m = MUSCLES[mk], p = PALV[k];
+    return '<div class="fp-st"><div class="fp-b" style="background:' + p.c + ';">' + k + '</div>'
+      + '<div><div class="fp-n">' + m.name + '<span>' + mk + ' · 你的' + DIMS[k].name.replace("肌肉","") + '強項</span></div>'
+      + '<div class="fp-e">' + fpEvidence(mk) + '</div>'
+      + (FLIGHT_COACH[k] ? '<div class="fp-c">教練改過站 · ' + FLIGHT_COACH[k] + '</div>' : '')
+      + '</div></div>';
+  }).join("");
+  h += '<div class="rule4" style="margin-top:14px;"></div></div>';
+  return h;
+}
+var SEL_L = 6;
+function pickL(n){ SEL_L = n; render(); }
+function starHTML(){
+  var done = LESSONS.filter(function(l){ return l.st==="done"; }).length;
+  var slices = LESSONS.map(function(l, i){
+    var p = l.dim ? PALV[l.dim] : {c:"#e6a93a",t:"#E8C89A",tint:"rgba(232,200,154,.20)"};
+    var hpx = 28 + i*8, cls = "sl", sty = "height:" + hpx + "px;cursor:pointer;";
+    if (l.st==="now") { cls += " now"; sty += "background:" + p.c + ";box-shadow:0 0 14px " + p.c + "66;"; }
+    else if (l.st==="done") { cls += " past"; sty += "background:" + p.tint + ";"; }
+    else cls += " todo";
+    if (l.L===SEL_L) sty += "outline:1.5px solid #E8C89A;outline-offset:2px;";
+    return '<div class="' + cls + '" style="' + sty + '" onclick="pickL(' + l.L + ')"></div>';
+  }).join("");
+  var lbls = LESSONS.map(function(l){
+    var p = l.dim ? PALV[l.dim] : {t:"#E8C89A"};
+    return '<span class="' + (l.st==="todo" ? "dim" : "") + '"><i style="color:' + (l.st==="todo" ? "#5d7692" : p.t) + ';">L' + l.L + '</i></span>';
+  }).join("");
+  var sel = LESSONS.filter(function(l){ return l.L===SEL_L; })[0];
+  var selLine = sel.st==="lock" ? "" :
+    '<div class="howq" style="margin-top:12px;"><div class="howq-k">L' + sel.L + ' · '
+    + (sel.st==="done" ? "已點亮" : sel.st==="now" ? "下一堂" : "還沒到") + '</div>'
+    + '<div class="howq-t"><b>' + sel.zh + '</b><br>'
+    + (sel.dim ? '亮的那天，<b>3 塊' + DIMS[sel.dim].name + '</b>出迷霧——儀表板跟著開、演練包跟著來。'
+               : sel.st==="done" ? '演練包已解鎖，隨時回去翻。' : '上完就點亮，演練包跟著解鎖。')
+    + '</div></div>';
+  var h = '<div class="cd" style="padding-right:30px;"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 亮了 ' + done + '/8</span></div>'
+    + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
+    + selLine
+    + '<div class="linknote">解鎖是總開關：L 亮一堂，那堂的肌肉出迷霧、儀表板跟著開——課上到哪，牆就長到哪。</div>';
+  /* 公眾演說階梯（10.8萬）＝下一座舞台，照樣渲染、迷霧鎖住 */
+  var sp = SPEECH.map(function(s, i){
+    return '<div class="sl todo" style="height:' + (52 + i*10) + 'px;border-color:#e6a93a;"></div>';
+  }).join("");
+  var splbl = SPEECH.map(function(s){
+    return '<span class="dim"><i style="color:#5d7692;">L' + s.L + '</i>' + s.zh + '</span>';
+  }).join("");
+  h += '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:#E8C89A;">NEXT STAGE</span> · <b>演說段 L9–L13</b></div>'
+    + '<div class="lockwrap"><div class="srow">' + sp + '</div><div class="slbl">' + splbl + '</div></div>'
+    + '<div class="lockbar">這五格是另一張門票——<b>公眾演說課（10.8 萬）</b>。你現在一次成交一個人；同一身肌力搬上舞台，<b>把價值一次給更多人</b>。</div></div>';
+  return h + '</div>';
+}
+function focusHTML(){
   var m = MUSCLES[FOCUS], d = DRILL[FOCUS];
-  var h = coachHTML();
-  h += '<div class="hero"><div class="kick">THIS SEASON · 這季主力</div>'
-    + '<div class="big-t">' + m.name + '——<em>' + m.tech.split("・")[0] + '</em></div>'
-    + '<div class="sub-t">教練校準後，這塊<b>上升空間最大</b>。私教席 12 塊全開，照最有感的練。</div>'
+  return '<div class="cd"><div class="sec">THIS SEASON · <b>這季主力</b></div>'
+    + '<div style="font-size:19px;font-weight:900;line-height:1.5;">' + m.name + '——' + m.tech.split("・")[0] + '</div>'
+    + '<div class="wall-note" style="margin-top:4px;">教練校準後，這塊<b style="color:#cfdcea;">上升空間最大</b>——先練它，路徑其他站不動。</div>'
     + '<div class="howq"><div class="howq-k">開口就用這句</div><div class="howq-t">「' + md_(d.line) + '」</div></div>'
     + '<button class="drill-tg" onclick="toggleDrill()">怎麼練・完整詳解 ' + (OPEN_DRILL ? "▴" : "▾") + '</button>'
     + (OPEN_DRILL ? drillHTML(d) : '')
-    + '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>'
-    + '<div class="rule4" style="margin-top:16px;"></div></div>';
-  h += '<div class="cd"><div class="sec">WEEKLY · <b>每週覆盤演練</b></div>'
-    + '<div style="font-size:19px;font-weight:800;line-height:1.5;">這週拆解：L4 推進</div>'
-    + '<div class="wall-note" style="margin-top:6px;">一週一次，場邊教練陪你把這週的片刻拆開看——會員席沒有這個時段。</div></div>';
-  return h + seatPathHTML();
+    + '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button></div>';
+}
+function mapHTML(){
+  return coachHTML() + flightHTML() + starHTML() + focusHTML() + seatPathHTML();
 }
 
 /* ═══ 開練流程（打卡標準＝這個客戶走到哪）═══ */
@@ -410,10 +571,14 @@ function recHTML(){
           var state = REC.stage==null ? "todo" : (s.k===REC.stage ? "now" : (i < sel ? "past" : "todo"));
           return {h:s.h, state:state, dimKey:s.k==="none" ? null : s.k, lbl:s.zh, lbl2:s.k==="none" ? "" : s.k, onclick:"pickStage('" + s.k + "')"};
         }).filter(Boolean)) + '</div>'
-      + (soft ? '<div class="brake">家人朋友走到「信了」就夠——<br>私教席一樣踩煞車，不往成交推。</div>' : '')
+      + (soft ? '<div class="brake">家人朋友走到「願意說」就夠——<br>私教席一樣踩煞車，不往成交推。</div>' : '')
       + (REC.stage!=null
           ? '<div class="q" style="margin-top:16px;">發生什麼？<span class="qs">寫一句就好</span></div>'
             + '<textarea class="ta" id="recnote" placeholder="' + (stageIdx(REC.stage)>=3 ? "他自己把合約日期講出來了" : "他開始問「那你們是怎麼做的」") + '"></textarea>'
+          : '')
+      + (REC.stage==="I"
+          ? '<div class="q" style="margin-top:16px;">成交了嗎？<span class="qs">金額選填——記了就進市場數字</span></div>'
+            + '<input class="ta" style="min-height:auto;" id="recamt" type="number" inputmode="numeric" placeholder="成交金額（元）">'
           : '')
       + '<button class="sub" ' + (REC.stage==null?"disabled":"") + ' onclick="recDone()">' + (REC.stage==null?"先點一片":"記進他的軌跡") + '</button>'
       + (REC.stage!=null ? '<button class="skip" onclick="recDone()">跳過文字，直接記 →</button>' : '');
@@ -427,6 +592,7 @@ function recHTML(){
           ? '沒反應也是軌跡的一部分——順序看得到，才知道哪一步卡住。'
           : '你出手「' + m.name + '」，<br>他的回答是——<b style="color:' + st.t + ';">' + st.full + '</b>。') + '</div></div>'
       + (REC.mile ? '<div class="mile">🎉 ' + REC.who + ' 第一次走到「' + st.zh + '」<span>這一步是他的里程碑，也是你的。</span></div>' : '')
+      + (REC.amt ? '<div class="mile">💰 記了 $' + REC.amt.toLocaleString() + '——進市場數字了。<span>成交是副作用——他先因為你變好。</span></div>' : '')
       + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>' : '')
       + '<div class="cd" style="margin-top:16px;padding-right:30px;text-align:left;">'
       + '<div class="sec">CLIENT PATH · <b>' + REC.who + ' 的軌跡</b></div>'
@@ -455,9 +621,13 @@ function fwHTML(){
 function recDone(){
   var ta = document.getElementById("recnote");
   if (ta) REC.note = ta.value.trim();
+  var am = document.getElementById("recamt");
+  REC.amt = am && am.value ? Math.max(0, parseInt(am.value, 10) || 0) : 0;
   var prevHi = REC.who==="新對象" ? 0 : clientHi(REC.who);
   REC.mile = REC.stage!=="none" && stageIdx(REC.stage) > prevHi;
-  LOG.push({muscle:REC.mk, target:REC.who, rel:REC.rel, stage:REC.stage, date:ago(0), note:REC.note});
+  var entry = {muscle:REC.mk, target:REC.who, rel:REC.rel, stage:REC.stage, date:ago(0), note:REC.note};
+  if (REC.amt) entry.amt = REC.amt;
+  LOG.push(entry);
   REC.step = 3; window.scrollTo(0,0); render();
 }
 
@@ -488,15 +658,25 @@ function outHTML(){
         return {h: Math.round(24 + (v-1)/4*96), state: k===focusDim ? "now" : "past", dimKey:k,
                 vTop: v.toFixed(1), lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
       }), {vals:true})
-    + '<div class="open-note">私教席 12 塊全開——教練校準分數，照上升空間最大的練。</div>'
+    + '<div class="open-note">私教席 12 塊全開（L1–L4 都點亮了，牆跟課走）——教練校準分數，照上升空間最大的練。</div>'
     + DORD.map(function(k){ return dimDetailHTML(k); }).join("")
     + '</div>';
-  h += '<div class="cd"><div class="sec">MARKET · <b>市場驗證</b></div>'
-    + '<div class="stat-row"><div class="stat-v">2</div><div class="stat-l">這季成交</div><div class="stat-r">都來自走完自己軌跡的客戶</div></div>'
-    + '<div class="stat-row"><div class="stat-v">3</div><div class="stat-l">軌道上的客戶</div><div class="stat-r">教練陪你看下一步推哪</div></div></div>';
+  /* 市場數字全部從 LOG 長出來：上場演練不分——每一筆都能記金額 */
+  var deals = LOG.filter(function(e){ return e.amt; });
+  var dsum = deals.reduce(function(a,e){ return a + e.amt; }, 0);
+  var pulls = 0, hiMap = {};
+  LOG.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).forEach(function(e){
+    var s = stageIdx(e.stage);
+    if (s > (hiMap[e.target]||0)) { pulls++; hiMap[e.target] = s; }
+  });
+  h += '<div class="cd"><div class="sec">MARKET · <b>市場數字</b></div>'
+    + '<div class="stat-row"><div class="stat-v" style="color:#e6a93a;">' + pulls + '</div><div class="stat-l">次客戶被拉近一圈</div><div class="stat-r">這才是主角——<br>圈圈往內縮的次數</div></div>'
+    + '<div class="stat-row"><div class="stat-v">' + LOG.length + '</div><div class="stat-l">筆出手</div><div class="stat-r">每一筆都長在<br>某個人的軌跡上</div></div>'
+    + '<div class="stat-row"><div class="stat-v" style="color:#5fd8b0;">$' + (dsum/10000) + ' 萬</div><div class="stat-l">成交金額</div><div class="stat-r">來自 ' + deals.length + ' 筆走到「認定你」<br>的紀錄</div></div>'
+    + '<div class="wall-note">金額只是記錄，不回饋分數——牆只長在真實反應上，成交是副作用。</div></div>';
   h += '<div class="vault"><div class="vault-k">VAULT · 改觀句金庫</div>'
     + '<div class="vault-q">成交是副作用——<b>他先因為你變好</b>。</div>'
-    + '<div class="vault-quote">「你幫我把數字拉出來看，我才發現卡的不是價格。」<small>張總 · 走到「服了」那天（示意）</small></div></div>';
+    + '<div class="vault-quote">「你幫我把數字拉出來看，我才發現卡的不是價格。」<small>張總 · 走到「要找你」那天（示意）</small></div></div>';
   return h + seatPathHTML();
 }
 function dimDetailHTML(k){
@@ -510,27 +690,29 @@ function dimDetailHTML(k){
     + '<div class="fbchips">' + fbChips(k) + '</div></div>';
 }
 
-/* ── 席位路徑（全貌感常駐）：pro＝最後一站，CTA 位放骨層句 ── */
+/* ── 席位路徑（全貌感常駐）：私教席＝現在，再上去多一階「公眾演說」（10.8萬門票，虛線待解鎖） ── */
 function seatPathHTML(){
   return '<div class="seatpath">'
     + '<div class="sp-row">'
     + '<div class="sp past" style="flex:1;height:26px;"></div>'
     + '<div class="sp past p2" style="flex:1;height:44px;"></div>'
     + '<div class="sp now" style="flex:1;height:62px;"></div>'
+    + '<div class="sp" style="flex:1;height:82px;border:1.5px dashed #e6a93a;border-bottom:0;background:transparent;"></div>'
     + '<div class="sp-goal">終點不是成交——<br><b>有人因為你變好。</b></div>'
     + '</div>'
     + '<div class="sp-lbl">'
     + '<span style="flex:1;text-align:center;color:#5fd8b0;">體驗席</span>'
     + '<span style="flex:1;text-align:center;color:#7ab5f5;">會員席</span>'
     + '<span style="flex:1;text-align:center;color:#e6a93a;">私教席<div class="sp-here">YOU’RE HERE</div></span>'
+    + '<span style="flex:1;text-align:center;color:#E8C89A;">公眾演說<div class="sp-here" style="color:#8ea1b6;">10.8 萬</div></span>'
     + '<span style="flex:1.6;"></span>'
     + '</div>'
-    + '<div class="sp-cta">你在路的最後一站——<br>現在換你，帶著你的客戶走完他們的。</div></div>';
+    + '<div class="sp-cta">現在換你，帶著你的客戶走完他們的——<br>再上一階「公眾演說」，同一身肌力，一次給更多人。</div></div>';
 }
 
 /* ═══ render ═══ */
 function render(){
-  var h = REC ? recHTML() : (PANE==="crm" ? crmHTML() : PANE==="today" ? todayHTML() : outHTML());
+  var h = REC ? recHTML() : (PANE==="crm" ? crmHTML() : PANE==="out" ? outHTML() : mapHTML());
   document.getElementById("bd").innerHTML = h;
   document.querySelectorAll(".nv").forEach(function(b){
     b.className = "nv" + (b.getAttribute("data-pane")===PANE ? " on" : "");

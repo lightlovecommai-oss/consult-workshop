@@ -250,15 +250,15 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 <script src="atpi-core.js"></script>
 <script src="judgement.js"></script>
 <script>
-/* ── 反饋階梯（2026-09-11 老師拍板「可以試試看」）：
-   打卡記的不是「我做了」，是「他走到哪」——沒反應→被吸引(A)→信了(T)→服了(P)→行動了(I)。
+/* ── 圈層階梯（2026-09-11 拍板用語，跟 pro 同一套詞）：
+   打卡記的不是「我做了」，是「他走到哪」——沒反應→想靠近(A)→願意說(T)→要找你(P)→認定你(I)。
    跟 pro 的客戶 CRM 同一把尺：member 每筆打卡都在替某個人的 ATPI 軌跡添一步。 */
 var STAGES = [
   {k:"none", zh:"沒反應",  full:"他沒什麼反應",   c:"#B4A695", t:"#8A7266", tint:"#EFE6DB", h:30},
-  {k:"A",    zh:"被吸引",  full:"他被吸引了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
-  {k:"T",    zh:"信了",    full:"他信了",         c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
-  {k:"P",    zh:"服了",    full:"他服了",         c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
-  {k:"I",    zh:"行動了",  full:"他行動了",       c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
+  {k:"A",    zh:"想靠近",  full:"他想靠近了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
+  {k:"T",    zh:"願意說",  full:"他願意說了",     c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
+  {k:"P",    zh:"要找你",  full:"他要找你了",     c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
+  {k:"I",    zh:"認定你",  full:"他認定你了",     c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
 ];
 function stageIdx(k){ for (var i=0;i<STAGES.length;i++) if (STAGES[i].k===k) return i; return -1; }
 var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
@@ -463,7 +463,7 @@ function recHTML(){
           var state = REC.stage==null ? "todo" : (s.k===REC.stage ? "now" : (i < sel ? "past" : "todo"));
           return {h:s.h, state:state, dimKey:s.k==="none" ? null : s.k, lbl:s.zh, lbl2:s.k==="none" ? "" : s.k, onclick:"pickStage('" + s.k + "')"};
         }).filter(Boolean)) + '</div>'
-      + (soft ? '<div class="brake">家人朋友走到「信了」就夠——<br>這裡我們刻意踩煞車，不往成交推。</div>' : '')
+      + (soft ? '<div class="brake">家人朋友走到「願意說」就夠——<br>這裡我們刻意踩煞車，不往成交推。</div>' : '')
       + (REC.stage!=null
           ? '<div class="q" style="margin-top:16px;">發生什麼？<span class="qs">寫一句就好</span></div>'
             + '<textarea class="ta" id="recnote" placeholder="' + (stageIdx(REC.stage)>=2 ? "他放下手機看著我：「你怎麼突然這麼會講話？」" : "我問了他週末去哪，他只嗯了一聲") + '"></textarea>'
@@ -565,16 +565,16 @@ function meHTML(){
     + '</div>';
   /* 升單卡：軌跡預覽當主角（personPath 同一支原語）＋錢鈕一頁一顆 */
   var pv = [
-    {h:36, state:"past", dimKey:"A", lbl:"被吸引", lbl2:"A"},
-    {h:58, state:"past", dimKey:"T", lbl:"信了",   lbl2:"T"},
-    {h:80, state:"past", dimKey:"P", lbl:"服了",   lbl2:"P"},
-    {h:102, state:"now", dimKey:"I", lbl:"行動了", lbl2:"I"}
+    {h:36, state:"past", dimKey:"A", lbl:"想靠近", lbl2:"A"},
+    {h:58, state:"past", dimKey:"T", lbl:"願意說", lbl2:"T"},
+    {h:80, state:"past", dimKey:"P", lbl:"要找你", lbl2:"P"},
+    {h:102, state:"now", dimKey:"I", lbl:"認定你", lbl2:"I"}
   ];
   h += '<div class="upg"><div class="upg-k">PRO SEAT · 私人教練席</div>'
     + '<div class="upg-t">在這裡，每個客戶都有自己的 ATPI 軌跡。</div>'
     + '<div class="upg-demo"><div class="upg-demo-k">PREVIEW · 一個客戶的地圖（示意）</div>'
     + slRow(pv)
-    + '<div class="upg-coach">教練陪你看：「他服了，下一步推「讓他想要」——帶他確認他要的結果。」</div></div>'
+    + '<div class="upg-coach">教練陪你看：「他要找你了，下一步推「讓他想要」——帶他確認他要的結果。」</div></div>'
     + '<div class="upg-s">你現在記的每一筆反應，到私教席都會長在客戶的軌跡上——誰走到哪、下一步推哪塊，教練陪你看。</div>'
     + '<div class="upg-bone">你影響的人多了，才需要一張地圖。</div>'
     + '<a class="upg-money" href="#">跟教練約 30 分鐘・免費解盤</a>'
