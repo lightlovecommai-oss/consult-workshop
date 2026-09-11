@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex">
+<title>影響力健身房・visitor v5 demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+/* ═══ visitor 大改版 demo v5（2026-09-11 老師拍板）═══
+   ① 視覺＝24-VI §3.9 薄片語言，跟 demo-member-v5 同一套原語
+   ② 身分＝體驗席（四身分 A/T/P/I 的 T・綠）；只開 2 招地基（講故事／問問題）
+   ③ 鉤子＝打卡記「他走到哪」之後，判讀（為什麼停、下一步練哪塊）鎖在會員席
+   純前端假資料 demo，不接後端、不進正式路由；驗過才回寫 visitor.html。 */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:84px;}
+
+/* 席位橫幅（visitor＝T 綠） */
+.tb{background:linear-gradient(135deg,#5C7464,#6E8B77);padding:16px 20px 14px;color:#fff;}
+.tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.85);}
+.tb-d{margin-left:auto;font-size:12px;color:rgba(255,255,255,.75);letter-spacing:.5px;}
+.tb-r{display:flex;align-items:center;gap:10px;margin-top:9px;}
+.tb-n{font-size:19px;font-weight:900;}
+.tb-s{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:5px;}
+.hall{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);padding:3px 10px;border-radius:20px;margin-left:auto;}
+
+.bd{padding:20px 20px 16px;}
+.cd{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
+.hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
+.sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:0 0 12px;}
+.sec b{color:#4A1B0C;font-size:13px;letter-spacing:1px;}
+.kick{font-size:12px;font-weight:700;letter-spacing:2px;color:#8A7266;margin-bottom:8px;}
+.big-t{font-size:22px;font-weight:900;line-height:1.5;}
+.big-t em{font-style:normal;color:#C6603A;}
+.sub-t{font-size:15px;color:#6E4A3C;margin-top:7px;line-height:1.85;}
+.rule4{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin-top:16px;}
+
+/* ═ 薄片原語（§3.9）：同 member demo ═ */
+.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px 4px 0;}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+.sl.todo{background:transparent!important;border:1.5px dashed #B4A695;border-bottom:0;}
+.sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
+.slbl{display:flex;gap:7px;padding:7px 4px 0;}
+.slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
+.slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
+.slbl span.dim{color:#B4A695;font-weight:600;}
+.slv{display:flex;gap:7px;padding:0 4px;}
+.slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
+
+/* 席位路徑（頁尾次要 CTA・幽靈框描下一階＝會員席藍） */
+.seatpath{background:transparent;border:1.5px solid #6E8CA8;border-radius:16px;padding:13px 14px 12px;margin:18px 0 4px;cursor:pointer;}
+.sp-cta{margin-top:10px;border-top:1px dashed #C9D6E2;padding-top:10px;text-align:center;font-size:14px;font-weight:800;color:#54718D;}
+.sp-row{display:flex;align-items:flex-end;gap:6px;border-bottom:2px solid rgba(74,27,12,.22);padding:2px 2px 0;}
+.sp{border-radius:5px 5px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
+.sp.now{background:#6E8B77;box-shadow:0 2px 8px rgba(110,139,119,.35);}
+.sp.todo{border:1.5px dashed #B4A695;border-bottom:0;}
+.sp-lbl{display:flex;gap:6px;padding:6px 2px 0;font-size:11.5px;font-weight:700;}
+.sp-goal{flex:1.6;align-self:center;font-size:12px;color:#6E4A3C;line-height:1.6;padding:0 2px 4px 8px;}
+.sp-goal b{color:#8E682B;}
+.sp-here{font-size:10px;font-weight:800;letter-spacing:.5px;color:#5C7464;white-space:nowrap;}
+
+/* 主行動鈕（練習鈕＝磚橘柔漸層） */
+.gobtn{display:block;width:100%;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);box-shadow:0 4px 12px rgba(198,96,58,.20);color:#fff;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700;text-align:center;cursor:pointer;font-family:inherit;min-height:56px;margin-top:18px;}
+.gobtn:active{transform:scale(.98);}
+.gobtn.done{background:#DCE7DE;color:#3E5546;box-shadow:none;cursor:default;}
+.howq{margin-top:14px;background:#FAF3EA;border-left:3px solid #C6603A;border-radius:0 12px 12px 0;padding:12px 14px;}
+.howq-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
+.howq-t{font-size:15px;line-height:1.8;}
+
+/* 詳解摺疊（CORE_DRILL 展開腳本） */
+.drill-tg{width:100%;background:none;border:0;color:#AF5433;font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
+.drill{margin-top:8px;border-top:1px dashed #E8DDD3;}
+.dr{padding:10px 2px 9px;border-bottom:1px dashed #F0E3DB;}
+.dr:last-child{border-bottom:0;}
+.dr-k{font-size:11.5px;color:#8A7266;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;}
+.dr-v{font-size:14px;line-height:1.85;}
+.dr-v b{color:#AF5433;}
+
+/* 週薄片列＋THIS WEEK 卡 */
+.wk{margin-top:16px;border-top:1px dashed #E8DDD3;padding-top:12px;}
+.wk .slbl span{font-size:11px;}
+.wkline{font-size:15px;}
+.wkline b{font-size:24px;font-weight:900;color:#AF5433;font-variant-numeric:tabular-nums;margin:0 2px;}
+.wkline span{display:block;font-size:12.5px;color:#8A7266;margin-top:2px;}
+/* 明天預告卡 */
+.tmr{display:flex;align-items:center;gap:14px;}
+.tmr-chip{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:#FAF3EA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#AF5433;line-height:1.2;}
+.tmr-chip span{font-size:10.5px;font-weight:700;color:#8A7266;letter-spacing:1px;}
+.tmr-t{font-size:15.5px;font-weight:800;}
+.tmr-s{font-size:13px;color:#8A7266;margin-top:3px;line-height:1.7;}
+
+/* 里程碑＋煙火 */
+.mile{margin-top:14px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:12px;padding:11px 13px;font-size:14.5px;font-weight:700;text-align:left;}
+.mile span{display:block;font-size:12.5px;color:#8A7266;font-weight:400;margin-top:3px;}
+.fwwrap{position:relative;width:64px;height:64px;margin:0 auto;}
+.fw{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;animation:fly .9s ease-out both;}
+@keyframes fly{0%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.35);opacity:0;}}
+
+/* 分享到館＋鼓勵 */
+.share-tg{display:block;width:100%;margin-top:12px;font-size:13.5px;padding:12px 16px;border-radius:14px;border:1.5px dashed #C9B4A4;background:none;color:#6E4A3C;cursor:pointer;font-family:inherit;min-height:44px;text-align:left;}
+.share-tg.on{border:1.5px solid #5C7464;background:#DCE7DE;color:#3E5546;font-weight:600;}
+.slim-ft{display:flex;align-items:center;margin-top:9px;}
+.cheer{font-size:12.5px;padding:6px 13px;border-radius:16px;border:1px solid #E6DAD1;background:#fff;color:#6E4A3C;cursor:pointer;font-family:inherit;min-height:32px;}
+.cheer.on{background:#F3D9CD;border-color:#C6603A;color:#AF5433;font-weight:700;}
+.mine-tag{margin-left:auto;font-size:11.5px;font-weight:700;letter-spacing:1px;color:#5C7464;}
+
+/* 開練流程 */
+.rec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.rec-bk{background:none;border:0;color:#6E4A3C;font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;font-family:inherit;min-height:44px;}
+.rec-n{font-size:15px;font-weight:700;}
+.rec-m{font-size:13px;color:#6E4A3C;margin-top:2px;}
+.q{font-size:15px;font-weight:700;margin:4px 0 11px;}
+.qs{font-size:13px;color:#6E4A3C;font-weight:400;margin-left:6px;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;}
+.op{font-size:13px;padding:11px 16px;border-radius:20px;border:1px solid #E6DAD1;background:#fff;color:#4A1B0C;cursor:pointer;font-family:inherit;min-height:44px;}
+.op.on{background:#C6603A;border-color:#C6603A;color:#fff;font-weight:600;}
+.op.warm{background:#F7F1EC;}
+.brake{margin-top:12px;background:#DCE7DE;border-radius:12px;padding:10px 12px;font-size:13px;color:#3E5546;line-height:1.75;}
+.ta{width:100%;background:#F7F1EC;border:1px solid #E6DAD1;border-radius:14px;padding:11px;font-size:17px;font-family:inherit;line-height:1.6;min-height:64px;resize:vertical;margin-top:9px;}
+.ta:focus{outline:none;border-color:#C6603A;background:#fff;}
+.sub{width:100%;background:#AF5433;color:#fff;border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;margin-top:15px;font-family:inherit;min-height:44px;}
+.sub[disabled]{background:#D8C9BC;color:#F7F1EC;}
+.skip{width:100%;margin-top:8px;background:none;border:0;color:#8A7266;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
+
+/* 反應階梯（右內距＝最高片 118px 的斜角呼吸位，member demo 修過的破圖坑） */
+.ladder{margin-top:6px;padding-right:14px;}
+.ladder .sl{cursor:pointer;}
+.lad-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
+
+/* 完成頁 */
+.ok{text-align:center;padding:10px 0 4px;}
+.ok-t{font-size:26px;margin:14px 0 10px;line-height:1.4;font-weight:600;}
+.ok-s{font-size:15px;color:#5A3A2A;line-height:1.95;}
+.p3check{width:64px;height:64px;border-radius:50%;background:#C6603A;color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto;animation:cpop .6s cubic-bezier(.34,1.56,.64,1);}
+@keyframes cpop{0%{transform:scale(0);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+.echo{background:#fff;border-left:3px solid #C6603A;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;line-height:1.75;text-align:left;}
+.echo span{display:block;font-size:12px;color:#8A7266;margin-top:4px;}
+.bone{margin:16px 2px 2px;font-size:15px;line-height:1.85;text-align:center;animation:bfade 1s .4s both;cursor:pointer;}
+@keyframes bfade{from{opacity:0;}to{opacity:1;}}
+.tapback{text-align:center;font-size:12.5px;color:#B39C89;margin-top:8px;cursor:pointer;padding:10px;min-height:44px;}
+/* 判讀鉤子（visitor 版的鉤子主角）：幽靈框描會員席藍 */
+.soft-mem{margin-top:12px;font-size:13px;color:#54718D;border:1.5px dashed #6E8CA8;border-radius:12px;padding:11px 12px;text-align:center;cursor:pointer;line-height:1.7;}
+.soft-mem b{color:#3E5D78;}
+
+/* 進步頁 */
+.wall-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
+.lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
+.lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
+.lock-note.lk{background:#EFE6DB;border-radius:10px;padding:9px 12px;color:#6E4A3C;margin-top:10px;font-weight:600;}
+.fbchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.fbc{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:#F7F1EC;color:#6E4A3C;}
+.fbc b{font-weight:800;}
+
+/* 反應標籤（夥伴頁 feed 用） */
+.rx-st{margin-left:auto;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;color:#fff;flex-shrink:0;}
+
+/* 夥伴頁 */
+.slim{background:#fff;border:1px solid #F0E3DB;border-radius:14px;padding:11px 13px;margin-bottom:8px;}
+.slim-top{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;}
+.slim-b{font-size:14px;line-height:1.8;margin-top:6px;color:#5A3A2A;}
+.stat{font-size:15px;line-height:1.8;}
+.stat b{font-size:28px;font-weight:700;color:#C6603A;font-variant-numeric:tabular-nums;vertical-align:-3px;}
+.res{display:flex;gap:10px;margin-top:0;}
+.resc{flex:1;border-radius:16px;padding:15px 14px;}
+.resc.lite{background:#fff;border:1px solid #E8DDD3;}
+.resc.dark{background:linear-gradient(135deg,#4A1B0C,#6B3018);color:#F7F1EC;}
+.resc-t{font-size:15px;font-weight:800;}
+.resc-s{font-size:12.5px;margin-top:5px;line-height:1.7;color:#8A7266;}
+.resc.dark .resc-s{color:rgba(247,241,236,.8);}
+.resc-a{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:#AF5433;text-decoration:none;border-bottom:1.5px solid #AF5433;padding-bottom:1px;}
+.resc.dark .resc-a{color:#E8C89A;border-color:#E8C89A;}
+
+/* 升會員卡（右內距 30px＝preview 高片斜角呼吸位） */
+.upg{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:19px 18px;color:#F7F1EC;margin-bottom:14px;}
+.upg-k{font-size:12px;letter-spacing:2px;color:#E8C89A;font-weight:700;}
+.upg-t{font-size:17px;font-weight:900;margin-top:9px;line-height:1.65;}
+.upg-s{font-size:13.5px;line-height:1.85;margin-top:10px;color:rgba(247,241,236,.92);}
+.upg-demo{background:#FDF9F4;border-radius:12px;padding:12px 30px 10px 12px;margin-top:13px;color:#4A1B0C;}
+.upg-demo-k{font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:#8A7266;margin-bottom:4px;}
+.upg-coach{font-size:12.5px;color:#6E4A3C;margin-top:9px;line-height:1.75;border-top:1px dashed #E8DDD3;padding-top:8px;}
+.upg-bone{margin-top:13px;font-size:14.5px;color:#F1E5CC;font-weight:600;line-height:1.7;}
+.upg-money{display:block;text-align:center;margin-top:13px;background:linear-gradient(135deg,#C6603A,#C99A4E);color:#fff;border-radius:14px;padding:15px;font-size:15.5px;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(198,96,58,.35);}
+.upg-b2{display:block;text-align:center;margin-top:8px;color:rgba(247,241,236,.72);font-size:13px;text-decoration:none;padding:9px;min-height:32px;}
+
+/* 導覽 */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:460px;margin:0 auto;background:#fff;display:flex;padding:8px 0 max(11px,env(safe-area-inset-bottom));}
+.nav::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
+.nv{flex:1;text-align:center;font-size:13px;color:#B4A695;background:none;border:0;cursor:pointer;padding:8px 0;font-family:inherit;min-height:44px;font-weight:600;}
+.nv.on{color:#C6603A;font-weight:800;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tb">
+    <div class="tb-k"><span>ATPIFIT · VISITOR SEAT</span><div class="tb-d">DEMO</div></div>
+    <div class="tb-r"><div class="tb-n">影響力健身房</div><span class="hall">體驗席</span></div>
+    <div class="tb-s">影響力是肌肉，練了就有</div>
+  </div>
+  <div class="bd" id="bd"></div>
+  <div class="nav">
+    <button class="nv" data-pane="gym">夥伴</button>
+    <button class="nv" data-pane="today">練習</button>
+    <button class="nv" data-pane="me">進步</button>
+  </div>
+</div>
+
+<script src="atpi-core.js"></script>
+<script src="judgement.js"></script>
+<script>
+/* ── 同 member demo 的反饋階梯：打卡記「他走到哪」。
+   visitor 版差別＝記完之後的「判讀」（為什麼停、下一步練哪塊）鎖在會員席——這就是鉤子。 */
+var STAGES = [
+  {k:"none", zh:"沒反應",  full:"他沒什麼反應",   c:"#B4A695", t:"#8A7266", tint:"#EFE6DB", h:30},
+  {k:"A",    zh:"被吸引",  full:"他被吸引了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
+  {k:"T",    zh:"信了",    full:"他信了",         c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
+  {k:"P",    zh:"服了",    full:"他服了",         c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
+  {k:"I",    zh:"行動了",  full:"他行動了",       c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
+];
+function stageIdx(k){ for (var i=0;i<STAGES.length;i++) if (STAGES[i].k===k) return i; return -1; }
+var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
+var DIMS = {A:{name:"吸引肌肉"},T:{name:"信任肌肉"},P:{name:"專業肌肉"},I:{name:"推進肌肉"}};
+var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
+var REL = ["工作","客戶","家人","朋友"], SOFT_REL = ["家人","朋友"];
+
+/* 體驗席只開 2 招地基（judgement.js CORE_DRILL：講故事／問問題），輪著練 */
+var CORE_META = {story:{sub:"把道理換成一件事", dim:"A"}, ask:{sub:"忍住答案，改問一句", dim:"T"}};
+var FOCUS_CORE = "story";
+
+/* ── demo 假資料：體驗第 3 天 ── */
+function ago(i){ var d=new Date(Date.now()-i*86400000); return d.toISOString().slice(0,10); }
+var LOG = [
+  {core:"ask",   target:"小美", rel:"工作", stage:"T",    date:ago(1), note:"她講到後來自己說「其實我知道該怎麼做」"},
+  {core:"story", target:"媽媽", rel:"家人", stage:"A",    date:ago(2), note:""},
+  {core:"story", target:"小美", rel:"工作", stage:"none", date:ago(3), note:"講完她說「喔」就去忙了"}
+];
+var PANE = (new URLSearchParams(location.search).get("pane")) || "today";
+var REC = null;
+var DONE_TODAY = false;
+var MEMBER_URL = "demo-member-v5.html";
+
+/* ── 薄片原語（同 member demo）── */
+function slRow(items, opt){
+  opt = opt || {};
+  var vals = items.map(function(it){
+    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#B4A695") + ';">' + (it.vTop||"") + '</span>';
+  }).join("");
+  var slices = items.map(function(it){
+    var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
+    var cls = "sl " + it.state, sty = "height:" + it.h + "px;";
+    if (it.state==="now") {
+      if (it.dimKey==="I") cls += " gold";
+      else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
+    } else if (it.state==="past") sty += "background:" + p.tint + ";";
+    if (it.state==="todo" && it.hot) sty += "border-color:#C6603A;";
+    return '<div class="' + cls + '" style="' + sty + '"' + (it.onclick ? ' onclick="' + it.onclick + '"' : '') + '></div>';
+  }).join("");
+  var lbls = items.map(function(it){
+    var p = PALV[it.dimKey] || {};
+    if (it.hot) return '<span style="color:#AF5433;font-weight:800;">' + it.lbl + '</span>';
+    return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
+      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
+      + it.lbl + '</span>';
+  }).join("");
+  return (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
+    + '<div class="srow">' + slices + '</div>'
+    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>');
+}
+
+/* ── 席位路徑：體驗席在第一站，按了參觀會員席 demo ── */
+function seatPathHTML(){
+  return '<div class="seatpath" onclick="location.href=MEMBER_URL">'
+    + '<div class="sp-row">'
+    + '<div class="sp now"  style="flex:1;height:26px;"></div>'
+    + '<div class="sp todo" style="flex:1;height:44px;"></div>'
+    + '<div class="sp todo" style="flex:1;height:62px;"></div>'
+    + '<div class="sp-goal">終點不是成交——<br><b>有人因為你變好。</b></div>'
+    + '</div>'
+    + '<div class="sp-lbl">'
+    + '<span style="flex:1;text-align:center;color:#5C7464;">體驗席<div class="sp-here">YOU’RE HERE</div></span>'
+    + '<span style="flex:1;text-align:center;color:#54718D;">會員席<div class="sp-here" style="color:#54718D;">下一站</div></span>'
+    + '<span style="flex:1;text-align:center;color:#B4A695;">私教席<div class="sp-here" style="color:#B4A695;">還沒解鎖</div></span>'
+    + '<span style="flex:1.6;"></span>'
+    + '</div>'
+    + '<div class="sp-cta">參觀下一站「會員席」 →</div></div>';
+}
+
+/* ── 某個人的 ATPI 軌跡（同 member demo 的原語）── */
+function personPathHTML(name, todayStage){
+  var hi = 0;
+  LOG.forEach(function(e){ if (e.target===name) hi = Math.max(hi, stageIdx(e.stage)); });
+  hi = Math.max(hi, stageIdx(todayStage));
+  var items = STAGES.slice(1).map(function(s){
+    var i = stageIdx(s.k);
+    var state = s.k===todayStage ? "now" : (i <= hi ? "past" : "todo");
+    if (todayStage==="none") state = i<=hi && hi>0 ? "past" : "todo";
+    return {h:s.h-16, state:state, dimKey:s.k, lbl:s.zh, lbl2:s.k};
+  });
+  return '<div style="background:#fff;border-radius:16px;padding:14px 30px 12px 14px;margin-top:16px;box-shadow:0 8px 30px rgba(74,27,12,.08);text-align:left;">'
+    + '<div class="sec">CLIENT PATH · <b>' + name + ' 走到哪了</b></div>'
+    + slRow(items) + '</div>';
+}
+
+/* ═══ 練習頁 ═══ */
+var OPEN_DRILL = false;
+function toggleDrill(){ OPEN_DRILL = !OPEN_DRILL; render(); }
+function md_(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>"); }
+function drillHTML(d){
+  function row(k, v){ return '<div class="dr"><div class="dr-k">' + k + '</div><div class="dr-v">' + md_(v) + '</div></div>'; }
+  return '<div class="drill">'
+    + row("練什麼", d.h) + row("找誰", d.who)
+    + row("怎麼開口", d.lead + '<br>「' + md_(d.line) + '」')
+    + row("重點", d.key)
+    + row("🌱 怎麼算成了", d.win)
+    + row("🌾 沒成怎麼辦", d.retry) + '</div>';
+}
+function weekStripHTML(){
+  var days = ["一","二","三","四","五","六","日"];
+  var dow = (new Date().getDay() + 6) % 7;
+  var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
+  var items = days.map(function(d, i){
+    var off = dow - i;
+    var done = off >= 0 && !!dset[ago(off)];
+    var state = i === dow ? (done ? "now" : "todo") : (done ? "past" : "todo");
+    return {h: done ? 26 : 17, state: state, dimKey: "T", lbl: i === dow ? "今天" : d,
+            hot: i === dow && !done, onclick: i === dow && !done ? "openRec()" : null};
+  });
+  return '<div class="wk">' + slRow(items) + '</div>';
+}
+var OPEN_WEEK = false;
+function toggleWeek(){ OPEN_WEEK = !OPEN_WEEK; render(); }
+function weekCardHTML(){
+  var dow = (new Date().getDay() + 6) % 7;
+  var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
+  var n = 0; for (var i = 0; i <= dow; i++) if (dset[ago(i)]) n++;
+  return '<div class="cd"><div class="sec">THIS WEEK · <b>這週</b></div>'
+    + '<div class="wkline">這週練了<b>' + n + '</b>天。<span>沒練的日子不扣。</span></div>'
+    + weekStripHTML()
+    + '<button class="drill-tg" onclick="toggleWeek()">週回顧——這週的每一筆 ' + (OPEN_WEEK ? "▴" : "▾") + '</button>'
+    + (OPEN_WEEK ? weekListHTML() : '') + '</div>';
+}
+function weekListHTML(){
+  var dow = (new Date().getDay() + 6) % 7, min = ago(dow);
+  var days = ["一","二","三","四","五","六","日"];
+  var es = LOG.filter(function(e){ return e.date >= min; });
+  if (!es.length) return '<div class="wall-note">這週還沒有紀錄——今天記第一筆。</div>';
+  return '<div class="drill">' + es.map(function(e){
+    var s = STAGES[stageIdx(e.stage)];
+    var dl = e.date === ago(0) ? "今天" : "週" + days[(new Date(e.date + "T00:00:00").getDay() + 6) % 7];
+    return '<div class="dr"><div class="dr-k">' + dl + ' · ' + CORE_DRILL[e.core].n + ' → ' + e.target + '</div>'
+      + '<div class="dr-v"><span class="fbc" style="color:' + s.t + ';background:' + (s.tint || "#EFE6DB") + ';">' + s.full + '</span>'
+      + (e.note ? ' ' + e.note : '') + '</div></div>';
+  }).join("") + '</div>';
+}
+function tomorrowHTML(){
+  var nk = FOCUS_CORE === "story" ? "ask" : "story";
+  return '<div class="cd tmr"><div class="tmr-chip">明<span>預告</span></div>'
+    + '<div><div class="tmr-t">明天換練「' + CORE_DRILL[nk].n + '」</div>'
+    + '<div class="tmr-s">2 招地基輪著練，明天打開就從這裡開始。</div></div></div>';
+}
+function goPane(p){ REC = null; PANE = p; window.scrollTo(0,0); render(); }
+function todayHTML(){
+  var d = CORE_DRILL[FOCUS_CORE], meta = CORE_META[FOCUS_CORE];
+  var h = '<div class="hero"><div class="kick" style="color:#5C7464;">TODAY · 今天練一招地基</div>'
+    + '<div class="big-t">' + d.n + '——<em>' + meta.sub + '</em></div>'
+    + '<div class="sub-t">講故事、問問題是 2 招地基——這 2 招用得好，12 塊肌肉才用得好。<br>練完不是打勾——是記下<b>他走到哪了</b>。</div>'
+    + '<div class="howq"><div class="howq-k">開口就用這句</div><div class="howq-t">「' + md_(d.line) + '」</div></div>'
+    + '<button class="drill-tg" onclick="toggleDrill()">怎麼練・完整詳解 ' + (OPEN_DRILL ? "▴" : "▾") + '</button>'
+    + (OPEN_DRILL ? drillHTML(d) : '')
+    + (DONE_TODAY
+        ? '<button class="gobtn done">今天記好了 ✓</button>'
+        : '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>')
+    + '<div class="rule4" style="margin-top:16px;"></div></div>';
+  return h + weekCardHTML() + tomorrowHTML() + seatPathHTML();
+}
+
+/* ═══ 開練流程 ═══ */
+function openRec(){ REC = {who:null, rel:null, stage:null, note:"", share:false, step:1}; window.scrollTo(0,0); render(); }
+function closeRec(){ REC = null; render(); }
+function recHTML(){
+  var d = CORE_DRILL[FOCUS_CORE];
+  var h = '<div class="cd"><div class="rec-hd"><button class="rec-bk" onclick="closeRec()">‹</button>'
+    + '<div><div class="rec-n">' + d.n + '</div><div class="rec-m">' + CORE_META[FOCUS_CORE].sub + '</div></div></div>';
+
+  if (REC.step === 1) {
+    var seen = {};
+    var chips = [];
+    LOG.forEach(function(e){ if (e.target && !seen[e.target]) { seen[e.target]=1; chips.push({n:e.target, r:e.rel}); } });
+    h += '<div class="q">對誰？<span class="qs">點一下就好</span></div><div class="opts">'
+      + chips.map(function(p){ return '<button class="op' + (REC.who===p.n?" on":"") + '" onclick="pickWho(\'' + p.n + '\',\'' + p.r + '\')">' + p.n + '</button>'; }).join("")
+      + '<button class="op warm" onclick="pickWho(\'陌生人\',\'陌生人\')">陌生人</button></div>';
+  } else if (REC.step === 2) {
+    var soft = SOFT_REL.indexOf(REC.rel) > -1;
+    h += '<div class="q">' + REC.who + ' 走到哪了？<span class="qs">點一片</span></div>'
+      + '<div class="ladder">' + slRow(STAGES.map(function(s, i){
+          if (soft && (s.k==="P" || s.k==="I")) return null;
+          var sel = stageIdx(REC.stage);
+          var state = REC.stage==null ? "todo" : (s.k===REC.stage ? "now" : (i < sel ? "past" : "todo"));
+          return {h:s.h, state:state, dimKey:s.k==="none" ? null : s.k, lbl:s.zh, lbl2:s.k==="none" ? "" : s.k, onclick:"pickStage('" + s.k + "')"};
+        }).filter(Boolean)) + '</div>'
+      + (soft ? '<div class="brake">家人朋友走到「信了」就夠——<br>這裡我們刻意踩煞車，不往成交推。</div>' : '')
+      + (REC.stage!=null
+          ? '<div class="q" style="margin-top:16px;">發生什麼？<span class="qs">寫一句就好</span></div>'
+            + '<textarea class="ta" id="recnote" placeholder="' + (stageIdx(REC.stage)>=2 ? "他放下手機看著我：「你怎麼突然這麼會講話？」" : "我問了他週末去哪，他只嗯了一聲") + '"></textarea>'
+          : '')
+      + (REC.stage!=null && REC.stage!=="none"
+          ? '<button class="share-tg' + (REC.share?" on":"") + '" onclick="toggleShare()">' + (REC.share?"✓ 會放到館裡":"也放到館裡") + '——讓夥伴看見這一步</button>'
+          : '')
+      + '<button class="sub" ' + (REC.stage==null?"disabled":"") + ' onclick="recDone()">' + (REC.stage==null?"先點一片":"記下來") + '</button>'
+      + (REC.stage!=null ? '<button class="skip" onclick="recDone()">跳過文字，直接記 →</button>' : '');
+  } else {
+    var st = STAGES[stageIdx(REC.stage)];
+    h += '<div class="ok">'
+      + (REC.mile ? '<div class="fwwrap"><div class="p3check">✓</div>' + fwHTML() + '</div>' : '<div class="p3check">✓</div>')
+      + '<div class="ok-t">每天進步一點點。</div>'
+      + '<div class="ok-s">' + (REC.stage==="none"
+          ? '沒反應不代表白講——這一筆也是他軌跡的一部分。'
+          : '你練的是「' + CORE_DRILL[FOCUS_CORE].n + '」，<br>他給你的回答是——<b style="color:' + st.t + ';">' + st.full + '</b>。') + '</div></div>'
+      + (REC.mile ? '<div class="mile">🎉 ' + REC.who + ' 第一次走到「' + st.zh + '」<span>這一步是他的里程碑，也是你的。</span></div>' : '')
+      + (REC.note ? '<div class="echo">你記下的：「' + REC.note + '」<span>文字留得住感覺，分數留不住。</span></div>' : '')
+      + personPathHTML(REC.who, REC.stage)
+      /* visitor 鉤子＝判讀鎖在會員席：為什麼停在那、下一步練哪塊 */
+      + '<div class="soft-mem" onclick="location.href=MEMBER_URL">'
+      + (REC.stage==="none"
+          ? '他為什麼沒接上？——<b>會員席的教練幫你判讀</b>，下一步該練哪塊 →'
+          : '他停在「' + st.zh + '」——為什麼停？下一步練哪塊？<br><b>會員席幫你判讀</b> →')
+      + '</div>'
+      + '<div class="bone" onclick="closeRec()">影響力的盡頭不是成交，是有人因為你變好。</div>'
+      + '<div class="tapback" onclick="closeRec()">點一下，回到練習 ›</div>';
+  }
+  return h + '</div>';
+}
+function pickWho(n, r){ REC.who=n; REC.rel=r; REC.step=2; render(); }
+function pickStage(k){
+  var ta = document.getElementById("recnote");
+  if (ta) REC.note = ta.value;
+  REC.stage = k; render();
+  var t = document.getElementById("recnote"); if (t && REC.note) t.value = REC.note;
+}
+function toggleShare(){
+  var ta = document.getElementById("recnote");
+  if (ta) REC.note = ta.value;
+  REC.share = !REC.share; render();
+  var t = document.getElementById("recnote"); if (t && REC.note) t.value = REC.note;
+}
+function fwHTML(){
+  var cols = ["#C6603A","#6E8B77","#6E8CA8","#C99A4E"], out = "";
+  for (var i=0;i<12;i++){
+    var a = Math.PI*2*i/12, r = 44 + (i%2)*16;
+    out += '<span class="fw" style="background:' + cols[i%4] + ';--dx:' + Math.round(Math.cos(a)*r) + 'px;--dy:' + Math.round(Math.sin(a)*r) + 'px;animation-delay:' + (0.15 + (i%3)*0.08) + 's;"></span>';
+  }
+  return out;
+}
+function recDone(){
+  var ta = document.getElementById("recnote");
+  if (ta) REC.note = ta.value.trim();
+  var prevHi = 0;
+  LOG.forEach(function(e){ if (e.target===REC.who) prevHi = Math.max(prevHi, stageIdx(e.stage)); });
+  REC.mile = REC.stage!=="none" && stageIdx(REC.stage) > prevHi;
+  LOG.unshift({core:FOCUS_CORE, target:REC.who, rel:REC.rel, stage:REC.stage, date:ago(0), note:REC.note});
+  if (REC.share && REC.stage!=="none")
+    FEED.unshift({n:"你", stage:REC.stage, t: REC.note || ('練「' + CORE_DRILL[FOCUS_CORE].n + '」——' + STAGES[stageIdx(REC.stage)].full), cheer:0, mine:true});
+  DONE_TODAY = true; REC.step = 3; window.scrollTo(0,0); render();
+}
+
+/* ═══ 進步頁 ═══ */
+function coreCount(k){ var n=0; LOG.forEach(function(e){ if (e.core===k) n++; }); return n; }
+function fbChipsAll(){
+  var n = {};
+  LOG.forEach(function(e){ if (e.stage && e.stage!=="none") n[e.stage] = (n[e.stage]||0) + 1; });
+  var out = "";
+  STAGES.slice(1).forEach(function(s){
+    if (n[s.k]) out += '<span class="fbc" style="color:' + s.t + ';background:' + s.tint + ';">' + s.full + ' <b>×' + n[s.k] + '</b></span>';
+  });
+  return out || '<span class="fbc">還沒有人給過反應——今天就去試一次</span>';
+}
+function meHTML(){
+  var h = "";
+  /* 2 招地基進度 */
+  var ns = coreCount("story"), na = coreCount("ask");
+  h += '<div class="cd"><div class="sec">BASE · <b>2 招地基</b></div>'
+    + slRow([
+        {h: 28 + ns*22, state: FOCUS_CORE==="story" ? "now" : "past", dimKey:"A", vTop:"×"+ns, lbl:"講故事", lbl2:"1"},
+        {h: 28 + na*22, state: FOCUS_CORE==="ask" ? "now" : "past",  dimKey:"T", vTop:"×"+na, lbl:"問問題", lbl2:"2"}
+      ], {vals:true})
+    + '<div class="fbchips">' + fbChipsAll() + '</div>'
+    + '<div class="wall-note">體驗席先練這 2 招——它們用得好，12 塊肌肉才用得好。</div></div>';
+  /* 12 塊肌肉牆：整面迷霧（全貌感：看得到、跟著會員席開放）。
+     預設高度＝老師的收單觀點（2026-09-11）：信任最高、吸引第二、專業第三、推進最矮——
+     大多數人的誤區是專業做太多、推進硬推太多；該長肉的是信任和吸引。
+     ⚠️ 只有「肌肉牆預設」這樣排；反應階梯是時間順序，仍然往上走。 */
+  var WALL_H = {A:88, T:110, P:66, I:44};
+  h += '<div class="cd"><div class="sec">MUSCLE WALL · <b>12 塊肌肉</b></div>'
+    + '<div class="lockwrap">'
+    + slRow(DORD.map(function(k){
+        return {h: WALL_H[k], state:"past", dimKey:k, lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
+      }))
+    + '</div>'
+    + '<div class="lock-note lk">🔒 12 塊肌肉跟著會員席開放——一次開 2 核心＋主力大肌肉的 3 塊。</div></div>';
+  /* 升會員卡：判讀 preview 當主角＋錢鈕一頁一顆 */
+  h += '<div class="upg"><div class="upg-k">MEMBER SEAT · 會員席</div>'
+    + '<div class="upg-t">在會員席，每個反應都有人幫你判讀。</div>'
+    + '<div class="upg-demo"><div class="upg-demo-k">PREVIEW · 你記的反應，變成判讀（示意）</div>'
+    + slRow([
+        {h:36, state:"past", dimKey:"A", lbl:"被吸引", lbl2:"A"},
+        {h:58, state:"now",  dimKey:"T", lbl:"信了",   lbl2:"T"},
+        {h:80, state:"todo", dimKey:"P", lbl:"服了",   lbl2:"P"},
+        {h:102, state:"todo", dimKey:"I", lbl:"行動了", lbl2:"I"}
+      ])
+    + '<div class="upg-coach">教練陪你看：「小美信了你，停在信了——下一步練「讓他釐清」，帶她看清楚她真正要的。」</div></div>'
+    + '<div class="upg-s">你在體驗席記的每一筆反應，到會員席都會有下文——他為什麼停在那、下一步練哪塊，教練陪你看。</div>'
+    + '<div class="upg-bone">終點不是成交——有人因為你變好。</div>'
+    + '<a class="upg-money" href="' + MEMBER_URL + '">加入會員席・開 12 塊肌肉</a>'
+    + '<a class="upg-b2" href="' + MEMBER_URL + '">先參觀會員席 →</a></div>';
+  return h;
+}
+
+/* ═══ 夥伴頁 ═══ */
+var FEED = [
+  {n:"J",  stage:"I", t:"沒想賣課，把課程真心分享給她——她就報名了", cheer:5},
+  {n:"N",  stage:"T", t:"發現他一直要明牌，其實是怕自己判斷錯", cheer:3},
+  {n:"M",  stage:"T", t:"第一次在別人面前講出內心真實的想法", cheer:2},
+  {n:"佳", stage:"none", t:"演練卡住——太尊重對方的自主，反而不容易多說什麼", cheer:6}
+];
+var CHEERED = {};
+function cheer(i){ if (CHEERED[i]) return; CHEERED[i] = 1; FEED[i].cheer++; render(); }
+function gymHTML(){
+  var h = '<div class="hero"><div class="kick" style="color:#5C7464;">GYM FLOOR · 全館這個月</div>'
+    + '<div class="stat">全館累計 <b>412</b> 次鍛鍊</div>'
+    + '<div class="sub-t">這個月大家練最多的是 <b style="color:#5C7464;">信任肌肉</b>・13 位夥伴一起在練</div>'
+    + '<div class="rule4"></div></div>';
+  /* 會員福利：看得到、跟著會員席開放 */
+  h += '<div class="lockwrap"><div class="res">'
+    + '<div class="resc lite"><div class="resc-t">免費月度課程</div><div class="resc-s">每月 2 堂，在社群裡開</div><span class="resc-a">進社群上課 →</span></div>'
+    + '<div class="resc dark"><div class="resc-t">更多練肌肉乾貨</div><div class="resc-s">秘訣、練法、課程回放</div><span class="resc-a">看乾貨 →</span></div></div></div>'
+    + '<div class="lock-note lk" style="margin:8px 0 4px;">🔒 月度課程與乾貨庫跟著會員席開放。</div>';
+  h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
+  h += FEED.map(function(f, i){
+    var s = STAGES[stageIdx(f.stage)];
+    return '<div class="slim"><div class="slim-top"><span>' + f.n + '</span>'
+      + '<span class="rx-st" style="margin-left:auto;background:' + (f.stage==="none" ? "#B4A695" : f.stage==="I" ? "#F1E5CC" : s.c) + ';' + (f.stage==="I" ? "color:#8E682B;border:1.5px solid #8E682B;" : "") + '">' + (f.stage==="none" ? "還在練" : "對方" + s.zh) + '</span></div>'
+      + '<div class="slim-b">' + f.t + '</div>'
+      + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
+      + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
+  }).join("");
+  return h + seatPathHTML();
+}
+
+/* ═══ render ═══ */
+function render(){
+  var h = REC ? recHTML() : (PANE==="today" ? todayHTML() : PANE==="me" ? meHTML() : gymHTML());
+  document.getElementById("bd").innerHTML = h;
+  document.querySelectorAll(".nv").forEach(function(b){
+    b.className = "nv" + (b.getAttribute("data-pane")===PANE ? " on" : "");
+    b.onclick = function(){ REC = null; PANE = b.getAttribute("data-pane"); window.scrollTo(0,0); render(); };
+  });
+}
+/* demo 專用：?rec=2&who=小美&rel=工作&stage=T 直接跳進打卡某一步；?core=ask 換地基 */
+(function(){
+  var q = new URLSearchParams(location.search);
+  if (q.get("core")) FOCUS_CORE = q.get("core");
+  if (q.get("rec")) REC = {who:q.get("who")||"小美", rel:q.get("rel")||"工作", stage:q.get("stage"), note:q.get("note")||"", share:false, mile:q.get("mile")==="1", step:+q.get("rec")};
+  if (q.get("drill")) OPEN_DRILL = true;
+  if (q.get("week")) OPEN_WEEK = true;
+})();
+render();
+</script>
+</body>
+</html>
