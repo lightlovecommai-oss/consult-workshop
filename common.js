@@ -362,6 +362,8 @@ function doCheckin(s, task, workshopId, extra) {
     dim: task.dim, muscle: task.muscle || "", pts: task.pts,
     date: d, week: weekStr(new Date(d)),
     reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    /* stage＝圈層（none/A/T/P/I，pro v5 打卡標準「這個客戶走到哪」）；別的頁不送＝空字串 */
+    stage: extra.stage || "",
     share: !!extra.share
   });
   postCheckin(s.lineId, task, workshopId, d, extra);
@@ -415,6 +417,8 @@ function postCheckin(lineId, task, workshopId, dateStr, extra) {
     pts: task.pts, date: dateStr || todayStr(),
     /* v2 會員模式：開練記的是「對方的反應」而不只是打勾（低摩擦守則：這三欄都可空） */
     reaction: extra.reaction || "", target: extra.target || "", rel: extra.rel || "", note: extra.note || "",
+    /* stage＝圈層（none/A/T/P/I，pro v5 打卡標準）；後端 Sheet 還沒有這欄，先送著等加欄 */
+    stage: extra.stage || "",
     /* share＝這筆願不願意被拿去館裡動態流用（v9 補「分享到館裡」死碼：以前 UI 有勾選、
        這裡沒送、後端沒欄位，使用者以為分享了其實沒有）。館裡顯示時對象一律匿名，只留關係類型。 */
     share: extra.share ? "1" : ""
@@ -540,7 +544,8 @@ async function loadBootstrap(userId, w) {
       return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
                dim: String(c.dim || ""), muscle: String(c.muscle || ""), pts: Number(c.pts) || 0,
                date: normDate(c.date), week: weekStr(new Date(c.date)),
-               reaction: String(c.reaction || ""), target: String(c.target || ""), rel: String(c.rel || ""), note: String(c.note || "") };
+               reaction: String(c.reaction || ""), target: String(c.target || ""), rel: String(c.rel || ""), note: String(c.note || ""),
+               stage: String(c.stage || "") };
     });
     /* v2 體測紀錄（12 小肌群 1–5）。舊後端還沒部署時會是 undefined → 給空陣列，畫面顯示「還沒量」。 */
     d.evals = (d.evals || []).map(function(e){
