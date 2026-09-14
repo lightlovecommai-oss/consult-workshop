@@ -6,7 +6,8 @@ if (typeof window !== "undefined" && typeof window.track !== "function") {
 }
 
 var LIFF_ID = "2010316474-wmb1ODe0";
-var SHEET_API = "https://script.google.com/macros/s/AKfycbwEwlg4cFa7B_e76ULJM26C2B9fgjwjFTXPFb_yRMWt1wZs33iTGnEI1LZ9v8uZHvdz/exec";
+/* 2026-09-11 Apps Script 搬家後的現行 URL（舊 _yRMWt 專案被 Google 鎖、已作廢）——真相＝《數位資產.md》 */
+var SHEET_API = "https://script.google.com/macros/s/AKfycbz7VxeV8ZmjSiGNO-G3ZwRLPg-H1H2NjXHy6brCU5yVaVoYOXB-LItU750j81Q3eno/exec";
 
 /* ── 4 大肌肉定義 ──
    k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
