@@ -433,14 +433,15 @@ function coachSignal(c){
   if (SOFT_REL.indexOf(c.rel) > -1 || hi >= 4) return null;
   var d = stallDays(c.name);
   if (d < 14) return null;
-  return 'COACH SIGNAL · 停在「' + (hi===0 ? "沒反應" : STAGES[hi].zh) + '」' + d + ' 天了——把這筆帶去這次 1v1 演練。';
+  return 'COACH SIGNAL · 停在「' + (hi===0 ? "沒反應" : STAGES[hi].zh) + '」' + d + ' 天了——把這筆帶去這次實戰演練。';
 }
 
 /* ═══ 客戶頁（CRM 主頁）═══ */
 function coachHTML(){
   return '<div class="coach"><div class="coach-av">光</div>'
     + '<div><div class="coach-n">光頭教練</div><div class="coach-s">看著你的每一筆紀錄</div></div>'
-    + '<a class="coach-nx" href="#"><b>1v1 覆盤</b>約時段 →</a></div>';
+    /* 先連官網首頁；官網做好「實戰演練」專頁後換成那頁的網址 */
+    + '<a class="coach-nx" href="https://www.atpifit.com/" target="_blank"><b>預約實戰演練</b>1.5 小時 →</a></div>';
 }
 function clientCardHTML(c){
   var run = clientRun(c.name), last = run[run.length-1];
@@ -505,7 +506,7 @@ function gravityHTML(){
   });
   return '<div class="cd"><div class="sec">GRAVITY FIELD · <b>引力場</b></div>'
     + '<div class="gfield">' + rings + '<div class="gme">你</div><div class="gorbit">' + orbit + '</div></div>'
-    + '<div class="glegend">越內圈＝他離你越近，位置只看他的<b>真實反應</b>。<b>虛線＝停超過 14 天</b>——卡住的優先掛出來，每圈最多 7 顆，其餘收進 <b>+N</b>；完整名單就在下面的客戶卡。點一個人，直接記下這一步。</div></div>';
+    + '<div class="glegend">這張就是你的<b>燈塔</b>——他的水溫幾度、該養還是該收，看這裡（L7 整堂教你讀它）。越內圈＝離你越近、水溫越熱，位置只看他的<b>真實反應</b>。<b>虛線＝停超 14 天，水溫在涼</b>——卡住的優先掛出來，每圈最多 7 顆，其餘收進 <b>+N</b>；完整名單就在下面的客戶卡。點一個人，直接記下這一步。</div></div>';
 }
 /* 客戶卡排序＝今天該動誰：卡住的最上＞「要找你」離成交最近＞其他＞家人朋友墊底（不往成交排） */
 function clientOrder(c){
@@ -529,7 +530,7 @@ function crmHTML(){
   h += cs.map(clientCardHTML).join("");
   /* 這週 1v1 議程：COACH SIGNAL 的筆自動排進來（是「你帶去」，v1 不宣稱教練已讀） */
   var agenda = cs.filter(function(c){ return coachSignal(c); });
-  h += '<div class="cd"><div class="sec">WEEKLY · <b>這週 1v1 議程</b></div>'
+  h += '<div class="cd"><div class="sec">WEEKLY · <b>這週實戰演練議程</b></div>'
     + (agenda.length
         ? agenda.map(function(c){
             var hi = clientHi(c.name), s = STAGES[hi];
@@ -538,7 +539,7 @@ function crmHTML(){
               + '<div class="fp-e">把這筆帶去演練——他卡住的那一步，就是這週要練的那塊肌肉。</div></div></div>';
           }).join("")
         : '<div class="fp-e">這週沒有卡住的筆——把最近成的那筆帶來拆，成的也要知道為什麼成。</div>')
-    + '<div class="wall-note" style="margin-top:8px;">一週一次，場邊教練陪你把卡住的片刻拆開看——會員席沒有這個時段。</div></div>';
+    + '<div class="wall-note" style="margin-top:8px;">一場 1.5 小時，大家一起上場演練，教練場邊陪你把卡住的片刻拆開練——會員席沒有這個時段。</div></div>';
   return h + seatPathHTML();
 }
 
@@ -615,13 +616,20 @@ function starHTML(){
     return '<span class="' + (l.st==="todo" ? "dim" : "") + '"><i style="color:' + (l.st==="todo" ? "#5d7692" : p.t) + ';">L' + l.L + '</i></span>';
   }).join("");
   var sel = LESSONS.filter(function(l){ return l.L===SEL_L; })[0];
+  var selBody = sel.dim ? '亮的那天，<b>3 塊' + DIMS[sel.dim].name + '</b>出迷霧——儀表板跟著開、演練包跟著來。'
+    : sel.st==="done" ? '演練包已解鎖，隨時回去翻。' : '上完就點亮，演練包跟著解鎖。';
+  if (sel.L===5) {
+    /* L5 口袋卡：上場前翻一眼的四幕腳本（真相＝15-課程梳理 L5 列） */
+    selBody = '上場前翻一眼——四幕走完，他才收得了單：<br>'
+      + [["A","破冰","7 分"],["T","深挖","30 分"],["P","大絕招","13 分"],["I","收單","10 分"]]
+          .map(function(a){ return '<b style="color:' + PALV[a[0]].t + ';">' + a[0] + ' ' + a[1] + ' ' + a[2] + '</b>'; })
+          .join('<span style="color:#5d7692;"> → </span>')
+      + '<br><span style="color:#8ea1b6;">最長的一幕是聽他說——深挖 30 分，你開口的時間不到一半。</span>';
+  }
   var selLine = sel.st==="lock" ? "" :
     '<div class="howq" style="margin-top:12px;"><div class="howq-k">L' + sel.L + ' · '
     + (sel.st==="done" ? "已點亮" : sel.st==="now" ? "下一堂" : "還沒到") + '</div>'
-    + '<div class="howq-t"><b>' + sel.zh + '</b><br>'
-    + (sel.dim ? '亮的那天，<b>3 塊' + DIMS[sel.dim].name + '</b>出迷霧——儀表板跟著開、演練包跟著來。'
-               : sel.st==="done" ? '演練包已解鎖，隨時回去翻。' : '上完就點亮，演練包跟著解鎖。')
-    + '</div></div>';
+    + '<div class="howq-t"><b>' + sel.zh + '</b><br>' + selBody + '</div></div>';
   var h = '<div class="cd" style="padding-right:30px;"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 亮了 ' + done + '/8</span></div>'
     + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
     + selLine
@@ -800,7 +808,8 @@ function outHTML(){
     + '<div class="stat-row"><div class="stat-v" style="color:#e6a93a;">' + pulls + '</div><div class="stat-l">次客戶被拉近一圈</div><div class="stat-r">這才是主角——<br>圈圈往內縮的次數</div></div>'
     + '<div class="stat-row"><div class="stat-v">' + LOG.length + '</div><div class="stat-l">筆出手</div><div class="stat-r">每一筆都長在<br>某個人的軌跡上</div></div>'
     + '<div class="stat-row"><div class="stat-v" style="color:#5fd8b0;">$' + (dsum/10000) + ' 萬</div><div class="stat-l">成交金額</div><div class="stat-r">來自 ' + deals.length + ' 筆走到「認定你」<br>的紀錄</div></div>'
-    + '<div class="wall-note">金額只是記錄，不回饋分數——牆只長在真實反應上，成交是副作用。</div></div>';
+    + '<div class="wall-note">金額只是記錄，不回饋分數——牆只長在真實反應上，成交是副作用。</div>'
+    + '<div class="wall-note" style="margin-top:6px;">北極星只有一個方向：<b>持續累積信賴</b>——7 小時 × 11 次接觸 × 4 個場合（L7）。你的每一筆出手都算在累積裡，只有累積才有奇蹟。</div></div>';
   var focusDim = MUSCLES[FOCUS].dim;
   h += '<div class="cd" style="padding-right:30px;"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
     + '<div class="wall-pot"><div class="pot-k">已解鎖影響力</div><div class="pot-n">612<span>/ 1000</span></div></div>'
