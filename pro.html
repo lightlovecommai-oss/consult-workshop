@@ -995,7 +995,7 @@ function outHTML(){
   var fm = focusMuscle(), focusDim = fm ? MUSCLES[fm].dim : null;
   var full = DORD.every(function(k){ return d5[k] != null; });
   var measured = MORD.filter(function(k){ return scores[k] != null; }).length;
-  h += '<div class="cd"><div class="sec">MUSCLE WALL · <b>四大肌肉</b> <span style="color:#5d7692;font-weight:600;">' + measured + '/12 已量</span></div>';
+  h += '<div class="cd"><div class="sec">MUSCLE MAP · <b>影響力肌肉</b> <span style="color:#5d7692;font-weight:600;">' + measured + '/12 已量</span></div>';
   if (full) {
     var pct = {}; DORD.forEach(function(k){ pct[k] = pctFromEval(d5[k]); });
     var pot = calcPotential(pct).unlocked;
