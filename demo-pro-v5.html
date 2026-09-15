@@ -41,7 +41,7 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .hero{background:linear-gradient(160deg,#0c131e 0%,#152233 100%);border:1px solid rgba(75,155,240,.25);border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 8px 28px rgba(12,19,30,.45);}
 .sec{font-size:12px;font-weight:700;color:#8ea1b6;letter-spacing:2px;margin:0 0 12px;}
 .sec b{color:#eaf1fa;font-size:13px;letter-spacing:1px;}
-.kick{font-size:12px;font-weight:700;letter-spacing:2px;color:#E8C89A;margin-bottom:8px;}
+.kick{display:flex;align-items:center;font-size:12px;font-weight:700;letter-spacing:2px;color:#E8C89A;margin-bottom:8px;}
 .big-t{font-size:22px;font-weight:900;line-height:1.5;color:#F7F1EC;}
 .big-t em{font-style:normal;color:#e6a93a;text-shadow:0 0 12px rgba(230,169,58,.45);}
 .sub-t{font-size:15px;color:#8ea1b6;margin-top:7px;line-height:1.85;}
@@ -189,17 +189,31 @@ body{background:#0c131e;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .lockbar b{color:#cfdcea;}
 .linknote{background:rgba(230,169,58,.10);border-radius:10px;padding:9px 12px;color:#E8C89A;margin-top:12px;font-weight:600;font-size:12.5px;line-height:1.7;}
 
-/* 甜蜜路徑：人設（最強兩維）＋工具鏈站（強項實色、弱項虛線＝用工具繞過）＋三狀態 */
+/* 甜蜜路徑（09-14 方案B重做）：狀態軸當主角＋路線一行＋四站摺疊；定義句收進「?」 */
+.qmark{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1px solid #3d5268;color:#5d7692;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;letter-spacing:0;}
+.defline{font-size:12px;color:#7d90a3;line-height:1.75;margin-top:8px;background:rgba(230,237,245,.05);border-radius:10px;padding:9px 12px;}
+.phaxis{display:flex;align-items:center;margin-top:14px;}
+.phx{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;white-space:nowrap;}
+.phx .pdot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;}
+.phx.done{color:#5fd8b0;}
+.phx.done .pdot{background:rgba(51,196,149,.18);border:1.5px solid #33c495;color:#5fd8b0;}
+.phx.now{color:#eec06a;}
+.phx.now .pdot{background:rgba(230,169,58,.16);border:2px solid #e6a93a;color:#eec06a;box-shadow:0 0 12px rgba(230,169,58,.45);}
+.phx.todo{color:#5d7692;}
+.phx.todo .pdot{background:transparent;border:1.5px dashed #3d5268;color:#5d7692;}
+.pbar{flex:1;height:2px;margin:0 8px;}
+.pbar.past{background:#33c495;box-shadow:0 0 6px rgba(51,196,149,.4);}
+.pbar.todo{background:transparent;border-top:2px dashed #3d5268;}
+.phnow{font-size:12.5px;color:#8ea1b6;margin-top:9px;line-height:1.7;}
+.phnow b{color:#eec06a;}
+.miniroute{font-size:13.5px;color:#cfdcea;margin-top:12px;line-height:1.9;}
+.miniroute i{font-style:normal;color:#5d7692;}
 .pers{display:flex;align-items:center;gap:12px;margin:16px 0 2px;}
 .pers-code{display:flex;align-items:center;gap:2px;font-size:15px;font-weight:900;background:rgba(230,237,245,.07);border:1px solid #2a3c52;border-radius:10px;padding:8px 11px;flex-shrink:0;}
 .pers-code i{font-style:normal;color:#5d7692;font-weight:700;}
 .pers-n{font-size:17px;font-weight:900;color:#F7F1EC;}
 .pers-tag{font-size:12.5px;color:#8ea1b6;margin-top:3px;line-height:1.6;}
-.ph-row{display:flex;gap:8px;margin-top:16px;}
-.ph{flex:1;text-align:center;border-radius:10px;padding:8px 4px;font-size:12px;font-weight:800;letter-spacing:.5px;}
-.ph.past{background:rgba(51,196,149,.10);border:1px solid rgba(51,196,149,.35);color:#5fd8b0;}
-.ph.now{background:rgba(230,169,58,.14);border:1.5px solid #e6a93a;color:#eec06a;box-shadow:0 0 10px rgba(230,169,58,.35);}
-.ph.todo{background:transparent;border:1px dashed #3d5268;color:#5d7692;}
+.pers-tag b{color:#cfdcea;}
 .fp-st{display:flex;gap:10px;padding:11px 2px 10px;border-bottom:1px dashed rgba(93,118,146,.25);}
 .fp-st:last-child{border-bottom:0;}
 .fp-b{width:26px;height:26px;border-radius:8px;color:#0c131e;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
@@ -328,16 +342,20 @@ var SPEECH = [
 var PERSONA = {
   code:"A+T", name:"社群關係經營者", tag:"人自然往你靠，聊著聊著就成交",
   chain:[
-    {dim:"A", strong:true,  tool:"IG／Threads 養粉",          role:"帶流量"},
-    {dim:"T", strong:true,  tool:"LINE 私訊聊到底",            role:"養信任"},
-    {dim:"P", strong:false, tool:"一頁「我是怎麼幫到人的」",   role:"方法感用一頁紙給，不硬講理論"},
-    {dim:"I", strong:false, tool:"限時報名表單",               role:"截止日替你開口，不用自己逼單"}
+    {dim:"A", strong:true,  short:"養粉",   tool:"IG／Threads 養粉",        role:"帶流量",
+     note:"內容照發就好，人會自己靠過來——這一步已經在跑。"},
+    {dim:"T", strong:true,  short:"私聊",   tool:"LINE 私訊聊到底",          role:"養信任",
+     note:"先聽他的事，別急著講方案——這一步已經在跑。"},
+    {dim:"P", strong:false, short:"一頁紙", tool:"一頁「我是怎麼幫到人的」", role:"方法感",
+     note:"方法感用一頁紙給，不硬講理論——聊得來的人一看，就知道你是那個解法。"},
+    {dim:"I", strong:false, short:"報名表", tool:"限時報名表單",             role:"替你開口",
+     note:"截止日替你開口，不用自己催——等一頁紙上線再掛。"}
   ]
 };
 var PHASES = [
   {k:"run",    zh:"① 跑通", line:"用兩個強項，拿到第一筆穩定成交"},
-  {k:"opt",    zh:"② 優化", line:"補第三維，堵住漏水那格"},
-  {k:"create", zh:"③ 創造", line:"練最弱維，開第二條路徑"}
+  {k:"opt",    zh:"② 優化", line:"補上第三塊，堵住漏水那格"},
+  {k:"create", zh:"③ 創造", line:"練最後一塊，開第二條路徑"}
 ];
 var PHASE = "opt";
 var PATH_NEXT = "補 P（專業）——在私訊裡加一頁「我是怎麼幫到人的」方法感，讓聊得來的人也看得見你的解法。這季主力是 P2，就是從這一步來的。";
@@ -556,44 +574,53 @@ function drillHTML(d){
     + row("🌱 怎麼算成了", d.win)
     + row("🌾 沒成怎麼辦", d.retry) + '</div>';
 }
-function fpEvidence(dim){
-  var es = LOG.filter(function(e){ return (MUSCLES[e.muscle]||{}).dim===dim; })
-              .sort(function(a,b){ return a.date > b.date ? -1 : 1; });
-  if (!es.length) return '這站還沒出手——出手一次，證據自己長上來。';
-  var e = es[0], s = STAGES[stageIdx(e.stage)];
-  return '最近一次：' + e.target + '——<b style="color:' + s.t + ';">' + s.full + '</b>'
-    + (e.note ? '，' + e.note : '。');
-}
+var OPEN_PATH = false, SHOW_DEF = false;
+function togglePath(){ OPEN_PATH = !OPEN_PATH; render(); }
+function toggleDef(){ SHOW_DEF = !SHOW_DEF; render(); }
 function flightHTML(){
+  /* 09-14 老師拍板方案B整支重做：一卡只答「我練到哪、下一步踩哪」。
+     狀態軸當主角；路線收一行、四站摺疊；定義句收進「?」；客戶動態只住 CRM 頁。 */
   var ds = DORD.map(function(k){ return {k:k, v:dimScore(k)}; })
                .sort(function(a,b){ return b.v - a.v; });
   var pi = 0; PHASES.forEach(function(p,i){ if (p.k===PHASE) pi = i; });
   var deals = LOG.filter(function(e){ return e.amt; }).length;
-  var h = '<div class="hero"><div class="kick">SWEET PATH · 變現甜蜜路徑</div>'
-    + '<div class="big-t">你不用樣樣強——<em>最強的兩塊，就是你的路</em>。</div>'
-    + '<div class="sub-t">甜蜜路徑＝<b>走哪條</b>（最強兩維定人設）×<b>現在動哪一步</b>（三個狀態）。弱項不硬練，用工具繞過。</div>';
+  var HERE = pi===0 ? 1 : pi===1 ? 2 : 3; /* 跑通踩強項尾站｜優化踩第三站｜創造踩最後站 */
+  var h = '<div class="hero"><div class="kick">SWEET PATH · 變現甜蜜路徑'
+    + '<div class="qmark" onclick="toggleDef()">?</div></div>'
+    + (SHOW_DEF ? '<div class="defline">甜蜜路徑＝<b style="color:#cfdcea;">走哪條</b>（最強兩塊肌肉定人設）×<b style="color:#cfdcea;">現在踩哪一步</b>（三個狀態）。口訣：跑通用兩個強項｜優化補上第三塊｜創造練最後一塊。不順手的不硬練，讓工具上場。</div>' : '');
+  h += '<div class="phaxis">' + PHASES.map(function(p,i){
+      var cls = i < pi ? "done" : i===pi ? "now" : "todo";
+      var dot = i < pi ? "✓" : i===pi ? "●" : "";
+      return (i ? '<div class="pbar ' + (i<=pi ? "past" : "todo") + '"></div>' : '')
+        + '<div class="phx ' + cls + '"><div class="pdot">' + dot + '</div>' + p.zh.slice(2) + '</div>';
+    }).join("") + '</div>';
+  h += '<div class="phnow">已 <b>' + deals + ' 筆成交</b>' + (pi > 0 ? '，跑通完成' : '')
+    + '——現在在「<b>' + PHASES[pi].zh.slice(2) + '</b>」：' + PHASES[pi].line + '。</div>';
   h += '<div class="pers"><span class="pers-code">'
     + PERSONA.code.split("+").map(function(k){ return '<b style="color:' + PALV[k].t + ';">' + k + '</b>'; }).join('<i>+</i>')
-    + '</span><div><div class="pers-n">' + PERSONA.name + '</div>'
-    + '<div class="pers-tag">「' + PERSONA.tag + '」 · 你最強：' + ds[0].k + ' ' + ds[0].v.toFixed(1) + '、' + ds[1].k + ' ' + ds[1].v.toFixed(1) + '</div></div></div>';
-  h += PERSONA.chain.map(function(st){
-    var p = PALV[st.dim];
-    var b = st.strong
-      ? '<div class="fp-b" style="background:' + p.c + ';">' + st.dim + '</div>'
-      : '<div class="fp-b" style="background:transparent;border:1.5px dashed ' + p.c + '99;color:' + p.t + ';">' + st.dim + '</div>';
-    return '<div class="fp-st">' + b
-      + '<div><div class="fp-n"' + (st.strong ? '' : ' style="color:#8ea1b6;"') + '>' + st.tool
-      + '<span>' + (st.strong ? '你的強項 · ' + st.role : '弱項 · 用工具繞過') + '</span></div>'
-      + '<div class="fp-e">' + (st.strong ? fpEvidence(st.dim) : st.role + '。') + '</div>'
-      + '</div></div>';
-  }).join("");
-  h += '<div class="ph-row">' + PHASES.map(function(p,i){
-    var cls = i < pi ? "past" : i===pi ? "now" : "todo";
-    return '<div class="ph ' + cls + '">' + p.zh + (i < pi ? ' ✓' : '') + '</div>';
-  }).join("") + '</div>'
-    + '<div class="glegend" style="margin-top:8px;">狀態照紀錄判：你已有 <b>' + deals + ' 筆成交</b>——跑通完成，現在在「優化」。口訣：跑通用兩個強項｜優化補第三維｜創造練最弱維。</div>';
-  h += '<div class="howq"><div class="howq-k">現在動哪一步 · ' + PHASES[pi].zh.slice(2) + '——' + PHASES[pi].line + '</div>'
-    + '<div class="howq-t">' + PATH_NEXT + '</div></div>';
+    + '</span><div><div class="pers-n" style="font-size:17px;">' + PERSONA.name + '</div>'
+    + '<div class="pers-tag">「' + PERSONA.tag + '」——<b>你不用樣樣強，最強的兩塊就是你的路。</b></div></div></div>';
+  h += '<div class="miniroute">路線：' + PERSONA.chain.map(function(st,i){
+      if (i > HERE) return '<span style="color:#5d7692;">' + st.short + '</span>';
+      return '<b style="color:' + PALV[st.dim].t + ';">' + st.short + (i===HERE ? '◀' : '') + '</b>';
+    }).join('<i> → </i>') + '</div>';
+  h += '<button class="drill-tg" onclick="togglePath()">看整條路 ' + (OPEN_PATH ? "▴" : "▾") + '</button>';
+  if (OPEN_PATH) {
+    h += '<div class="drill">'
+      + '<div class="fp-e" style="padding:10px 2px 2px;">照分數判你走這條——你最強：' + ds[0].k + ' ' + ds[0].v.toFixed(1) + '、' + ds[1].k + ' ' + ds[1].v.toFixed(1) + '（教練可改）。</div>'
+      + PERSONA.chain.map(function(st,i){
+          var p = PALV[st.dim];
+          var b = st.strong
+            ? '<div class="fp-b" style="background:' + p.c + ';">' + st.dim + '</div>'
+            : '<div class="fp-b" style="background:transparent;border:1.5px dashed ' + p.c + '99;color:' + p.t + ';">' + st.dim + '</div>';
+          return '<div class="fp-st">' + b
+            + '<div><div class="fp-n"' + (st.strong ? '' : ' style="color:#8ea1b6;"') + '>' + st.tool
+            + '<span>' + (st.strong ? '你的強項 · ' + st.role : '工具上場 · ' + st.role)
+            + (i===HERE ? ' ・<b style="color:#eec06a;">◀ 你在這</b>' : '') + '</span></div>'
+            + '<div class="fp-e">' + st.note + '</div></div></div>';
+        }).join("") + '</div>';
+  }
+  h += '<div class="howq"><div class="howq-k">現在這一步</div><div class="howq-t">' + PATH_NEXT + '</div></div>';
   h += '<div class="fp-c" style="margin-top:12px;">教練拍板 · ' + PATH_COACH + '</div>';
   h += '<div class="rule4" style="margin-top:14px;"></div></div>';
   return h;
