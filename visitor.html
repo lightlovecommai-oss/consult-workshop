@@ -191,7 +191,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
-.sl.todo{background:transparent!important;border:1.5px dashed #B4A695;border-bottom:0;}
+.sl.todo{background:transparent!important;border:1.5px dashed #9C8879;border-bottom:0;}
 .sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
 .sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
 @keyframes sltap{0%,100%{box-shadow:0 0 0 0 var(--tc,rgba(198,96,58,.45));}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
@@ -200,7 +200,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
 .slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
-.slbl span.dim{color:#B4A695;font-weight:600;}
+.slbl span.dim{color:#8A7266;font-weight:600;}
 .slbl span em.tapchip{display:inline-block;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#C6603A;border-radius:9px;padding:1px 7px;margin-top:4px;letter-spacing:.05em;}
 .wall-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
 .subrow{margin-top:14px;border-top:1px dashed #E8DDD3;padding-top:12px;}
@@ -437,7 +437,7 @@ var FROMQ = false;
 try { FROMQ = new URLSearchParams(location.search).get("from") === "quiz"; } catch(e){}
 
 /* 統一儀表板色盤（暖版；DIMS 由各專案自定） */
-var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
+var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F4E1D9"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
 var WALL_FULL = false;
 var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
 var DIM_ZH = {A:"吸引肌肉",T:"信任肌肉",P:"專業肌肉",I:"推進肌肉"};
@@ -595,7 +595,7 @@ function render(){
 function slRow(items, opt){
   opt = opt || {};
   var vals = items.map(function(it){
-    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#B4A695") + ';">' + (it.vTop||"") + '</span>';
+    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#8A7266") + ';">' + (it.vTop||"") + '</span>';
   }).join("");
   var slices = items.map(function(it){
     var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
@@ -610,7 +610,7 @@ function slRow(items, opt){
   var lbls = items.map(function(it){
     var p = PALV[it.dimKey] || {};
     return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
-      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
+      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#8A7266" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
       + it.lbl
       + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");

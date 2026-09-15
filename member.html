@@ -66,12 +66,12 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
-.sl.todo{background:transparent!important;border:1.5px dashed #B4A695;border-bottom:0;}
+.sl.todo{background:transparent!important;border:1.5px dashed #9C8879;border-bottom:0;}
 .sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
 .slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
 .slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
-.slbl span.dim{color:#B4A695;font-weight:600;}
+.slbl span.dim{color:#8A7266;font-weight:600;}
 /* 可點的薄片（口袋卡入口）：光暈脈動＋標籤下的「點我」小徽——薄片本身長得不像按鈕，要講出來 */
 .sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
 @keyframes sltap{0%,100%{box-shadow:0 0 0 0 var(--tc,rgba(198,96,58,.45));}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
@@ -87,7 +87,7 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .sp.past{background:#DCE7DE;}
 .sp.now{background:#6E8CA8;box-shadow:0 2px 8px rgba(110,140,168,.35);}
 .sp.now.g{background:#6E8B77;box-shadow:0 2px 8px rgba(110,139,119,.35);}
-.sp.todo{border:1.5px dashed #B4A695;border-bottom:0;}
+.sp.todo{border:1.5px dashed #9C8879;border-bottom:0;}
 .sp-lbl{display:flex;gap:6px;padding:6px 2px 0;font-size:11.5px;font-weight:700;}
 .sp-goal{flex:1.6;align-self:center;font-size:12px;color:#6E4A3C;line-height:1.6;padding:0 2px 4px 8px;}
 .sp-goal b{color:#8E682B;}
@@ -372,14 +372,14 @@ var GYM_POSTS = []; // 真的分享到館裡貼文（loadGymPosts）
    打卡記的不是「我做了」，是「他走到哪」——沒反應→想靠近(A)→願意說(T)→要找你(P)→認定你(I)。 */
 var STAGES = [
   {k:"none", zh:"沒反應",  full:"他沒什麼反應",   c:"#B4A695", t:"#8A7266", tint:"#EFE6DB", h:30},
-  {k:"A",    zh:"想靠近",  full:"他想靠近了",     c:"#C6603A", t:"#AF5433", tint:"#F3D9CD", h:52},
+  {k:"A",    zh:"想靠近",  full:"他想靠近了",     c:"#C6603A", t:"#AF5433", tint:"#F4E1D9", h:52},
   {k:"T",    zh:"願意說",  full:"他願意說了",     c:"#6E8B77", t:"#5C7464", tint:"#DCE7DE", h:74},
   {k:"P",    zh:"要找你",  full:"他要找你了",     c:"#6E8CA8", t:"#54718D", tint:"#DDE6EE", h:96},
   {k:"I",    zh:"認定你",  full:"他認定你了",     c:"#C99A4E", t:"#8E682B", tint:"#F1E5CC", h:118}
 ];
 function stageIdx(k){ for (var i=0;i<STAGES.length;i++) if (STAGES[i].k===k) return i; return -1; }
 /* DIMS 由 common.js 提供（含 color/soft/name），這裡只補薄片用的 tint 色組 */
-var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
+var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F4E1D9"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
 var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
 
 /* REACT 留著兩個用途：①種子戰報顯示 ②打卡回寫 reaction 欄（後端相容，見 saveRec） */
@@ -487,7 +487,7 @@ function potNow(){
 function slRow(items, opt){
   opt = opt || {};
   var vals = items.map(function(it){
-    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#B4A695") + ';">' + (it.vTop||"") + '</span>';
+    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#8A7266") + ';">' + (it.vTop||"") + '</span>';
   }).join("");
   var slices = items.map(function(it){
     var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
@@ -504,7 +504,7 @@ function slRow(items, opt){
     var p = PALV[it.dimKey] || {};
     if (it.hot) return '<span style="color:#AF5433;font-weight:800;">' + it.lbl + '</span>';
     return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
-      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
+      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#8A7266" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
       + it.lbl
       + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");
