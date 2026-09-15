@@ -31,6 +31,9 @@
    技巧詳解文案真相＝judgement.js CORE_DRILL，本頁不自己養一份。 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+/* 席位色：綠＝我在體驗席（骨架、數字、標籤），行動色橘只留給「要按的」。
+   變數名跟 member.html 同一套（那邊會員藍／體驗綠切換），這頁固定體驗席。 */
+body{--sd:#5C7464;--st:#DCE7DE;}
 .app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:40px;}
 
 /* 席位橫幅：排版同 member.html（kicker＋logo＋品牌名＋hall 膠囊＋標語），體驗席＝T 綠 */
@@ -45,7 +48,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 
 .bd{padding:20px 20px 16px;}
 .sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:20px 4px 10px;}
-.sec b{color:#4A1B0C;font-size:13px;letter-spacing:1px;}
+.sec b{color:var(--sd);font-size:13px;letter-spacing:1px;}
 
 /* 連續天數（席位色＝綠） */
 .streak{display:flex;align-items:center;gap:10px;padding:0 2px 14px;}
@@ -57,12 +60,12 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* 今日主卡：member 練習頁機制（技巧名＋開場句＋技巧詳解摺疊＋去記錄流程），只開 2 塊地基 */
 .hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .hero-eb{display:flex;align-items:baseline;font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
-.hero-eb b{letter-spacing:0;color:#4A1B0C;}
+.hero-eb b{letter-spacing:0;color:var(--sd);}
 .hero-eb i{margin-left:auto;font-style:normal;font-size:11px;font-weight:700;color:#C9A87A;letter-spacing:1px;}
 .kick{font-size:13px;font-weight:800;color:#5C7464;letter-spacing:1px;margin-bottom:2px;}
 .p3big{font-size:26px;font-weight:900;color:#4A1B0C;letter-spacing:.04em;}
 .p3how{margin-top:8px;font-size:15.5px;line-height:1.8;color:#4A1B0C;}
-.p3how b{color:#8E682B;}
+.p3how b{color:var(--sd);}
 .p3q{margin:13px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;}
 .p3q-k{font-size:12.5px;color:#8A7266;line-height:1.7;margin-bottom:5px;}
 .p3q-t{font-size:15.5px;font-weight:700;color:#4A1B0C;line-height:1.8;}
@@ -76,7 +79,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .mr{display:flex;gap:10px;font-size:13.5px;line-height:1.8;padding:5px 0;}
 .mr b{flex-shrink:0;width:74px;color:#8A7266;font-weight:700;}
 .mr span{flex:1;color:#4A1B0C;}
-.mr span b{width:auto;color:#8E682B;}
+.mr span b{width:auto;color:var(--sd);}
 /* 打卡／記錄＝行動鈕，一律磚橘漸層（同 member .go4） */
 /* CTA 三層（2026-09-06 裁決）：錢鈕=磚橘→金漸層（一頁一顆）／參觀=幽靈框跟下一階色／練習=磚橘同色系柔漸層 */
 .go{display:block;width:100%;border:none;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);box-shadow:0 4px 12px rgba(198,96,58,.20);color:#fff;font-size:17px;font-weight:700;letter-spacing:1px;padding:15px;border-radius:16px;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;transition:transform .1s;}
@@ -168,10 +171,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* 已解鎖影響力（數字連續性：quiz→visitor→member 同一條線） */
 .pot{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:16px;padding:14px 16px 13px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
 .pot-k{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;}
-.pot-n{font-size:28px;font-weight:900;color:#8E682B;margin-top:2px;letter-spacing:.02em;}
+.pot-n{font-size:28px;font-weight:900;color:var(--sd);margin-top:2px;letter-spacing:.02em;}
 .pot-n span{font-size:13px;font-weight:700;color:#B39C89;margin-left:4px;letter-spacing:0;}
 .pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:8px;overflow:hidden;}
-.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#6E8B77,#5C7464);}
 .pot-s{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.75;}
 
 /* ═ 統一能力值儀表板 own 態（規格＝demo-muscle-card-v4.html v4.2）═
@@ -180,38 +183,37 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .base{margin-bottom:12px;border-bottom:1px dashed #E8DDD3;padding-bottom:11px;}
 .base-k{font-size:11px;letter-spacing:3px;font-weight:700;color:#B39C89;margin-bottom:7px;}
 .core{display:flex;align-items:center;gap:10px;padding:4px 0;cursor:pointer;}
-.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#8E682B;}
+.core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--sd);}
 .core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
-.core-tag{flex-shrink:0;font-size:10px;font-weight:700;color:#993C1D;background:#FDF1E8;border:1px solid #EAC9B4;border-radius:20px;padding:1px 8px;}
-.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#C6603A,#C99A4E);}
-.dsec{margin-top:14px;padding-top:13px;border-top:1px dashed #E8DDD3;}
-.base + .dsec{margin-top:2px;padding-top:0;border-top:0;}
-.dh{display:flex;align-items:center;gap:8px;margin:6px 0 7px;}
-.dh-en{flex-shrink:0;font-size:10.5px;font-weight:900;letter-spacing:1.5px;}
-.dh-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
-.dh-bar{flex:1;height:7px;border-radius:4px;background:#EFE6DB;overflow:hidden;}
-.dh-bar i{display:block;height:100%;border-radius:4px;}
-.dh-v{flex-shrink:0;width:26px;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
-.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
-.m{position:relative;background:#F7F1EC;border:1px solid #EFE6DB;border-radius:12px;padding:9px 10px 8px;min-width:0;}
-.m-n{font-size:12.5px;font-weight:700;color:#4A1B0C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.m-n i{font-style:normal;font-size:10px;font-weight:800;margin-right:3px;}
-.mbar{height:5px;border-radius:3px;background:#E8DDD3;margin:7px 0 6px;overflow:hidden;}
-.mbar i{display:block;height:100%;border-radius:3px;}
-.m-v{font-size:11px;font-weight:700;color:#8A7266;font-variant-numeric:tabular-nums;}
-.m.off{background:#FBF8F5;}
-.m.off .m-n{color:#B39C89;}
-.m.off .m-v{color:#C9BBAE;font-weight:600;}
-.m.focus{background:#FDF1E8;border-color:#EAC9B4;cursor:pointer;}
-.m.focus:before,.m.focus:after{content:"";position:absolute;width:12px;height:12px;border:2px solid #C6603A;}
-.m.focus:before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:4px 0 0 0;}
-.m.focus:after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 4px 0;}
-.m.focus .m-v{color:#993C1D;}
+.core-tag{flex-shrink:0;font-size:10px;font-weight:700;color:var(--sd);background:var(--st);border:1px solid #C3D5C8;border-radius:20px;padding:1px 8px;}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#6E8B77,#5C7464);}
+/* 薄片：跟 member 同一套語彙（實色＝點亮了・淡色＝量過・虛線＝還沒解鎖） */
+.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px 4px 0;}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+.sl.todo{background:transparent!important;border:1.5px dashed #B4A695;border-bottom:0;}
+.sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
+.sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
+@keyframes sltap{0%,100%{box-shadow:0 0 0 0 var(--tc,rgba(198,96,58,.45));}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
+.slv{display:flex;gap:7px;padding:0 4px;}
+.slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
+.slbl{display:flex;gap:7px;padding:7px 4px 0;}
+.slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
+.slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
+.slbl span.dim{color:#B4A695;font-weight:600;}
+.slbl span em.tapchip{display:inline-block;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#C6603A;border-radius:9px;padding:1px 7px;margin-top:4px;letter-spacing:.05em;}
+.wall-note{font-size:12.5px;color:#8A7266;margin-top:10px;line-height:1.7;}
+.subrow{margin-top:14px;border-top:1px dashed #E8DDD3;padding-top:12px;}
+.lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
+.lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
+.lock-note.lk{background:#EFE6DB;border-radius:10px;padding:9px 12px;color:#6E4A3C;margin-top:10px;font-weight:600;}
+.pocket-go{display:block;width:100%;margin-top:10px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:14px;padding:13px;font-size:15px;font-weight:700;color:#AF5433;cursor:pointer;font-family:inherit;min-height:48px;}
+.pocket-go:active{transform:scale(.99);}
+.drill-tg{width:100%;background:none;border:0;color:var(--sd);font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
 .mushint{margin-top:12px;font-size:12px;color:#8A7266;text-align:center;line-height:1.8;}
 .mus-cta{display:block;text-align:center;margin:0 0 12px;padding:12px;border:1.5px dashed #C6603A;border-radius:14px;color:#AF5433;font-size:14px;font-weight:700;text-decoration:none;}
 .mus-cta:active{transform:scale(.98);}
 .fromq{background:#FDF9F0;border:1.5px solid #C99A4E;border-radius:14px;padding:11px 14px;font-size:13.5px;line-height:1.8;color:#5A3A2A;margin-bottom:12px;}
-.fromq b{color:#8E682B;}
+.fromq b{color:var(--sd);}
 
 /* 口袋提示卡（幽靈浮層：半透明毛玻璃、可讀、再按一下就不見） */
 .ov{position:fixed;inset:0;background:rgba(43,33,24,.22);display:none;z-index:50;}
@@ -223,11 +225,11 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .sh-mk{font-size:12px;font-weight:900;}
 .sh-n{font-size:19px;font-weight:900;color:#4A1B0C;}
 .sh-dim{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A7266;}
-.sh-tech{font-size:13px;font-weight:700;color:#993C1D;margin-top:3px;}
+.sh-tech{font-size:13px;font-weight:700;color:var(--sd);margin-top:3px;}
 .sh-sec{margin-top:13px;}
 .sh-k{font-size:11px;letter-spacing:2px;font-weight:700;color:#B39C89;margin-bottom:4px;}
 .sh-t{font-size:14.5px;line-height:1.85;color:#4A1B0C;}
-.sh-t b{color:#993C1D;}
+.sh-t b{color:var(--sd);}
 .sh-line{background:#F7F1EC;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.8;color:#5A3A2A;margin-top:5px;}
 .sh-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px;}
 .sh-two .sh-t{font-size:13px;line-height:1.75;}
@@ -334,7 +336,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
           <div class="cmp-seat" style="background:#6E8B77;">體驗席<small>你在這</small></div>
           <div class="cmp-seat" style="background:#6E8CA8;">會員席<small>NT$99/月</small></div>
         </div>
-        <div class="cmp-r"><div class="cmp-k">誰看你練</div><div class="cmp-v">自己練</div><div class="cmp-m">場邊教練<br>每筆紀錄有人回</div></div>
+        <div class="cmp-r"><div class="cmp-k">誰看你練</div><div class="cmp-v">自己練</div><div class="cmp-m">場邊教練</div></div>
         <div class="cmp-r"><div class="cmp-k">練哪塊</div><div class="cmp-v">2 招地基</div><div class="cmp-m">＋健檢選出的那塊<br>先練最有感</div></div>
         <div class="cmp-r"><div class="cmp-k">練多深</div><div class="cmp-v">—</div><div class="cmp-m">每招拆到<br>你講得出口</div></div>
       </div>
@@ -434,7 +436,8 @@ var FROMQ = false;
 try { FROMQ = new URLSearchParams(location.search).get("from") === "quiz"; } catch(e){}
 
 /* 統一儀表板色盤（暖版；DIMS 由各專案自定） */
-var PALV = {A:{c:"#C6603A",t:"#AF5433"},T:{c:"#6E8B77",t:"#5C7464"},P:{c:"#6E8CA8",t:"#54718D"},I:{c:"#C99A4E",t:"#8E682B"}};
+var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F3D9CD"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
+var WALL_FULL = false;
 var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
 var DIM_ZH = {A:"吸引肌肉",T:"信任肌肉",P:"專業肌肉",I:"推進肌肉"};
 
@@ -587,39 +590,84 @@ function render(){
   document.getElementById("muscard").innerHTML = musHTML();
 }
 
-/* ═ 統一能力值儀表板 own 態（規格＝demo-muscle-card-v4.html v4.2）═
-   地基 2 核心可按出口袋卡；有基線＝大肌肉條真成數＋專屬招那格亮，其餘「還沒點亮」。 */
+/* ── 薄片原語（CSS 版）：跟 member.html 同一份，改行為兩邊要同步 ── */
+function slRow(items, opt){
+  opt = opt || {};
+  var vals = items.map(function(it){
+    return '<span style="color:' + (it.state==="now" ? (PALV[it.dimKey]||{}).t || "#4A1B0C" : "#B4A695") + ';">' + (it.vTop||"") + '</span>';
+  }).join("");
+  var slices = items.map(function(it){
+    var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
+    var cls = "sl " + it.state, sty = "height:" + it.h + "px;";
+    if (it.state==="now") {
+      if (it.dimKey==="I") cls += " gold"; /* I 金紅線：淡底＋深版描邊，不鋪實色 */
+      else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
+    } else if (it.state==="past") sty += "background:" + p.tint + ";";
+    if (it.tap) { cls += " tap"; sty += "--tc:" + p.c + "73;"; }
+    return '<div class="' + cls + '" style="' + sty + '"' + (it.onclick ? ' onclick="' + it.onclick + '"' : '') + '></div>';
+  }).join("");
+  var lbls = items.map(function(it){
+    var p = PALV[it.dimKey] || {};
+    return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
+      + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
+      + it.lbl
+      + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
+  }).join("");
+  return (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
+    + '<div class="srow">' + slices + '</div>'
+    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>');
+}
+
+/* ═ 影響力版圖（薄片版）═ 語彙搬自 member 的 muscle wall，但鉤子反過來：
+   member 是「我練到哪」，visitor 是「還沒解鎖的那 11 塊」——只有專屬招那片鋪實色可點。 */
 function musHTML(){
   var tag = '<span class="core-tag">輪替中</span>';
   var h = '<div class="base"><div class="base-k">FOUNDATION · 地基 · 2 核心技巧</div>'
     + '<div class="core" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
     + '<div class="core" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
-  /* 沒基線＝12 格全暗：開一個回測驗的口（很少人直開 visitor，但開了就別讓他撞牆） */
+  /* 沒基線＝整面牆虛線：開一個回測驗的口（很少人直開 visitor，但開了就別讓他撞牆） */
   if (!MS12) h += '<a class="mus-cta" href="'+QUIZ_URL+'" onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'})">先做 3 分鐘影響力健檢，點亮你的第一塊 →</a>';
-  h += DORD.map(function(k){
-    var pc = PCTV ? PCTV[k] : null;
-    var head = '<div class="dh"><span class="dh-en" style="color:'+PALV[k].t+';">'+DIM_EN[k]+'</span>'
-      + '<span class="dh-zh">'+DIM_ZH[k]+'</span>'
-      + '<span class="dh-bar"><i style="width:'+(pc==null?0:pc)+'%;background:'+PALV[k].c+';"></i></span>'
-      + (pc==null ? '' : '<span class="dh-v" style="color:'+PALV[k].t+';">'+pc+'</span>')
-      + '</div>';
-    var tiles = musclesOfDim(k).map(function(mk){
-      var own = OWN && mk === OWN.mk;
-      var cls = "m" + (own ? " focus" : " off");
-      var tap = own ? ' onclick="pocket(\''+mk+'\')"'
-        : (!MS12 ? ' onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'});location.href=QUIZ_URL"' : '');
-      var barW = (own && MS12) ? Math.round((MS12[mk]-1)/4*100) : 0;
-      var val = (own && MS12) ? MS12[mk].toFixed(1)+" · 本週主力" : "還沒點亮";
-      return '<div class="'+cls+'"'+tap+'><div class="m-n"><i style="color:'+PALV[k].t+';">'+mk+'</i>'+MUSCLES[mk].name+'</div>'
-        + '<div class="mbar"><i style="width:'+barW+'%;background:'+PALV[k].c+';"></i></div>'
-        + '<div class="m-v">'+val+'</div></div>';
-    }).join('');
-    return '<div class="dsec">'+head+'<div class="row3">'+tiles+'</div></div>';
-  }).join('');
+  var ownDim = OWN ? MUSCLES[OWN.mk].dim : null;
+  h += slRow(DORD.map(function(k){
+        var pc = PCTV ? PCTV[k] : null;
+        return {h: pc==null ? 34 : Math.round(24 + pc/100*96),
+                state: pc==null ? "todo" : (k===ownDim ? "now" : "past"),
+                dimKey:k, vTop: pc==null ? "—" : pc,
+                lbl: DIM_ZH[k].replace("肌肉",""), lbl2: DIM_EN[k], onclick:"toggleWall()"};
+      }), {vals:true})
+    + '<div class="wall-note">'+(MS12
+        ? '實色＝健檢說先練這塊・淡色＝量過了・虛線＝還沒解鎖。'
+        : '四大肌肉都還沒量過——健檢做完，這面牆就會一塊塊長出來。')+'</div>';
+  h += (WALL_FULL ? DORD : [ownDim || DORD[0]]).map(dimDetailHTML).join('');
+  h += '<button class="drill-tg" onclick="toggleWall()">'+(WALL_FULL ? '收合 ▴' : '看還沒解鎖的 9 塊 ▾')+'</button>';
   h += '<div class="mushint">'+(OWN
-    ? '健檢說「'+OWN.name+'」先練最有感——已經排進你的輪替。其他 11 塊，會員一塊一塊點亮。'
+    ? '12 塊裡，健檢先幫你點亮 1 塊。其餘 11 塊在會員席跟著輪替，一塊一塊解鎖。'
     : '你在練的 2 塊地基，墊在這 12 塊肌肉下面。')+'</div>';
   return h;
+}
+function toggleWall(){
+  WALL_FULL = !WALL_FULL;
+  document.getElementById("muscard").innerHTML = musHTML();
+}
+/* 體驗席的資料開放邏輯：整面牆只有健檢給的那 1 塊點得開，其餘三維連詳解都上鎖 */
+function dimDetailHTML(k){
+  var ownDim = OWN ? MUSCLES[OWN.mk].dim : null;
+  var open = k === ownDim;
+  var inner = slRow(musclesOfDim(k).map(function(mk){
+        var own = OWN && mk === OWN.mk;
+        var v = (own && MS12) ? MS12[mk] : null;
+        return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70),
+                state: own ? "now" : "todo", dimKey:k,
+                vTop: v==null ? "—" : v.toFixed(1),
+                lbl: MUSCLES[mk].name, lbl2: mk,
+                tap: own, onclick: own ? "pocket('"+mk+"')" : null};
+      }), {vals:true});
+  return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:'+PALV[k].t+';">'+DIM_EN[k]+'</span> · <b>'+DIM_ZH[k]+'・3 小塊</b></div>'
+    + (open
+        ? inner + '<div class="lock-note">這排只有「'+OWN.name+'」點得開——健檢說先練這塊最有感。另外 2 塊，會員席一次開 3 塊。</div>'
+          + '<button class="pocket-go" onclick="pocket(\''+OWN.mk+'\')">看「'+OWN.name+'」怎麼練 →</button>'
+        : '<div class="lockwrap">'+inner+'</div><div class="lock-note lk">🔒 這 3 塊還沒解鎖——會員席跟著輪替，一次開 3 塊。</div>')
+    + '</div>';
 }
 
 /* ═ 口袋提示卡（幽靈浮層）＝demo v4.2 移植，素材全現成：MUSCLES＋DRILL＋CORE_DRILL ═ */
