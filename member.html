@@ -63,11 +63,12 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
    共軸：一律 skewX(-12deg)、origin 釘在基線（底邊）→ 所有片同角同軸。
    三態：.now 實色＝現在/這一個；.past 淡填＝走過/既有；.todo 虛線＝還沒到。
    I 金紅線：實色態不鋪 #C99A4E，改淡底＋深版 #8E682B 描邊（.now.gold）。 */
-.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px 4px 0;}
+.slw{--sg:0px;}
+.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 .sl.todo{background:transparent!important;border:1.5px dashed #B4A695;border-bottom:0;}
 .sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
-.slbl{display:flex;gap:7px;padding:7px 4px 0;}
+.slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
 .slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
 .slbl span.dim{color:#B4A695;font-weight:600;}
@@ -75,7 +76,7 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
 @keyframes sltap{0%,100%{box-shadow:0 0 0 0 var(--tc,rgba(198,96,58,.45));}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
 .slbl span em.tapchip{display:inline-block;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#C6603A;border-radius:9px;padding:1px 7px;margin-top:4px;letter-spacing:.05em;}
-.slv{display:flex;gap:7px;padding:0 4px;}
+.slv{display:flex;gap:7px;padding:0 calc(4px + var(--sg,0px)) 0 4px;}
 .slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
 
 /* 席位路徑＝頁尾次要 CTA（幽靈框描下一階識別色）：整條路一次露出＋按了參觀下一階 */
@@ -507,9 +508,14 @@ function slRow(items, opt){
       + it.lbl
       + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");
-  return (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
+  /* 斜角呼吸位：skewX(-12deg) 會把最高那片的右上角往外推 h*tan12°，
+     不留位子就會被切掉。從最高片自己算，別再一處一處補 padding-right。 */
+  var gut = Math.ceil(Math.max.apply(null, items.map(function(it){ return it.h; })) * 0.2126);
+  return '<div class="slw" style="--sg:' + gut + 'px;">'
+    + (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
     + '<div class="srow">' + slices + '</div>'
-    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>');
+    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>')
+    + '</div>';
 }
 
 /* ── 席位路徑（頁尾次要 CTA）：參觀鏈連到私教席的 demo ── */
@@ -787,7 +793,7 @@ function meHTML(){
   var focusDim = MUSCLES[FOCUS].dim;
   var pot = potNow();
   var full = pot != null;
-  h += '<div class="cd" style="padding-right:30px;"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
+  h += '<div class="cd"><div class="sec">MUSCLE WALL · <b>四大肌肉</b></div>'
     + '<div class="wall-pot"><div class="pot-k">已解鎖影響力</div><div class="pot-n">' + (full ? pot : "—") + '<span>/ 1000</span></div></div>'
     + slRow(DORD.map(function(k){
         var v = D5[k];
@@ -799,6 +805,8 @@ function meHTML(){
     + (full ? '' : '<div class="wknote">「—」＝這塊還沒量過。上課跟教練把它量起來，這面牆就會一塊塊長出來——先練量過的那塊最有感。</div>')
     /* 主力那一維預設就攤開——口袋卡入口原本埋在「展開 12 塊」後面，兩層深沒人找得到 */
     + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : dimDetailHTML(focusDim))
+    /* 鎖頭字一句就夠：每一排都掛一次會變成三行雜訊 */
+    + (WALL_FULL ? '<div class="lock-note lk">🔒 灰掉的那幾排還沒開——詳解跟著主力走，會員版一次開 3 塊。</div>' : '')
     + '<button class="drill-tg" onclick="toggleWall()">' + (WALL_FULL ? "收合 ▴" : "展開其餘 9 塊・詳細 ▾") + '</button>'
     + '</div>';
   /* 升單卡：軌跡預覽當主角＋錢鈕一頁一顆 */
@@ -835,7 +843,7 @@ function dimDetailHTML(k){
     + (open
         ? inner + '<div class="lock-note">本週主力——這 3 塊都點得開，看完整怎麼練。</div>'
           + '<button class="pocket-go" onclick="openPocket(\'' + FOCUS + '\')">看「' + MUSCLES[FOCUS].name + '」怎麼練 →</button>'
-        : '<div class="lockwrap">' + inner + '</div><div class="lock-note lk">🔒 詳解跟著主力開放——會員版一次開 3 塊。</div>')
+        : '<div class="lockwrap">' + inner + '</div>')
     + '</div>';
 }
 

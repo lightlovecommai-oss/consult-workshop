@@ -62,17 +62,18 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 /* ═ 薄片原語・科技版：形狀跟 member/visitor 完全同（skewX -12°、基線共軸、三態），
    只換色——實色＝霓虹＋發光、淡填＝霓虹 22% 透明、虛線＝深藍灰。
    I 金紅線的深底落法：不鋪實，改 18% 金底＋實線金描邊＋發光。 ═ */
-.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.20);padding:6px 4px 0;}
+.slw{--sg:0px;}
+.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.20);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 .sl.todo{background:transparent!important;border:1.5px dashed #3d5268;border-bottom:0;}
 .sl.sel{outline:2px solid #E8C89A;outline-offset:2px;animation:selpop .35s cubic-bezier(.34,1.56,.64,1);}
 @keyframes selpop{0%{transform:skewX(-12deg) scale(.92);}60%{transform:skewX(-12deg) scale(1.08);}100%{transform:skewX(-12deg) scale(1);}}
 .sl.now.gold{background:rgba(230,169,58,.18)!important;border:2px solid #e6a93a;border-bottom:0;box-shadow:0 0 14px rgba(230,169,58,.45);}
-.slbl{display:flex;gap:7px;padding:7px 4px 0;}
+.slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#cfdcea;line-height:1.45;}
 .slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
 .slbl span.dim{color:#5d7692;font-weight:600;}
-.slv{display:flex;gap:7px;padding:0 4px;}
+.slv{display:flex;gap:7px;padding:0 calc(4px + var(--sg,0px)) 0 4px;}
 .slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
 
 /* 客戶卡（CRM 主角）：一張卡＝一個人的軌跡。
@@ -150,7 +151,7 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .sub{width:100%;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#fff;border:0;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;margin-top:15px;font-family:inherit;min-height:44px;}
 .sub[disabled]{background:#2a3c52;color:#5d7692;}
 .skip{width:100%;margin-top:8px;background:none;border:0;color:#7d90a3;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
-.ladder{margin-top:6px;padding-right:30px;} /* 最高片 118px 的斜角呼吸位 */
+.ladder{margin-top:6px;} /* 最高片 118px 的斜角呼吸位 */
 .ladder .sl{cursor:pointer;}
 
 /* 完成頁 */
@@ -452,9 +453,14 @@ function slRow(items, opt){
       + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#5d7692" : p.t||"#8ea1b6") + ';">' + it.lbl2 + '</i>' : '')
       + it.lbl + '</span>';
   }).join("");
-  return (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
+  /* 斜角呼吸位：skewX(-12deg) 會把最高那片的右上角往外推 h*tan12°，
+     不留位子就會被切掉。從最高片自己算，別再一處一處補 padding-right。 */
+  var gut = Math.ceil(Math.max.apply(null, items.map(function(it){ return it.h; })) * 0.2126);
+  return '<div class="slw" style="--sg:' + gut + 'px;">'
+    + (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
     + '<div class="srow">' + slices + '</div>'
-    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>');
+    + (opt.noLbl ? '' : '<div class="slbl">' + lbls + '</div>')
+    + '</div>';
 }
 
 /* ── 客戶軌跡：一片＝一次出手（時間序），顏色＝用哪塊肌肉、高度＝他走到哪 ── */
@@ -776,7 +782,7 @@ function starHTML(){
   var selLine = '<div class="howq" style="margin-top:12px;"><div class="howq-k">L' + sel.L + ' · '
     + (sel.st==="done" ? "已點亮" : sel.st==="now" ? "下一格" : sel.dim ? "還沒到" : ln.unlocked ? "已解鎖" : "還沒開") + '</div>'
     + '<div class="howq-t"><b>' + sel.zh + '</b><br>' + selBody + '</div></div>';
-  var h = '<div class="cd" style="padding-right:30px;"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 肌肉格亮了 ' + ln.doneN + '/4</span></div>'
+  var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 肌肉格亮了 ' + ln.doneN + '/4</span></div>'
     + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
     + selLine
     + '<div class="linknote">解鎖是總開關：肌肉量到哪、格子亮到哪——課上到哪，牆就長到哪。L5–L8 的進度下次 1v1 跟教練對。</div>';
@@ -905,7 +911,7 @@ function recHTML(){
               ? '<div class="fp-c" style="margin-top:10px;">✓ 有「」的原話，自動進改觀句金庫——只收真話，不代擬</div>'
               : '<div class="wall-note" style="text-align:left;">下次他的原話用「」框起來，會自動存進改觀句金庫。</div>')
         : '')
-      + '<div class="cd" style="margin-top:16px;padding-right:30px;text-align:left;">'
+      + '<div class="cd" style="margin-top:16px;text-align:left;">'
       + '<div class="sec">CLIENT PATH · <b>' + esc_(REC.who) + ' 的軌跡</b></div>'
       + runRowHTML(REC.who)
       + '<div class="read"><div class="cv">光</div><div>' + (soft2 ? SOFT_READ : NEXT[st.k==="none" ? STAGES[clientHi(REC.who)].k : st.k].line) + '</div></div></div>'
@@ -989,7 +995,7 @@ function outHTML(){
   var fm = focusMuscle(), focusDim = fm ? MUSCLES[fm].dim : null;
   var full = DORD.every(function(k){ return d5[k] != null; });
   var measured = MORD.filter(function(k){ return scores[k] != null; }).length;
-  h += '<div class="cd" style="padding-right:30px;"><div class="sec">MUSCLE WALL · <b>四大肌肉</b> <span style="color:#5d7692;font-weight:600;">' + measured + '/12 已量</span></div>';
+  h += '<div class="cd"><div class="sec">MUSCLE WALL · <b>四大肌肉</b> <span style="color:#5d7692;font-weight:600;">' + measured + '/12 已量</span></div>';
   if (full) {
     var pct = {}; DORD.forEach(function(k){ pct[k] = pctFromEval(d5[k]); });
     var pot = calcPotential(pct).unlocked;
