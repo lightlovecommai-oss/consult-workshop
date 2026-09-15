@@ -194,6 +194,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .pill{font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;display:inline-block;}
 
 .lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
+.cyc-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;text-align:center;}
 /* 口袋卡入口鈕：次要鈕（白底描邊），不跟同頁的錢鈕搶——一頁一顆錢鈕的規矩 */
 .pocket-go{display:block;width:100%;margin-top:10px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:14px;padding:13px;font-size:15px;font-weight:700;color:#AF5433;cursor:pointer;font-family:inherit;min-height:48px;}
 .pocket-go:active{transform:scale(.99);}
@@ -430,7 +431,9 @@ var FREE_TALK_URL = "";
 var PRO_WS = ["超引力-顧問課", "超引力-公眾演說"]; /* member 的 WID 排除私教班 */
 var LOG = [], FEED = [], CHEERED = {};
 var MS = {}, D5 = {};            /* 每次 render 重算：calcMuscleScores / calcDimScores5 */
-var FOCUS = "A1", DONE_TODAY = false, IS_MEMBER = true;
+/* DONE_TODAY＝任務輪（中午換日，管按鈕能不能按）；DONE_CAL＝真實今天有沒有紀錄（管日曆格）。
+   兩個混用會讓上午那筆昨天的紀錄同時點亮「昨天」跟「今天」兩格、週天數也多算一天。 */
+var FOCUS = "A1", DONE_TODAY = false, DONE_CAL = false, IS_MEMBER = true;
 var OPEN_DRILL = false, OPEN_WEEK = false, WALL_FULL = false, POCKET = null, FEED_ALL = false;
 var ANIM = true;                 /* 進頁/切分頁薄片從基線長上來一次；頁內重繪不重播 */
 
@@ -552,10 +555,11 @@ function weekStripHTML(){
   var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
   var dim = MUSCLES[FOCUS].dim;
   var items = days.map(function(d, i){
-    var done = i === dow ? DONE_TODAY : (dow - i > 0 && !!dset[ago(dow - i)]);
+    var done = i === dow ? DONE_CAL : (dow - i > 0 && !!dset[ago(dow - i)]);
     var state = i === dow ? (done ? "now" : "todo") : (done ? "past" : "todo");
+    var open = i === dow && !done && !DONE_TODAY;
     return {h: done ? 26 : 17, state: state, dimKey: dim, lbl: i === dow ? "今天" : d,
-            hot: i === dow && !done, onclick: i === dow && !done ? "openRec()" : null};
+            hot: open, onclick: open ? "openRec()" : null};
   });
   return '<div class="wk">' + slRow(items) + '</div>';
 }
@@ -564,7 +568,7 @@ function weekCardHTML(){
   var dow = (new Date().getDay() + 6) % 7;
   var dset = {}; LOG.forEach(function(e){ dset[e.date] = 1; });
   var n = 0; for (var i = 1; i <= dow; i++) if (dset[ago(i)]) n++;
-  if (DONE_TODAY) n++;
+  if (DONE_CAL) n++;
   return '<div class="cd"><div class="sec">THIS WEEK · <b>這週</b></div>'
     + '<div class="wkline">這週練了<b>' + n + '</b>天。<span>沒練的日子不扣。</span></div>'
     + weekStripHTML()
@@ -614,8 +618,10 @@ function todayHTML(){
     + '<div class="howq"><div class="howq-k">開口就用這句</div><div class="howq-t">「' + md_(d.line) + '」</div></div>'
     + '<button class="drill-tg" onclick="toggleDrill()">怎麼練・完整詳解 ' + (OPEN_DRILL ? "▴" : "▾") + '</button>'
     + (OPEN_DRILL ? drillHTML(d) : '')
+    /* 「這一輪」不是「今天」：任務池的日界線在中午 12:00（taskCycleNow_），
+       上午打開時昨天下午那筆還在同一輪內——講「今天記好了」會跟他的記憶打架。 */
     + (DONE_TODAY
-        ? '<button class="gobtn done">今天記好了 ✓</button>'
+        ? '<button class="gobtn done">這一輪記好了 ✓</button><div class="cyc-note">下一輪中午 12:00 開始——晚上練的算同一輪，不用趕在半夜前記。</div>'
         : '<button class="gobtn" onclick="openRec()">練完了，記下他的反應</button>')
     + '<div class="rule4" style="margin-top:16px;"></div></div>';
   return h + weekCardHTML() + tomorrowHTML() + seatPathHTML();
@@ -744,7 +750,7 @@ function bindRec(){
     LOG = buildLog();
     if (REC.share && REC.stage !== "none")
       FEED.unshift({n:"你", stage:REC.stage, t: REC.note || ('練「' + MUSCLES[FOCUS].name + '」——' + STAGES[stageIdx(REC.stage)].full), cheer:0, mine:true});
-    DONE_TODAY = true;
+    DONE_TODAY = true; DONE_CAL = true;
     REC.step = 3; window.scrollTo(0,0); render();
   }
   if (dn) dn.onclick = function(){ done(false); };
@@ -1026,7 +1032,7 @@ async function boot(){
     postToSheet = function(){ return Promise.resolve(); };   /* demo 不寫 Sheet */
     TASKS = []; S = demoStateMember_(); WID = "";
     setSeat(qs.get("seat") !== "v");
-    LOG = buildLog(); FOCUS = "T1"; DONE_TODAY = false;
+    LOG = buildLog(); FOCUS = "T1"; DONE_TODAY = false; DONE_CAL = false;
     /* demo 的全館數字（示意，同 demo-member-v5 劇本） */
     GYM_TOTAL = 412; GYM_MONTH_TOP = { muscle: "", dim: "T" }; GYM_MONTH_PEOPLE = 13;
     FEED = buildFeed();
@@ -1036,6 +1042,7 @@ async function boot(){
     if (qs.get("drill")) OPEN_DRILL = true;
     if (qs.get("wall")) WALL_FULL = true;
     if (qs.get("week")) OPEN_WEEK = true;
+    if (qs.get("done")) { DONE_TODAY = true; DONE_CAL = qs.get("done") !== "cycle"; }
     el("nav").classList.remove("hide");
     if (qs.get("review") === "1") { renderReview(); return; }
     render();
@@ -1060,6 +1067,7 @@ async function boot(){
   LOG = buildLog();
   FOCUS = weakestThree(S)[0] || "A1";
   DONE_TODAY = (S.checkinLog || []).some(function(e){ return normDate(e.date) === taskDayStr(); });
+  DONE_CAL = (S.checkinLog || []).some(function(e){ return normDate(e.date) === todayStr(); });
   FEED = buildFeed(); /* 先上 WINS＋種子，真貼文載到再補 */
   el("nav").classList.remove("hide");
   render();
