@@ -438,6 +438,11 @@ var MS = {}, D5 = {};            /* 每次 render 重算：calcMuscleScores / ca
 /* DONE_TODAY＝任務輪（中午換日，管按鈕能不能按）；DONE_CAL＝真實今天有沒有紀錄（管日曆格）。
    兩個混用會讓上午那筆昨天的紀錄同時點亮「昨天」跟「今天」兩格、週天數也多算一天。 */
 var FOCUS = "A1", DONE_TODAY = false, DONE_CAL = false, IS_MEMBER = true;
+/* 「指定席位」欄的值 → 這頁要掛哪一席。對照表跟 index.html 的 SEAT_MAP 是同一份來源，
+   那邊決定去哪一頁、這邊決定到站後掛什麼頭。私教直開 member.html 當會員席看待。 */
+var SEAT_FORCE = {"體驗席":false, "體驗客":false, "visitor":false,
+                  "會員席":true, "會員":true, "member":true,
+                  "私教席":true, "私教":true, "pro":true};
 var OPEN_DRILL = false, OPEN_WEEK = false, WALL_FULL = false, POCKET = null, FEED_ALL = false;
 var ANIM = true;                 /* 進頁/切分頁薄片從基線長上來一次；頁內重繪不重播 */
 
@@ -1064,9 +1069,12 @@ async function boot(){
   var st = d.student || {};
   S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "",
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
-  /* 席位：STUDENTS 的 paidMember 手動勾選欄。路由層（index.html）已把未付 99 導去
-     visitor.html，這裡預設會員、留體驗席當直開網址的防呆。 */
-  setSeat(st.paidMember == null ? true : !!st.paidMember);
+  /* 席位判定順序：①STUDENTS 的「指定席位」手動蓋台欄（index.html 的 routeFor 也吃這欄，
+     兩邊要同一個答案，否則會被路由送進 member.html 卻掛體驗席的頭）②paidMember 勾選欄。
+     ⚠️ Code.gs 的 granted_() 永遠回布林，paidMember 不會是 null——欄位漏掉或改名會靜默
+     判成體驗席，所以不能只靠它。 */
+  var forced = SEAT_FORCE[String(st.seat || "").trim().toLowerCase()];
+  setSeat(forced == null ? !!st.paidMember : forced);
   var en = (d.enrollments || []).filter(function(e){ return e.lineId === S.lineId && PRO_WS.indexOf(e.workshopId) < 0; });
   WID = en.length ? en[0].workshopId : "";
   LOG = buildLog();
