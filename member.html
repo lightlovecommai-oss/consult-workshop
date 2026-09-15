@@ -66,6 +66,9 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+/* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。
+   階梯／週軌那些排是階段不是分數，不給軌。 */
+.sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(74,27,12,.055);border-radius:6px 6px 0 0;z-index:-1;}
 .sl.todo{background:transparent!important;border:1.5px dashed #9C8879;border-bottom:0;}
 .sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
 .slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
@@ -491,7 +494,7 @@ function slRow(items, opt){
   }).join("");
   var slices = items.map(function(it){
     var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
-    var cls = "sl " + it.state, sty = "height:" + it.h + "px;";
+    var cls = "sl " + it.state, sty = "height:" + it.h + "px;" + (opt.full ? "--fh:" + opt.full + "px;" : "");
     if (it.state==="now") {
       if (it.dimKey==="I") cls += " gold"; /* I 金紅線：淡底＋深版描邊，不鋪實色 */
       else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
@@ -799,9 +802,9 @@ function meHTML(){
         var v = D5[k];
         var state = v==null ? "todo" : (k===focusDim ? "now" : "past");
         return {h: v==null ? 34 : Math.round(24 + (v-1)/4*96), state:state, dimKey:k,
-                vTop: v==null ? "—" : v.toFixed(1), lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k], onclick:"toggleWall()"};
-      }), {vals:true})
-    + '<div class="wall-note">實色＝本週主力・淡色＝練過・虛線＝還沒解鎖。</div>'
+                vTop: v==null ? "—" : pctFromEval(v), lbl:DIMS[k].name.replace("肌肉",""), lbl2:DIM_EN[k], onclick:"toggleWall()"};
+      }), {vals:true, full:120})
+    + '<div class="wall-note">實色＝本週主力・淡色＝練過・虛線＝還沒解鎖・背後淡影＝這把尺的滿格。<br>0–100 ＝ 你在這把尺上已解鎖到哪，不是跟別人比的名次。</div>'
     + (full ? '' : '<div class="wknote">「—」＝這塊還沒量過。上課跟教練把它量起來，這面牆就會一塊塊長出來——先練量過的那塊最有感。</div>')
     /* 主力那一維預設就攤開——口袋卡入口原本埋在「展開 12 塊」後面，兩層深沒人找得到 */
     + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : dimDetailHTML(focusDim))
@@ -835,9 +838,9 @@ function dimDetailHTML(k){
   var inner = slRow(ks.map(function(mk){
         var v = MS[mk];
         return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70), state: v==null ? "todo" : (mk===FOCUS ? "now" : "past"),
-                dimKey:k, vTop: v==null ? "—" : v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk,
+                dimKey:k, vTop: v==null ? "—" : pctFromEval(v), lbl:MUSCLES[mk].name, lbl2:mk,
                 tap: open && mk===FOCUS, onclick: open ? "openPocket('" + mk + "')" : null};
-      }), {vals:true})
+      }), {vals:true, full:88})
     + '<div class="fbchips">' + fbChips(k) + '</div>';
   return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span> · <b>' + DIMS[k].name + '・3 小塊</b></div>'
     + (open

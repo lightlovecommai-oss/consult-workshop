@@ -65,6 +65,9 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.20);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+/* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。
+   科技底是深色，軌要用亮色壓一層，暖版那邊的墨色在這裡看不見。 */
+.sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(234,241,250,.07);border-radius:6px 6px 0 0;z-index:-1;}
 .sl.todo{background:transparent!important;border:1.5px dashed #526c88;border-bottom:0;}
 .sl.sel{outline:2px solid #E8C89A;outline-offset:2px;animation:selpop .35s cubic-bezier(.34,1.56,.64,1);}
 @keyframes selpop{0%{transform:skewX(-12deg) scale(.92);}60%{transform:skewX(-12deg) scale(1.08);}100%{transform:skewX(-12deg) scale(1);}}
@@ -439,7 +442,7 @@ function slRow(items, opt){
   }).join("");
   var slices = items.map(function(it){
     var p = PALV[it.dimKey] || {c:"#5d7692",t:"#8ea1b6",tint:"rgba(125,144,163,.18)"};
-    var cls = "sl " + it.state, sty = "height:" + it.h + "px;";
+    var cls = "sl " + it.state, sty = "height:" + it.h + "px;" + (opt.full ? "--fh:" + opt.full + "px;" : "");
     if (it.state==="now") {
       if (it.dimKey==="I") cls += " gold";
       else sty += "background:" + p.c + ";box-shadow:0 0 14px " + p.c + "66;";
@@ -684,7 +687,7 @@ function flightHTML(){
   if (OPEN_PATH) {
     h += '<div class="drill">'
       + '<div class="fp-e" style="padding:10px 2px 2px;">照分數判你走這條——你最強：'
-      + pn.order.slice(0,2).map(function(k){ return k + (pn.d5[k]!=null ? ' ' + pn.d5[k].toFixed(1) : ''); }).join('、')
+      + pn.order.slice(0,2).map(function(k){ return k + (pn.d5[k]!=null ? ' ' + pctFromEval(pn.d5[k]) : ''); }).join('、')
       + '（教練拍板可改）。</div>'
       + pn.chain.map(function(st,i){
           var p = PALV[st.dim];
@@ -1005,9 +1008,9 @@ function outHTML(){
       var v = d5[k];
       if (v == null) return {h:24, state:"todo", dimKey:k, vTop:"—", lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
       return {h: Math.round(24 + (v-1)/4*96), state: k===focusDim ? "now" : "past", dimKey:k,
-              vTop: v.toFixed(1), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
-    }), {vals:true})
-    + '<div class="open-note">私教席 12 塊全開——教練校準分數，照上升空間最大的練。</div>'
+              vTop: pctFromEval(v), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
+    }), {vals:true, full:120})
+    + '<div class="open-note">私教席 12 塊全開——教練校準分數，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
     + DORD.map(function(k){ return dimDetailHTML(k, scores, fm); }).join("")
     + '</div>';
   var VAULT = buildVault();
@@ -1028,8 +1031,8 @@ function dimDetailHTML(k, scores, fm){
         var v = scores[mk];
         if (v == null) return {h:18, state:"todo", dimKey:k, vTop:"—", lbl:MUSCLES[mk].name, lbl2:mk};
         return {h: Math.round(18 + (v-1)/4*70), state: mk===fm ? "now" : "past",
-                dimKey:k, vTop:v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk};
-      }), {vals:true})
+                dimKey:k, vTop:pctFromEval(v), lbl:MUSCLES[mk].name, lbl2:mk};
+      }), {vals:true, full:88})
     + '<div class="fbchips">' + fbChips(k) + '</div></div>';
 }
 function fbChips(dim){

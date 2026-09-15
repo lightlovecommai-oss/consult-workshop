@@ -191,6 +191,8 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
 .sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+/* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。 */
+.sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(74,27,12,.055);border-radius:6px 6px 0 0;z-index:-1;}
 .sl.todo{background:transparent!important;border:1.5px dashed #9C8879;border-bottom:0;}
 .sl.now.gold{background:#F1E5CC!important;border:2px solid #8E682B;border-bottom:0;}
 .sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
@@ -599,7 +601,7 @@ function slRow(items, opt){
   }).join("");
   var slices = items.map(function(it){
     var p = PALV[it.dimKey] || {c:"#B4A695",t:"#8A7266",tint:"#EFE6DB"};
-    var cls = "sl " + it.state, sty = "height:" + it.h + "px;";
+    var cls = "sl " + it.state, sty = "height:" + it.h + "px;" + (opt.full ? "--fh:" + opt.full + "px;" : "");
     if (it.state==="now") {
       if (it.dimKey==="I") cls += " gold"; /* I 金紅線：淡底＋深版描邊，不鋪實色 */
       else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
@@ -640,9 +642,9 @@ function musHTML(){
                 state: pc==null ? "todo" : (k===ownDim ? "now" : "past"),
                 dimKey:k, vTop: pc==null ? "—" : pc,
                 lbl: DIM_ZH[k].replace("肌肉",""), lbl2: DIM_EN[k], onclick:"toggleWall()"};
-      }), {vals:true})
+      }), {vals:true, full:120})
     + '<div class="wall-note">'+(MS12
-        ? '實色＝健檢說先練這塊・淡色＝量過了・虛線＝還沒解鎖。'
+        ? '實色＝健檢說先練這塊・淡色＝量過了・虛線＝還沒解鎖・背後淡影＝這把尺的滿格。<br>0–100 ＝ 你在這把尺上已解鎖到哪，不是跟別人比的名次。'
         : '四大肌肉都還沒量過——健檢做完，這面牆就會一塊塊長出來。')+'</div>';
   var dims = WALL_FULL ? DORD : [ownDim || DORD[0]];
   h += dims.map(dimDetailHTML).join('');
@@ -666,12 +668,13 @@ function dimDetailHTML(k){
   var inner = slRow(musclesOfDim(k).map(function(mk){
         var own = OWN && mk === OWN.mk;
         var v = (own && MS12) ? MS12[mk] : null;
+        /* 2026-09-15 統一單位：小塊也走 0–100（pctFromEval），全站肌肉分數只有這一把尺 */
         return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70),
                 state: own ? "now" : "todo", dimKey:k,
-                vTop: v==null ? "—" : v.toFixed(1),
+                vTop: v==null ? "—" : pctFromEval(v),
                 lbl: MUSCLES[mk].name, lbl2: mk,
                 tap: own, onclick: own ? "pocket('"+mk+"')" : null};
-      }), {vals:true});
+      }), {vals:true, full:88});
   return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:'+PALV[k].t+';">'+DIM_EN[k]+'</span> · <b>'+DIM_ZH[k]+'・3 小塊</b></div>'
     + (open
         ? inner + '<div class="lock-note">這排只有「'+OWN.name+'」點得開——健檢說先練這塊最有感。另外 2 塊，會員席一次開 3 塊。</div>'
