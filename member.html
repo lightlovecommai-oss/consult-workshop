@@ -29,6 +29,10 @@
    ③ 全貌感常駐：席位路徑條每個分頁都在（現在位置亮、灰格叫還沒解鎖、終點放骨層句） */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
+/* 席位色：藍＝我在哪一席（骨架、數字、標籤），行動色橘只留給「要按的」。
+   member.html 也會渲染體驗席（未付費直開的防呆），所以走變數不寫死。 */
+body{--sd:#54718D;--st:#DDE6EE;}
+body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:84px;}
 
 /* 席位橫幅：體驗席＝T綠／會員席＝P藍（私教席金在 pro.html 那頭），載入中先咖啡漸層 */
@@ -48,10 +52,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .cd,.cw{background:#fff;border:1px solid #E8DDD3;border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,60,30,.05);}
 .hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:0 0 12px;}
-.sec b{color:#4A1B0C;font-size:13px;letter-spacing:1px;}
+.sec b{color:var(--sd);font-size:13px;letter-spacing:1px;}
 .kick{display:flex;align-items:center;font-size:12px;font-weight:700;letter-spacing:2px;color:#8A7266;margin-bottom:8px;}
 .big-t{font-size:22px;font-weight:900;line-height:1.5;}
-.big-t em{font-style:normal;color:#C6603A;}
+.big-t em{font-style:normal;color:var(--sd);}
 .sub-t{font-size:15px;color:#6E4A3C;margin-top:7px;line-height:1.85;}
 .rule4{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin-top:16px;}
 
@@ -91,9 +95,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 /* 主行動鈕（CTA 三層：練習鈕＝磚橘柔漸層／錢鈕＝磚橘→金漸層・一頁一顆） */
 .gobtn{display:block;width:100%;background:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);box-shadow:0 4px 12px rgba(198,96,58,.20);color:#fff;border:0;border-radius:16px;padding:17px;font-size:17px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;font-family:inherit;min-height:56px;box-sizing:border-box;margin-top:18px;}
 .gobtn:active{transform:scale(.98);}
-.gobtn.done{background:#DCE7DE;color:#3E5546;box-shadow:none;cursor:default;}
+.gobtn.done{background:var(--st);color:var(--sd);box-shadow:none;cursor:default;}
 .gobtn.money{background:linear-gradient(135deg,#C6603A 0%,#C99A4E 100%);text-shadow:0 1px 2px rgba(0,0,0,.18);box-shadow:0 6px 18px rgba(198,96,58,.28);}
-.howq{margin-top:14px;background:#FAF3EA;border-left:3px solid #C6603A;border-radius:0 12px 12px 0;padding:12px 14px;}
+.howq{margin-top:14px;background:#FAF3EA;border-left:3px solid var(--sd);border-radius:0 12px 12px 0;padding:12px 14px;}
 .howq-k{font-size:12px;color:#8A7266;margin-bottom:5px;}
 .howq-t{font-size:15px;line-height:1.8;}
 /* 換一個 ⟳（v3 練-1 拍板：純 icon 無底色無框——次要按鈕不搶眼） */
@@ -101,22 +105,22 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .p3swap:active{transform:rotate(180deg) scale(.92);}
 
 /* 詳解摺疊 */
-.drill-tg{width:100%;background:none;border:0;color:#AF5433;font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
+.drill-tg{width:100%;background:none;border:0;color:var(--sd);font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
 .drill{margin-top:8px;border-top:1px dashed #E8DDD3;}
 .dr{padding:10px 2px 9px;border-bottom:1px dashed #F0E3DB;}
 .dr:last-child{border-bottom:0;}
 .dr-k{font-size:11.5px;color:#8A7266;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;}
 .dr-v{font-size:14px;line-height:1.85;}
-.dr-v b{color:#AF5433;}
+.dr-v b{color:var(--sd);}
 
 /* 週薄片列＋THIS WEEK 卡＋明天預告卡 */
 .wk{margin-top:16px;border-top:1px dashed #E8DDD3;padding-top:12px;}
 .wk .slbl span{font-size:11px;}
 .wkline{font-size:15px;}
-.wkline b{font-size:24px;font-weight:900;color:#AF5433;font-variant-numeric:tabular-nums;margin:0 2px;}
+.wkline b{font-size:24px;font-weight:900;color:var(--sd);font-variant-numeric:tabular-nums;margin:0 2px;}
 .wkline span{display:block;font-size:12.5px;color:#8A7266;margin-top:2px;}
 .tmr{display:flex;align-items:center;gap:14px;}
-.tmr-chip{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:#FAF3EA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#AF5433;line-height:1.2;}
+.tmr-chip{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:var(--st);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:var(--sd);line-height:1.2;}
 .tmr-chip span{font-size:10.5px;font-weight:700;color:#8A7266;letter-spacing:1px;}
 .tmr-t{font-size:15.5px;font-weight:800;}
 .tmr-s{font-size:13px;color:#8A7266;margin-top:3px;line-height:1.7;}
@@ -169,7 +173,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .ok-s{font-size:15px;color:#5A3A2A;line-height:1.95;}
 .p3check{width:64px;height:64px;border-radius:50%;background:#C6603A;color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto;animation:cpop .6s cubic-bezier(.34,1.56,.64,1);}
 @keyframes cpop{0%{transform:scale(0);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
-.echo{background:#fff;border-left:3px solid #C6603A;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;line-height:1.75;text-align:left;}
+.echo{background:#fff;border-left:3px solid var(--sd);border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;line-height:1.75;text-align:left;}
 .echo span{display:block;font-size:12px;color:#8A7266;margin-top:4px;}
 .bone{margin:16px 2px 2px;font-size:15px;line-height:1.85;text-align:center;animation:bfade 1s .4s both;cursor:pointer;}
 @keyframes bfade{from{opacity:0;}to{opacity:1;}}
@@ -219,14 +223,14 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .resc-t{font-size:15px;font-weight:800;}
 .resc-s{font-size:12.5px;margin-top:5px;line-height:1.7;color:#8A7266;}
 .resc.dark .resc-s{color:rgba(247,241,236,.8);}
-.resc-a{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:#AF5433;text-decoration:none;border-bottom:1.5px solid #AF5433;padding-bottom:1px;}
+.resc-a{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;color:var(--sd);text-decoration:none;border-bottom:1.5px solid var(--sd);padding-bottom:1px;}
 .resc.dark .resc-a{color:#E8C89A;border-color:#E8C89A;}
 .slim{background:#fff;border:1px solid #F0E3DB;border-radius:14px;padding:11px 13px;margin-bottom:8px;}
 .slim-top{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;}
 .slim-b{font-size:14px;line-height:1.8;margin-top:6px;color:#5A3A2A;}
 .slim-b span{color:#6E4A3C;font-size:13px;font-weight:700;}
 .stat{font-size:15px;line-height:1.8;}
-.stat b{font-size:28px;font-weight:700;color:#C6603A;font-variant-numeric:tabular-nums;vertical-align:-3px;}
+.stat b{font-size:28px;font-weight:700;color:var(--sd);font-variant-numeric:tabular-nums;vertical-align:-3px;}
 
 /* 升單卡（私教席）：軌跡預覽當主角＋錢鈕（磚橘→金漸層・一頁一顆） */
 .upg{background:linear-gradient(135deg,#4A1B0C,#6B3018);border-radius:16px;padding:19px 18px;color:#F7F1EC;margin-bottom:14px;}
@@ -275,7 +279,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:460px;margin:0 auto;background:#fff;display:flex;padding:8px 0 max(11px,env(safe-area-inset-bottom));}
 .nav::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
 .nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;color:#B4A695;background:none;border:0;cursor:pointer;padding:5px 0;font-family:inherit;min-height:44px;}
-.nv.on{color:#C6603A;}
+.nv.on{color:var(--sd);}
 .nv-i{height:22px;display:flex;align-items:center;justify-content:center;}
 .nv-i svg{display:block;}
 .hide{display:none;}
@@ -948,6 +952,7 @@ function go(p){
 function setSeat(member){
   IS_MEMBER = member;
   el("tb").className = "tb " + (member ? "seat-m" : "seat-v");
+  document.body.classList.toggle("seat-v", !member);
   el("seatEn").textContent = "ATPIFIT · " + (member ? "MEMBER" : "VISITOR") + " SEAT";
   el("hall").textContent = member ? "會員席" : "體驗席";
 }
