@@ -805,6 +805,28 @@ function loadQR_() {
   document.head.appendChild(sc);
 }
 
+/* ── Aa 字級開關（2026-09-15 無障礙）：60 歲客群看不到字。
+   三檔 100／115／130%，用 CSS zoom（會重排版、不會橫向溢出），
+   localStorage 一個 key 四頁共用——在哪頁調，整站跟著。
+   common.js 都在 </body> 前載入，跑到這裡時 body 一定在。 ── */
+var FONT_SCALES = [1, 1.15, 1.3];
+function fontScaleNow_() {
+  var v = 1;
+  try { v = parseFloat(localStorage.getItem("cw_fontscale") || "1"); } catch (e) {}
+  return FONT_SCALES.indexOf(v) > -1 ? v : 1;
+}
+function applyFontScale_(v) {
+  document.body.style.zoom = v === 1 ? "" : v;
+  var btn = document.getElementById("aaBtn");
+  if (btn) btn.textContent = v === 1 ? "Aa" : (v === 1.15 ? "Aa+" : "Aa++");
+}
+function cycleFontScale() {
+  var next = FONT_SCALES[(FONT_SCALES.indexOf(fontScaleNow_()) + 1) % FONT_SCALES.length];
+  try { localStorage.setItem("cw_fontscale", String(next)); } catch (e) {}
+  applyFontScale_(next);
+}
+applyFontScale_(fontScaleNow_());
+
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];
 async function loadStudents() {
