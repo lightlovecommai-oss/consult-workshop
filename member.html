@@ -67,6 +67,10 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#4A1B0C;line-height:1.45;}
 .slbl span i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:1px;}
 .slbl span.dim{color:#B4A695;font-weight:600;}
+/* 可點的薄片（口袋卡入口）：光暈脈動＋標籤下的「點我」小徽——薄片本身長得不像按鈕，要講出來 */
+.sl.tap{cursor:pointer;animation:sltap 1.9s ease-in-out infinite;}
+@keyframes sltap{0%,100%{box-shadow:0 0 0 0 var(--tc,rgba(198,96,58,.45));}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
+.slbl span em.tapchip{display:inline-block;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#C6603A;border-radius:9px;padding:1px 7px;margin-top:4px;letter-spacing:.05em;}
 .slv{display:flex;gap:7px;padding:0 4px;}
 .slv span{flex:1;text-align:center;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
 
@@ -190,6 +194,9 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
 .pill{font-size:13px;font-weight:600;color:#993C1D;background:#F0E3DB;padding:5px 12px;border-radius:20px;display:inline-block;}
 
 .lock-note{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.7;}
+/* 口袋卡入口鈕：次要鈕（白底描邊），不跟同頁的錢鈕搶——一頁一顆錢鈕的規矩 */
+.pocket-go{display:block;width:100%;margin-top:10px;background:#FDF6EF;border:1.5px solid #E8C89A;border-radius:14px;padding:13px;font-size:15px;font-weight:700;color:#AF5433;cursor:pointer;font-family:inherit;min-height:48px;}
+.pocket-go:active{transform:scale(.99);}
 /* 沒開放的排整排上迷霧（去彩＋降透明），鎖說明改灰底條才看得到 */
 .lockwrap{filter:grayscale(.9);opacity:.38;pointer-events:none;}
 .lock-note.lk{background:#EFE6DB;border-radius:10px;padding:9px 12px;color:#6E4A3C;margin-top:10px;font-weight:600;}
@@ -424,7 +431,7 @@ var PRO_WS = ["超引力-顧問課", "超引力-公眾演說"]; /* member 的 WI
 var LOG = [], FEED = [], CHEERED = {};
 var MS = {}, D5 = {};            /* 每次 render 重算：calcMuscleScores / calcDimScores5 */
 var FOCUS = "A1", DONE_TODAY = false, IS_MEMBER = true;
-var OPEN_DRILL = false, OPEN_WEEK = false, WALL_FULL = false, POCKET = null;
+var OPEN_DRILL = false, OPEN_WEEK = false, WALL_FULL = false, POCKET = null, FEED_ALL = false;
 var ANIM = true;                 /* 進頁/切分頁薄片從基線長上來一次；頁內重繪不重播 */
 
 function el(id){ return document.getElementById(id); }
@@ -477,6 +484,7 @@ function slRow(items, opt){
       else sty += "background:" + p.c + ";box-shadow:0 2px 8px " + p.c + "44;";
     } else if (it.state==="past") sty += "background:" + p.tint + ";";
     if (it.state==="todo" && it.hot) sty += "border-color:#C6603A;"; /* 今天還沒記：虛線亮行動色邀請點 */
+    if (it.tap) { cls += " tap"; sty += "--tc:" + p.c + "73;"; } /* 可點的那片：脈動光暈跟著身分色 */
     return '<div class="' + cls + '" style="' + sty + '"' + (it.onclick ? ' onclick="' + it.onclick + '"' : '') + '></div>';
   }).join("");
   var lbls = items.map(function(it){
@@ -484,7 +492,8 @@ function slRow(items, opt){
     if (it.hot) return '<span style="color:#AF5433;font-weight:800;">' + it.lbl + '</span>';
     return '<span class="' + (it.state==="todo" ? "dim" : "") + '">'
       + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#B4A695" : p.t||"#8A7266") + ';">' + it.lbl2 + '</i>' : '')
-      + it.lbl + '</span>';
+      + it.lbl
+      + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");
   return (opt.vals ? '<div class="slv">' + vals + '</div>' : '')
     + '<div class="srow">' + slices + '</div>'
@@ -773,8 +782,9 @@ function meHTML(){
       }), {vals:true})
     + '<div class="wall-note">實色＝本週主力・淡色＝練過・虛線＝還沒解鎖。</div>'
     + (full ? '' : '<div class="wknote">「—」＝這塊還沒量過。上課跟教練把它量起來，這面牆就會一塊塊長出來——先練量過的那塊最有感。</div>')
-    + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : '')
-    + '<button class="drill-tg" onclick="toggleWall()">' + (WALL_FULL ? "收合 ▴" : "展開 12 塊・詳細 ▾") + '</button>'
+    /* 主力那一維預設就攤開——口袋卡入口原本埋在「展開 12 塊」後面，兩層深沒人找得到 */
+    + (WALL_FULL ? DORD.map(function(k){ return dimDetailHTML(k); }).join("") : dimDetailHTML(focusDim))
+    + '<button class="drill-tg" onclick="toggleWall()">' + (WALL_FULL ? "收合 ▴" : "展開其餘 9 塊・詳細 ▾") + '</button>'
     + '</div>';
   /* 升單卡：軌跡預覽當主角＋錢鈕一頁一顆 */
   var pv = [
@@ -803,12 +813,13 @@ function dimDetailHTML(k){
         var v = MS[mk];
         return {h: v==null ? 26 : Math.round(18 + (v-1)/4*70), state: v==null ? "todo" : (mk===FOCUS ? "now" : "past"),
                 dimKey:k, vTop: v==null ? "—" : v.toFixed(1), lbl:MUSCLES[mk].name, lbl2:mk,
-                onclick: open ? "openPocket('" + mk + "')" : null};
+                tap: open && mk===FOCUS, onclick: open ? "openPocket('" + mk + "')" : null};
       }), {vals:true})
     + '<div class="fbchips">' + fbChips(k) + '</div>';
   return '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:' + PALV[k].t + ';">' + DIM_EN[k] + '</span> · <b>' + DIMS[k].name + '・3 小塊</b></div>'
     + (open
-        ? inner + '<div class="lock-note">本週主力——點一小塊，看完整怎麼練。</div>'
+        ? inner + '<div class="lock-note">本週主力——這 3 塊都點得開，看完整怎麼練。</div>'
+          + '<button class="pocket-go" onclick="openPocket(\'' + FOCUS + '\')">看「' + MUSCLES[FOCUS].name + '」怎麼練 →</button>'
         : '<div class="lockwrap">' + inner + '</div><div class="lock-note lk">🔒 詳解跟著主力開放——會員版一次開 3 塊。</div>')
     + '</div>';
 }
@@ -830,7 +841,10 @@ function closePocket(){ POCKET = null; el("ov").classList.remove("on"); el("shee
 function pocketGo(mk){ FOCUS = mk; closePocket(); go("today"); openRec(); }
 /* ═══ 夥伴頁 ═══ */
 /* FEED＝三層疊起來：①真的分享貼文（gymPosts，只含 share=true 的筆、不含對象名字）
-   ②真學員戰報 WINS ③種子戰報 GYM_SEED。鼓勵數一律從 0 起算——不編數字。 */
+   ②真學員戰報 WINS ③種子戰報 GYM_SEED。鼓勵數一律從 0 起算——不編數字。
+   2026-09-15 加排序：三層直接串會變成 20+ 張沒人看完，而且跟「我在練什麼」無關。
+   權重＝你的這一步 › 跟你本週主力同一小塊 › 同一大肌肉 › 真貼文（新→舊）› 其餘；
+   預設只印 5 張，其餘收在「看更多」後面。 */
 function buildFeed(){
   var out = [];
   (GYM_POSTS || []).forEach(function(p){
@@ -838,15 +852,27 @@ function buildFeed(){
     var t = p.note || (p.muscle && MUSCLES[p.muscle]
       ? '練「' + MUSCLES[p.muscle].name + '」——' + STAGES[stageIdx(st)].full
       : STAGES[stageIdx(st)].full);
-    out.push({n: p.name || "夥伴", stage: st, t: t, cheer: 0});
+    out.push({n: p.name || "夥伴", stage: st, t: t, cheer: 0,
+              real: true, muscle: p.muscle || "", dim: p.dim || (p.muscle && MUSCLES[p.muscle] ? MUSCLES[p.muscle].dim : "")});
   });
-  WINS.forEach(function(w){ out.push({n: w.n + "・" + w.role, stage: w.dim, t: w.d, cheer: 0}); });
+  WINS.forEach(function(w){ out.push({n: w.n + "・" + w.role, stage: w.dim, t: w.d, cheer: 0, dim: w.dim}); });
   GYM_SEED.forEach(function(g){
     out.push({n: g.n, stage: g.react === "沒特別" ? "none" : g.dim,
-              t: g.turns.map(function(tn){ return tn.t; }).join("——"), cheer: 0});
+              t: g.turns.map(function(tn){ return tn.t; }).join("——"), cheer: 0, dim: g.dim});
   });
-  return out;
+  return sortFeed(out);
 }
+/* 排序權重。sort 在現代引擎是穩定的——同分維持原順序，真貼文的新→舊（後端排好的）不會被打亂。 */
+function feedRank(f){
+  if (f.mine) return 0;
+  if (FOCUS && f.muscle === FOCUS) return 1;
+  if (FOCUS && f.dim && f.dim === MUSCLES[FOCUS].dim) return 2;
+  return f.real ? 3 : 4;
+}
+function sortFeed(list){
+  return list.slice().sort(function(a, b){ return feedRank(a) - feedRank(b); });
+}
+function feedMore(){ FEED_ALL = true; render(); }
 function cheer(i){ if (CHEERED[i]) return; CHEERED[i] = 1; FEED[i].cheer++; render(); } /* 前端本地，後端待補 */
 function gymHTML(){
   var hr = new Date().getHours(), greet = hr < 5 ? "晚安" : hr < 11 ? "早安" : hr < 18 ? "午安" : "晚安";
@@ -875,7 +901,8 @@ function gymHTML(){
     + '<div class="resc lite"><div class="resc-t">免費月度課程</div><div class="resc-s">每月 2 堂，在社群裡開</div><a class="resc-a" href="' + SKOOL_URL + '" target="_blank" rel="noopener">進社群上課 →</a></div>'
     + '<div class="resc dark"><div class="resc-t">更多練肌肉乾貨</div><div class="resc-s">秘訣、練法、課程回放</div><a class="resc-a" href="' + SKOOL_URL + '" target="_blank" rel="noopener">看乾貨 →</a></div></div>';
   h += '<div class="sec" style="margin:18px 4px 10px;">FEED · <b>夥伴的這一步</b></div>';
-  h += FEED.map(function(f, i){
+  var shown = FEED_ALL ? FEED : FEED.slice(0, 5);
+  h += shown.map(function(f, i){
     var s = STAGES[stageIdx(f.stage)];
     return '<div class="slim"><div class="slim-top"><span>' + esc_(f.n) + '</span>'
       + '<span class="rx-st" style="margin-left:auto;background:' + (f.stage==="none" ? "#B4A695" : f.stage==="I" ? "#F1E5CC" : s.c) + ';' + (f.stage==="I" ? "color:#8E682B;border:1.5px solid #8E682B;" : "") + '">' + (f.stage==="none" ? "還在練" : "對方" + s.zh) + '</span></div>'
@@ -883,6 +910,8 @@ function gymHTML(){
       + '<div class="slim-ft"><button class="cheer' + (CHEERED[i] ? " on" : "") + '" onclick="cheer(' + i + ')">💪 鼓勵' + (f.cheer ? ' ×' + f.cheer : '') + '</button>'
       + (f.mine ? '<span class="mine-tag">你的這一步</span>' : '') + '</div></div>';
   }).join("");
+  if (!FEED_ALL && FEED.length > 5)
+    h += '<button class="drill-tg" onclick="feedMore()">看更多夥伴的這一步（還有 ' + (FEED.length - 5) + ' 則）▾</button>';
   return h + seatPathHTML();
 }
 
