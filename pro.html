@@ -134,6 +134,21 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .howq-t{font-size:15px;line-height:1.8;color:#cfdcea;}
 .howq-t b{color:#e6a93a;}
 .drill-tg{width:100%;background:none;border:0;color:#E8C89A;font-weight:700;font-size:13.5px;padding:12px 0 2px;cursor:pointer;font-family:inherit;min-height:44px;text-align:center;}
+/* 練習鈕＝柔漸層（CTA 三層：錢鈕漸層一頁一顆／練習柔漸層）。
+   這頁的錢鈕讓給最下面的升單卡，「記下反應」是練習動作不是掏錢。 */
+.softbtn{display:block;width:100%;background:rgba(232,200,154,.12);border:1px solid rgba(232,200,154,.45);border-radius:16px;color:#E8C89A;font-size:16px;font-weight:800;padding:16px;text-align:center;cursor:pointer;font-family:inherit;min-height:56px;margin-top:18px;}
+.softbtn:active{transform:scale(.98);}
+/* 小肌肉切換：12 塊自己挑要練哪塊。系統推薦的那顆掛一點，不是幫你決定 */
+.mkpick{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0 2px;}
+.mkp{font-family:inherit;font-size:12.5px;font-weight:800;border-radius:9px;padding:7px 10px;min-height:32px;cursor:pointer;background:transparent;border:1px solid #2a3c50;color:#8ea1b6;letter-spacing:.5px;}
+.mkp.rec::after{content:"●";font-size:7px;vertical-align:super;margin-left:3px;}
+/* 這塊肌肉在客戶身上留下什麼——邊練邊長出來的數字 */
+.fstat{display:flex;gap:8px;margin-top:12px;}
+.fstat>div{flex:1;background:rgba(230,237,245,.05);border:1px solid #1d2c3c;border-radius:12px;padding:10px 8px;text-align:center;}
+.fstat b{display:block;font-size:21px;font-weight:900;color:#eaf1fa;font-variant-numeric:tabular-nums;line-height:1.2;}
+.fstat i{font-style:normal;font-size:11px;color:#7d90a3;font-weight:600;}
+.fwho{font-size:12.5px;color:#7d90a3;margin-top:9px;line-height:1.7;}
+.fwho b{color:#cfdcea;font-weight:700;}
 .drill{margin-top:8px;border-top:1px dashed rgba(93,118,146,.35);}
 .dr{padding:10px 2px 9px;border-bottom:1px dashed rgba(93,118,146,.25);}
 .dr:last-child{border-bottom:0;}
@@ -219,14 +234,16 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .phaxis{display:flex;align-items:center;margin-top:14px;}
 .phx{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;white-space:nowrap;}
 .phx .pdot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;}
-.phx.done{color:#5fd8b0;}
-.phx.done .pdot{background:rgba(51,196,149,.18);border:1.5px solid #33c495;color:#5fd8b0;}
+/* 2026-09-18 減色：路徑軸原本 done 綠／now 金／todo 灰＝光是「走到哪」就三個色，
+   再加上 ATPI 四色，整張卡七種顏色在搶。軸統一走金，只靠亮度分前後。 */
+.phx.done{color:#8ea1b6;}
+.phx.done .pdot{background:rgba(232,200,154,.10);border:1.5px solid rgba(232,200,154,.45);color:#E8C89A;}
 .phx.now{color:#eec06a;}
 .phx.now .pdot{background:rgba(230,169,58,.16);border:2px solid #e6a93a;color:#eec06a;box-shadow:0 0 12px rgba(230,169,58,.45);}
 .phx.todo{color:#5d7692;}
 .phx.todo .pdot{background:transparent;border:1.5px dashed #526c88;color:#5d7692;}
 .pbar{flex:1;height:2px;margin:0 8px;}
-.pbar.past{background:#33c495;box-shadow:0 0 6px rgba(51,196,149,.4);}
+.pbar.past{background:rgba(232,200,154,.45);}
 .pbar.todo{background:transparent;border-top:2px dashed #526c88;}
 .phnow{font-size:12.5px;color:#8ea1b6;margin-top:9px;line-height:1.7;}
 .phnow b{color:#eec06a;}
@@ -417,7 +434,7 @@ var ST_WEAK = {
 };
 var PHASES = [
   {k:"run",    zh:"① 跑通", line:"用兩個強項，拿到第一筆穩定成交"},
-  {k:"opt",    zh:"② 優化", line:"補上第三塊，堵住漏水那格"},
+  {k:"opt",    zh:"② 優化", line:"第三塊也練起來，這一格最有感"},
   {k:"create", zh:"③ 創造", line:"練最後一塊，開第二條路徑"}
 ];
 /* 人設：量過的維照分數排、沒量的墊後；量不滿兩維＝還沒有人設（誠實空狀態） */
@@ -701,9 +718,9 @@ function flightHTML(){
   var pn = personaNow();
   var h = '<div class="hero"><div class="kick">SWEET PATH · 變現甜蜜路徑'
     + '<div class="qmark" onclick="toggleDef()">?</div></div>'
-    + (SHOW_DEF ? '<div class="defline">甜蜜路徑＝<b style="color:#cfdcea;">走哪條</b>（最強兩塊肌肉定人設）×<b style="color:#cfdcea;">現在踩哪一步</b>（三個狀態）。口訣：跑通用兩個強項｜優化補上第三塊｜創造練最後一塊。不順手的不硬練，讓工具上場。</div>' : '');
+    + (SHOW_DEF ? '<div class="defline">甜蜜路徑＝<b style="color:#cfdcea;">走哪條</b>（最強兩塊肌肉定人設）×<b style="color:#cfdcea;">現在踩哪一步</b>（三個狀態）。口訣：跑通用兩個強項｜優化練起第三塊｜創造練最後一塊。不順手的不硬練，讓工具上場。</div>' : '');
   if (!pn) {
-    h += '<div class="sub-t" style="margin-top:12px;">你的路照<b>最強兩塊肌肉</b>自動判——先跟教練把體格量起來（至少兩維），這條路就會浮出來。</div>'
+    h += '<div class="sub-t" style="margin-top:12px;">你的路照<b>最強兩塊肌肉</b>自動判——做完 ATPI 體測（至少兩維），這條路就會浮出來。</div>'
       + '<div class="rule4" style="margin-top:14px;"></div></div>';
     return h;
   }
@@ -723,9 +740,12 @@ function flightHTML(){
     + pn.code.split("+").map(function(k){ return '<b style="color:' + PALV[k].t + ';">' + k + '</b>'; }).join('<i>+</i>')
     + '</span><div><div class="pers-n" style="font-size:17px;">' + pn.name + '</div>'
     + '<div class="pers-tag">「' + pn.tag + '」——<b>你不用樣樣強，最強的兩塊就是你的路。</b></div></div></div>';
+  /* 減色：原本走過的每一站都上該維色＝一行四個顏色。只有「你在這」那站有色，
+     走過的用亮灰、還沒到的用暗灰——顏色留給人設代號，那才是這張卡在講的事。 */
   h += '<div class="miniroute">路線：' + pn.chain.map(function(st,i){
       if (i > HERE) return '<span style="color:#5d7692;">' + st.short + '</span>';
-      return '<b style="color:' + PALV[st.dim].t + ';">' + st.short + (i===HERE ? '◀' : '') + '</b>';
+      if (i < HERE) return '<span style="color:#8ea1b6;">' + st.short + '</span>';
+      return '<b style="color:' + PALV[st.dim].t + ';">' + st.short + '◀</b>';
     }).join('<i> → </i>') + '</div>';
   h += '<button class="drill-tg" onclick="togglePath()">看整條路 ' + (OPEN_PATH ? "▴" : "▾") + '</button>';
   if (OPEN_PATH) {
@@ -735,9 +755,11 @@ function flightHTML(){
       + '（教練拍板可改）。</div>'
       + pn.chain.map(function(st,i){
           var p = PALV[st.dim];
+          /* 減色：非強項那兩站原本也上該維色（虛線版），四站四個色。
+             改成強項才有色、工具站走灰——這一排要講的是「哪兩塊是你的」。 */
           var b = st.strong
             ? '<div class="fp-b" style="background:' + p.c + ';">' + st.dim + '</div>'
-            : '<div class="fp-b" style="background:transparent;border:1.5px dashed ' + p.c + '99;color:' + p.t + ';">' + st.dim + '</div>';
+            : '<div class="fp-b" style="background:transparent;border:1.5px dashed #526c88;color:#8ea1b6;">' + st.dim + '</div>';
           return '<div class="fp-st">' + b
             + '<div><div class="fp-n"' + (st.strong ? '' : ' style="color:#8ea1b6;"') + '>' + st.tool
             + '<span>' + (st.strong ? '你的強項 · ' + st.role : '工具上場 · ' + st.role)
@@ -752,8 +774,9 @@ function flightHTML(){
       + '</b>）把一個「要找你」的客戶走到成交——第一筆成交，就是跑通。';
   } else {
     var third = pn.chain[2];
-    stepTxt = '補 <b>' + third.dim + '（' + DIMS_V[third.dim].name.replace("肌肉","") + '）</b>——'
-      + third.note.split("——")[0] + '，讓「' + third.tool + '」上場，堵住漏水那格。';
+    /* 「補」是赤字語言（禁用薄／弱／缺口／補）——同一件事講成「先練這塊最有感」 */
+    stepTxt = '先練 <b>' + third.dim + '（' + DIMS_V[third.dim].name.replace("肌肉","") + '）</b>——'
+      + third.note.split("——")[0] + '，讓「' + third.tool + '」上場，這一格最有感。';
   }
   h += '<div class="howq"><div class="howq-k">現在這一步</div><div class="howq-t">' + stepTxt + '</div></div>';
   /* 誠實版：這是系統照分數自動判的，教練拍板在 1v1（後端沒有欄位，不編教練說過的話） */
@@ -812,7 +835,7 @@ function starHTML(){
   if (sel.dim) {
     selBody = sel.st==="done"
       ? '<b>3 塊' + DIMS_V[sel.dim].name + '</b>都量過了——這格亮著，儀表板跟著開。'
-      : '量完 <b>3 塊' + DIMS_V[sel.dim].name + '</b>就點亮——跟教練把它量起來，儀表板跟著開。';
+      : '量完 <b>3 塊' + DIMS_V[sel.dim].name + '</b>就點亮——體測量到這一維，儀表板跟著開。';
   } else {
     selBody = ln.unlocked
       ? '放大段已解鎖——上到哪、練到哪，<b>下次 1v1 跟教練對進度</b>（系統不記逐堂，不裝有進度條）。'
@@ -832,8 +855,12 @@ function starHTML(){
   var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 肌肉格亮了 ' + ln.doneN + '/4</span></div>'
     + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
     + selLine
-    + '<div class="linknote">解鎖是總開關：肌肉量到哪、格子亮到哪——課上到哪，牆就長到哪。L5–L8 的進度下次 1v1 跟教練對。</div>';
-  /* 公眾演說階梯（10.8萬）＝下一座舞台，照樣渲染、迷霧鎖住；已是演說學員就不鎖 */
+    + '<div class="linknote">格子亮到哪＝你的體測長到哪，課上到哪、牆就長到哪。L5–L8 的進度下次 1v1 現場對。</div>';
+  return h + '</div>';
+}
+/* 升單卡（2026-09-18）：原本「NEXT STAGE 演說段」掛在星圖裡、席位梯獨立在頁尾，
+   兩塊都在講「你在哪、下一階是什麼」＝同一件事講兩次。合成一張，這頁的錢鈕給它。 */
+function stageCTAHTML(){
   var isSpeech = WID === "超引力-公眾演說";
   var sp = SPEECH.map(function(s, i){
     return '<div class="sl todo" style="height:' + (52 + i*10) + 'px;border-color:#e6a93a;"></div>';
@@ -841,38 +868,85 @@ function starHTML(){
   var splbl = SPEECH.map(function(s){
     return '<span class="dim"><i style="color:#5d7692;">L' + s.L + '</i>' + s.zh + '</span>';
   }).join("");
-  h += '<div class="subrow"><div class="sec" style="margin-bottom:8px;"><span style="color:#E8C89A;">NEXT STAGE</span> · <b>演說段 L9–L13</b></div>'
+  var h = '<div class="cd" style="border-color:rgba(232,200,154,.45);">'
+    + '<div class="sec"><span style="color:#E8C89A;">NEXT STAGE</span> · <b>把影響力放大</b></div>'
+    + '<div class="big-t" style="font-size:22px;">你現在一次成交<em>一個人</em>。<br>同一身肌力搬上舞台，<em>一次給更多人</em>。</div>';
+  h += seatPathHTML(true);
+  h += '<div class="subrow">'
     + (isSpeech
         ? '<div class="srow">' + sp + '</div><div class="slbl">' + splbl + '</div>'
           + '<div class="lockbar">你已經在這座舞台上——L9–L13 的進度跟教練現場對，系統不記逐堂。</div>'
         : '<div class="lockwrap"><div class="srow">' + sp + '</div><div class="slbl">' + splbl + '</div></div>'
-          + '<div class="lockbar">這五格是另一張門票——<b>公眾演說課（10.8 萬）</b>。你現在一次成交一個人；同一身肌力搬上舞台，<b>把價值一次給更多人</b>。</div>')
+          + '<div class="lockbar">這五格是另一張門票——<b>公眾演說課（10.8 萬）</b>。台下坐三十個人，你講的那一次就是三十次一對一。</div>')
     + '</div>';
+  /* 錢鈕（升單）——這頁唯一一顆，練習鈕已經退成 .softbtn */
+  if (!isSpeech) h += '<a class="gobtn" href="https://www.atpifit.com/" target="_blank" style="text-decoration:none;">看「公眾演說」這一階 →</a>';
   return h + '</div>';
 }
-/* 這季主力＝上升空間最大的那塊（weakestThree 第一塊；還沒量就先請教練量） */
+/* 系統推薦＝上升空間最大的那塊（weakestThree 第一塊）。只是預設值，他可以自己切。 */
 function focusMuscle(){ return weakestThree(S)[0] || null; }
+var SEL_MK = null;
+function pickMK(mk){ SEL_MK = mk; OPEN_DRILL = false; render(); }
+/* 這塊肌肉在客戶身上留下什麼：推過幾個人、上次幾天前、有幾個因此往前走一圈。
+   全部從打卡紀錄算（buildLog 已存 muscle／target／stage／date），不新增欄位、不動 Sheet。
+   「往前走一圈」＝用這塊的那一筆，把他推到了他自己的新高——LOG 已按日期排序，所以邊走邊比就好。 */
+function muscleField(mk){
+  var hi = {}, used = {}, moved = 0, last = null;
+  LOG.forEach(function(e){
+    var prev = hi[e.target] || 0, now = stageIdx(e.stage);
+    if (e.muscle === mk) {
+      used[e.target] = 1;
+      if (now > prev) moved++;
+      if (!last || e.date > last) last = e.date;
+    }
+    if (now > prev) hi[e.target] = now;
+  });
+  var names = Object.keys(used);
+  return { n: names.length, names: names, moved: moved,
+           days: last ? Math.floor((Date.now() - new Date(last)) / 864e5) : null };
+}
 function focusHTML(){
-  var mk = focusMuscle();
+  var rec = focusMuscle();
+  var mk = (SEL_MK && MUSCLES[SEL_MK]) ? SEL_MK : rec;
+  var head = '<div class="cd"><div class="sec">FIELD DRILL · <b>落地練肌肉</b></div>';
   if (!mk) {
-    return '<div class="cd"><div class="sec">THIS SEASON · <b>這季主力</b></div>'
-      + '<div class="empty">跟教練把 12 塊肌肉量起來，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div></div>';
+    return head + '<div class="empty">做完 ATPI 體測，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div></div>';
   }
-  var m = MUSCLES[mk], d = (typeof DRILL !== "undefined" && DRILL[mk]) || null;
-  var h = '<div class="cd"><div class="sec">THIS SEASON · <b>這季主力</b></div>'
-    + '<div style="font-size:19px;font-weight:900;line-height:1.5;">' + esc_(m.name) + '——' + esc_(m.tech.split("・")[0]) + '</div>'
-    + '<div class="wall-note" style="margin-top:4px;">教練校準後，這塊<b style="color:#cfdcea;">上升空間最大</b>——先練它，路徑其他站不動。</div>';
+  var m = MUSCLES[mk], d = (typeof DRILL !== "undefined" && DRILL[mk]) || null, f = muscleField(mk);
+  var h = head
+    + '<div class="mkpick">' + MORD.map(function(k){
+        var p = PALV[MUSCLES[k].dim], on = k === mk;
+        return '<button type="button" class="mkp' + (on ? " on" : "") + (k === rec ? " rec" : "") + '"'
+          + ' aria-pressed="' + on + '" onclick="pickMK(\'' + k + '\')"'
+          + (on ? ' style="background:' + p.c + ';border-color:' + p.c + ';color:#0c131e;"'
+                : ' style="color:' + p.t + ';"') + '>' + k + '</button>';
+      }).join("") + '</div>'
+    + '<div style="font-size:19px;font-weight:900;line-height:1.5;margin-top:10px;">' + esc_(m.name) + '——' + esc_(m.tech.split("・")[0]) + '</div>'
+    + '<div class="wall-note" style="margin-top:4px;">'
+    + (mk === rec ? '掛點的這塊<b style="color:#cfdcea;">上升空間最大</b>——先練它最有感，其他 11 塊隨時可以切過來。'
+                  : '你自己挑的這塊。系統原本推薦 <b style="color:#cfdcea;">' + rec + ' ' + esc_(MUSCLES[rec].name) + '</b>，要回去點掛點那顆。')
+    + '</div>'
+    /* 邊練邊長出來的客戶數字＝這塊肌肉的成績單，不是抽象分數 */
+    + '<div class="fstat">'
+    + '<div><b>' + f.n + '</b><i>個客戶用過</i></div>'
+    + '<div><b>' + f.moved + '</b><i>因此往前一圈</i></div>'
+    + '<div><b>' + (f.days === null ? "—" : f.days) + '</b><i>天前用過</i></div>'
+    + '</div>'
+    + '<div class="fwho">' + (f.n
+        ? '用在：<b>' + f.names.map(esc_).join("、") + '</b>'
+        : '還沒用這塊推過任何人——練完記一筆，這三個數字就會動。') + '</div>';
   if (d) {
     h += '<div class="howq"><div class="howq-k">開口就用這句</div><div class="howq-t">「' + md_(d.line) + '」</div></div>'
       + '<button class="drill-tg" onclick="toggleDrill()">怎麼練・完整詳解 ' + (OPEN_DRILL ? "▴" : "▾") + '</button>'
       + (OPEN_DRILL ? drillRowsHTML(d) : '');
   }
-  h += '<button class="gobtn" id="recFocus">練完了，記下他的反應</button></div>';
+  h += '<button class="softbtn" id="recFocus">練完了，記下他的反應</button></div>';
   return h;
 }
 function mapHTML(){
-  /* 卡序＝因果鏈不斷：甜蜜路徑說下一步 → 這季主力怎麼練＋打卡鈕 → 星圖查閱 */
-  return coachHTML() + flightHTML() + focusHTML() + starHTML() + seatPathHTML();
+  /* 卡序（2026-09-18 老師拍板）＝課程為主體：先看全部課程走到哪（星圖）→ 這塊怎麼練＋客戶數字
+     （落地練肌肉）→ 我走的是哪條路（甜蜜路徑，完整版查閱）→ 下一階（升單卡，錢鈕在這）。 */
+  return coachHTML() + starHTML() + focusHTML() + flightHTML() + stageCTAHTML();
 }
 
 /* ═══ 開練流程（打卡標準＝這個客戶走到哪）═══ */
@@ -1054,7 +1128,7 @@ function outHTML(){
       return {h: Math.round(24 + (v-1)/4*96), state: k===focusDim ? "now" : "past", dimKey:k,
               vTop: pctFromEval(v), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
     }), {vals:true, full:120})
-    + '<div class="open-note">私教席 12 塊全開——教練校準分數，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
+    + '<div class="open-note">私教席 12 塊全開——分數來自 ATPI 體測，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
     + DORD.map(function(k){ return dimDetailHTML(k, scores, fm); }).join("")
     + '</div>';
   var VAULT = buildVault();
@@ -1092,8 +1166,10 @@ function fbChips(dim){
 }
 
 /* ── 席位路徑（全貌感常駐）：私教席＝現在，再上去多一階「公眾演說」（10.8萬門票，虛線待解鎖） ── */
-function seatPathHTML(){
-  return '<div class="seatpath">'
+/* bare＝已經被包在升單卡裡：脫掉自己的金框（免得金框裡再一層金框），
+   也不重複那句 CTA——卡片標題已經講過同一件事。 */
+function seatPathHTML(bare){
+  return '<div class="seatpath"' + (bare ? ' style="border:0;padding:0;margin:14px 0 0;"' : '') + '>'
     + '<div class="sp-row">'
     + '<div class="sp past" style="flex:1;height:26px;"></div>'
     + '<div class="sp past p2" style="flex:1;height:44px;"></div>'
@@ -1108,7 +1184,8 @@ function seatPathHTML(){
     + '<span style="flex:1;text-align:center;color:#E8C89A;">公眾演說<div class="sp-here" style="color:#8ea1b6;">10.8 萬</div></span>'
     + '<span style="flex:1.6;"></span>'
     + '</div>'
-    + '<div class="sp-cta">現在換你，帶著你的客戶走完他們的——<br>再上一階「公眾演說」，同一身肌力，一次給更多人。</div></div>';
+    + (bare ? '' : '<div class="sp-cta">現在換你，帶著你的客戶走完他們的——<br>再上一階「公眾演說」，同一身肌力，一次給更多人。</div>')
+    + '</div>';
 }
 
 /* ═══ render ═══ */
