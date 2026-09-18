@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pro CRM 重設計 · 可改版 demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800;900&display=swap">
+<style>
+/* ═══ pro CRM 分頁重設計・可改版 demo（2026-09-15）═══
+   老師的診斷：「卡片架構很好，但視覺整理看起來很混亂」，member 是他心中的標竿。
+   三刀：①今日主角＋一行一人看板（八張同權重重卡→一張主角卡＋八行）
+        ②客戶卡的薄片退場，換圈層軌（薄片語言只留給分數，圈層語言只留給人）
+        ③顏色收到一個（階段色只出現在分組標題那一處，行內全灰）
+   ＋鉤子：「誰快冷掉」預警——pro 獨有、member 給不了的價值。
+   ⚠️ 這是提案稿，不是正式頁。畫面確認後才落回 pro.html。 */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0b0f16;font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;}
+::selection{background:#FFD79A;color:#4A1B0C;}
+
+/* ── 外殼：一屏一列，左畫面右註記（老師原話「一頁一頁在旁邊修改」） ── */
+.shell{max-width:1180px;margin:0 auto;padding:28px 20px 120px;}
+.hd{border-bottom:1px solid #1e2c3a;padding-bottom:18px;margin-bottom:26px;}
+.hd h1{font-size:21px;font-weight:900;color:#F7F1EC;}
+.hd p{font-size:14px;color:#8ea1b6;line-height:1.9;margin-top:8px;}
+.hd .ver{font-size:12px;color:#5d7692;letter-spacing:1px;margin-top:8px;}
+.row{display:flex;gap:24px;align-items:flex-start;margin-bottom:34px;padding-bottom:34px;border-bottom:1px dashed #1e2c3a;}
+.x-left{flex:0 0 460px;}
+.x-side{flex:1;min-width:260px;position:sticky;top:20px;}
+.x-k{font-size:12px;font-weight:800;letter-spacing:2px;color:#E8C89A;margin-bottom:10px;}
+.x-why{font-size:13.5px;color:#8ea1b6;line-height:1.9;background:#111c28;border:1px solid #1e2c3a;border-left:3px solid #E8C89A;border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:12px;}
+.x-why b{color:#cfdcea;}
+.x-side textarea{width:100%;min-height:150px;background:#0e1620;border:1px solid #24344a;border-radius:10px;color:#eaf1fa;font-family:inherit;font-size:14px;line-height:1.8;padding:12px;resize:vertical;}
+.x-side textarea:focus{outline:none;border-color:#E8C89A;}
+.x-side label{display:block;font-size:12px;color:#7d90a3;margin-bottom:6px;}
+.phone{background:#0c131e;border:1px solid #1e2c3a;border-radius:22px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.5);}
+[data-edit]{outline:1px dashed transparent;transition:outline-color .15s;border-radius:3px;}
+[data-edit]:hover{outline-color:rgba(232,200,154,.45);}
+[data-edit]:focus{outline:1px solid #E8C89A;background:rgba(232,200,154,.06);}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(11,15,22,.97);border-top:1px solid #1e2c3a;padding:12px 20px;display:flex;align-items:center;gap:14px;z-index:80;}
+.bar span{font-size:13px;color:#8ea1b6;}
+.bar button{margin-left:auto;background:#C6603A;border:0;color:#fff;font-family:inherit;font-size:14.5px;font-weight:800;border-radius:10px;padding:11px 20px;cursor:pointer;}
+.bar button.gh{background:transparent;border:1px solid #33475e;color:#8ea1b6;margin-left:0;font-weight:600;}
+
+/* ══════ 以下＝提案畫面本體（落回 pro.html 時搬這一段的結構與 class）══════ */
+.app{--sd:#e6a93a;}
+.tb{background:linear-gradient(135deg,#4A1B0C,#6B3018);padding:16px 20px 14px;position:relative;overflow:hidden;}
+.tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:#E8C89A;}
+.tb-d{margin-left:auto;font-size:12px;color:rgba(247,241,236,.6);}
+.tb-r{display:flex;align-items:center;gap:10px;margin-top:9px;}
+.tb-n{font-size:19px;font-weight:900;color:#F7F1EC;}
+.tb-s{font-size:12.5px;color:rgba(247,241,236,.65);margin-top:5px;}
+.hall{font-size:12px;font-weight:700;color:#E8C89A;background:rgba(232,200,154,.12);border:1px solid rgba(232,200,154,.45);padding:3px 10px;border-radius:20px;margin-left:auto;}
+.bd{padding:18px 18px 22px;}
+
+/* 今日主角卡＝全頁唯一的主角。member 有「今天練一塊」，pro 到現在沒有「今天推誰」 */
+.today{background:linear-gradient(160deg,#101a26 0%,#16283c 100%);border:1px solid rgba(230,169,58,.34);border-radius:18px;padding:17px 16px 16px;box-shadow:0 8px 28px rgba(0,0,0,.42);}
+.today-k{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:2.5px;color:#E8C89A;margin-bottom:12px;}
+.today-k i{font-style:normal;width:6px;height:6px;border-radius:50%;background:#e6a93a;box-shadow:0 0 8px #e6a93a;}
+.who{display:flex;align-items:center;gap:11px;}
+.who-av{width:42px;height:42px;border-radius:50%;background:rgba(234,241,250,.09);border:1px solid rgba(234,241,250,.2);color:#eaf1fa;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
+.who-n{font-size:18px;font-weight:900;color:#F7F1EC;}
+.who-m{font-size:12.5px;color:#7d90a3;margin-top:3px;}
+.who-m em{font-style:normal;color:#eec06a;font-weight:700;}
+
+/* 圈層軌：人不是用 0–100 量的，人是走圈層的。四格＋起點，現在那格亮。
+   ⚠️ 這排刻意不用薄片——薄片在這套語言裡＝分數高度，借去講圈層會讓兩邊都讀不懂。 */
+.ring{display:flex;align-items:center;margin:15px 0 4px;}
+.ring-s{flex:1;text-align:center;position:relative;}
+.ring-d{width:11px;height:11px;border-radius:50%;margin:0 auto 7px;background:rgba(234,241,250,.14);}
+.ring-s.past .ring-d{background:rgba(234,241,250,.3);}
+.ring-s.now .ring-d{width:15px;height:15px;margin-bottom:5px;}
+.ring-t{font-size:11px;color:#5d7692;letter-spacing:.5px;}
+.ring-s.past .ring-t{color:#7d90a3;}
+.ring-s.now .ring-t{font-weight:800;font-size:12px;}
+.ring-l{position:absolute;top:5px;left:-50%;width:100%;height:1.5px;background:rgba(234,241,250,.12);}
+.ring-s.past .ring-l,.ring-s.now .ring-l{background:rgba(234,241,250,.26);}
+
+.read{display:flex;gap:9px;margin-top:14px;border-top:1px dashed rgba(93,118,146,.32);padding-top:12px;font-size:14px;line-height:1.85;color:#cfdcea;}
+.read .cv{width:24px;height:24px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;}
+.read b{color:#eec06a;}
+/* 一頁一顆：整個分頁只有這顆是橘的 */
+.go{display:block;width:100%;margin-top:15px;background:linear-gradient(135deg,#C6603A,#AF5433);border:0;border-radius:12px;color:#fff;font-family:inherit;font-size:16px;font-weight:800;padding:15px;cursor:pointer;box-shadow:0 6px 18px rgba(198,96,58,.32);}
+
+/* 冷卻預警＝pro 獨有的鉤子。做成細條不做成卡——它是提醒，不是主角 */
+.chill{display:flex;align-items:center;gap:9px;margin-top:12px;background:rgba(93,118,146,.1);border:1px solid rgba(93,118,146,.28);border-radius:12px;padding:11px 13px;font-size:13px;color:#8ea1b6;line-height:1.7;}
+.chill b{color:#cfdcea;font-weight:700;}
+
+/* 看板：一行一人。分組標題自己就是「他走到哪」，所以行內一點顏色都不用上 */
+.board{margin-top:24px;}
+.grp{display:flex;align-items:baseline;gap:8px;margin:20px 0 4px;}
+.grp-n{font-size:13.5px;font-weight:800;}
+.grp-c{font-size:12px;color:#5d7692;}
+.grp-line{flex:1;height:1px;background:#1c2836;}
+.cl{display:flex;align-items:center;gap:11px;padding:12px 4px;border-bottom:1px solid #16212e;cursor:pointer;}
+.cl:last-child{border-bottom:0;}
+.cl-av{width:32px;height:32px;border-radius:50%;background:rgba(234,241,250,.07);border:1px solid rgba(234,241,250,.15);color:#a8bccf;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;flex-shrink:0;}
+.cl-n{font-size:15px;font-weight:700;color:#e3ecf6;}
+.cl-m{font-size:12px;color:#5d7692;margin-top:2px;}
+.cl-r{margin-left:auto;display:flex;align-items:center;gap:9px;}
+.cl-w{font-size:11.5px;font-weight:700;color:#8ea1b6;background:rgba(93,118,146,.16);border-radius:20px;padding:3px 8px;}
+.cl-x{color:#3d5169;font-size:17px;}
+
+.wk{margin-top:26px;background:#111c28;border:1px solid #1d2c3c;border-radius:16px;padding:15px 15px 14px;}
+.wk-k{font-size:11px;font-weight:800;letter-spacing:2.5px;color:#8ea1b6;margin-bottom:10px;}
+.wk-k b{color:#eaf1fa;letter-spacing:1px;font-size:12.5px;}
+.wk-i{font-size:13.5px;color:#cfdcea;line-height:1.85;}
+.wk-f{font-size:12.5px;color:#7d90a3;line-height:1.8;margin-top:9px;border-top:1px dashed rgba(93,118,146,.3);padding-top:9px;}
+
+/* ── 客戶展開屏 ── */
+.back{font-size:13.5px;color:#8ea1b6;padding:2px 0 14px;cursor:pointer;}
+.hist{margin-top:16px;}
+.hist-k{font-size:11px;font-weight:800;letter-spacing:2.5px;color:#8ea1b6;margin-bottom:11px;}
+.hist-i{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #16212e;}
+.hist-d{font-size:12px;color:#5d7692;flex:0 0 46px;padding-top:2px;}
+.hist-t{font-size:13.5px;color:#cfdcea;line-height:1.75;}
+.hist-t i{font-style:normal;font-size:11.5px;font-weight:700;color:#7d90a3;background:rgba(93,118,146,.16);border-radius:20px;padding:2px 7px;margin-left:6px;white-space:nowrap;}
+
+/* ── 對照屏用 ── */
+.ba{font-size:12px;font-weight:800;letter-spacing:2px;padding:14px 18px 0;}
+.ba.b4{color:#8a6f5a;}
+.ba.af{color:#E8C89A;}
+.old{background:#131f2b;border:1px solid #1d2c3c;border-radius:18px;padding:16px 30px 14px 16px;margin:10px 18px 0;box-shadow:0 6px 20px rgba(0,0,0,.28);}
+.old-hd{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.old-av{width:38px;height:38px;border-radius:50%;background:#4b9bf0;color:#0c131e;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;}
+.old-n{font-size:16px;font-weight:800;color:#F7F1EC;}
+.old-m{font-size:12.5px;color:#7d90a3;margin-top:2px;}
+.old-st{margin-left:auto;font-size:12px;font-weight:800;padding:4px 11px;border-radius:20px;color:#7ab5f5;background:rgba(75,155,240,.22);}
+.srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.2);padding:10px 12px 0 4px;}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
+.slbl{display:flex;gap:7px;padding:7px 12px 0 4px;}
+.slbl span{flex:1;text-align:center;font-size:11px;font-weight:700;color:#8ea1b6;}
+.old-go{margin-top:10px;text-align:right;font-size:13px;font-weight:800;color:#E8C89A;}
+.old-rd{display:flex;gap:9px;margin-top:12px;border-top:1px dashed rgba(93,118,146,.35);padding-top:11px;font-size:13.5px;line-height:1.8;color:#cfdcea;}
+.old-rd b{color:#e6a93a;}
+.nav{display:flex;border-top:2px solid #1e2c3a;background:rgba(15,25,38,.96);padding:9px 0 13px;}
+.nv{flex:1;text-align:center;font-size:13px;color:#7d90a3;font-weight:600;}
+.nv.on{color:#e6a93a;font-weight:800;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hd">
+  <h1>pro · 客戶管理分頁　重設計提案</h1>
+  <p>診斷：卡片內容是對的，問題在<b>階層</b>——八張同權重的重卡、八顆同色 CTA、薄片被借去講圈層、階段這件事一張卡上講了三次。<br>
+  三刀：①今日主角＋一行一人看板　②薄片退場換圈層軌　③顏色收到一個。加一個 member 給不了的鉤子：誰快冷掉。<br>
+  <b>直接點畫面上的字就能改</b>，右邊欄寫你的想法。改完按右下角「複製全部修改」，貼回對話給我。</p>
+  <div class="ver">版本 <span id="ver">—</span>　·　草稿存在這台瀏覽器，關掉不會掉</div>
+</div>
+
+<!-- ═════ 畫面 1 ═════ -->
+<div class="row">
+  <div class="x-left">
+    <div class="phone"><div class="app" data-screen="新 CRM 主畫面">
+      <div class="tb">
+        <div class="tb-k"><span data-edit>ATPIFIT · PRO SEAT</span><span class="tb-d" data-edit>DEMO</span></div>
+        <div class="tb-r"><div><div class="tb-n" data-edit>超引力成交學</div></div><span class="hall" data-edit>私人教練席</span></div>
+        <div class="tb-s" data-edit>教練陪你，把客戶練成真實的關係</div>
+      </div>
+      <div class="bd">
+
+        <div class="today">
+          <div class="today-k"><i></i><span data-edit>TODAY · 今天先推這一個</span></div>
+          <div class="who">
+            <div class="who-av" data-edit>周</div>
+            <div>
+              <div class="who-n" data-edit>周姐</div>
+              <div class="who-m"><span data-edit>客戶 · 記了 1 筆 · </span><em data-edit>停在「沒反應」16 天</em></div>
+            </div>
+          </div>
+          <div class="ring">
+            <div class="ring-s now"><div class="ring-d" style="background:#8ea1b6;box-shadow:0 0 10px rgba(142,161,182,.7);"></div><div class="ring-t" style="color:#a8bccf;" data-edit>沒反應</div></div>
+            <div class="ring-s"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>想靠近</div></div>
+            <div class="ring-s"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>願意說</div></div>
+            <div class="ring-s"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>要找你</div></div>
+            <div class="ring-s"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>認定你</div></div>
+          </div>
+          <div class="read"><div class="cv">光</div><div data-edit>他還沒想靠近——先別給內容，回頭練「讓他想聽」，用一件事勾住他。</div></div>
+          <button class="go" data-edit>記下這一步 →</button>
+        </div>
+
+        <div class="chill">
+          <span>🌡️</span>
+          <div><b data-edit>還有 2 個人正在冷掉</b><span data-edit>——林經理 12 天、陳小姐 11 天沒有新的一筆。滿 14 天我會幫你排進這週演練。</span></div>
+        </div>
+
+        <div class="board">
+          <div class="grp"><span class="grp-n" style="color:#eec06a;" data-edit>認定你</span><span class="grp-c" data-edit>2 人</span><span class="grp-line"></span></div>
+          <div class="cl"><div class="cl-av" data-edit>陳</div><div><div class="cl-n" data-edit>陳老闆</div><div class="cl-m" data-edit>客戶 · 4 筆 · 跨 3 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+          <div class="cl"><div class="cl-av" data-edit>A</div><div><div class="cl-n" data-edit>Amy</div><div class="cl-m" data-edit>客戶 · 1 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+
+          <div class="grp"><span class="grp-n" style="color:#7ab5f5;" data-edit>要找你</span><span class="grp-c" data-edit>1 人</span><span class="grp-line"></span></div>
+          <div class="cl"><div class="cl-av" data-edit>張</div><div><div class="cl-n" data-edit>張總</div><div class="cl-m" data-edit>客戶 · 4 筆 · 跨 2 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+
+          <div class="grp"><span class="grp-n" style="color:#5fd8b0;" data-edit>願意說</span><span class="grp-c" data-edit>2 人</span><span class="grp-line"></span></div>
+          <div class="cl"><div class="cl-av" data-edit>妹</div><div><div class="cl-n" data-edit>妹妹</div><div class="cl-m" data-edit>家人 · 1 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+          <div class="cl"><div class="cl-av" data-edit>林</div><div><div class="cl-n" data-edit>林經理</div><div class="cl-m" data-edit>客戶 · 2 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-w" data-edit>停 12 天</span><span class="cl-x">›</span></div></div>
+
+          <div class="grp"><span class="grp-n" style="color:#f08a63;" data-edit>想靠近</span><span class="grp-c" data-edit>2 人</span><span class="grp-line"></span></div>
+          <div class="cl"><div class="cl-av" data-edit>陳</div><div><div class="cl-n" data-edit>陳小姐</div><div class="cl-m" data-edit>客戶 · 2 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-w" data-edit>停 11 天</span><span class="cl-x">›</span></div></div>
+          <div class="cl"><div class="cl-av" data-edit>王</div><div><div class="cl-n" data-edit>王大哥</div><div class="cl-m" data-edit>朋友 · 1 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+
+          <div class="grp"><span class="grp-n" style="color:#8ea1b6;" data-edit>還沒反應</span><span class="grp-c" data-edit>1 人</span><span class="grp-line"></span></div>
+          <div class="cl"><div class="cl-av" data-edit>周</div><div><div class="cl-n" data-edit>周姐</div><div class="cl-m" data-edit>客戶 · 1 筆 · 跨 1 週</div></div><div class="cl-r"><span class="cl-w" data-edit>停 16 天</span><span class="cl-x">›</span></div></div>
+        </div>
+
+        <div class="wk">
+          <div class="wk-k"><span data-edit>WEEKLY ·</span> <b data-edit>這週實戰演練議程</b></div>
+          <div class="wk-i" data-edit>周姐（停 16 天）· 林經理（停 12 天）——把這兩筆帶去演練，教練陪你把卡住的那一步拆開。</div>
+          <div class="wk-f" data-edit>一場 1.5 小時，大家一起上場演練——會員席沒有這個時段。</div>
+        </div>
+
+      </div>
+      <div class="nav"><div class="nv on">客戶管理</div><div class="nv">課程地圖</div><div class="nv">市場數字</div></div>
+    </div></div>
+  </div>
+  <div class="x-side">
+    <div class="x-k">畫面 1｜新 CRM 主畫面</div>
+    <div class="x-why">
+      <b>改了什麼：</b>八張重卡收成「一張主角卡＋一行一人」。<br>
+      <b>為什麼：</b>member 有「今天練一塊」所以人會每天回來；pro 到現在只有一個待辦池，八個人同時在喊，打開不知道先做哪個。現在整頁只有<b>一顆橘鈕</b>，就是今天那一個人。<br>
+      <b>顏色：</b>階段色只留在分組標題那一處，行內全灰。原本一張卡上頭像色＋膠囊色＋薄片色都在講同一件事，講三次。<br>
+      <b>新東西：</b>「正在冷掉」細條——這是 member 給不了的價值，本來埋在 COACH SIGNAL 裡沒被當主角。
+    </div>
+    <label>你的註記（哪裡怪、少了什麼、順序要不要換）</label>
+    <textarea data-note="新 CRM 主畫面" placeholder="例：主角卡我想先看到他上次說了什麼"></textarea>
+  </div>
+</div>
+
+<!-- ═════ 畫面 2 ═════ -->
+<div class="row">
+  <div class="x-left">
+    <div class="phone"><div class="app" data-screen="點開一個客戶">
+      <div class="tb">
+        <div class="tb-k"><span data-edit>ATPIFIT · PRO SEAT</span><span class="tb-d" data-edit>DEMO</span></div>
+        <div class="tb-r"><div><div class="tb-n" data-edit>超引力成交學</div></div><span class="hall" data-edit>私人教練席</span></div>
+      </div>
+      <div class="bd">
+        <div class="back" data-edit>← 回客戶看板</div>
+        <div class="who">
+          <div class="who-av" data-edit>張</div>
+          <div>
+            <div class="who-n" data-edit>張總</div>
+            <div class="who-m"><span data-edit>客戶 · 記了 4 筆 · 跨 2 週</span></div>
+          </div>
+        </div>
+        <div class="ring">
+          <div class="ring-s past"><div class="ring-d"></div><div class="ring-t" data-edit>沒反應</div></div>
+          <div class="ring-s past"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>想靠近</div></div>
+          <div class="ring-s past"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>願意說</div></div>
+          <div class="ring-s now"><div class="ring-l"></div><div class="ring-d" style="background:#4b9bf0;box-shadow:0 0 10px rgba(75,155,240,.8);"></div><div class="ring-t" style="color:#7ab5f5;" data-edit>要找你</div></div>
+          <div class="ring-s"><div class="ring-l"></div><div class="ring-d"></div><div class="ring-t" data-edit>認定你</div></div>
+        </div>
+
+        <div class="hist">
+          <div class="hist-k" data-edit>他走過的路 · 4 筆</div>
+          <div class="hist-i"><div class="hist-d" data-edit>9/12</div><div class="hist-t"><span data-edit>「你幫我把數字拉出來看。」</span><i data-edit>要找你</i></div></div>
+          <div class="hist-i"><div class="hist-d" data-edit>9/05</div><div class="hist-t"><span data-edit>主動問我們自己內部怎麼做的</span><i data-edit>願意說</i></div></div>
+          <div class="hist-i"><div class="hist-d" data-edit>8/30</div><div class="hist-t"><span data-edit>聊到他去年那個沒收尾的案子</span><i data-edit>願意說</i></div></div>
+          <div class="hist-i"><div class="hist-d" data-edit>8/24</div><div class="hist-t"><span data-edit>飯局上加了 LINE，說改天聊聊</span><i data-edit>想靠近</i></div></div>
+        </div>
+
+        <div class="read"><div class="cv">光</div><div data-edit>他要找你了——下一步「讓他想要」，帶他確認他要的結果，別替他決定。</div></div>
+        <button class="go" data-edit>記下這一步 →</button>
+      </div>
+      <div class="nav"><div class="nv on">客戶管理</div><div class="nv">課程地圖</div><div class="nv">市場數字</div></div>
+    </div></div>
+  </div>
+  <div class="x-side">
+    <div class="x-k">畫面 2｜點開一個客戶</div>
+    <div class="x-why">
+      <b>改了什麼：</b>原本擠在卡片裡的「薄片列＋最近一筆＋教練判讀」，搬到展開頁，變成<b>一條走過的路</b>。<br>
+      <b>為什麼：</b>教練席真正的產品是「這個人怎麼一步步變近的」。那是一條時間線，不是一排長條圖——原本用薄片畫，跟 MUSCLE MAP 的分數高度長得一樣，讀者會以為那是分數。<br>
+      <b>圈層軌：</b>薄片語言只留給分數，圈層語言只留給人。兩套語言各守各的。<br>
+      <b>光頭只出現一次：</b>原本八張卡各一個頭像，人聲重複八次就變模板了。
+    </div>
+    <label>你的註記</label>
+    <textarea data-note="點開一個客戶" placeholder="例：歷程要不要顯示他當時說的原話就好"></textarea>
+  </div>
+</div>
+
+<!-- ═════ 畫面 3 ═════ -->
+<div class="row" style="border-bottom:0;">
+  <div class="x-left">
+    <div class="phone"><div class="app" data-screen="改版前後對照">
+      <div class="ba b4" data-edit>改版前 · 一張客戶卡（× 8 張連著）</div>
+      <div class="old">
+        <div class="old-hd">
+          <div class="old-av">張</div>
+          <div><div class="old-n">張總</div><div class="old-m">客戶 · 記了 4 筆 · 跨 2 週</div></div>
+          <span class="old-st">走到「要找你」</span>
+        </div>
+        <div class="srow">
+          <div class="sl" style="height:44px;background:rgba(51,196,149,.22);"></div>
+          <div class="sl" style="height:60px;background:rgba(75,155,240,.22);"></div>
+          <div class="sl" style="height:76px;background:rgba(75,155,240,.22);"></div>
+          <div class="sl" style="height:92px;background:rgba(230,169,58,.18);border:1.5px solid #e6a93a;border-bottom:0;"></div>
+        </div>
+        <div class="slbl"><span>T2</span><span>P1</span><span>P2</span><span>I1</span></div>
+        <div class="old-m" style="margin-top:9px;">最近一筆 · 「你幫我把數字拉出來看。」</div>
+        <div class="old-rd"><div class="cv" style="width:24px;height:24px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;">光</div><div>他要找你了——下一步<b>「讓他想要」</b>，帶他確認他要的結果。</div></div>
+        <div class="old-go">推進他——記下這一步 →</div>
+      </div>
+
+      <div class="ba af" style="padding-top:26px;" data-edit>改版後 · 同一個人在看板上（× 8 行）</div>
+      <div style="padding:6px 18px 20px;">
+        <div class="grp"><span class="grp-n" style="color:#7ab5f5;" data-edit>要找你</span><span class="grp-c" data-edit>1 人</span><span class="grp-line"></span></div>
+        <div class="cl"><div class="cl-av">張</div><div><div class="cl-n">張總</div><div class="cl-m">客戶 · 4 筆 · 跨 2 週</div></div><div class="cl-r"><span class="cl-x">›</span></div></div>
+        <div style="font-size:13px;color:#7d90a3;line-height:1.9;margin-top:16px;" data-edit>同樣八個客戶：改版前要滑 8 × 5 層＝40 個資訊塊，還有 8 顆一樣的 CTA；改版後是 8 行＋1 顆鈕，想看細節才點進去。</div>
+      </div>
+      <div class="nav"><div class="nv on">客戶管理</div><div class="nv">課程地圖</div><div class="nv">市場數字</div></div>
+    </div></div>
+  </div>
+  <div class="x-side">
+    <div class="x-k">畫面 3｜改版前後對照</div>
+    <div class="x-why">
+      這屏只是給你對照用，不會做進正式頁。<br>
+      要看的是<b>密度</b>：上面那張卡本身沒有錯，錯在它連著出現八次。<br>
+      如果你覺得摺疊之後「看不到全貌」，我可以在看板行上補一個很小的圈層點——但那會把顏色再放回去，要取捨。
+    </div>
+    <label>你的註記</label>
+    <textarea data-note="改版前後對照" placeholder="例：我還是想在列表上看到每個人走到哪"></textarea>
+  </div>
+</div>
+
+</div>
+
+<div class="bar">
+  <span id="cnt">還沒有修改</span>
+  <button class="gh" onclick="resetAll()">清掉我的修改</button>
+  <button onclick="copyAll()">複製全部修改</button>
+</div>
+
+<script>
+/* ── 可改版外殼（沿用 design-canvas／quiz demo 那兩支的做法）──
+   ①只把「自己身上有文字節點」的元素設 contenteditable，巢狀的跳過——重複標會讓整塊反白蓋住字
+   ②BUTTON 也開放編輯：CTA 的字最需要改
+   ③貼上一律轉純文字
+   ④localStorage key ＝ 畫面內容的雜湊，重出 demo 就自動換 key，舊草稿不會蓋在對不上的新畫面上 */
+var EDITS = {}, NOTES = {}, KEY;
+
+function hash(s){ var h=5381,i=s.length; while(i) h=(h*33)^s.charCodeAt(--i); return (h>>>0).toString(16); }
+
+function init(){
+  var nodes = [].slice.call(document.querySelectorAll("[data-edit]"));
+  var sig = "";
+  nodes.forEach(function(el, i){
+    if (el.parentElement.closest("[data-edit]")) return;
+    var scr = el.closest("[data-screen]");
+    el.setAttribute("data-id", i);
+    el.setAttribute("data-scr", scr ? scr.getAttribute("data-screen") : "—");
+    el.setAttribute("data-orig", el.textContent.trim());
+    el.setAttribute("contenteditable", "true");
+    sig += el.textContent.trim();
+    el.addEventListener("input", onEdit);
+    el.addEventListener("paste", function(e){
+      e.preventDefault();
+      document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text"));
+    });
+  });
+  KEY = "prodemo_" + hash(sig);
+  document.getElementById("ver").textContent = hash(sig);
+  [].forEach.call(document.querySelectorAll("[data-note]"), function(t){
+    t.addEventListener("input", function(){ NOTES[t.getAttribute("data-note")] = t.value; save(); });
+  });
+  load();
+}
+function onEdit(e){
+  var el = e.target, id = el.getAttribute("data-id"), now = el.textContent.trim();
+  if (now === el.getAttribute("data-orig")) delete EDITS[id];
+  else EDITS[id] = {scr: el.getAttribute("data-scr"), from: el.getAttribute("data-orig"), to: now};
+  save();
+}
+function save(){
+  localStorage.setItem(KEY, JSON.stringify({e: EDITS, n: NOTES}));
+  count();
+}
+function load(){
+  var raw = localStorage.getItem(KEY);
+  if (!raw) return count();
+  try {
+    var d = JSON.parse(raw);
+    EDITS = d.e || {}; NOTES = d.n || {};
+    Object.keys(EDITS).forEach(function(id){
+      var el = document.querySelector('[data-id="' + id + '"]');
+      if (el) el.textContent = EDITS[id].to;
+    });
+    Object.keys(NOTES).forEach(function(k){
+      var t = document.querySelector('[data-note="' + CSS.escape(k) + '"]');
+      if (t) t.value = NOTES[k];
+    });
+  } catch(err){}
+  count();
+}
+function count(){
+  var n = Object.keys(EDITS).length, m = Object.keys(NOTES).filter(function(k){ return (NOTES[k]||"").trim(); }).length;
+  document.getElementById("cnt").textContent = (n || m) ? ("改了 " + n + " 句　·　" + m + " 則註記") : "還沒有修改";
+}
+function copyAll(){
+  var out = "# pro CRM 重設計 demo（版本 " + document.getElementById("ver").textContent + "）\n";
+  var scrs = [];
+  [].forEach.call(document.querySelectorAll("[data-screen]"), function(s){ scrs.push(s.getAttribute("data-screen")); });
+  scrs.forEach(function(s){
+    var lines = [];
+    Object.keys(EDITS).forEach(function(id){
+      if (EDITS[id].scr === s) lines.push("【想怎麼改】" + EDITS[id].from + " >> " + EDITS[id].to);
+    });
+    if ((NOTES[s] || "").trim()) lines.push("【註記】" + NOTES[s].trim());
+    if (lines.length) out += "\n## " + s + "\n" + lines.join("\n") + "\n";
+  });
+  if (out.indexOf("##") < 0) out += "\n（沒有修改）\n";
+  navigator.clipboard.writeText(out).then(function(){
+    var b = document.querySelectorAll(".bar button")[1];
+    var t = b.textContent; b.textContent = "已複製，貼回對話給我";
+    setTimeout(function(){ b.textContent = t; }, 2200);
+  });
+}
+function resetAll(){
+  if (!confirm("清掉這台瀏覽器上的所有修改與註記？")) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+init();
+</script>
+</body>
+</html>
