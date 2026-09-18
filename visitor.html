@@ -25,6 +25,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
+/* ⟦視覺tokens⟧ 由 productkit/_tools/gen_視覺tokens_css.py 產生，請勿手改——改值去 3-教材/_圖產生器/視覺tokens.json */
+:root {
+  --skew: -12deg;          /* 樞紐釘基線 50% 100%，一張圖裡所有片同角同軸 */
+  --slice-r: 9px;
+  /* 三態沒有任何一態是實色——紅線：I 原版金不鋪大面積、一張圖實色最多兩片 */
+  --slice-now: .2;        /* 現在這站，另加深版描邊 */
+  --slice-now-w: 3.5px;
+  --slice-now-lift: 1.16;
+  --slice-done: .5;       /* 走過了 */
+  --slice-todo-w: 2.5px;    /* 還沒到＝虛線 */
+  --slice-todo-a: .35;
+  --slice-todo-dash: 8px 8px;
+  --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+}
+/* ⟦/視覺tokens⟧ */
 /* ═══ 體驗席（visitor）・單頁 v3 ═══
    2026-09-05 老師意見：今日主卡搬 member 練習頁整個機制（範例說明＋應用場景＋收回饋給評語），
    只開 2 塊地基；教練席併進三站進度卡下半、強調 CTA；三站小字照老師改。
@@ -190,7 +205,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 /* 薄片：跟 member 同一套語彙（實色＝點亮了・淡色＝量過・虛線＝還沒解鎖） */
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
-.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 /* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。 */
 .sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(74,27,12,.055);border-radius:6px 6px 0 0;z-index:-1;}
 .sl.todo{background:transparent!important;border:1.5px dashed #9C8879;border-bottom:0;}
@@ -616,7 +631,7 @@ function slRow(items, opt){
       + it.lbl
       + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");
-  /* 斜角呼吸位：skewX(-12deg) 會把最高那片的右上角往外推 h*tan12°，
+  /* 斜角呼吸位：--skew（-12°）會把最高那片的右上角往外推 h*tan12°，
      不留位子就會被切掉。從最高片自己算，別再一處一處補 padding-right。 */
   var gut = Math.ceil(Math.max.apply(null, items.map(function(it){ return it.h; })) * 0.2126);
   return '<div class="slw" style="--sg:' + gut + 'px;">'

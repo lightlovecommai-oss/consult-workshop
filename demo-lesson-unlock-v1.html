@@ -8,6 +8,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
+/* ⟦視覺tokens⟧ 由 productkit/_tools/gen_視覺tokens_css.py 產生，請勿手改——改值去 3-教材/_圖產生器/視覺tokens.json */
+:root {
+  --skew: -12deg;          /* 樞紐釘基線 50% 100%，一張圖裡所有片同角同軸 */
+  --slice-r: 9px;
+  /* 三態沒有任何一態是實色——紅線：I 原版金不鋪大面積、一張圖實色最多兩片 */
+  --slice-now: .2;        /* 現在這站，另加深版描邊 */
+  --slice-now-w: 3.5px;
+  --slice-now-lift: 1.16;
+  --slice-done: .5;       /* 走過了 */
+  --slice-todo-w: 2.5px;    /* 還沒到＝虛線 */
+  --slice-todo-a: .35;
+  --slice-todo-dash: 8px 8px;
+  --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+}
+/* ⟦/視覺tokens⟧ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#080d15;font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;padding-bottom:120px;}
 .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 0;}
@@ -34,8 +49,8 @@ h1{font-size:23px;font-weight:900;letter-spacing:.5px;}
 .sec{font-size:12px;font-weight:700;color:#8ea1b6;letter-spacing:2px;margin:0 0 12px;}
 .sec b{color:#eaf1fa;font-size:13px;letter-spacing:1px;}
 .srow{display:flex;align-items:flex-end;gap:5px;height:104px;}
-.sl{flex:1;border-radius:5px;transform:skewX(-11deg);position:relative;cursor:pointer;transition:transform .12s;}
-.sl:active{transform:skewX(-11deg) scale(.96);}
+.sl{flex:1;border-radius:5px;transform:skewX(var(--skew));position:relative;cursor:pointer;transition:transform .12s;}
+.sl:active{transform:skewX(var(--skew)) scale(.96);}
 .sl.todo{background:transparent;border:1.5px dashed #33475e;}
 .sl.now{box-shadow:0 0 14px currentColor;}
 .sl.sel:after{content:"";position:absolute;inset:-4px;border:1.5px solid #E8C89A;border-radius:8px;}
@@ -382,7 +397,7 @@ function vhash(){
   document.getElementById("vh").textContent = "版本 " + h.toString(16);
 }
 var st = document.createElement("style");
-st.textContent = "@keyframes pop{0%{transform:skewX(-11deg) scale(1);}40%{transform:skewX(-11deg) scale(1.13);}100%{transform:skewX(-11deg) scale(1);}}";
+st.textContent = "@keyframes pop{0%{transform:skewX(var(--skew)) scale(1);}40%{transform:skewX(var(--skew)) scale(1.13);}100%{transform:skewX(var(--skew)) scale(1);}}";
 document.head.appendChild(st);
 rvlist(); star(); vhash();
 </script>

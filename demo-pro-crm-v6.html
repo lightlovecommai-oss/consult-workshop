@@ -8,6 +8,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800;900&display=swap">
 <style>
+/* ⟦視覺tokens⟧ 由 productkit/_tools/gen_視覺tokens_css.py 產生，請勿手改——改值去 3-教材/_圖產生器/視覺tokens.json */
+:root {
+  --skew: -12deg;          /* 樞紐釘基線 50% 100%，一張圖裡所有片同角同軸 */
+  --slice-r: 9px;
+  /* 三態沒有任何一態是實色——紅線：I 原版金不鋪大面積、一張圖實色最多兩片 */
+  --slice-now: .2;        /* 現在這站，另加深版描邊 */
+  --slice-now-w: 3.5px;
+  --slice-now-lift: 1.16;
+  --slice-done: .5;       /* 走過了 */
+  --slice-todo-w: 2.5px;    /* 還沒到＝虛線 */
+  --slice-todo-a: .35;
+  --slice-todo-dash: 8px 8px;
+  --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+}
+/* ⟦/視覺tokens⟧ */
 /* ═══ pro CRM 分頁重設計・可改版 demo（2026-09-15）═══
    老師的診斷：「卡片架構很好，但視覺整理看起來很混亂」，member 是他心中的標竿。
    三刀：①今日主角＋一行一人看板（八張同權重重卡→一張主角卡＋八行）
@@ -128,7 +143,7 @@ body{background:#0b0f16;font-family:"Noto Sans TC","PingFang TC",-apple-system,s
 .old-m{font-size:12.5px;color:#7d90a3;margin-top:2px;}
 .old-st{margin-left:auto;font-size:12px;font-weight:800;padding:4px 11px;border-radius:20px;color:#7ab5f5;background:rgba(75,155,240,.22);}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.2);padding:10px 12px 0 4px;}
-.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;}
 .slbl{display:flex;gap:7px;padding:7px 12px 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:11px;font-weight:700;color:#8ea1b6;}
 .old-go{margin-top:10px;text-align:right;font-size:13px;font-weight:800;color:#E8C89A;}

@@ -20,6 +20,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
+/* ⟦視覺tokens⟧ 由 productkit/_tools/gen_視覺tokens_css.py 產生，請勿手改——改值去 3-教材/_圖產生器/視覺tokens.json */
+:root {
+  --skew: -12deg;          /* 樞紐釘基線 50% 100%，一張圖裡所有片同角同軸 */
+  --slice-r: 9px;
+  /* 三態沒有任何一態是實色——紅線：I 原版金不鋪大面積、一張圖實色最多兩片 */
+  --slice-now: .2;        /* 現在這站，另加深版描邊 */
+  --slice-now-w: 3.5px;
+  --slice-now-lift: 1.16;
+  --slice-done: .5;       /* 走過了 */
+  --slice-todo-w: 2.5px;    /* 還沒到＝虛線 */
+  --slice-todo-a: .35;
+  --slice-todo-dash: 8px 8px;
+  --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+}
+/* ⟦/視覺tokens⟧ */
 /* ═══ 私人教練席 v5・三分頁版（2026-09-14 demo-pro-v5 驗過轉正）═══
    三分頁：①客戶管理＝引力場＋客戶卡（排序＝今天該動誰）＋COACH SIGNAL＋這週議程
    ②課程地圖＝甜蜜路徑（最強兩維定人設×三狀態定下一步）＋這季主力＋課程星圖＋演說段
@@ -59,18 +74,18 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .sub-t b{color:#cfdcea;}
 .rule4{height:2px;background:linear-gradient(90deg,#e8734a,#33c495,#4b9bf0,#e6a93a);box-shadow:0 0 8px rgba(232,115,74,.35);border-radius:2px;margin-top:16px;}
 
-/* ═ 薄片原語・科技版：形狀跟 member/visitor 完全同（skewX -12°、基線共軸、三態），
+/* ═ 薄片原語・科技版：形狀跟 member/visitor 完全同（同一個 --skew、基線共軸、三態），
    只換色——實色＝霓虹＋發光、淡填＝霓虹 22% 透明、虛線＝深藍灰。
    I 金紅線的深底落法：不鋪實，改 18% 金底＋實線金描邊＋發光。 ═ */
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(234,241,250,.20);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
-.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 /* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。
    科技底是深色，軌要用亮色壓一層，暖版那邊的墨色在這裡看不見。 */
 .sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(234,241,250,.07);border-radius:6px 6px 0 0;z-index:-1;}
 .sl.todo{background:transparent!important;border:1.5px dashed #526c88;border-bottom:0;}
 .sl.sel{outline:2px solid #E8C89A;outline-offset:2px;animation:selpop .35s cubic-bezier(.34,1.56,.64,1);}
-@keyframes selpop{0%{transform:skewX(-12deg) scale(.92);}60%{transform:skewX(-12deg) scale(1.08);}100%{transform:skewX(-12deg) scale(1);}}
+@keyframes selpop{0%{transform:skewX(var(--skew)) scale(.92);}60%{transform:skewX(var(--skew)) scale(1.08);}100%{transform:skewX(var(--skew)) scale(1);}}
 .sl.now.gold{background:rgba(230,169,58,.18)!important;border:2px solid #e6a93a;border-bottom:0;box-shadow:0 0 14px rgba(230,169,58,.45);}
 .slbl{display:flex;gap:7px;padding:7px calc(4px + var(--sg,0px)) 0 4px;}
 .slbl span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#cfdcea;line-height:1.45;}
@@ -117,7 +132,7 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .seatpath{background:transparent;border:1.5px solid rgba(232,200,154,.5);border-radius:16px;padding:13px 14px 12px;margin:18px 0 4px;}
 .sp-cta{margin-top:10px;border-top:1px dashed rgba(232,200,154,.35);padding-top:10px;text-align:center;font-size:13.5px;font-weight:700;color:#E8C89A;line-height:1.7;}
 .sp-row{display:flex;align-items:flex-end;gap:6px;border-bottom:2px solid rgba(234,241,250,.20);padding:2px 2px 0;}
-.sp{border-radius:5px 5px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
+.sp{border-radius:5px 5px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;}
 .sp.past{background:rgba(51,196,149,.22);}
 .sp.past.p2{background:rgba(75,155,240,.22);}
 .sp.now{background:rgba(230,169,58,.18);border:2px solid #e6a93a;border-bottom:0;box-shadow:0 0 14px rgba(230,169,58,.45);}
@@ -510,7 +525,7 @@ function slRow(items, opt){
       + (it.lbl2 ? '<i style="color:' + (it.state==="todo" ? "#5d7692" : p.t||"#8ea1b6") + ';">' + it.lbl2 + '</i>' : '')
       + it.lbl + '</span>';
   }).join("");
-  /* 斜角呼吸位：skewX(-12deg) 會把最高那片的右上角往外推 h*tan12°，
+  /* 斜角呼吸位：--skew（-12°）會把最高那片的右上角往外推 h*tan12°，
      不留位子就會被切掉。從最高片自己算，別再一處一處補 padding-right。 */
   var gut = Math.ceil(Math.max.apply(null, items.map(function(it){ return it.h; })) * 0.2126);
   return '<div class="slw" style="--sg:' + gut + 'px;">'

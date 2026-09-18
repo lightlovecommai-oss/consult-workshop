@@ -21,6 +21,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
 <style>
+/* ⟦視覺tokens⟧ 由 productkit/_tools/gen_視覺tokens_css.py 產生，請勿手改——改值去 3-教材/_圖產生器/視覺tokens.json */
+:root {
+  --skew: -12deg;          /* 樞紐釘基線 50% 100%，一張圖裡所有片同角同軸 */
+  --slice-r: 9px;
+  /* 三態沒有任何一態是實色——紅線：I 原版金不鋪大面積、一張圖實色最多兩片 */
+  --slice-now: .2;        /* 現在這站，另加深版描邊 */
+  --slice-now-w: 3.5px;
+  --slice-now-lift: 1.16;
+  --slice-done: .5;       /* 走過了 */
+  --slice-todo-w: 2.5px;    /* 還沒到＝虛線 */
+  --slice-todo-a: .35;
+  --slice-todo-dash: 8px 8px;
+  --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+}
+/* ⟦/視覺tokens⟧ */
 /* ═══ 會員模式 v11（2026-09-14：demo-member-v5 驗過轉正）═══
    畫面真相＝demo-member-v5.html（2026-09-11 大改版拍板：薄片語言／反饋當主角／全貌感常駐），
    這支只做「demo 假資料 → S 真資料」的轉接，版面一片不動。
@@ -60,12 +75,12 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .rule4{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin-top:16px;}
 
 /* ═ 薄片原語（§3.9 九條的 CSS 落法）═
-   共軸：一律 skewX(-12deg)、origin 釘在基線（底邊）→ 所有片同角同軸。
+   共軸：角度一律吃 --skew、origin 釘在基線（底邊）→ 所有片同角同軸。
    三態：.now 實色＝現在/這一個；.past 淡填＝走過/既有；.todo 虛線＝還沒到。
    I 金紅線：實色態不鋪 #C99A4E，改淡底＋深版 #8E682B 描邊（.now.gold）。 */
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
-.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
+.sl{flex:1;border-radius:6px 6px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;position:relative;transition:height .4s cubic-bezier(.4,0,.2,1);}
 /* 滿格軌（2026-09-15）：只有 MUSCLE MAP 那兩排會傳 full——那兩排才有「滿格」這件事。
    階梯／週軌那些排是階段不是分數，不給軌。 */
 .sl::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--fh,0px);background:rgba(74,27,12,.055);border-radius:6px 6px 0 0;z-index:-1;}
@@ -86,7 +101,7 @@ body.seat-v{--sd:#5C7464;--st:#DCE7DE;}
 .seatpath{background:transparent;border:1.5px solid #C99A4E;border-radius:16px;padding:13px 14px 12px;margin:18px 0 4px;cursor:pointer;}
 .sp-cta{margin-top:10px;border-top:1px dashed #E8C89A;padding-top:10px;text-align:center;font-size:14px;font-weight:800;color:#8E682B;}
 .sp-row{display:flex;align-items:flex-end;gap:6px;border-bottom:2px solid rgba(74,27,12,.22);padding:2px 2px 0;}
-.sp{border-radius:5px 5px 0 0;transform:skewX(-12deg);transform-origin:50% 100%;}
+.sp{border-radius:5px 5px 0 0;transform:skewX(var(--skew));transform-origin:50% 100%;}
 .sp.past{background:#DCE7DE;}
 .sp.now{background:#6E8CA8;box-shadow:0 2px 8px rgba(110,140,168,.35);}
 .sp.now.g{background:#6E8B77;box-shadow:0 2px 8px rgba(110,139,119,.35);}
@@ -511,7 +526,7 @@ function slRow(items, opt){
       + it.lbl
       + (it.tap ? '<em class="tapchip">點我</em>' : '') + '</span>';
   }).join("");
-  /* 斜角呼吸位：skewX(-12deg) 會把最高那片的右上角往外推 h*tan12°，
+  /* 斜角呼吸位：--skew（-12°）會把最高那片的右上角往外推 h*tan12°，
      不留位子就會被切掉。從最高片自己算，別再一處一處補 padding-right。 */
   var gut = Math.ceil(Math.max.apply(null, items.map(function(it){ return it.h; })) * 0.2126);
   return '<div class="slw" style="--sg:' + gut + 'px;">'
