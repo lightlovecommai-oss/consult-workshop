@@ -868,10 +868,8 @@ var LESSON_Q3 = {
 7:"用 7-11-4 盤點你的變現路徑。想像一個客戶從第一次看到你、到掏錢成交的完整過程，盤你現在真的有的。\n\n① 深度 7｜你有哪些內容資產（短影音／長影音／貼文／長文／電子書／Podcast／課件／直播回放）？估總時長＿＿小時（往 7 小時靠）\n② 頻率 11｜從陌生到成交，他會跟你接觸幾次？把接觸點一個一個列出來（例：看到短影音 → 領電子書 → 私訊 → 約諮詢 →…）共＿＿次\n③ 廣度 4｜他會在幾個不同場域碰到你（社群／搜尋得到／私域／線下／口碑）？共＿＿個\n④ 三軸裡先練哪一軸最有感：＿＿；這 7 天我要做的一個具體動作（只寫一個、要做得到）：＿＿"
 };
 /* 教材在 Skool，這裡只連過去不重做播放器（Skool 沒 API，不寫篇數等即時數字）。
-   ⚠️ 逐堂連結還沒拿到，先落到社群首頁——不假裝有專屬連結。填了哪堂，哪堂就直接進那一課。 */
-var SKOOL_URL = "https://www.skool.com/influence-8679/about?ref=ebb628ac5055497fb61e281e175fc786";
-var LESSON_URL = { 1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:"", 8:"" };
-function lessonURL(n){ return LESSON_URL[n] || SKOOL_URL; }
+   八堂都連同一個教室（老師 2026-09-18 指定），不做逐堂連結。 */
+var CLASSROOM_URL = "https://www.skool.com/influence-8679/classroom/16c9099a?md=642b3a60f1234b1f9f2be134c9e5d7bd";
 
 /* 交過的堂：後端 submissions 的 taskKey＝hw_L2 這種格式 */
 function submittedL(){
@@ -933,7 +931,7 @@ function starHTML(){
 
   h += '<div class="mats">' + ["教材影片","口袋卡","演練清單"].map(function(n){
     return s.open
-      ? '<a class="mat on" href="' + lessonURL(s.L) + '" target="_blank" rel="noopener"><b>▶</b>' + n + '</a>'
+      ? '<a class="mat on" href="' + CLASSROOM_URL + '" target="_blank" rel="noopener"><b>▶</b>' + n + '</a>'
       : '<div class="mat"><b>🔒</b>' + n + '</div>';
   }).join("") + '</div>';
 
