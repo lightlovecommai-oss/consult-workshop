@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DEMO・寫心得解鎖下一堂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#080d15;font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;padding-bottom:120px;}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 0;}
+h1{font-size:23px;font-weight:900;letter-spacing:.5px;}
+.lead{font-size:14.5px;color:#8ea1b6;line-height:1.9;margin-top:9px;max-width:760px;}
+.lead b{color:#E8C89A;}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0f1824;border-top:1px solid #23344a;padding:11px 18px;display:flex;gap:10px;align-items:center;z-index:90;flex-wrap:wrap;}
+.bar span{font-size:12.5px;color:#7d90a3;}
+.bar button{font-family:inherit;font-size:13.5px;font-weight:800;border-radius:12px;padding:10px 15px;cursor:pointer;border:1px solid #2a3c50;background:transparent;color:#cfdcea;min-height:42px;}
+.bar button.go{background:linear-gradient(135deg,#C6603A,#AF5433);border:0;color:#fff;}
+.cols{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;margin-top:22px;}
+.phone{width:460px;flex:0 0 460px;background:#0c131e;border:1px solid #23344a;border-radius:24px;overflow:hidden;position:sticky;top:18px;box-shadow:0 18px 50px rgba(0,0,0,.5);}
+.right{flex:1;min-width:380px;}
+@media(max-width:1000px){.phone{position:static;width:100%;flex:1 1 100%;}}
+
+/* ── pro.html 視覺原語（原樣搬過來，demo 不另創一套） ── */
+.tb{background:linear-gradient(135deg,#4A1B0C,#6B3018);padding:16px 20px 14px;position:relative;overflow:hidden;}
+.tb:after{content:"";position:absolute;left:0;right:0;top:0;height:1.5px;background:linear-gradient(90deg,transparent,#E8C89A,transparent);animation:scan 3.2s ease-in-out infinite;}
+@keyframes scan{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
+.tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:#E8C89A;}
+.tb-n{font-size:19px;font-weight:900;color:#F7F1EC;margin-top:9px;}
+.bd{padding:20px 18px 26px;}
+.cd{background:#131f2b;border:1px solid #1d2c3c;border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.28);}
+.sec{font-size:12px;font-weight:700;color:#8ea1b6;letter-spacing:2px;margin:0 0 12px;}
+.sec b{color:#eaf1fa;font-size:13px;letter-spacing:1px;}
+.srow{display:flex;align-items:flex-end;gap:5px;height:104px;}
+.sl{flex:1;border-radius:5px;transform:skewX(-11deg);position:relative;cursor:pointer;transition:transform .12s;}
+.sl:active{transform:skewX(-11deg) scale(.96);}
+.sl.todo{background:transparent;border:1.5px dashed #33475e;}
+.sl.now{box-shadow:0 0 14px currentColor;}
+.sl.sel:after{content:"";position:absolute;inset:-4px;border:1.5px solid #E8C89A;border-radius:8px;}
+.slbl{display:flex;gap:5px;margin-top:8px;}
+.slbl span{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:#cfdcea;}
+.slbl span i{font-style:normal;display:block;font-size:11.5px;font-weight:900;}
+.slbl span.dim{color:#5d7692;}
+.howq{background:rgba(230,237,245,.05);border-left:3px solid #E8C89A;border-radius:0 12px 12px 0;padding:12px 13px;margin-top:12px;}
+.howq-k{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#E8C89A;margin-bottom:6px;}
+.howq-t{font-size:14.5px;line-height:1.85;color:#cfdcea;}
+.howq-t b{color:#F7F1EC;font-weight:800;}
+.linknote{font-size:12px;color:#7d90a3;margin-top:13px;line-height:1.75;}
+.gobtn{display:block;width:100%;background:linear-gradient(135deg,#C6603A,#AF5433);border:0;border-radius:16px;color:#fff;font-size:16px;font-weight:800;padding:16px;text-align:center;cursor:pointer;font-family:inherit;min-height:56px;margin-top:16px;}
+.gobtn:active{transform:scale(.98);}
+.gobtn:disabled{background:#1b2838;color:#5d7692;cursor:default;}
+.softbtn{display:block;width:100%;background:rgba(232,200,154,.12);border:1px solid rgba(232,200,154,.45);border-radius:16px;color:#E8C89A;font-size:15px;font-weight:800;padding:14px;text-align:center;cursor:pointer;font-family:inherit;min-height:52px;margin-top:12px;}
+.lockbar{background:rgba(232,200,154,.08);border:1px dashed rgba(232,200,154,.45);border-radius:12px;padding:11px 12px;font-size:13px;color:#cfdcea;line-height:1.8;margin-top:12px;}
+.lockbar b{color:#E8C89A;}
+
+/* 課綱三行（全部課都看得到，這是「全貌感」） */
+.olt{font-size:19px;font-weight:900;line-height:1.5;margin-top:12px;color:#F7F1EC;}
+.ol{margin-top:11px;}
+.ol div{display:flex;gap:9px;font-size:13.5px;line-height:1.8;color:#cfdcea;padding:5px 0;border-top:1px solid #1d2c3c;}
+.ol div:first-child{border-top:0;}
+.ol i{font-style:normal;flex:0 0 76px;color:#7d90a3;font-size:12px;font-weight:700;padding-top:2px;}
+.mk{display:inline-block;font-size:11.5px;font-weight:800;border-radius:7px;padding:2px 7px;margin:2px 4px 2px 0;border:1px solid;}
+.mats{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+.mat{flex:1;min-width:88px;text-align:center;font-size:11.5px;font-weight:700;border-radius:11px;padding:9px 4px;border:1px solid #1d2c3c;background:rgba(230,237,245,.04);color:#7d90a3;line-height:1.55;}
+.mat.on{color:#cfdcea;border-color:#2a3c50;}
+.mat b{display:block;font-size:15px;margin-bottom:2px;}
+
+/* 學習單抽屜 */
+.ov{position:fixed;inset:0;background:rgba(6,10,16,.72);display:none;align-items:flex-end;justify-content:center;z-index:100;padding:18px;}
+.ov.on{display:flex;}
+.sheet{width:100%;max-width:460px;max-height:88vh;overflow:auto;background:#101b26;border:1px solid #2a3c50;border-radius:20px;padding:18px 16px 22px;}
+.sh-top{display:flex;align-items:flex-start;gap:10px;}
+.sh-t{font-size:18px;font-weight:900;line-height:1.5;flex:1;}
+.sh-x{background:transparent;border:0;color:#7d90a3;font-size:22px;cursor:pointer;font-family:inherit;padding:0 4px;line-height:1;}
+.sh-m{font-size:12.5px;color:#7d90a3;margin-top:5px;line-height:1.7;}
+.hw{margin-top:16px;}
+.hw-l{font-size:14px;font-weight:800;color:#E8C89A;margin-bottom:5px;}
+.hw-h{font-size:12.5px;color:#7d90a3;line-height:1.75;margin-bottom:7px;}
+.hw textarea,.hw input[type=text]{width:100%;background:#0c131e;border:1px solid #2a3c50;border-radius:12px;color:#eaf1fa;font-family:inherit;font-size:15px;padding:11px;line-height:1.75;resize:vertical;}
+.hw textarea{min-height:92px;}
+.hw-c{font-size:12px;color:#7d90a3;text-align:right;margin-top:4px;font-variant-numeric:tabular-nums;}
+.hw-c.ok{color:#33c495;}
+.q3box{background:rgba(230,237,245,.05);border-left:3px solid #4b9bf0;border-radius:0 12px 12px 0;padding:12px 13px;font-size:13.5px;line-height:1.9;color:#cfdcea;white-space:pre-wrap;margin-bottom:9px;}
+.msg{font-size:13.5px;text-align:center;margin-top:10px;min-height:19px;}
+
+/* 右欄：題目校對區 */
+.rv{background:#101b26;border:1px solid #23344a;border-radius:16px;padding:16px;margin-bottom:13px;}
+.rv-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:10px;}
+.rv-l{font-size:13px;font-weight:900;letter-spacing:1px;}
+.rv-n{font-size:15px;font-weight:800;color:#F7F1EC;}
+.tag{font-size:11px;font-weight:800;border-radius:7px;padding:2px 8px;letter-spacing:.5px;}
+.tag.old{background:rgba(51,196,149,.14);color:#33c495;border:1px solid rgba(51,196,149,.4);}
+.tag.new{background:rgba(232,115,74,.14);color:#e8734a;border:1px solid rgba(232,115,74,.4);}
+.ed{background:#0c131e;border:1px solid #2a3c50;border-radius:12px;padding:12px;font-size:13.5px;line-height:1.95;color:#cfdcea;white-space:pre-wrap;outline:none;}
+.ed:focus{border-color:#E8C89A;background:#0d1522;}
+.rv small{display:block;font-size:12px;color:#7d90a3;margin-top:8px;line-height:1.7;}
+.h2{font-size:16px;font-weight:900;margin:24px 0 11px;color:#E8C89A;letter-spacing:.5px;}
+.h2:first-child{margin-top:0;}
+.note{font-size:13px;color:#8ea1b6;line-height:1.9;background:rgba(230,237,245,.04);border:1px solid #1d2c3c;border-radius:12px;padding:13px;margin-bottom:14px;}
+.note b{color:#cfdcea;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>寫心得解鎖下一堂・DEMO</h1>
+  <div class="lead">
+    左邊是<b>真的可以點的流程</b>：點一堂沒開的課 → 跳出「上一堂的學習單」→ 寫完送出 → 那一格就亮起來。<br>
+    右邊是<b>八堂課的 Q3 專屬題全文，可以直接改字</b>；改完按右下角「複製全部修改」貼回來給我。<br>
+    右邊改的字會直接吃進左邊的流程，改完再點一次就看得到。
+  </div>
+
+  <div class="cols">
+    <!-- ══ 手機：課程星圖 ══ -->
+    <div class="phone">
+      <div class="tb"><div class="tb-k">◆ 私人教練席</div><div class="tb-n">課程地圖</div></div>
+      <div class="bd"><div id="star"></div></div>
+    </div>
+
+    <!-- ══ 右欄：題目校對 ══ -->
+    <div class="right">
+      <div class="note">
+        <b>這裡要你看的是題目文字。</b>綠標「已有學習單」＝從 productkit 搬回來的（L1／L5／L6／L7），我只把紙本壓成手機填得完的長度。
+        橘標「這次新寫」＝原本沒有學習單的四堂（L2／L3／L4／L8），題目是我照 12 小肌群補的，請你逐條看過。<br>
+        每堂的 Q1 心得（150 字）、Q2 用在哪裡，八堂完全一樣，不用逐堂看。
+      </div>
+      <div class="h2">Q3 本課專屬題・八堂</div>
+      <div id="rvlist"></div>
+
+      <div class="h2">要跟你確認的三件事</div>
+      <div class="note" id="asks"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 學習單抽屜 ══ -->
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<div class="bar">
+  <span id="vh"></span>
+  <button onclick="resetDemo()">重來一次（清空進度）</button>
+  <button onclick="fillDemo()">幫我填滿（省得打字）</button>
+  <button class="go" onclick="exportAll()">複製全部修改</button>
+</div>
+
+<script>
+/* ═══ 課程資料 ═══
+   名稱用 productkit 正式課名（pro.html 現在的簡稱之後要一起對齊）。
+   done/now/todo 不再看體測分數——看「上一堂交了沒」。 */
+var PAL = {
+  A:{c:"#e8734a",t:"#f09a78",tint:"rgba(232,115,74,.20)"},
+  T:{c:"#33c495",t:"#5fd6ae",tint:"rgba(51,196,149,.20)"},
+  P:{c:"#4b9bf0",t:"#7db6f5",tint:"rgba(75,155,240,.20)"},
+  I:{c:"#e6a93a",t:"#E8C89A",tint:"rgba(230,169,58,.20)"},
+  X:{c:"#e6a93a",t:"#E8C89A",tint:"rgba(232,200,154,.18)"}
+};
+var LS = [
+  {L:1,dim:"A",zh:"3% 的秘密・溝通引力",
+   p:"你講了很多，對方客氣地點頭，然後就沒有然後了。",
+   g:"三句話讓一個陌生人開口、追問、一週後還記得你。",
+   mk:["A1 讓他開口","A2 讓他追問","A3 讓他記得"], has:1},
+  {L:2,dim:"T",zh:"信任肌肉・完整溝通 3 步驟",
+   p:"聊了半天都停在表面，他很客氣，但什麼都沒真的告訴你。",
+   g:"讓對方主動講出他本來沒打算講的事。",
+   mk:["T1 讓他敢說","T2 讓他交心","T3 讓他當真"], has:0},
+  {L:3,dim:"P",zh:"專業肌肉・開口前的攻心 3 策略",
+   p:"你很專業，他感受不到，最後還是回去比價。",
+   g:"還沒報價，他就認定你是那個人。",
+   mk:["P1 讓他釐清","P2 讓他有感","P3 讓他放心"], has:0},
+  {L:4,dim:"I",zh:"推進肌肉・成交專屬「大絕招」",
+   p:"聊得很愉快，結束後沒有下一步，他說再看看。",
+   g:"拿得到他同意的具體推進：下次時間、他要準備的東西。",
+   mk:["I1 讓他想要","I2 讓他敢要","I3 讓他答應"], has:0},
+  {L:5,dim:"X",zh:"吸引式變現・1v1 顧問腳本",
+   p:"諮詢一小時聊得很開心，結束卻收不了單。",
+   g:"有一份自己的四幕腳本，照著走就收得了單。",
+   mk:["A 破冰 7 分","T 深挖 30 分","P 大絕招 13 分","I 收單 10 分"], has:1},
+  {L:6,dim:"X",zh:"建立自己的甜蜜變現路徑",
+   p:"什麼方法都想學，學了一堆，每一招都不順手。",
+   g:"知道自己最強兩維走哪條路，不順手的讓系統做。",
+   mk:["六種強項組合","最省力路徑","替代做法"], has:1},
+  {L:7,dim:"X",zh:"變現路徑的導航：北極星＋燈塔",
+   p:"內容做了很多，客戶還是沒有自己走過來。",
+   g:"盤得出自己的 7-11-4，知道這週要先做哪一個動作。",
+   mk:["深度 7","頻率 11","廣度 4"], has:1},
+  {L:8,dim:"X",zh:"成交能力太好，要避開的副作用",
+   p:"成交變快之後，出現你沒預期的代價——最常發生在最親近的人身上。",
+   g:"畫得出自己的界線，力量用在對的地方。",
+   mk:["起心動念三問","三個場景","一條界線"], has:1}
+];
+
+/* Q3 專屬題：L1/L5/L6/L7＝productkit 學習單壓縮版；L2/L3/L4/L8＝這次新寫 */
+var Q3 = {
+1:"練 A 吸引三塊肌，寫出你的「引力 Combo」。照三塊肌把示範改寫成你自己的版本（你的產業、你的故事、你的說話習慣）——先求有，再求像你。\n\n① A1 讓他開口｜真誠稱讚：挑一個 7 天內會遇到的人，寫一句真誠、具體的稱讚（要講到他身上的細節，不是客套）。\n② A2 讓他追問｜端牛肉：從你做過的事挑一個真實結果，寫成「低（平凡起點）→ 轉（關鍵改變）→ 高（結果數字）」，再串成一句話端出來。\n③ A3 讓他記得｜低轉高故事：把那塊牛肉擴寫成 60 秒小故事（平凡 → 遇到坎 → 轉折 → 成果 → 一句啟示）。",
+2:"練 T 信任三塊肌，寫出你的「交心 Combo」。挑同一個真實對象，三塊肌都寫他。\n\n① T1 讓他敢說｜講出心裡 OS：寫一句你「還沒說出口」的真話——還在怕的、還沒成的、還在學的。你要先給，他才會給。\n② T2 讓他交心｜提問式聆聽：針對這個人，寫三層問句各一句——皮（現狀、事情怎麼發生的）／肉（那時候你什麼感受）／骨（你想帶人去哪裡）。\n③ T3 讓他當真｜承諾兌現：寫一個你 7 天內做得到的小承諾，再寫你要怎麼讓他親眼看到你做到了。",
+3:"練 P 專業三塊肌，寫出你的「攻心 Combo」。挑一個真實客戶，三塊肌都對他。\n\n① P1 讓他釐清｜目標落差：畫出他的 A → B（兩端的數字讓他自己報），寫下你要在落差處問的那一句。\n② P2 讓他有感｜大絕招：你要讓他親自體驗什麼？怎麼做出前後對比？（做完請他給 0–10 分，7 分以上才算過）\n③ P3 讓他放心｜他證三件組：各寫一個見證、一個數據、一個背書，並寫你要怎麼端出來，讓他主動追問那個案例。",
+4:"練 I 推進三塊肌，寫出你的「收單 Combo」。挑一個已經聊過、但還沒動的人。\n\n① I1 讓他想要｜結果翻譯：把你的服務翻成一句「他要的結果」（不是規格、不是內容），寫到他能原句複述。\n② I2 讓他敢要｜讀水溫：寫出你最常遇到的兩個抗點，各配一句你要主動問出來的話，以及你會怎麼回。\n③ I3 讓他答應｜真誠邀請＋被動跟進：寫你的邀請句（我想邀請你＿＿，因為＿＿），再寫一個讓他自己回來找你的理由。",
+5:"優化你的「變現路徑」。打開《ATPI 個人溝通變現路徑・使用手冊》第三章，找到你的強項組合，改寫成你自己的版本。核心邏輯：不是硬去練不順手的那塊，是讓系統幫你做那一段。\n\n① 我的最強兩維是：＿＿＿＿（A 吸引／T 信任／P 專業／I 推進，選 2 個）\n② 手冊對應的最省力路徑，改寫成我的四步（誰？在哪裡？做什麼？）：①②③④\n③ 我不順手的是＿＿，我用這個方法替代（照手冊）：＿＿；我要避開的場景：＿＿\n④ 未來 7 天，這條路徑我要先做的第一步：＿＿",
+6:"寫出你自己的 60 分鐘諮詢流程。打開《「溝通變現」1v1 顧問成交腳本・ATPI 實戰版》，照四幕改寫成你的版本——腳本可以照抄再改。\n\n① 第一幕 A 破冰 7 分：我的開場＋前置約定／萬能關鍵句（如果解決一個問題，你的＿＿會＿＿）／端牛肉一句（以前＿＿，現在＿＿）\n② 第二幕 T 深挖 30 分：皮 ×2、肉 ×2、骨 ×2，六句問句寫出來\n③ 第三幕 P 大絕招 13 分：我要讓他體驗什麼？怎麼做對比？我最常點出的客戶誤區 1–2 個\n④ 第四幕 I 收單 10 分：我的真誠邀請句／我的被動跟進理由\n\n最長的一幕是聽他說——你開口的時間不到一半。",
+7:"用 7-11-4 盤點你的變現路徑。想像一個客戶從第一次看到你、到掏錢成交的完整過程，盤你現在真的有的。\n\n① 深度 7｜你有哪些內容資產（短影音／長影音／貼文／長文／電子書／Podcast／課件／直播回放）？估總時長＿＿小時（往 7 小時靠）\n② 頻率 11｜從陌生到成交，他會跟你接觸幾次？把接觸點一個一個列出來（例：看到短影音 → 領電子書 → 私訊 → 約諮詢 →…）共＿＿次\n③ 廣度 4｜他會在幾個不同場域碰到你（社群／搜尋得到／私域／線下／口碑）？共＿＿個\n④ 三軸裡先練哪一軸最有感：＿＿；這 7 天我要做的一個具體動作（只寫一個、要做得到）：＿＿",
+8:"寫下你的「界線清單」。你的成交能力會一直長，這堂課要先講清楚：力量要用在哪裡、不用在哪裡。\n\n① 三個場景：能成交之後，你最可能在哪三個場合用力過頭？各寫一個真實場景——家人一個、朋友一個、客戶一個。\n② 每個場景配一條界線：我不會＿＿，我會改成＿＿。\n③ 一句起心動念：這個月我最想幫到誰？幫到他之後，我希望他變成什麼樣子？（這一題沒有標準答案，但要寫得出名字）"
+};
+
+var ASKS = [
+"<b>① 課名要對齊。</b>現在 app 裡寫的是簡稱（「信任肌肉・完整溝通三步」），productkit 學習單寫的是全名（「信任肌肉：完整溝通 3 步驟」）。這個 demo 一律用全名，如果你要 app 維持簡稱，跟我說一聲。",
+"<b>② L8 沒有逐字稿素材。</b>其他七堂的 Q3 我都有課程內容可以對，L8 的三道題是我照骨層三問（看得見骨嗎／皮層句有沒有獨自站著／起心動念純嗎）推的，最需要你看。",
+"<b>③ 交了就亮，不等審核。</b>學生按下送出，下一堂立刻開——導師審核只影響積分，不擋課。你之前拍板的就是這條，先確認我沒理解錯。"
+];
+
+/* ═══ 狀態 ═══ */
+var SUB = JSON.parse(localStorage.getItem("dlu_sub") || "{}");   /* 交過的堂 */
+var SEL = 1, JUST = 0;
+function saveSub(){ localStorage.setItem("dlu_sub", JSON.stringify(SUB)); }
+function openL(n){ return n === 1 || !!SUB[n-1]; }              /* L1 永遠開；其餘看上一堂 */
+function nextTodo(){ for (var i = 1; i <= 8; i++) if (openL(i) && !SUB[i]) return i; return 8; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function q3of(n){
+  var el = document.getElementById("q3-" + n);
+  return el ? el.innerText.trim() : Q3[n];
+}
+
+/* ═══ 星圖 ═══ */
+function star(){
+  var doneN = LS.filter(function(l){ return SUB[l.L]; }).length;
+  var slices = LS.map(function(l,i){
+    var p = PAL[l.dim], op = openL(l.L), sub = !!SUB[l.L];
+    var cls = "sl", sty = "height:" + (26 + i*9) + "px;";
+    if (sub) { cls += " past"; sty += "background:" + p.tint + ";border:1.5px solid " + p.c + "55;"; }
+    else if (op) { cls += " now"; sty += "background:" + p.c + ";color:" + p.c + ";"; }
+    else { cls += " todo"; }
+    if (l.L === SEL) cls += " sel";
+    if (l.L === JUST) sty += "animation:pop .5s ease;";
+    return '<div class="' + cls + '" style="' + sty + '" onclick="pick(' + l.L + ')"></div>';
+  }).join("");
+  var lbls = LS.map(function(l){
+    var p = PAL[l.dim], op = openL(l.L);
+    return '<span class="' + (op ? "" : "dim") + '"><i style="color:' + (op ? p.t : "#5d7692") + ';">L' + l.L + '</i></span>';
+  }).join("");
+
+  var s = LS.filter(function(l){ return l.L === SEL; })[0], p = PAL[s.dim], op = openL(s.L), sub = !!SUB[s.L];
+  var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> '
+    + '<span style="color:#5d7692;font-weight:600;">超引力顧問課 · 交了 ' + doneN + '/8 堂</span></div>'
+    + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>';
+
+  /* 大綱：八堂都看得到，鎖的只是教材跟作業 */
+  h += '<div class="olt">L' + s.L + '　' + esc(s.zh) + '</div>'
+    + '<div class="ol">'
+    +   '<div><i>解什麼問題</i><span>' + esc(s.p) + '</span></div>'
+    +   '<div><i>學完你會</i><span>' + esc(s.g) + '</span></div>'
+    +   '<div><i>練哪幾塊</i><span>' + s.mk.map(function(m){
+          return '<b class="mk" style="color:' + p.t + ';border-color:' + p.c + '66;">' + esc(m) + '</b>'; }).join("") + '</span></div>'
+    + '</div>';
+
+  h += '<div class="mats">'
+    + ['教材影片','口袋卡','演練清單'].map(function(n,i){
+        return '<div class="mat' + (op ? " on" : "") + '"><b>' + (op ? "▶" : "🔒") + '</b>' + n + '</div>'; }).join("")
+    + '</div>';
+
+  if (sub) {
+    h += '<div class="howq"><div class="howq-k">L' + s.L + ' · 已交</div>'
+      + '<div class="howq-t">心得跟落地應用都收到了，<b>下一堂已經開了</b>。想再看一次自己寫的，找教練調。</div></div>';
+  } else if (op) {
+    h += '<div class="howq"><div class="howq-k">L' + s.L + ' · 現在這堂</div>'
+      + '<div class="howq-t">課上完就寫一份——<b>寫過一遍，才真正是你的</b>。交出去，L' + (s.L+1) + ' 同時就開。</div></div>'
+      + (s.L < 8 ? '<button class="gobtn" onclick="openHW(' + s.L + ')">交 L' + s.L + ' 的學習單</button>'
+                 : '<button class="gobtn" onclick="openHW(8)">交 L8 的學習單</button>');
+  } else {
+    h += '<div class="lockbar">大綱先給你看，因為你要知道自己在走哪條路。'
+      + '這一格要開，差<b>一份 L' + (s.L-1) + ' 的學習單</b>——心得＋你打算用在哪裡。</div>'
+      /* 跳兩堂以上的時候不給死鈕——直接帶他去現在真的寫得了的那一堂 */
+      + '<button class="gobtn" onclick="openHW(' + nextTodo() + ')">'
+      + (openL(s.L-1) ? '去交 L' + (s.L-1) + ' 的學習單' : '從 L' + nextTodo() + ' 開始交') + '</button>';
+  }
+  h += '<div class="linknote">八堂大綱全部看得到，亮起來的是你走過的。交一份，下一格就亮——不用等導師打勾。</div></div>';
+  document.getElementById("star").innerHTML = h;
+  JUST = 0;
+}
+function pick(n){ SEL = n; star(); }
+
+/* ═══ 學習單抽屜 ═══ */
+var HWL = 0;
+function openHW(n){
+  HWL = n;
+  var s = LS.filter(function(l){ return l.L === n; })[0];
+  document.getElementById("sheet").innerHTML =
+    '<div class="sh-top"><div><div class="sh-t">L' + n + ' 課後學習單</div>'
+    + '<div class="sh-m">' + esc(s.zh) + '　·　三題都寫完，L' + (n+1 > 8 ? "…" : n+1) + ' 立刻開</div></div>'
+    + '<button class="sh-x" onclick="closeHW()">✕</button></div>'
+    + '<div class="hw"><div class="hw-l">Q1｜這堂課我的心得與收穫（150 字以上）</div>'
+    +   '<div class="hw-h">寫不出來就從這句開始：「我以前以為⋯⋯，上完課我發現⋯⋯」</div>'
+    +   '<textarea id="q1" placeholder="最打中你的觀念是什麼？哪裡跟你原本想的不一樣？"></textarea>'
+    +   '<div class="hw-c" id="q1c">0 / 150 字</div></div>'
+    + '<div class="hw"><div class="hw-l">Q2｜可以使用在哪裡？你會怎麼使用？</div>'
+    +   '<div class="hw-h">選一個 7 天內就會遇到的真實場景（家人／朋友／客戶／貼文⋯⋯）</div>'
+    +   '<input type="text" id="q2s" placeholder="我會用在這個場景：" style="margin-bottom:6px;">'
+    +   '<textarea id="q2h" placeholder="我具體會這樣使用：" style="min-height:64px;"></textarea></div>'
+    + '<div class="hw"><div class="hw-l">Q3｜本課專屬題</div>'
+    +   '<div class="q3box">' + esc(q3of(n)) + '</div>'
+    +   '<textarea id="q3" placeholder="在這裡作答"></textarea></div>'
+    + '<div class="hw"><div class="hw-l">附件（選填）</div>'
+    +   '<div class="hw-h">手寫拍照、簡報或文件都可以附上（照片 / PDF / Word）</div>'
+    +   '<input type="file" style="width:100%;font-size:14px;color:#8ea1b6;"></div>'
+    + '<button class="gobtn" id="sb" onclick="submitHW()">送出，開下一堂</button>'
+    + '<div class="msg" id="msg"></div>';
+  document.getElementById("ov").classList.add("on");
+  var q1 = document.getElementById("q1"), c = document.getElementById("q1c");
+  q1.oninput = function(){
+    var k = q1.value.replace(/\s/g,"").length;
+    c.textContent = k + " / 150 字"; c.className = "hw-c" + (k >= 150 ? " ok" : "");
+  };
+  q1.focus();
+}
+function closeHW(){ document.getElementById("ov").classList.remove("on"); }
+function submitHW(){
+  var m = document.getElementById("msg");
+  var q1 = document.getElementById("q1").value, q2s = document.getElementById("q2s").value,
+      q2h = document.getElementById("q2h").value, q3 = document.getElementById("q3").value;
+  if (q1.replace(/\s/g,"").length < 150) { m.style.color = "#e8734a"; m.textContent = "Q1 心得再多寫一點，滿 150 字才算完成～"; return; }
+  if (!q2s.trim() || !q2h.trim() || !q3.trim()) { m.style.color = "#e8734a"; m.textContent = "Q2、Q3 每一題都要填喔"; return; }
+  m.style.color = "#33c495"; m.textContent = "✅ 收到了——L" + (HWL+1 > 8 ? "…" : HWL+1) + " 已經開了";
+  SUB[HWL] = 1; saveSub();
+  setTimeout(function(){
+    closeHW();
+    if (HWL < 8) { SEL = HWL + 1; JUST = HWL + 1; } else SEL = 8;
+    star();
+  }, 1000);
+}
+function fillDemo(){
+  var q1 = document.getElementById("q1"); if (!q1) return;
+  q1.value = "我以前以為講越多越有說服力，上完課我發現真正有影響力的人講得比我少。這堂課最打中我的是「先讓對方開口」這件事——我一直在準備自己要講什麼，卻沒想過對方為什麼要聽。回想上週跟客戶那場，我花了四十分鐘講方案，他全程點頭，最後說再看看。現在我知道那不是他不需要，是他根本沒機會講出他要什麼。接下來我要先把嘴閉上，把前十分鐘留給他。";
+  document.getElementById("q2s").value = "這週三跟林經理的續約會議";
+  document.getElementById("q2h").value = "開場先真誠稱讚他上次主動幫我們協調排程這件事，然後把方案簡報砍掉一半，前十五分鐘只問不講。";
+  document.getElementById("q3").value = "（示範用文字）照三塊肌各寫了一段，實際使用時學生自己寫。";
+  document.getElementById("q1").oninput();
+}
+function resetDemo(){ SUB = {}; saveSub(); SEL = 1; star(); closeHW(); }
+
+/* ═══ 右欄題目校對 ═══ */
+function rvlist(){
+  document.getElementById("rvlist").innerHTML = LS.map(function(l){
+    var p = PAL[l.dim];
+    return '<div class="rv"><div class="rv-h">'
+      + '<span class="rv-l" style="color:' + p.t + ';">L' + l.L + '</span>'
+      + '<span class="rv-n">' + esc(l.zh) + '</span>'
+      + '<span class="tag ' + (l.has ? "old" : "new") + '">' + (l.has ? "已有學習單・壓縮版" : "這次新寫") + '</span>'
+      + '</div><div class="ed" id="q3-' + l.L + '" contenteditable="true" spellcheck="false">' + esc(Q3[l.L]) + '</div>'
+      + '<small>' + (l.has
+          ? "來源：productkit 4-學習單／L" + l.L + "-課後學習單.md"
+          : "原本沒有學習單，題目照 " + l.mk.slice(0,3).join("／") + " 補") + '</small></div>';
+  }).join("");
+  document.getElementById("asks").innerHTML = ASKS.join("<br><br>");
+  /* 貼上一律吃純文字，不把 Word 的樣式帶進來 */
+  document.querySelectorAll(".ed").forEach(function(el){
+    el.addEventListener("paste", function(e){
+      e.preventDefault();
+      document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text"));
+    });
+  });
+}
+function exportAll(){
+  var out = ["【L1–L8 學習單 Q3 專屬題・修改回覆】", ""];
+  LS.forEach(function(l){
+    var now = q3of(l.L);
+    if (now !== Q3[l.L]) {
+      out.push("【L" + l.L + " " + l.zh + "・改後】");
+      out.push(now, "");
+    }
+  });
+  if (out.length === 2) out.push("（沒有改動——題目照這樣做）");
+  var t = out.join("\n");
+  navigator.clipboard.writeText(t).then(function(){
+    alert("已複製，貼回對話給我就好。\n\n" + (out.length === 2 ? "你這次沒有改任何題目。" : "共改了 " + ((out.length - 2) / 3) + " 堂。"));
+  }, function(){ prompt("複製這段貼回給我：", t); });
+}
+
+/* 版本雜湊：確認你看到的跟我改的是同一版 */
+function vhash(){
+  var s = JSON.stringify(LS) + JSON.stringify(Q3) + ASKS.join("");
+  var h = 5381; for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  document.getElementById("vh").textContent = "版本 " + h.toString(16);
+}
+var st = document.createElement("style");
+st.textContent = "@keyframes pop{0%{transform:skewX(-11deg) scale(1);}40%{transform:skewX(-11deg) scale(1.13);}100%{transform:skewX(-11deg) scale(1);}}";
+document.head.appendChild(st);
+rvlist(); star(); vhash();
+</script>
+</body>
+</html>
