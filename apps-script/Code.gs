@@ -952,7 +952,7 @@ function doGet(e) {
                      defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
                      honorFeed: computeHonorFeed_(30),
                      rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
-                     pending: computePending_(buid) });
+                     pending: computePending_(buid), submissions: computeSubmissions_(buid) });
     }
 
     if (action === "logs") {
@@ -1000,6 +1000,21 @@ function computePending_(uid) {
     return String(r["LINE userId"]) === uid && String(r["狀態"] || "").trim() !== "已通過";
   }).map(function(r) {
     return { workshopId: String(r["課程"] || ""), taskKey: String(r["任務key"] || "") };
+  });
+}
+
+/* 某學員「交過的作業」——不管導師審核過沒有。
+   ⚠️ 跟 computePending_ 不一樣：那個只回還沒通過的（給儀表板顯示「已繳交、等審核」）。
+   這個回全部，因為課程星圖的解鎖看「交了沒」，不看「過了沒」（2026-09-18 老師拍板：
+   送出就開下一堂，導師審核先拿掉）。要把審核加回來，改成在這裡濾 狀態 === "已通過" 就好。 */
+function computeSubmissions_(uid) {
+  var sh = ss_().getSheetByName(TABS.pending);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return rows_(TABS.pending).filter(function(r) {
+    return String(r["LINE userId"]) === uid;
+  }).map(function(r) {
+    return { workshopId: String(r["課程"] || ""), taskKey: String(r["任務key"] || ""),
+             date: normDateStr_(r["繳交時間"]) };
   });
 }
 

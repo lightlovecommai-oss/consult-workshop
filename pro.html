@@ -149,6 +149,36 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .fstat i{font-style:normal;font-size:11px;color:#7d90a3;font-weight:600;}
 .fwho{font-size:12.5px;color:#7d90a3;margin-top:9px;line-height:1.7;}
 .fwho b{color:#cfdcea;font-weight:700;}
+
+/* 課綱三行：八堂都看得到（全貌感），鎖住的只有教材跟作業 */
+.olt{font-size:19px;font-weight:900;line-height:1.5;margin-top:12px;color:#F7F1EC;}
+.ol{margin-top:11px;}
+.ol div{display:flex;gap:9px;font-size:13.5px;line-height:1.8;color:#cfdcea;padding:5px 0;border-top:1px solid #1d2c3c;}
+.ol div:first-child{border-top:0;}
+.ol i{font-style:normal;flex:0 0 76px;color:#7d90a3;font-size:12px;font-weight:700;padding-top:2px;}
+.mk{display:inline-block;font-size:11.5px;font-weight:800;border-radius:7px;padding:2px 7px;margin:2px 4px 2px 0;border:1px solid;}
+.mats{display:flex;gap:7px;margin-top:12px;}
+.mat{flex:1;text-align:center;font-size:11.5px;font-weight:700;border-radius:11px;padding:9px 4px;border:1px solid #1d2c3c;background:rgba(230,237,245,.04);color:#7d90a3;line-height:1.55;text-decoration:none;display:block;}
+.mat.on{color:#cfdcea;border-color:#2a3c50;}
+.mat b{display:block;font-size:15px;margin-bottom:2px;}
+/* 學習單抽屜 */
+.ov{position:fixed;inset:0;background:rgba(6,10,16,.74);display:none;align-items:flex-end;justify-content:center;z-index:120;padding:14px;}
+.ov.on{display:flex;}
+.sheet{width:100%;max-width:460px;max-height:90vh;overflow:auto;background:#101b26;border:1px solid #2a3c50;border-radius:20px;padding:18px 16px 22px;}
+.sh-top{display:flex;align-items:flex-start;gap:10px;}
+.sh-t{font-size:18px;font-weight:900;line-height:1.5;flex:1;}
+.sh-x{background:transparent;border:0;color:#7d90a3;font-size:22px;cursor:pointer;font-family:inherit;padding:0 4px;line-height:1;min-height:44px;min-width:44px;}
+.sh-m{font-size:12.5px;color:#7d90a3;margin-top:5px;line-height:1.7;}
+.hw{margin-top:16px;}
+.hw-l{font-size:14px;font-weight:800;color:#E8C89A;margin-bottom:5px;}
+.hw-h{font-size:12.5px;color:#7d90a3;line-height:1.75;margin-bottom:7px;}
+.hw textarea,.hw input[type=text]{width:100%;background:#0c131e;border:1px solid #2a3c50;border-radius:12px;color:#eaf1fa;font-family:inherit;font-size:16px;padding:11px;line-height:1.75;resize:vertical;}
+.hw textarea{min-height:92px;}
+.hw-c{font-size:12px;color:#7d90a3;text-align:right;margin-top:4px;font-variant-numeric:tabular-nums;}
+.hw-c.ok{color:#33c495;}
+.q3box{background:rgba(230,237,245,.05);border-left:3px solid #4b9bf0;border-radius:0 12px 12px 0;padding:12px 13px;font-size:13.5px;line-height:1.9;color:#cfdcea;white-space:pre-wrap;margin-bottom:9px;}
+.hw-msg{font-size:13.5px;text-align:center;margin-top:10px;min-height:19px;}
+
 .drill{margin-top:8px;border-top:1px dashed rgba(93,118,146,.35);}
 .dr{padding:10px 2px 9px;border-bottom:1px dashed rgba(93,118,146,.25);}
 .dr:last-child{border-bottom:0;}
@@ -326,6 +356,7 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
     <button class="nv" data-pane="out">市場數字</button>
   </div>
 </div>
+<div class="ov" id="hwOv" onclick="if(event.target===this)closeHW();"><div class="sheet" id="hwSheet"></div></div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="track.js"></script>
@@ -784,79 +815,236 @@ function flightHTML(){
   h += '<div class="rule4" style="margin-top:14px;"></div></div>';
   return h;
 }
-/* ── 課程星圖：L1–L4 用真資料算（該維 3 塊都量過＝點亮）；L5–L8 沒有逐堂紀錄，
-   L1–L4 全亮＝整塊解鎖（跟教練對進度），不假裝有細部進度。 ── */
-function lessonsNow(){
-  var scores = calcMuscleScores(S);
-  var base = [
-    {L:1, zh:"吸引肌肉・3% 的秘密",   dim:"A"},
-    {L:2, zh:"信任肌肉・完整溝通三步", dim:"T"},
-    {L:3, zh:"專業肌肉・開口前攻心",   dim:"P"},
-    {L:4, zh:"推進肌肉・成交大絕招",   dim:"I"}
-  ];
-  var nowGiven = false;
-  base.forEach(function(l){
-    var all = musclesOfDim(l.dim).every(function(mk){ return scores[mk] != null; });
-    if (all) l.st = "done";
-    else if (!nowGiven) { l.st = "now"; nowGiven = true; }
-    else l.st = "todo";
+/* ── 課程星圖（2026-09-18 改版）：解鎖看「上一堂交了學習單沒」，不看體測分數。
+   體測分數是「你現在多強」，課程進度是「你走到哪」——兩件事，之前混在一起。
+   L1 永遠開；L(n+1) 要 L(n) 交過才亮。送出即解鎖，不等導師打勾（老師拍板）。
+   八堂大綱全部看得到（全貌感），鎖住的只有教材、口袋卡、作業。
+   ⚠️ 課名：L2–L4 原本的副標（完整溝通 3 步驟／攻心 3 策略／大絕招）老師 2026-09-18 說先省略，
+      productkit 15-課程梳理 也自己標了「主題句待與 12 小肌群表對齊後重寫」，這裡先只留肌肉名。 ── */
+var LESSONS_DEF = [
+  {L:1, dim:"A", zh:"吸引肌肉・3% 的秘密",
+   p:"你講了很多，對方客氣地點頭，然後就沒有然後了。",
+   g:"三句話讓一個陌生人開口、追問、一週後還記得你。",
+   mk:["A1 讓他開口","A2 讓他追問","A3 讓他記得"]},
+  {L:2, dim:"T", zh:"信任肌肉",
+   p:"聊了半天都停在表面，他很客氣，但什麼都沒真的告訴你。",
+   g:"讓對方主動講出他本來沒打算講的事。",
+   mk:["T1 讓他敢說","T2 讓他交心","T3 讓他當真"]},
+  {L:3, dim:"P", zh:"專業肌肉",
+   p:"你很專業，他感受不到，最後還是回去比價。",
+   g:"還沒報價，他就認定你是那個人。",
+   mk:["P1 讓他釐清","P2 讓他有感","P3 讓他放心"]},
+  {L:4, dim:"I", zh:"推進肌肉",
+   p:"聊得很愉快，結束後沒有下一步，他說再看看。",
+   g:"拿得到他同意的具體推進：下次時間、他要準備的東西。",
+   mk:["I1 讓他想要","I2 讓他敢要","I3 讓他答應"]},
+  {L:5, dim:null, zh:"吸引式變現・1v1 顧問腳本",
+   p:"諮詢一小時聊得很開心，結束卻收不了單。",
+   g:"有一份自己的四幕腳本，照著走就收得了單。",
+   mk:["A 破冰 7 分","T 深挖 30 分","P 大絕招 13 分","I 收單 10 分"]},
+  {L:6, dim:null, zh:"建立自己的甜蜜變現路徑",
+   p:"什麼方法都想學，學了一堆，每一招都不順手。",
+   g:"知道自己最強兩維走哪條路，不順手的讓系統做。",
+   mk:["六種強項組合","最省力路徑","替代做法"]},
+  {L:7, dim:null, zh:"變現路徑的導航：北極星＋燈塔",
+   p:"內容做了很多，客戶還是沒有自己走過來。",
+   g:"盤得出自己的 7-11-4，知道這週要先做哪一個動作。",
+   mk:["深度 7","頻率 11","廣度 4"]},
+  {L:8, dim:null, zh:"成交能力太好，要避開的副作用",
+   p:"成交變快之後，出現你沒預期的代價——最常發生在最親近的人身上。",
+   g:"畫得出自己的界線，力量用在對的地方。",
+   mk:["起心動念","三個場景","一條界線"]}
+];
+/* Q3 本課專屬題（老師 2026-09-18 逐條校對過的版本）。
+   L1/L5/L6/L7＝productkit 4-學習單 壓成手機填得完的長度；L2/L3/L4＝原本沒有學習單，照該維三塊小肌群新寫。
+   ⚠️ L8 老師說「會改版，先不用」——所以 L8 沒有 Q3，只交 Q1＋Q2（見 hwHTML 的分支）。 */
+var LESSON_Q3 = {
+1:"練 A 吸引三塊肌。照三塊肌把示範改寫成你自己的版本（你的產業、你的故事、你的說話習慣）——先求有，再求像你。\n\n① A1 讓他開口｜真誠稱讚：挑一個 7 天內會遇到的人，寫一句真誠、具體的稱讚（要講到他身上的細節，不是客套）。\n② A2 讓他追問｜端牛肉：從你做過的事挑一個真實結果，寫成「低（平凡起點）→ 轉（關鍵改變）→ 高（結果數字）」，再串成一句話端出來。\n③ A3 讓他記得｜低轉高故事：把那塊牛肉擴寫成 60 秒小故事（平凡 → 遇到坎 → 轉折 → 成果 → 一句啟示）。",
+2:"練 T 信任三塊肌。挑真實對象，三塊肌都寫他。\n\n① T1 讓他敢說｜講出心裡 OS：寫一句你「還沒說出口」的真話——還在怕的、還沒成的、還在學的。你要先給，他才會給。\n② T2 讓他交心｜提問式聆聽：針對這個人，寫三層問句各一句——皮（現狀、事情怎麼發生的）／肉（那時候你什麼感受）／骨（你想帶人去哪裡）。\n③ T3 讓他當真｜承諾兌現：寫一個你 7 天內做得到的小承諾，再寫你要怎麼讓他親眼看到你做到了。",
+3:"練 P 專業三塊肌。挑真實客戶，三塊肌都對他。\n\n① P1 讓他釐清｜目標落差：畫出他的 A → B（兩端的數字讓他自己報），寫下你要在落差處問的那一句。\n② P2 讓他有感｜大絕招：你要讓他親自體驗什麼？怎麼做出前後對比？（做完請他給 0–10 分，7 分以上才算過）\n③ P3 讓他放心｜他證三件組：各寫一個見證、一個數據、一個背書，並寫你要怎麼端出來，讓他主動追問那個案例。",
+4:"練 I 推進三塊肌。挑真實客戶、但還沒動的人。\n\n① I1 讓他想要｜結果翻譯：把你的服務翻成一句「他要的結果」（不是規格、不是內容），寫到他能原句複述。\n② I2 讓他敢要｜讀水溫：寫出你最常遇到的兩個抗點，各配一句你要主動問出來的話，以及你會怎麼回。\n③ I3 讓他答應｜真誠邀請＋被動跟進：寫你的邀請句（我想邀請你＿＿，因為＿＿），再寫一個讓他自己回來找你的理由。",
+5:"優化你的「變現路徑」。打開《ATPI 個人溝通變現路徑・使用手冊》第三章，找到你的強項組合，改寫成你自己的版本。核心邏輯：不是硬去練不順手的那塊，是讓系統幫你做那一段。\n\n① 我的最強兩維是：＿＿＿＿（A 吸引／T 信任／P 專業／I 推進，選 2 個）\n② 手冊對應的最省力路徑，改寫成我的四步（誰？在哪裡？做什麼？）：①②③④\n③ 我不順手的是＿＿，我用這個方法替代（照手冊）：＿＿；我要避開的場景：＿＿\n④ 未來 7 天，這條路徑我要先做的第一步：＿＿",
+6:"寫出你自己的 60 分鐘諮詢流程。打開《「溝通變現」1v1 顧問成交腳本・ATPI 實戰版》，照四幕改寫成你的版本——腳本可以照抄再改。\n\n① 第一幕 A 破冰 7 分：我的開場＋前置約定／萬能關鍵句（如果解決一個問題，你的＿＿會＿＿）／端牛肉一句（以前＿＿，現在＿＿）\n② 第二幕 T 深挖 30 分：皮 ×2、肉 ×2、骨 ×2，六句問句寫出來\n③ 第三幕 P 大絕招 13 分：我要讓他體驗什麼？怎麼做對比？我最常點出的客戶誤區 1–2 個\n④ 第四幕 I 收單 10 分：我的真誠邀請句／我的被動跟進理由\n\n最長的一幕是聽他說——你開口的時間不到一半。",
+7:"用 7-11-4 盤點你的變現路徑。想像一個客戶從第一次看到你、到掏錢成交的完整過程，盤你現在真的有的。\n\n① 深度 7｜你有哪些內容資產（短影音／長影音／貼文／長文／電子書／Podcast／課件／直播回放）？估總時長＿＿小時（往 7 小時靠）\n② 頻率 11｜從陌生到成交，他會跟你接觸幾次？把接觸點一個一個列出來（例：看到短影音 → 領電子書 → 私訊 → 約諮詢 →…）共＿＿次\n③ 廣度 4｜他會在幾個不同場域碰到你（社群／搜尋得到／私域／線下／口碑）？共＿＿個\n④ 三軸裡先練哪一軸最有感：＿＿；這 7 天我要做的一個具體動作（只寫一個、要做得到）：＿＿"
+};
+/* 教材在 Skool，這裡只連過去不重做播放器（Skool 沒 API，不寫篇數等即時數字）。
+   ⚠️ 逐堂連結還沒拿到，先落到社群首頁——不假裝有專屬連結。填了哪堂，哪堂就直接進那一課。 */
+var SKOOL_URL = "https://www.skool.com/influence-8679/about?ref=ebb628ac5055497fb61e281e175fc786";
+var LESSON_URL = { 1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:"", 8:"" };
+function lessonURL(n){ return LESSON_URL[n] || SKOOL_URL; }
+
+/* 交過的堂：後端 submissions 的 taskKey＝hw_L2 這種格式 */
+function submittedL(){
+  var o = {};
+  ((S && S.submissions) || []).forEach(function(s){
+    var m = /^hw_L(\d+)$/.exec(String(s.taskKey || ""));
+    if (m) o[Number(m[1])] = 1;
   });
-  var unlocked = !nowGiven; /* L1-L4 全亮＝放大段解鎖 */
-  var adv = [
-    {L:5, zh:"1v1 顧問腳本"}, {L:6, zh:"甜蜜變現路徑"},
-    {L:7, zh:"北極星＋燈塔"}, {L:8, zh:"力量的副作用"}
-  ];
-  adv.forEach(function(l){ l.dim = null; l.st = "todo"; l.hot = unlocked; });
-  return { list: base.concat(adv), unlocked: unlocked, doneN: base.filter(function(l){ return l.st==="done"; }).length };
+  return o;
+}
+function lessonOpen(n, sub){ return n === 1 || !!sub[n-1]; }
+function lessonsNow(){
+  var sub = submittedL();
+  var list = LESSONS_DEF.map(function(l){
+    var o = {L:l.L, dim:l.dim, zh:l.zh, p:l.p, g:l.g, mk:l.mk};
+    o.sub = !!sub[l.L]; o.open = lessonOpen(l.L, sub);
+    o.st = o.sub ? "done" : o.open ? "now" : "todo";
+    return o;
+  });
+  var nextTodo = 8;
+  for (var i = 1; i <= 8; i++) if (lessonOpen(i, sub) && !sub[i]) { nextTodo = i; break; }
+  return { list: list, doneN: list.filter(function(l){ return l.sub; }).length,
+           nextTodo: nextTodo, unlocked: !!sub[4] };
 }
 var SPEECH = [
   {L:9,  zh:"舞台開場"}, {L:10, zh:"乾貨體驗感"}, {L:11, zh:"銷講收單"},
   {L:12, zh:"三種銷講稿"}, {L:13, zh:"大師之路"}
 ];
-var SEL_L = 5;
+var SEL_L = 0;   /* 0＝還沒點過，預設停在「現在該交的那一堂」 */
 function pickL(n){ SEL_L = n; render(); }
+var GOLD = {c:"#e6a93a", t:"#E8C89A", tint:"rgba(232,200,154,.20)"};
+function lpal(l){ return l.dim ? PALV[l.dim] : GOLD; }
 function starHTML(){
   var ln = lessonsNow(), LESSONS = ln.list;
+  if (!SEL_L) SEL_L = ln.nextTodo;
   var slices = LESSONS.map(function(l, i){
-    var p = l.dim ? PALV[l.dim] : {c:"#e6a93a",t:"#E8C89A",tint:"rgba(232,200,154,.20)"};
-    var hpx = 28 + i*8, cls = "sl", sty = "height:" + hpx + "px;cursor:pointer;";
-    if (l.st==="now") { cls += " now"; sty += "background:" + p.c + ";box-shadow:0 0 14px " + p.c + "66;"; }
-    else if (l.st==="done") { cls += " past"; sty += "background:" + p.tint + ";"; }
-    else { cls += " todo"; if (l.hot) sty += "border-color:#E8C89A;"; }
-    if (l.L===SEL_L) cls += " sel";
+    var p = lpal(l), cls = "sl", sty = "height:" + (26 + i*9) + "px;cursor:pointer;";
+    if (l.st === "done")      { cls += " past"; sty += "background:" + p.tint + ";border:1.5px solid " + p.c + "55;"; }
+    else if (l.st === "now")  { cls += " now";  sty += "background:" + p.c + ";box-shadow:0 0 14px " + p.c + "66;"; }
+    else                      { cls += " todo"; }
+    if (l.L === SEL_L) cls += " sel";
     return '<div class="' + cls + '" style="' + sty + '" onclick="pickL(' + l.L + ')"></div>';
   }).join("");
   var lbls = LESSONS.map(function(l){
-    var p = l.dim ? PALV[l.dim] : {t:"#E8C89A"};
-    return '<span class="' + (l.st==="todo" && !l.hot ? "dim" : "") + '"><i style="color:' + (l.st==="todo" && !l.hot ? "#5d7692" : p.t) + ';">L' + l.L + '</i></span>';
+    return '<span class="' + (l.open ? "" : "dim") + '"><i style="color:' + (l.open ? lpal(l).t : "#5d7692") + ';">L' + l.L + '</i></span>';
   }).join("");
-  var sel = LESSONS.filter(function(l){ return l.L===SEL_L; })[0] || LESSONS[0];
-  var selBody;
-  if (sel.dim) {
-    selBody = sel.st==="done"
-      ? '<b>3 塊' + DIMS_V[sel.dim].name + '</b>都量過了——這格亮著，儀表板跟著開。'
-      : '量完 <b>3 塊' + DIMS_V[sel.dim].name + '</b>就點亮——體測量到這一維，儀表板跟著開。';
-  } else {
-    selBody = ln.unlocked
-      ? '放大段已解鎖——上到哪、練到哪，<b>下次 1v1 跟教練對進度</b>（系統不記逐堂，不裝有進度條）。'
-      : '先把 L1–L4 的肌肉量完，放大段就開了。';
-  }
-  if (sel.L===5 && ln.unlocked) {
-    /* L5 口袋卡：上場前翻一眼的四幕腳本（真相＝15-課程梳理 L5 列） */
-    selBody = '上場前翻一眼——四幕走完，他才收得了單：<br>'
-      + [["A","破冰","7 分"],["T","深挖","30 分"],["P","大絕招","13 分"],["I","收單","10 分"]]
-          .map(function(a){ return '<b style="color:' + PALV[a[0]].t + ';">' + a[0] + ' ' + a[1] + ' ' + a[2] + '</b>'; })
-          .join('<span style="color:#5d7692;"> → </span>')
-      + '<br><span style="color:#8ea1b6;">最長的一幕是聽他說——深挖 30 分，你開口的時間不到一半。</span>';
-  }
-  var selLine = '<div class="howq" style="margin-top:12px;"><div class="howq-k">L' + sel.L + ' · '
-    + (sel.st==="done" ? "已點亮" : sel.st==="now" ? "下一格" : sel.dim ? "還沒到" : ln.unlocked ? "已解鎖" : "還沒開") + '</div>'
-    + '<div class="howq-t"><b>' + sel.zh + '</b><br>' + selBody + '</div></div>';
-  var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 肌肉格亮了 ' + ln.doneN + '/4</span></div>'
+  var s = LESSONS.filter(function(l){ return l.L === SEL_L; })[0] || LESSONS[0], p = lpal(s);
+
+  var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 交了 ' + ln.doneN + '/8 堂</span></div>'
     + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
-    + selLine
-    + '<div class="linknote">格子亮到哪＝你的體測長到哪，課上到哪、牆就長到哪。L5–L8 的進度下次 1v1 現場對。</div>';
+    /* 大綱：八堂都給看。他要知道自己在走哪條路，不是走一格看一格 */
+    + '<div class="olt">L' + s.L + '　' + esc_(s.zh) + '</div>'
+    + '<div class="ol">'
+    +   '<div><i>解什麼問題</i><span>' + esc_(s.p) + '</span></div>'
+    +   '<div><i>學完你會</i><span>' + esc_(s.g) + '</span></div>'
+    +   '<div><i>練哪幾塊</i><span>' + s.mk.map(function(m){
+          return '<b class="mk" style="color:' + p.t + ';border-color:' + p.c + '66;">' + esc_(m) + '</b>'; }).join("") + '</span></div>'
+    + '</div>';
+
+  h += '<div class="mats">' + ["教材影片","口袋卡","演練清單"].map(function(n){
+    return s.open
+      ? '<a class="mat on" href="' + lessonURL(s.L) + '" target="_blank" rel="noopener"><b>▶</b>' + n + '</a>'
+      : '<div class="mat"><b>🔒</b>' + n + '</div>';
+  }).join("") + '</div>';
+
+  if (s.sub) {
+    h += '<div class="howq"><div class="howq-k">L' + s.L + ' · 已交</div>'
+      + '<div class="howq-t">心得跟落地應用都收到了，<b>下一堂已經開了</b>。想再看一次自己寫的，下次 1v1 跟教練調。</div></div>';
+  } else if (s.open) {
+    h += '<div class="howq"><div class="howq-k">L' + s.L + ' · 現在這堂</div>'
+      + '<div class="howq-t">課上完就寫一份——<b>寫過一遍，才真正是你的</b>。'
+      + (s.L < 8 ? '交出去，L' + (s.L+1) + ' 同時就開。' : '這是最後一堂，寫完整條路就走完了。') + '</div></div>'
+      + '<button class="softbtn" onclick="openHW(' + s.L + ')">交 L' + s.L + ' 的學習單</button>';
+  } else {
+    h += '<div class="lockbar">大綱先給你看，因為你要知道自己在走哪條路。'
+      + '這一格要開，差<b>一份 L' + (s.L-1) + ' 的學習單</b>——心得＋你打算用在哪裡。</div>'
+      /* 跳兩堂以上不給死鈕，直接帶他去現在真的寫得了的那一堂 */
+      + '<button class="softbtn" onclick="openHW(' + ln.nextTodo + ')">'
+      + (s.open || ln.nextTodo === s.L - 1 ? '去交 L' + (s.L-1) + ' 的學習單' : '從 L' + ln.nextTodo + ' 開始交') + '</button>';
+  }
+  h += '<div class="linknote">八堂大綱全部看得到，亮起來的是你走過的。交一份，下一格立刻開。</div>';
   return h + '</div>';
+}
+
+/* ── 課後學習單：沿用儀表板那份四欄（Q1 心得／Q2 場景＋做法／Q3 專屬題／附件），
+   欄位名跟 Code.gs 的 action:"submit" 對齊，不另開一套。
+   2026-09-18 老師拍板「導師審核先拿掉」：送出就解鎖、不顯示待審核、pts 記 0。
+   後端那張待審核分頁照舊寫（資料留著），要加回審核只要把 pts 改回來＋讀 approved 旗標。 ── */
+var HW_L = 0, HW_BUSY = false;
+function openHW(n){
+  HW_L = n;
+  var s = LESSONS_DEF.filter(function(l){ return l.L === n; })[0];
+  var q3 = LESSON_Q3[n];
+  document.getElementById("hwSheet").innerHTML =
+    '<div class="sh-top"><div><div class="sh-t">L' + n + ' 課後學習單</div>'
+    + '<div class="sh-m">' + esc_(s.zh) + (n < 8 ? '　·　寫完送出，L' + (n+1) + ' 立刻開' : '') + '</div></div>'
+    + '<button class="sh-x" onclick="closeHW()" aria-label="關閉">✕</button></div>'
+    + '<div class="hw"><div class="hw-l">Q1｜這堂課我的心得與收穫（150 字以上）</div>'
+    +   '<div class="hw-h">寫不出來就從這句開始：「我以前以為⋯⋯，上完課我發現⋯⋯」</div>'
+    +   '<textarea id="hwQ1" placeholder="最打中你的觀念是什麼？哪裡跟你原本想的不一樣？"></textarea>'
+    +   '<div class="hw-c" id="hwQ1c">0 / 150 字</div></div>'
+    + '<div class="hw"><div class="hw-l">Q2｜可以使用在哪裡？你會怎麼使用？</div>'
+    +   '<div class="hw-h">選一個 7 天內就會遇到的真實場景（家人／朋友／客戶／貼文⋯⋯）</div>'
+    +   '<input type="text" id="hwQ2s" placeholder="我會用在這個場景：" style="margin-bottom:6px;">'
+    +   '<textarea id="hwQ2h" placeholder="我具體會這樣使用：" style="min-height:64px;"></textarea></div>'
+    + (q3
+        ? '<div class="hw"><div class="hw-l">Q3｜本課專屬題</div>'
+          + '<div class="q3box">' + esc_(q3) + '</div>'
+          + '<textarea id="hwQ3" placeholder="在這裡作答"></textarea></div>'
+        : '')
+    + '<div class="hw"><div class="hw-l">附件（選填）</div>'
+    +   '<div class="hw-h">手寫拍照、簡報或文件都可以附上（照片 / PDF / Word）</div>'
+    +   '<input type="file" id="hwFile" accept="image/*,.pdf,.doc,.docx" style="width:100%;font-size:15px;color:#8ea1b6;"></div>'
+    + '<button class="gobtn" id="hwBtn" onclick="submitHW()">送出' + (n < 8 ? '，開下一堂' : '') + '</button>'
+    + '<div class="hw-msg" id="hwMsg"></div>';
+  document.getElementById("hwOv").classList.add("on");
+  var q1 = document.getElementById("hwQ1"), c = document.getElementById("hwQ1c");
+  q1.oninput = function(){
+    var k = q1.value.replace(/\s/g, "").length;
+    c.textContent = k + " / 150 字"; c.className = "hw-c" + (k >= 150 ? " ok" : "");
+  };
+  track("hw_open", { lesson: n });
+}
+function closeHW(){ document.getElementById("hwOv").classList.remove("on"); }
+function hwFileB64(f){
+  return new Promise(function(res, rej){
+    var r = new FileReader();
+    r.onload = function(){ var v = String(r.result); res(v.substring(v.indexOf(",") + 1)); };
+    r.onerror = rej; r.readAsDataURL(f);
+  });
+}
+async function submitHW(){
+  if (HW_BUSY) return;
+  var m = document.getElementById("hwMsg"), btn = document.getElementById("hwBtn");
+  var q1 = document.getElementById("hwQ1").value,
+      q2s = document.getElementById("hwQ2s").value,
+      q2h = document.getElementById("hwQ2h").value,
+      q3el = document.getElementById("hwQ3"), q3 = q3el ? q3el.value : "";
+  function bad(t){ m.style.color = "#e8734a"; m.textContent = t; }
+  if (q1.replace(/\s/g, "").length < 150) return bad("Q1 心得再多寫一點，滿 150 字才算完成～");
+  if (!q2s.trim() || !q2h.trim()) return bad("Q2 的場景跟做法都要填喔");
+  if (q3el && !q3.trim()) return bad("Q3 專屬題也要寫喔");
+  var f = (document.getElementById("hwFile") || {}).files;
+  f = f && f[0];
+  if (f && f.size > 12 * 1024 * 1024) return bad("附件太大（超過 12MB），請壓縮或改用拍照");
+
+  HW_BUSY = true; if (btn) btn.disabled = true;
+  m.style.color = "#8ea1b6"; m.textContent = f ? "上傳中…大檔案需要一點時間" : "送出中…";
+  var s = LESSONS_DEF.filter(function(l){ return l.L === HW_L; })[0];
+  try {
+    var payload = { action: "submit", userId: S.lineId, workshopId: WID,
+      taskKey: "hw_L" + HW_L, taskName: "L" + HW_L + " 課後學習單・" + s.zh,
+      dim: s.dim || "", pts: 0,
+      q1: q1.trim(), q2scene: q2s.trim(), q2how: q2h.trim(), q3: q3.trim() };
+    if (f) { payload.filename = f.name; payload.mimeType = f.type || "application/octet-stream"; payload.fileData = await hwFileB64(f); }
+    if (S.lineId !== "DEMO") {
+      var r = await fetch(SHEET_API, { method: "POST", body: JSON.stringify(payload),
+        headers: { "Content-Type": "text/plain;charset=utf-8" } });
+      var d = await r.json().catch(function(){ return {}; });
+      if (d.status !== "ok") throw new Error(d.message || "fail");
+    }
+    (S.submissions = S.submissions || []).push({ taskKey: "hw_L" + HW_L, date: todayStr() });
+    track("hw_submit", { lesson: HW_L });
+    m.style.color = "#33c495"; m.textContent = HW_L < 8 ? "✅ 收到了——L" + (HW_L + 1) + " 已經開了" : "✅ 收到了——整條路你走完了";
+    setTimeout(function(){
+      closeHW();
+      if (HW_L < 8) SEL_L = HW_L + 1;
+      HW_BUSY = false; render();
+    }, 1000);
+  } catch (e) {
+    HW_BUSY = false; if (btn) btn.disabled = false;
+    bad("送出失敗，請稍後再試 🙏");
+  }
 }
 /* 升單卡（2026-09-18）：原本「NEXT STAGE 演說段」掛在星圖裡、席位梯獨立在頁尾，
    兩塊都在講「你在哪、下一階是什麼」＝同一件事講兩次。合成一張，這頁的錢鈕給它。 */
@@ -1261,7 +1449,9 @@ function demoStatePro_(){
       ev("T1",4,"coach"), ev("T2",3,"self"),  ev("T3",4.5,"coach"),
       ev("P1",3,"coach"), ev("P2",1.5,"coach"), ev("P3",3,"self"),
       ev("I1",2,"coach"), ev("I2",2.5,"self"), ev("I3",2,"coach")
-    ]
+    ],
+    /* 交過 L1、L2＝現在停在 L3；demo 才這樣預設，真資料讀後端 submissions */
+    submissions: [ {taskKey:"hw_L1", date:ago(30)}, {taskKey:"hw_L2", date:ago(16)} ]
   };
 }
 
@@ -1290,7 +1480,8 @@ async function boot() {
   if (d.workshops) WORKSHOPS = d.workshops;
   var st = d.student || {};
   S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "",
-        checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
+        checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [],
+        submissions: d.submissions || [] };
   var enrolledPro = (d.enrollments || []).filter(function(e){ return e.lineId === S.lineId && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
   WID = enrolledPro.length ? enrolledPro[0].workshopId : PRO_WORKSHOPS[0];
   LOG = buildLog();

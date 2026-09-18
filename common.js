@@ -553,6 +553,11 @@ async function loadBootstrap(userId, w) {
       return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) || 0,
                source: String(e.source || "self"), date: normDate(e.date), week: String(e.week || "") };
     }).filter(function(e){ return MORD.indexOf(e.muscle) > -1 && e.score >= 1 && e.score <= 5; });
+    /* 課後學習單繳交紀錄（taskKey＝hw_L2 這種）。課程星圖用它決定下一堂開不開。
+       舊後端還沒部署時是 undefined → 空陣列，星圖就停在 L1，不會炸。 */
+    d.submissions = (d.submissions || []).map(function(s){
+      return { taskKey: String(s.taskKey || ""), workshopId: String(s.workshopId || ""), date: normDate(s.date) };
+    });
     d.revenue = (d.revenue || []).map(function(e){
       return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
                A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
