@@ -39,12 +39,11 @@ var TABS = {
       所以是「新名擺前面、舊名保留在後」的加法，兩種標題都讀得到、也寫得進去。
       等分頁標題改成肌肉版之後，才可以把「〇〇力」／「影響力」從別名裡拿掉。 */
 var COLS = {
-  /* paidMember＝手動勾選欄「溝通健身房會員」（誰付了 99），2026-09-01 起用來區分
-     member.html 的體驗客／會員內容。欄位在「(遊戲)開通名單」姓名跟團隊中間，人工維護，
-     跟課程開通欄（workshopId 那些）是不同性質的旗標，不會被 computeConfig_() 的課程掃描讀到。 */
-  /* seat＝手動指定席位（2026-09-07）。空白＝走 index.html 的自動規則；填了就直接蓋過去。
-     合法值（中英都收，前端 SEAT_MAP 對照）：體驗席／會員席／私教席／舊版／健檢。
-     用一欄下拉而不是四個打勾欄＝一個人不可能同時被指定兩個地方，表上一眼看得出他落在哪。 */
+  /* seat＝「指定席位」欄，身分的唯一真相（2026-09-18 起）。一欄下拉而不是幾個打勾欄，
+     因為一個人一次只有一個角色，表上一眼看得出他落在哪。
+     合法值（中英都收，前端 SEAT_MAP 對照）：體驗席／會員席／私教席／舊版／健檢。空白＝走自動規則。
+     paidMember 現在由 seatPaid_() 從席位推得；「溝通健身房會員」打勾欄只在席位空白時當 fallback，
+     不必再人工維護（別把這個欄位別名刪掉，舊列還靠它）。 */
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"],
               paidMember:["溝通健身房會員","影響力健身房會員","paidMember"],
               seat:["指定席位","seat"] },
@@ -577,6 +576,20 @@ function truthy_(v) {
   if (v === true || v === 1) return true;
   return String(v).toLowerCase() === "true" || String(v) === "1";
 }
+/* 席位 → 這個人算不算「已經付錢進來的」。
+   2026-09-18 老師：一次只有一個角色，身分改以「指定席位」為唯一真相，
+   不再靠「溝通健身房會員」打勾欄推。會員席／私教席／舊版本來就是付過錢的人。
+   ⚠️ 席位空白時一定要退回讀打勾欄——沒填席位的舊列若直接判 false，
+      會整批靜默降級成體驗席（踩過一次，畫面不報錯）。
+   「健檢」不在表裡＝那是「丟他回去重測」的動作，不代表身分，所以也走 fallback。 */
+var SEAT_PAID = { "體驗席":false, "體驗客":false, "visitor":false,
+                  "會員席":true,  "會員":true,   "member":true,
+                  "私教席":true,  "私教":true,   "pro":true,
+                  "舊版":true,    "學員":true,   "dashboard":true };
+function seatPaid_(seat, cell) {
+  var v = SEAT_PAID[String(seat || "").trim().toLowerCase()];
+  return v === undefined ? granted_(cell) : v;
+}
 /* 開通格判定：核取方塊 TRUE、或打勾類文字(✅/是/v/o…)＝開通；空白或叉/否/0＝沒開通。 */
 function granted_(v) {
   if (v === true || v === 1) return true;
@@ -616,9 +629,11 @@ function computeStudent_(uid) {
   var st = null;
   rows_(TABS.students).forEach(function(r) {
     var id = String(pick_(r, COLS.students.lineId));
-    if (id === uid) st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
-                            paidMember: granted_(pick_(r, COLS.students.paidMember)),
-                            seat: String(pick_(r, COLS.students.seat) || "").trim() };
+    if (id === uid) {
+      var seat = String(pick_(r, COLS.students.seat) || "").trim();
+      st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
+             paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
+    }
   });
   return st;
 }
@@ -925,9 +940,10 @@ function doGet(e) {
       computeConfig_().enrollments.forEach(function(en){ enrolledSet[en.lineId] = true; });
       var students = rows_(TABS.students).map(function(r) {
         var id = String(pick_(r, COLS.students.lineId));
+        var seat = String(pick_(r, COLS.students.seat) || "").trim();
         return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)),
-                 enrolled: !!enrolledSet[id], paidMember: granted_(pick_(r, COLS.students.paidMember)),
-                 seat: String(pick_(r, COLS.students.seat) || "").trim() };
+                 enrolled: !!enrolledSet[id],
+                 paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
       }).filter(function(s){ return s.lineId; });
       return json_({ status: "ok", students: students });
     }
@@ -1626,8 +1642,12 @@ function upsertRewards() {
    「指定席位」欄：手動蓋過自動路由。在 Apps Script 選 setupSeatColumn → 執行一次。
    會做兩件事：① 在「(遊戲)開通名單」補上「指定席位」欄 ② 掛上下拉選單（含空白＝自動）。
    可重複執行；已經有欄位就只重掛驗證，不會動到已填的值。
-   ⚠️ 這欄是「例外處理」用的，不是常態。常態請維護課程開通欄與「影響力健身房會員」勾選欄，
-      讓自動規則自己判斷；每多一個手動指定，就多一個之後會忘記為什麼這樣設的地方。
+   ⭐ 2026-09-18 老師改口：這欄從「例外處理」升成**身分的唯一真相**（一個人一次只有一個角色，
+      用一欄下拉比四個打勾欄清楚）。常態就是每一列都填，「溝通健身房會員」打勾欄不必再維護——
+      seatPaid_() 會從席位推出 paidMember。空白仍然走自動規則，當舊列的防呆。
+   ⚠️ 課程開通欄（人實戰／短影音實戰／tenlead-1／超引力-顧問課／超引力-公眾演說）是**另一回事**，
+      不能一起收掉：那是寬表，欄名＝workshopId，打勾＝拿得到那門課的任務池（見 computeConfig_）。
+      席位決定「他進哪一頁」，開通欄決定「他在那頁裡有哪些任務」。
    ═══════════════════════════════════════════════════════════ */
 var SEAT_OPTIONS = ["體驗席", "會員席", "私教席", "舊版", "健檢"];
 function setupSeatColumn() {
@@ -1641,10 +1661,12 @@ function setupSeatColumn() {
   var lastRow = Math.max(sh.getLastRow(), 2);
   var rule = SpreadsheetApp.newDataValidation()
     .requireValueInList(SEAT_OPTIONS, true).setAllowInvalid(false)
-    .setHelpText("空白＝自動路由；填了就直接指定他進哪一頁").build();
+    .setHelpText("每個人都要填。一次一個角色，這欄決定他進哪一頁").build();
   sh.getRange(2, c + 1, lastRow - 1, 1).setDataValidation(rule);
-  sh.getRange(1, c + 1).setNote("手動指定席位。空白＝走自動規則（天麗→舊版、有開通課或會員→會員席、其餘→體驗席）。"
-    + "填了就直接蓋過去：" + SEAT_OPTIONS.join("／"));
+  sh.getRange(1, c + 1).setNote("身分就看這一欄（" + SEAT_OPTIONS.join("／") + "），一個人一次一個角色。\n"
+    + "「溝通健身房會員」打勾欄不用再維護了——會員席／私教席／舊版自動算已付費。\n"
+    + "空白＝走舊的自動規則（防呆用，正常請填）。\n"
+    + "⚠️ 課程開通欄（超引力-顧問課等）是另一回事，決定他有哪些任務，不要一起清掉。");
   return "「指定席位」欄已就緒（第 " + (c + 1) + " 欄），下拉選項＝" + SEAT_OPTIONS.join("／") + "，空白＝自動。";
 }
 
