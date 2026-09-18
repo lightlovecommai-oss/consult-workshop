@@ -593,6 +593,10 @@ function seatPaid_(seat, cell) {
 /* 開通格判定：核取方塊 TRUE、或打勾類文字(✅/是/v/o…)＝開通；空白或叉/否/0＝沒開通。 */
 function granted_(v) {
   if (v === true || v === 1) return true;
+  /* 欄位根本不存在時（課程欄被刪掉、但(設定)課程那列還 active）v 是 undefined。
+     少了這行的話 String(undefined)＝"undefined"，不在下面的否定清單裡，會一路 return true
+     ＝全表每個人都被開通那門課。刪欄的時候很容易踩到，所以擋在這裡。 */
+  if (v === undefined || v === null) return false;
   var s = String(v).trim().toLowerCase();
   if (s === "") return false;
   if (s === "false" || s === "0" || s === "x" || s === "✗" || s === "✕" || s === "否" || s === "-") return false;
