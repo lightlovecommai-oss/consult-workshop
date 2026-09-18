@@ -98,6 +98,12 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .read .cv{width:24px;height:24px;border-radius:50%;background:rgba(232,200,154,.15);border:1px solid rgba(232,200,154,.5);color:#E8C89A;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
 .read b{color:#e6a93a;}
 .cl-go{margin-top:10px;text-align:right;font-size:13px;font-weight:800;color:#E8C89A;}
+/* 分組標題：卡片只開四張，標題就是「為什麼今天是這張」。顏色只上在這裡，卡片裡一片不動 */
+.cl-grp{font-size:12.5px;font-weight:800;letter-spacing:1.5px;margin:20px 0 9px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 9px;}
+.cl-grp i{font-style:normal;font-size:11.5px;font-weight:600;color:#7d90a3;letter-spacing:0;}
+/* 其餘的人收起來——不是不重要，是今天不用動他。完整名單在上面的引力場 */
+.cl-more{display:block;width:100%;background:transparent;border:1px dashed #2a3c50;border-radius:14px;color:#8ea1b6;font-size:13.5px;font-weight:700;padding:14px;cursor:pointer;font-family:inherit;min-height:44px;margin-bottom:12px;}
+.cl-more:active{transform:scale(.99);}
 
 /* 教練在場條 */
 .coach{display:flex;align-items:center;gap:10px;background:rgba(12,19,30,.5);border:1px solid rgba(232,200,154,.25);border-radius:14px;padding:11px 13px;margin-bottom:14px;}
@@ -593,7 +599,7 @@ function gravityHTML(){
   });
   return '<div class="cd"><div class="sec">GRAVITY FIELD · <b>引力場</b></div>'
     + '<div class="gfield">' + rings + '<div class="gme">你</div><div class="gorbit">' + orbit + '</div></div>'
-    + '<div class="glegend">這張就是你的<b>燈塔</b>——他的水溫幾度、該養還是該收，看這裡（L7 整堂教你讀它）。越內圈＝離你越近、水溫越熱，位置只看他的<b>真實反應</b>。<b>虛線＝停超 14 天，水溫在涼</b>——卡住的優先掛出來，每圈最多 7 顆，其餘收進 <b>+N</b>；完整名單就在下面的客戶卡。點一個人，直接記下這一步。</div></div>';
+    + '<div class="glegend">這張就是你的<b>燈塔</b>——他的水溫幾度、該養還是該收，看這裡（L7 整堂教你讀它）。越內圈＝離你越近、水溫越熱，位置只看他的<b>真實反應</b>。<b>虛線＝停超 14 天，水溫在涼</b>——卡住的優先掛出來，每圈最多 7 顆，其餘收進 <b>+N</b>。下面的卡片只開<b>今天該動的四張</b>，其他人收在「其他 N 人」裡。點一個人，直接記下這一步。</div></div>';
 }
 /* 客戶卡排序＝今天該動誰：卡住的最上＞「要找你」離成交最近＞其他＞家人朋友墊底（不往成交排） */
 function clientOrder(c){
@@ -601,6 +607,35 @@ function clientOrder(c){
   if (coachSignal(c)) return 0;
   if (clientHi(c.name) === 3) return 1;
   return 2;
+}
+/* 卡片只開四張（2026-09-18 拍板）：離錢最近 ×2、做得很好 ×1、需要跟進 ×1，其餘收進「其他 N 人」。
+   十個客戶就是十張五層卡，滑到底也認不出今天該動誰——收起來不是藏，是讓四張有機會被看見。
+   規則全用現成訊號算，不新增欄位。家人朋友一律不進四格：現有設計刻意讓他們不往成交排
+   （clientOrder 墊底、SOFT_READ 踩煞車），選進「離錢最近」等於打自己臉。 */
+var CL_GROUPS = [
+  {k:"money",  zh:"離錢最近", c:"#4b9bf0", hint:"推一步就會動的"},
+  {k:"good",   zh:"做得很好", c:"#e6a93a", hint:"成的也要知道為什麼成"},
+  {k:"follow", zh:"需要跟進", c:"#e8734a", hint:"水溫在涼，帶去演練"}
+];
+function crmBuckets(cs){
+  var pick = {money:[], good:[], follow:[]}, used = {};
+  var hard = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; });
+  function take(k, arr, n){
+    arr.forEach(function(c){
+      if (pick[k].length >= n || used[c.name]) return;
+      used[c.name] = 1; pick[k].push(c);
+    });
+  }
+  /* 跟進先挑：用的是 coachSignal——跟 WEEKLY 議程同一把尺，
+     不會出現「議程說要帶去演練、上面卡片卻沒選他」 */
+  take("follow", hard.filter(function(c){ return coachSignal(c); })
+                     .sort(function(a,b){ return stallDays(b.name) - stallDays(a.name); }), 1);
+  take("good",   hard.filter(function(c){ return clientHi(c.name) === 4; })
+                     .sort(function(a,b){ return stallDays(a.name) - stallDays(b.name); }), 1);
+  /* 離錢最近＝還沒認定你的人裡圈層最高的，同圈層看誰停最少天（還在動的先推） */
+  take("money",  hard.filter(function(c){ return clientHi(c.name) < 4; })
+                     .sort(function(a,b){ return (clientHi(b.name) - clientHi(a.name)) || (stallDays(a.name) - stallDays(b.name)); }), 2);
+  return { pick: pick, rest: cs.filter(function(c){ return !used[c.name]; }) };
 }
 function crmHTML(){
   var cs = clientList().sort(function(a,b){ return clientOrder(a) - clientOrder(b); });
@@ -622,7 +657,16 @@ function crmHTML(){
     + '<div class="sub-t" style="margin-top:10px;"><b>' + onTrack + '</b> 個客戶在引力場裡 · <b>' + high + '</b> 個走到「要找你」以上</div>'
     + '<div class="rule4"></div></div>';
   h += gravityHTML();
-  h += cs.map(clientCardHTML).join("");
+  var bk = crmBuckets(cs);
+  h += CL_GROUPS.map(function(g){
+    if (!bk.pick[g.k].length) return "";   /* 沒人就整格不出現，不留空標題 */
+    return '<div class="cl-grp" style="color:' + g.c + ';">' + g.zh + '<i>' + g.hint + '</i></div>'
+      + bk.pick[g.k].map(clientCardHTML).join("");
+  }).join("");
+  if (bk.rest.length) {
+    h += '<button class="cl-more" id="clMore" aria-expanded="false" aria-controls="clRest">其他 ' + bk.rest.length + ' 人 ▾</button>'
+      + '<div id="clRest" hidden>' + bk.rest.map(clientCardHTML).join("") + '</div>';
+  }
   /* 這週 1v1 議程：COACH SIGNAL 的筆自動排進來（是「你帶去」，v1 不宣稱教練已讀） */
   var agenda = cs.filter(function(c){ return coachSignal(c); });
   h += '<div class="cd"><div class="sec">WEEKLY · <b>這週實戰演練議程</b></div>'
@@ -1087,6 +1131,11 @@ function render(){
   document.querySelectorAll("#bd [data-recfor]").forEach(function(n){
     n.onclick = function(){ openRecFor(n.getAttribute("data-recfor")); };
   });
+  var cm = el("clMore");
+  if (cm) cm.onclick = function(){
+    el("clRest").hidden = false;
+    cm.remove();   /* 展開就不收回去——收合鈕在這裡只會多一個沒人按的狀態 */
+  };
   var fr = el("firstRec"); if (fr) fr.onclick = openRec;
   var rf = el("recFocus"); if (rf) rf.onclick = openRec;
   document.querySelectorAll(".nv").forEach(function(b){
