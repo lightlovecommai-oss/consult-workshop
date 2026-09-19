@@ -203,6 +203,13 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .pk-say{font-size:14px;color:#cfdcea;line-height:1.9;}
 .pk-say b{color:#e6a93a;}
 .pk-bl{display:inline-block;min-width:34px;border-bottom:1px solid #5d7692;height:1em;vertical-align:baseline;}
+/* 口袋卡抽屜（星圖「口袋卡」按下去看的就是這堂的卡本身，不跳 Skool） */
+button.mat{font-family:inherit;cursor:pointer;width:100%;}
+.pkc{margin-top:15px;padding-top:14px;border-top:1px solid #1d2c3c;}
+.pkc-h{font-size:15px;font-weight:800;color:#F7F1EC;margin-bottom:6px;}
+.pkc-w{font-size:12.5px;color:#7d90a3;line-height:1.75;margin-bottom:8px;}
+.pkc-ex div{display:flex;gap:9px;font-size:13px;line-height:1.8;color:#8ea1b6;padding:4px 0;}
+.pkc-ex i{font-style:normal;flex:0 0 32px;color:#5d7692;font-size:11.5px;font-weight:700;padding-top:3px;}
 
 /* 開練流程 */
 .rec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
@@ -897,7 +904,7 @@ var LESSON_Q3 = {
 };
 /* 教材在 Skool，這裡只連過去不重做播放器（Skool 沒 API，不寫篇數等即時數字）。
    八堂都連同一個教室（老師 2026-09-18 指定），不做逐堂連結。 */
-var CLASSROOM_URL = "https://www.skool.com/influence-8679/classroom/16c9099a?md=642b3a60f1234b1f9f2be134c9e5d7bd";
+var CLASSROOM_URL = "https://www.skool.com/influence-8679/classroom/16c9099a";
 
 /* 交過的堂：後端 submissions 的 taskKey＝hw_L2 這種格式 */
 function submittedL(){
@@ -957,11 +964,19 @@ function starHTML(){
           return '<b class="mk" style="color:' + p.t + ';border-color:' + p.c + '66;">' + esc_(m) + '</b>'; }).join("") + '</span></div>'
     + '</div>';
 
-  h += '<div class="mats">' + ["教材影片","口袋卡","演練清單"].map(function(n){
-    return s.open
-      ? '<a class="mat on" href="' + CLASSROOM_URL + '" target="_blank" rel="noopener"><b>▶</b>' + n + '</a>'
-      : '<div class="mat"><b>🔒</b>' + n + '</div>';
-  }).join("") + '</div>';
+  /* 兩顆材料鈕（2026-09-19 老師裁定）：教材影片→Skool 教室；口袋卡→這堂自己的卡，不再連 Skool。
+     原本第三顆「演練清單」刪掉——它從來沒有內容，演練範例就在口袋卡的三場景裡。
+     L5–L8 目前沒有口袋卡，就不渲染那顆，不給按不下去的死鈕。 */
+  h += '<div class="mats">'
+    + (s.open
+        ? '<a class="mat on" href="' + CLASSROOM_URL + '" target="_blank" rel="noopener"><b>▶</b>教材影片</a>'
+        : '<div class="mat"><b>🔒</b>教材影片</div>')
+    + (pkOfLesson(s.L).length
+        ? (s.open
+            ? '<button class="mat on" onclick="openPk(' + s.L + ')"><b>▤</b>口袋卡</button>'
+            : '<div class="mat"><b>🔒</b>口袋卡</div>')
+        : '')
+    + '</div>';
 
   if (s.sub) {
     h += '<div class="howq"><div class="howq-k">L' + s.L + ' · 已交</div>'
@@ -1022,6 +1037,37 @@ function openHW(n){
   track("hw_open", { lesson: n });
 }
 function closeHW(){ document.getElementById("hwOv").classList.remove("on"); }
+
+/* ── 口袋卡抽屜：跟學習單共用同一個 #hwOv／#hwSheet，closeHW() 一起關。
+   資料＝pocket-cards.js 的 PKCARDS（真相在 productkit 3-教材/口袋卡，那裡改完同步過來）。
+   adv 的卡老師裁定只當補充教材，app 不顯示。 ── */
+function pkOfLesson(n){
+  return (typeof PKCARDS !== "undefined" ? PKCARDS : []).filter(function(x){
+    return x.L === "L" + n && !x.adv;
+  });
+}
+function openPk(n){
+  var s = LESSONS_DEF.filter(function(l){ return l.L === n; })[0];
+  if (!s) return;
+  var cards = pkOfLesson(n), p = lpal(s);
+  document.getElementById("hwSheet").innerHTML =
+    '<div class="sh-top"><div><div class="sh-t">L' + n + ' 口袋卡</div>'
+    + '<div class="sh-m">' + esc_(s.zh) + '　·　' + cards.length + ' 張　·　開口前看一眼就好</div></div>'
+    + '<button class="sh-x" onclick="closeHW()" aria-label="關閉">✕</button></div>'
+    + cards.map(function(c){
+        return '<div class="pkc"><div class="pkc-h">'
+          + '<b class="mk" style="color:' + p.t + ';border-color:' + p.c + '66;">' + esc_(c.code) + '</b>'
+          + esc_(c.name) + '</div>'
+          + '<div class="pkc-w">' + esc_(c.wrong) + '</div>'
+          + '<div class="pk-say">' + pkSay_(c.say) + '</div>'
+          + '<div class="pkc-ex">' + (c.ex || []).map(function(e){
+              return '<div><i>' + esc_(e[0]) + '</i><span>' + esc_(e[1]) + '</span></div>';
+            }).join("") + '</div></div>';
+      }).join("")
+    + '<div class="linknote" style="margin-top:16px;">句子照抄會卡——換成你自己的話再開口。真的用出去了，回「落地練肌肉」記一筆。</div>';
+  document.getElementById("hwOv").classList.add("on");
+  track("pk_open", { lesson: n });
+}
 function hwFileB64(f){
   return new Promise(function(res, rej){
     var r = new FileReader();
