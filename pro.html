@@ -331,6 +331,13 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .nv.on{color:var(--sd);font-weight:800;text-shadow:0 0 10px rgba(230,169,58,.5);}
 .hide{display:none;}
 
+/* 「先量看自己」浮動 CTA：demo 版 ?next=quiz 時觸發，把好奇的訪客順導到影響力健檢 */
+.next-cta{position:fixed;right:16px;bottom:20px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:12px 18px;background:linear-gradient(135deg,rgba(230,169,58,.95),rgba(232,200,154,.95));color:#0c131e;font-family:inherit;font-size:15px;font-weight:800;text-decoration:none;border-radius:999px;box-shadow:0 6px 22px rgba(230,169,58,.45),0 0 0 1px rgba(255,255,255,.35) inset;animation:nctPulse 2.6s ease-in-out infinite;}
+.next-cta:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(230,169,58,.55),0 0 0 1px rgba(255,255,255,.5) inset;}
+.next-cta .nct-arrow{font-size:16px;line-height:1;}
+@keyframes nctPulse{0%,100%{box-shadow:0 6px 22px rgba(230,169,58,.45),0 0 0 1px rgba(255,255,255,.35) inset;}50%{box-shadow:0 6px 28px rgba(230,169,58,.75),0 0 0 1px rgba(255,255,255,.55) inset;}}
+@media (max-width:420px){.next-cta{right:12px;bottom:14px;padding:11px 16px;font-size:14.5px;}}
+
 /* 讀取頁：教練席開門（咖啡漸層＋四色依序脈動） */
 .loading{text-align:center;padding:56px 20px;color:#8ea1b6;font-size:15px;line-height:1.9;}
 .boots{padding:34px 4px;}
@@ -1470,6 +1477,8 @@ function demoStatePro_(){
 
 async function boot() {
   var qs = new URLSearchParams(location.search);
+  /* ?next=quiz：把好奇的訪客順著導去影響力健檢；跟 demo 是獨立開關，可單獨掛。 */
+  if (qs.get("next") === "quiz") { el("nextQuizCta").classList.remove("hide"); }
   if (qs.get("demo") === "1") {
     postToSheet = function(){ return Promise.resolve(); };   // demo 不寫 Sheet
     TASKS = []; S = demoStatePro_(); WID = PRO_WORKSHOPS[0];
@@ -1504,5 +1513,8 @@ async function boot() {
 }
 boot();
 </script>
+<a id="nextQuizCta" class="next-cta hide" href="https://quiz.atpifit.com/" rel="noopener">
+  先量看自己 <span class="nct-arrow" aria-hidden="true">→</span>
+</a>
 </body>
 </html>
