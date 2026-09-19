@@ -332,6 +332,8 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .hide{display:none;}
 
 /* 「先量看自己」浮動 CTA：demo 版 ?next=quiz 時觸發，把好奇的訪客順導到影響力健檢 */
+/* ⚠️ .hide 定義在前面，特異性同分會輸給 .next-cta，所以要這條複合選擇器才關得掉 */
+.next-cta.hide{display:none;}
 .next-cta{position:fixed;right:16px;bottom:20px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:12px 18px;background:linear-gradient(135deg,rgba(230,169,58,.95),rgba(232,200,154,.95));color:#0c131e;font-family:inherit;font-size:15px;font-weight:800;text-decoration:none;border-radius:999px;box-shadow:0 6px 22px rgba(230,169,58,.45),0 0 0 1px rgba(255,255,255,.35) inset;animation:nctPulse 2.6s ease-in-out infinite;}
 .next-cta:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(230,169,58,.55),0 0 0 1px rgba(255,255,255,.5) inset;}
 .next-cta .nct-arrow{font-size:16px;line-height:1;}
@@ -379,6 +381,10 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
   </div>
 </div>
 <div class="ov" id="hwOv" onclick="if(event.target===this)closeHW();"><div class="sheet" id="hwSheet"></div></div>
+<!-- ⚠️ 必須留在 <script> 之前：boot() 同步段就會抓這顆，放到 script 後面會拿到 null 並炸掉整個 boot。 -->
+<a id="nextQuizCta" class="next-cta hide" href="https://quiz.atpifit.com/" rel="noopener">
+  先量看自己 <span class="nct-arrow" aria-hidden="true">→</span>
+</a>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="track.js"></script>
@@ -1478,7 +1484,8 @@ function demoStatePro_(){
 async function boot() {
   var qs = new URLSearchParams(location.search);
   /* ?next=quiz：把好奇的訪客順著導去影響力健檢；跟 demo 是獨立開關，可單獨掛。 */
-  if (qs.get("next") === "quiz") { el("nextQuizCta").classList.remove("hide"); }
+  var _nq = el("nextQuizCta");
+  if (qs.get("next") === "quiz" && _nq) { _nq.classList.remove("hide"); }
   if (qs.get("demo") === "1") {
     postToSheet = function(){ return Promise.resolve(); };   // demo 不寫 Sheet
     TASKS = []; S = demoStatePro_(); WID = PRO_WORKSHOPS[0];
@@ -1513,8 +1520,5 @@ async function boot() {
 }
 boot();
 </script>
-<a id="nextQuizCta" class="next-cta hide" href="https://quiz.atpifit.com/" rel="noopener">
-  先量看自己 <span class="nct-arrow" aria-hidden="true">→</span>
-</a>
 </body>
 </html>
