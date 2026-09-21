@@ -101,11 +101,16 @@ var SEAT_MAP = {
   "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
 };
 /* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
-var FROM = "", MSQ = "";
+var FROM = "", MSQ = "", QSID = "";
 try {
   var sp_ = new URLSearchParams(window.location.search);
   FROM = sp_.get("from") || "";
   MSQ = sp_.get("ms") || "";   // LINE 外測完的 12 格分數（quiz 夾帶過來，MORD 序、1–5）
+  /* sid＝測驗那一站的裝置碼。quiz.atpifit.com 與 app.atpifit.com 的 localStorage 不互通，
+     所以它只能靠網址過來；記下來一起送給後端，匿名測驗那列才接得到這個 LINE 身份。 */
+  QSID = sp_.get("sid") || "";
+  if (QSID) localStorage.setItem("cw_qsid", QSID);       // 之後幾次進來沒帶參數也還接得上
+  else QSID = localStorage.getItem("cw_qsid") || "";
 } catch(e){}
 function fromQ_(){ return FROM ? "&from=" + encodeURIComponent(FROM) : ""; }
 
@@ -127,7 +132,7 @@ function sendQuizBaseline_(id, name) {
   DORD.forEach(function(k){ pct[k] = pctFromEval(d5[k]); });
   var sk = DORD.reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
   var uk = DORD.filter(function(k){ return k !== sk; }).reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
-  var quiz = { action: "quiz", userId: id, displayName: name || "", name: "", email: "", job: "",
+  var quiz = { action: "quiz", userId: id, displayName: name || "", name: "", email: "", job: "", quizSid: QSID,
     scoreA: pct.A, scoreT: pct.T, scoreP: pct.P, scoreI: pct.I,
     rawAnswers: parts.join(","), mainAbility: DIMS[sk].name, subAbility: DIMS[uk].name,
     timestamp: new Date().toISOString() };
@@ -155,9 +160,9 @@ function sendQuizBaseline_(id, name) {
    · 跟 sendQuizBaseline_ 一樣用 sendBeacon——這行的下一行就跳頁了 */
 function sayHello_(id, name) {
   if (!/^U[0-9a-f]{32}$/i.test(String(id || ""))) return;   // 假身份／測試 id 不進名單
-  var sig = id + "|" + (name || "");
+  var sig = id + "|" + (name || "") + "|" + QSID;   // 名字或測驗裝置碼晚一步才拿到時要能再送一次
   try { if (localStorage.getItem("cw_hello_v1") === sig) return; } catch(e){}
-  var payload = { action: "hello", userId: id, displayName: name || "" };
+  var payload = { action: "hello", userId: id, displayName: name || "", quizSid: QSID };
   var ok = false;
   try {
     if (navigator.sendBeacon) {

@@ -30,7 +30,8 @@ var TABS = {
   redemptions: "(遊戲)兌換紀錄",       // 兌換申請（需人工審核）：LINE userId | 姓名 | rewardId | 名稱 | 代幣 | 申請時間 | 狀態
   pending:     "(遊戲)待審核",         // 作業繳交待審核：繳交時間 | LINE userId | 姓名 | 課程 | 任務key | 任務名 | 維度 | 分數 | 檔案連結 | 通過(勾) | 狀態
   subscribe:   "(漏斗)電子報訂閱",     // 官網訂閱表單（atpifit.com）：時間 | Email | 姓名 | 來源 | 頁面 + 七個追蹤欄（程式自動建立）
-  signup:      "(漏斗)複訓報名"        // 官網複訓報名表（/courses/retrain）：時間 | 姓名 | LINE ID | 電話 | Email | 報名梯次 | 同意守則 | 狀態 + 七個追蹤欄（程式自動建立）
+  signup:      "(漏斗)複訓報名",       // 官網複訓報名表（/courses/retrain）：時間 | 姓名 | LINE ID | 電話 | Email | 報名梯次 | 同意守則 | 狀態 + 七個追蹤欄（程式自動建立）
+  identity:    "(系統)身份對照"        // 身份線索池（2026-09-21 起，程式自動建立）：主鍵 | 類型 | 值 | 首次 | 來源
 };
 
 /* 每個邏輯欄位 → 可能的實際標題（中英文都列，讀寫都靠這張表對齊）。
@@ -588,6 +589,56 @@ function ensureRosterRow_(lineId, name) {
   }
   appendMapped_(TABS.students, { lineId: COLS.students.lineId, name: COLS.students.name },
                 { lineId: lineId, name: name || "" });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   身份線索池（第 0 階・2026-09-21）
+
+   為什麼是「線索池」不是「對照表」：現在**只記不合併**。
+   合併（一個人號 → 多條認證管道）是第 1 階的事，那時要回頭把這張表收斂成人號。
+   先記的理由只有一個——**沒存下來的線索，事後花錢也補不回來**。
+   同一台瀏覽器的裝置碼是永久的，所以「今天匿名測完、三週後才用 LINE 進館」
+   這條線只有在當下兩邊都記了才連得起來。
+
+   一列 ＝ 一條線索。主鍵＝那筆資料實際用的 id（U…／web:…／dev:…）。
+   同一組（主鍵, 類型, 值）只記第一次，時間是首次看到的時間。 */
+var IDENT_HEADERS = ["主鍵", "類型", "值", "首次看到", "來源"];
+function ensureIdentitySheet_() {
+  var ss = ss_(), sh = ss.getSheetByName(TABS.identity);
+  if (sh) return sh;
+  sh = ss.insertSheet(TABS.identity);
+  sh.getRange(1, 1, 1, IDENT_HEADERS.length).setValues([IDENT_HEADERS]);
+  sh.setFrozenRows(1);
+  sh.getRange(1, 1).setNote("身份線索池：一列＝一條線索，只記不合併。\n"
+    + "類型＝line／email／device（quizDevice＝測驗那一站的裝置碼，跟健身房不同網域所以不同值）。\n"
+    + "⚠️ 這張表是「一年後把同一個人的資料接回來」的唯一憑據，不要手動刪列。");
+  return sh;
+}
+function recordIdentity_(primaryKey, clues, source) {
+  try {
+    var key = String(primaryKey || "").trim();
+    if (!key) return;
+    var want = [];
+    if (clues.line)    want.push(["line",       String(clues.line).trim()]);
+    if (clues.email)   want.push(["email",      String(clues.email).trim().toLowerCase()]);
+    if (clues.device)  want.push(["device",     String(clues.device).trim()]);
+    if (clues.quizSid) want.push(["quizDevice", String(clues.quizSid).trim()]);
+    if (!want.length) return;
+    var sh = ensureIdentitySheet_();
+    var seen = {}, lastRow = sh.getLastRow();
+    if (lastRow > 1) {
+      sh.getRange(2, 1, lastRow - 1, 3).getValues().forEach(function(r){
+        seen[String(r[0]) + " " + String(r[1]) + " " + String(r[2])] = true;
+      });
+    }
+    var now = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    var add = want.filter(function(w){ return !seen[key + " " + w[0] + " " + w[1]]; })
+                  .map(function(w){ return [key, w[0], w[1], now, source || ""]; });
+    if (add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, IDENT_HEADERS.length).setValues(add);
+  } catch (e) {
+    /* 低摩擦守則：線索沒記到絕不可以擋住寫入本身 */
+    Logger.log("recordIdentity_ 失敗（不影響主要寫入）：" + e);
+  }
 }
 
 /* 這串是不是真的 LINE userId（U + 32 碼 hex）。
@@ -1216,9 +1267,18 @@ function doPost(e) {
       /* 2026-09-08：LINE 外開測驗拿不到 userId（LIFF 不強制登入），以前這裡直接退件，
          連人家填好的 Email 都丟了。改成：有 Email 就照收，用 "web:"+email 當去重鍵；
          兩個都沒有才退（沒身份沒聯絡方式，這列存了也找不回人）。 */
+      /* 2026-09-21：再補一層。上面那層只救了「有留 Email」的人——
+         在 LINE 外測完又按「不領取」的人連 Email 都沒有，以前整份結果直接退件，
+         連他測過都不知道。改用**裝置碼**當最後的鍵（track.sessionId＝cw_sid，
+         同一台瀏覽器永遠同一個），至少分數留得下來，之後能接回去。 */
       var hasLineId = !!quid;
       if (!quid && body.email) quid = "web:" + String(body.email).trim().toLowerCase();
+      if (!quid && body.track && body.track.sessionId) quid = "dev:" + String(body.track.sessionId).trim();
       if (!quid) return json_({ status: "error", message: "missing userId" });
+      /* 這一刻手上有的所有線索都記下來——一年後要合併成同一個人，靠的就是這張表。
+         現在只記不合併（合併是第 1 階的事），但**沒記下來的線索事後補不回來**。 */
+      recordIdentity_(quid, { line: hasLineId ? quid : "", email: body.email,
+                              device: (body.track || {}).sessionId, quizSid: body.quizSid }, "quiz");
       var qvals = {
         time: body.timestamp || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
         lineId: quid, displayName: body.displayName || "", pictureUrl: body.pictureUrl || "",
@@ -1291,6 +1351,10 @@ function doPost(e) {
       var hid = String(body.userId || body.lineId || "").trim();
       if (!isLineId_(hid)) return json_({ status: "ok", skipped: true });
       ensureRosterRow_(hid, String(body.displayName || body.name || "").trim());
+      /* quizSid＝測驗那一站的裝置碼，由交接連結的 ?sid= 帶過來。
+         quiz.atpifit.com 與 app.atpifit.com 的 localStorage 不互通，
+         所以兩邊各有一組裝置碼；沒有這條參數，匿名測驗那列就永遠接不到這個 LINE 身份。 */
+      recordIdentity_(hid, { line: hid, device: (body.track || {}).sessionId, quizSid: body.quizSid }, "hello");
       return json_({ status: "ok" });
     }
 
@@ -1729,15 +1793,18 @@ function listWebOrphans() {
   var out = [];
   rows_(TABS.quiz).forEach(function(r){
     var id = String(pick_(r, COLS.quizWrite.lineId) || "").trim();
-    if (id.toLowerCase().indexOf("web:") !== 0) return;
+    var low = id.toLowerCase();
+    if (low.indexOf("web:") !== 0 && low.indexOf("dev:") !== 0) return;
+    var email = String(pick_(r, COLS.quizWrite.email) || (low.indexOf("web:") === 0 ? id.slice(4) : "")).trim();
     var ms = QK.map(function(k){ return Number(pick_(r, COLS.quizWrite[k])); });
     var good = ms.every(function(v){ return v >= 1 && v <= 5; });
-    out.push([ String(pick_(r, COLS.quizWrite.time) || ""),
-               String(pick_(r, COLS.quizWrite.email) || id.slice(4)),
+    var link = !good ? "⚠️ 12 格分數不全，接不回來——請他重測一次"
+             : !email ? "（沒有 Email，寄不了信）只能等他用 LINE 回來時自動接："
+                        + "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",")
+             : "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",");
+    out.push([ String(pick_(r, COLS.quizWrite.time) || ""), email || id,
                String(pick_(r, COLS.quizWrite.name) || pick_(r, COLS.quizWrite.displayName) || ""),
-               good ? ms.join(",") : "",
-               good ? "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",")
-                    : "⚠️ 12 格分數不全，接不回來——請他重測一次" ]);
+               good ? ms.join(",") : "", link ]);
   });
   var name = "(暫)LINE外孤兒";
   var ss = ss_(), sh = ss.getSheetByName(name);
