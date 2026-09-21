@@ -53,6 +53,9 @@ var COLS = {
               /* v2：小肌群層＋會員模式的開練紀錄（都可空，舊列不受影響） */
               muscle:["小肌群","muscle"], reaction:["對方反應","reaction"],
               target:["對象","target"], rel:["關係","rel"], note:["發生什麼","note"],
+              /* stage＝圈層（none/A/T/P/I，pro v5 打卡標準「這個客戶走到哪」）；
+                 沒欄位＝前端寫進來的圈層會被 appendMapped_ 靜默丟掉，讀回來只能靠 reaction 反推＝不準 */
+              stage:["圈層","stage"],
               /* share＝「分享到館裡」勾選（v9 補死碼：以前前端有勾選、這裡沒欄位接） */
               share:["分享到館裡","share"] },
   /* v2 體測：小肌群 1–5 評分。source＝quiz(測驗基線)／self(週測自評)／coach(教練校準) */
@@ -557,18 +560,41 @@ function quizReportUrl_(qraw, body) {
   }
 }
 
-/* 測驗完自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
-   已存在同 userId 就不動，避免重複。 */
+/* 自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
+   已存在同 userId 就不重複建；但**姓名還空著**時會補上（測驗補寫那條路徑姓名是空的，
+   等他真的用 LINE 進館才拿得到 displayName）。只補空格，不覆蓋人工填過的名字。 */
 function ensureRosterRow_(lineId, name) {
   if (!lineId) return;
   var sh = ss_().getSheetByName(TABS.students);
   if (!sh) return;
-  var existing = rows_(TABS.students);
-  for (var i = 0; i < existing.length; i++) {
-    if (String(pick_(existing[i], COLS.students.lineId)) === lineId) return;  // 已在名單，不重複
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idCol = -1, nameCol = -1;
+  for (var c = 0; c < headers.length; c++) {
+    if (idCol < 0 && COLS.students.lineId.indexOf(headers[c]) > -1) idCol = c;
+    if (nameCol < 0 && COLS.students.name.indexOf(headers[c]) > -1) nameCol = c;
+  }
+  if (idCol < 0) return;
+  if (lastRow > 1) {
+    var ids = sh.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]).trim() !== lineId) continue;
+      if (name && nameCol > -1) {
+        var cell = sh.getRange(i + 2, nameCol + 1);
+        if (String(cell.getValue()).trim() === "") cell.setValue(name);
+      }
+      return;  // 已在名單，不重複建列
+    }
   }
   appendMapped_(TABS.students, { lineId: COLS.students.lineId, name: COLS.students.name },
                 { lineId: lineId, name: name || "" });
+}
+
+/* 這串是不是真的 LINE userId（U + 32 碼 hex）。
+   開通名單是人主檔，只讓真身份進來——擋掉 web:xxx 假身份、demo/測試用的 ?id=、
+   以及後端零驗證下有人亂打 ?userId= 灌進來的垃圾列。 */
+function isLineId_(v) {
+  return /^U[0-9a-f]{32}$/i.test(String(v || "").trim());
 }
 
 function truthy_(v) {
@@ -840,7 +866,8 @@ function computeLogs_(uid) {
              reaction: String(pick_(r, COLS.checkins.reaction) || ""),
              target: String(pick_(r, COLS.checkins.target) || ""),
              rel: String(pick_(r, COLS.checkins.rel) || ""),
-             note: String(pick_(r, COLS.checkins.note) || "") };
+             note: String(pick_(r, COLS.checkins.note) || ""),
+             stage: String(pick_(r, COLS.checkins.stage) || "") };
   });
   var revenue = rows_(TABS.revenue).filter(function(r){ return String(pick_(r, COLS.revenue.lineId)) === uid; }).map(function(r){
     return { workshopId: String(pick_(r, COLS.revenue.workshopId)), amount: Number(pick_(r, COLS.revenue.amount)) || 0,
@@ -1094,6 +1121,7 @@ function doPost(e) {
         muscle: String(body.muscle || "").toUpperCase(), pts: body.pts || 0, date: body.date || today,
         /* v2 會員模式：低摩擦守則——這三欄全部可空，不擋打卡 */
         reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || "",
+        stage: body.stage || "",
         share: body.share ? true : false
       }, body));
       return json_({ status: "ok" });
@@ -1256,6 +1284,16 @@ function doPost(e) {
       }, "LAUNCHILL_SUBSCRIBE_WEBHOOK_URL");
       return json_({ status: "ok", launchill: subResult || null });
     }
+    /* 進館報到：只要有人用真的 LINE 身份開過健身房，就在開通名單留一列（課程欄空白＝未開通）。
+       2026-09-21 補——以前只有「在 LINE 裡做測驗」這一條路會建列，
+       在電腦上測完、之後才用 LINE 進館的人永遠不會出現在名單上，光頭看不到也開通不了。 */
+    if (body.action === "hello") {
+      var hid = String(body.userId || body.lineId || "").trim();
+      if (!isLineId_(hid)) return json_({ status: "ok", skipped: true });
+      ensureRosterRow_(hid, String(body.displayName || body.name || "").trim());
+      return json_({ status: "ok" });
+    }
+
     /* 複訓報名（atpifit.com/courses/retrain）。保證金人工對帳，這裡只收名單。
        必要欄位只有姓名跟梯次——Email 可能記錯、電話是選填，低摩擦守則不拿它們擋報名。 */
     if (body.action === "signup") {
@@ -1345,7 +1383,9 @@ function onEdit(e) {
    ═══════════════════════════════════════════════════════════ */
 function migrateV2_() {
   ensureColumn_(TABS.tasks, "muscle");
-  ["小肌群", "對方反應", "對象", "關係", "發生什麼"].forEach(function(h){ ensureColumn_(TABS.checkins, h); });
+  /* 圈層 + 分享到館裡：以前列在 COLS 但沒進遷移，導致 pro 席寫入的圈層／分享旗標
+     被 appendMapped_ 靜默丟掉；補上兩欄後老欄位不動、老資料保留。 */
+  ["小肌群", "對方反應", "對象", "關係", "發生什麼", "圈層", "分享到館裡"].forEach(function(h){ ensureColumn_(TABS.checkins, h); });
   evalSheet_();
 }
 /* 單獨跑遷移（不想整個 setup 重跑時用這支） */
@@ -1672,6 +1712,43 @@ function setupSeatColumn() {
     + "空白＝走舊的自動規則（防呆用，正常請填）。\n"
     + "⚠️ 課程開通欄（超引力-顧問課等）是另一回事，決定他有哪些任務，不要一起清掉。");
   return "「指定席位」欄已就緒（第 " + (c + 1) + " 欄），下拉選項＝" + SEAT_OPTIONS.join("／") + "，空白＝自動。";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LINE 外測驗的孤兒：列出來＋幫每個人算好「接回連結」。
+   在 Apps Script 選 listWebOrphans → 執行，結果寫進「(暫)LINE外孤兒」分頁（每次重建）。
+
+   他們是誰：在電腦上做測驗拿不到 LINE userId，那一列的鍵是 web:<email>，
+   刻意不進開通名單（那個身份進不了館）。分數躺在測驗分頁、人沒接上。
+   怎麼接回：連結帶著他自己的 12 格分數（?ms=），他**用手機在 LINE 裡**打開，
+   index.html 拿到真 userId 的那一刻就補寫「測驗一列＋體測基線 12 列」，
+   同時報到進開通名單——人、分數、名單一次全接上。
+   ⚠️ 在電腦瀏覽器開沒有用（拿不到 LINE 身份），信裡一定要講「用手機、在 LINE 裡打開」。 */
+function listWebOrphans() {
+  var QK = ["Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12"];
+  var out = [];
+  rows_(TABS.quiz).forEach(function(r){
+    var id = String(pick_(r, COLS.quizWrite.lineId) || "").trim();
+    if (id.toLowerCase().indexOf("web:") !== 0) return;
+    var ms = QK.map(function(k){ return Number(pick_(r, COLS.quizWrite[k])); });
+    var good = ms.every(function(v){ return v >= 1 && v <= 5; });
+    out.push([ String(pick_(r, COLS.quizWrite.time) || ""),
+               String(pick_(r, COLS.quizWrite.email) || id.slice(4)),
+               String(pick_(r, COLS.quizWrite.name) || pick_(r, COLS.quizWrite.displayName) || ""),
+               good ? ms.join(",") : "",
+               good ? "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",")
+                    : "⚠️ 12 格分數不全，接不回來——請他重測一次" ]);
+  });
+  var name = "(暫)LINE外孤兒";
+  var ss = ss_(), sh = ss.getSheetByName(name);
+  if (sh) ss.deleteSheet(sh);
+  sh = ss.insertSheet(name);
+  var head = ["測驗時間", "Email", "姓名", "12格分數", "接回連結（請他用手機在 LINE 裡打開）"];
+  sh.getRange(1, 1, 1, head.length).setValues([head]);
+  sh.setFrozenRows(1);
+  if (out.length) sh.getRange(2, 1, out.length, head.length).setValues(out);
+  sh.autoResizeColumns(1, 4);
+  return "找到 " + out.length + " 筆 LINE 外孤兒，已寫進「" + name + "」分頁。";
 }
 
 /* ═══════════════════════════════════════════════════════════

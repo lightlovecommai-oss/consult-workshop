@@ -148,6 +148,28 @@ function sendQuizBaseline_(id, name) {
   }
   try { localStorage.setItem("cw_msq_sent_v1", sig); } catch(e){}
 }
+/* ⭐ 2026-09-21 進館報到：只要拿到真身份就跟後端報一聲，開通名單補上這個人。
+   以前只有「在 LINE 裡做測驗」會建列——在電腦上測完、之後才用 LINE 進來的人
+   永遠不在名單上，看不到也開通不了。報到不改任何席位，課程欄空白＝還是體驗席。
+   · 同一個 (id, 名字) 只送一次；拿到名字之後會再送一次，讓後端把空的姓名欄補起來
+   · 跟 sendQuizBaseline_ 一樣用 sendBeacon——這行的下一行就跳頁了 */
+function sayHello_(id, name) {
+  if (!/^U[0-9a-f]{32}$/i.test(String(id || ""))) return;   // 假身份／測試 id 不進名單
+  var sig = id + "|" + (name || "");
+  try { if (localStorage.getItem("cw_hello_v1") === sig) return; } catch(e){}
+  var payload = { action: "hello", userId: id, displayName: name || "" };
+  var ok = false;
+  try {
+    if (navigator.sendBeacon) {
+      ok = navigator.sendBeacon(SHEET_API, new Blob([JSON.stringify(payload)], { type: "text/plain;charset=utf-8" }));
+    }
+  } catch(e){}
+  if (!ok) {
+    try { fetch(SHEET_API, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" }, keepalive: true }); } catch(e){}
+  }
+  try { localStorage.setItem("cw_hello_v1", sig); } catch(e){}
+}
+
 function routeFor(id) {
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
   var q = "?id=" + encodeURIComponent(id) + fromQ_();
@@ -175,6 +197,7 @@ async function init() {
     if (urlId) {
       rememberUid_(urlId);   // 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程
       sendQuizBaseline_(urlId, "");
+      sayHello_(urlId, "");
       window.location.href = routeFor(urlId);
       return;
     }
@@ -189,6 +212,7 @@ async function init() {
       var p = await liff.getProfile();
       rememberUid_(p.userId);
       sendQuizBaseline_(p.userId, p.displayName || "");
+      sayHello_(p.userId, p.displayName || "");
       window.location.href = routeFor(p.userId);
       return;
     } else if (liff.isInClient()) {
@@ -203,7 +227,7 @@ async function init() {
   /* 桌面捷徑若沒帶 id，用上次記住的 id 進場（同樣走身分路由，未開通的人才不會被 dashboard 再彈一次） */
   try {
     var savedId = localStorage.getItem("cw_uid");
-    if (savedId) { sendQuizBaseline_(savedId, ""); window.location.href = routeFor(savedId); return; }
+    if (savedId) { sendQuizBaseline_(savedId, ""); sayHello_(savedId, ""); window.location.href = routeFor(savedId); return; }
   } catch (e) {}
 
   /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）＝真路人 → 體驗席。
