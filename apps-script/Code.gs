@@ -949,6 +949,45 @@ function evalSheet_() {
   }
   return sh;
 }
+/* ⭐ 2026-09-22：測驗的 12 格答案 → 體測基線。
+   以前這件事只有 index.html 的 ?ms= 那條路會做，而在 LINE 裡測完的交接連結
+   是 ?id=…&from=quiz、沒帶 ms=，所以走正常路徑的人 12 格答案永遠到不了體格——
+   體測分頁從 2026-09-07（攤平回填那天）之後一列都沒長過，49 位測驗者裡
+   35 位是三格同分的佔位值、14 位完全空白。weakestThree／甜蜜路徑／解盤腳本
+   全都讀體格，等於整套判讀跑在佔位資料上。
+   改放在後端＝不管從哪條路進來（LINE 內測驗、?ms= 回頭補、之後的原生 App）
+   都只有這一個地方在寫，不會再漏。
+   同一人同一天只寫一次（重測會覆蓋成當天最新那份）。 */
+function writeQuizBaseline_(uid, qraw) {
+  try {
+    /* 只寫真 LINE 身份：web:／dev: 鍵進不了館，那種體格沒有任何畫面讀得到，
+       寫了只是垃圾列。他們的 12 格答案原封不動留在測驗分頁，日後用 ?ms= 接回來時，
+       這支會用他真正的 userId 再寫一次。 */
+    if (!isLineId_(uid)) return 0;
+    var MORD_ = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+    var ms = MORD_.map(function(_, i){ return Number(qraw[i]); });
+    if (ms.some(function(v){ return !(v >= 1 && v <= 5); })) return 0;   // 12 格不全就不寫
+    var sh = evalSheet_(), last = sh.getLastRow();
+    var today_ = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy-MM-dd");
+    if (last > 1) {
+      var old = sh.getRange(2, 1, last - 1, 5).getValues();
+      for (var i = 0; i < old.length; i++) {
+        if (String(old[i][0]).trim() !== uid || String(old[i][3]) !== "quiz") continue;
+        var d = old[i][4];
+        d = (d instanceof Date) ? Utilities.formatDate(d, "Asia/Taipei", "yyyy-MM-dd")
+                                : String(d).slice(0, 10);
+        if (d === today_) return 0;   // 今天已經寫過這個人的 quiz 基線
+      }
+    }
+    sh.getRange(last + 1, 1, 12, 6).setValues(
+      MORD_.map(function(mk, i){ return [uid, mk, ms[i], "quiz", today_, ""]; })
+    );
+    return 12;
+  } catch (e) {
+    Logger.log("writeQuizBaseline_ 失敗（不影響測驗列寫入）：" + e);   // 低摩擦守則：寫體格失敗不能擋測驗
+    return 0;
+  }
+}
 function computeSelfEval_(uid) {
   var row = rows_(TABS.quiz).filter(function(r){ return String(pick_(r, COLS.quiz.lineId)) === uid; }).pop();
   if (!row) return null;
@@ -1303,6 +1342,7 @@ function doPost(e) {
       upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS).concat(
         ["displayName","pictureUrl","name","email","job","income","goalIncome","customerSource",
          "targetContext","targetNeed","targetKeyMuscle"]));  // 同 userId 更新那列，重測/重開不重複
+      writeQuizBaseline_(quid, qraw);   // 12 格答案順手寫成體測基線——這是體格的唯一來源，別再只靠 ?ms=
       if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）；web:xxx 假身份進不了館，不進名單
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
@@ -1897,6 +1937,97 @@ function backfillQuizMuscles() {
   return "舊測驗基線回填：" + filled + " 人 × 12 格＝" + out.length + " 列；"
        + "已有體測紀錄跳過 " + skipped + " 人；分數不完整略過 " + bad + " 列。"
        + "（三格同分＝只搬大肌肉水位，等他們在 App 做一次自評就會被新軸覆蓋）";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   一次性：把測驗分頁裡**真實的 12 格答案**補成體測基線，並清掉攤平佔位值。
+   在 Apps Script 選 backfillQuizMuscles12 → 執行。可重複執行（第二次會說 0 人要補）。
+
+   為什麼要有這支：2026-09-07 跑的 backfillQuizMuscles 是在「只有四維分數」的年代
+   寫的，一個維度三格同分＝佔位。但那之後大家測的是新版 12 題，真實答案一直
+   躺在測驗分頁的 Q1–Q12，只是沒有人把它搬進體測分頁（後端 quiz 端點以前不寫）。
+   三格同分的後果是 weakestThree() 選不出最弱那塊——解盤、甜蜜路徑、專屬招
+   全部跑在佔位資料上。
+
+   ⚠️ 這支會刪列，但刪的範圍很窄，而且刪掉的東西可以完全重建：
+   · 只刪 source＝quiz 的列（coach 校準、self 週自評一列都不動）
+   · 只刪「同一人同一天、12 格齊全、且每個維度內三格完全同分」的整組——
+     那個形狀只有 backfillQuizMuscles 會產生，就是佔位值的指紋
+   · 只刪「這次真的有真實 12 格可以補上去」的人
+   · 執行前自動把整張體測分頁複製成「(備份)體測-時間戳」，出事可以整張搬回來
+   新列的日期用**他測驗那天**（不是今天），因為那才是這份資料真正的量測時間。
+   ═══════════════════════════════════════════════════════════ */
+function backfillQuizMuscles12() {
+  var MORD_ = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
+  var dnorm = function(v){
+    return (v instanceof Date) ? Utilities.formatDate(v, "Asia/Taipei", "yyyy-MM-dd")
+                               : String(v || "").slice(0, 10);
+  };
+
+  /* ① 每個人取「最新一列有完整 12 格」的測驗當真相 */
+  var real = {};
+  rows_(TABS.quiz).forEach(function(q){
+    var uid = String(pick_(q, COLS.quizWrite.lineId) || "").trim();
+    if (!isLineId_(uid)) return;        // web:／dev: 鍵的體格沒人讀得到，不補（理由同 writeQuizBaseline_）
+    var ms = [];
+    for (var i = 1; i <= 12; i++) ms.push(Number(pick_(q, COLS.quizWrite["Q" + i])));
+    if (ms.some(function(v){ return !(v >= 1 && v <= 5); })) return;
+    var d = dnorm(pick_(q, COLS.quizWrite.time));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+    if (!real[uid] || d >= real[uid].d) real[uid] = { ms: ms, d: d };
+  });
+  if (!Object.keys(real).length) return "測驗分頁裡找不到任何 12 格齊全的列。";
+
+  /* ② 讀體測分頁，把 source=quiz 的列按「人＋日期」分組 */
+  var sh = evalSheet_(), last = sh.getLastRow();
+  var vals = last > 1 ? sh.getRange(2, 1, last - 1, 6).getValues() : [];
+  var groups = {};
+  vals.forEach(function(r, idx){
+    if (String(r[3]) !== "quiz") return;
+    var key = String(r[0]).trim() + "|" + dnorm(r[4]);
+    (groups[key] = groups[key] || { rows: [], by: {} });
+    groups[key].rows.push(idx);
+    groups[key].by[String(r[1]).toUpperCase()] = Number(r[2]);
+  });
+
+  var isFlat = function(by){
+    if (MORD_.some(function(mk){ return !(by[mk] >= 1 && by[mk] <= 5); })) return false;
+    return ["A","T","P","I"].every(function(d){
+      return by[d + "1"] === by[d + "2"] && by[d + "2"] === by[d + "3"];
+    });
+  };
+  var same = function(by, ms){ return MORD_.every(function(mk, i){ return by[mk] === ms[i]; }); };
+
+  /* ③ 決定誰要補、哪些佔位列要清掉 */
+  var drop = {}, add = [], filled = 0, alreadyOk = 0, dropped = 0;
+  Object.keys(real).forEach(function(uid){
+    var t = real[uid];
+    var mine = Object.keys(groups).filter(function(k){ return k.indexOf(uid + "|") === 0; });
+    if (mine.some(function(k){ return k === uid + "|" + t.d && same(groups[k].by, t.ms); })) {
+      alreadyOk++; return;                       // 已經有一模一樣的真實基線，不重複寫
+    }
+    mine.forEach(function(k){
+      if (!isFlat(groups[k].by)) return;         // 不是佔位指紋就留著
+      groups[k].rows.forEach(function(i){ drop[i] = true; dropped++; });
+    });
+    MORD_.forEach(function(mk, i){ add.push([uid, mk, t.ms[i], "quiz", t.d, ""]); });
+    filled++;
+  });
+  if (!filled) return "沒有人需要補：" + alreadyOk + " 位的體格已經是真實 12 格了。";
+
+  /* ④ 先備份整張，再重寫 */
+  var ss = ss_();
+  var stamp = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyyMMdd-HHmm");
+  sh.copyTo(ss).setName("(備份)體測-" + stamp);
+
+  var keep = vals.filter(function(_, i){ return !drop[i]; }).concat(add);
+  if (last > 1) sh.getRange(2, 1, last - 1, 6).clearContent();
+  if (keep.length) sh.getRange(2, 1, keep.length, 6).setValues(keep);
+
+  return "真實 12 格基線回填：" + filled + " 人 × 12 格＝" + add.length + " 列；"
+       + "清掉三格同分的佔位列 " + dropped + " 列；"
+       + "本來就正確、跳過 " + alreadyOk + " 人。"
+       + "備份分頁：(備份)體測-" + stamp + "（確認沒問題後可以刪）";
 }
 
 /* ═══════════════════════════════════════════════════════════
