@@ -1790,32 +1790,52 @@ function setupSeatColumn() {
    ⚠️ 在電腦瀏覽器開沒有用（拿不到 LINE 身份），信裡一定要講「用手機、在 LINE 裡打開」。 */
 function listWebOrphans() {
   var QK = ["Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12"];
-  var out = [];
-  rows_(TABS.quiz).forEach(function(r){
+  var qrows = rows_(TABS.quiz);
+
+  /* 先掃一遍，記住「哪些 Email 已經有真 LINE 身份的列」。
+     同一個人可能先在電腦做一次（web:）、後來又用 LINE 做／接回來一次（U…）——
+     那種人早就拿到結果了，再寄「你的結果沒交到你手上，抱歉」比不寄更傷。 */
+  var lineEmail = {};
+  qrows.forEach(function(r){
+    if (!isLineId_(pick_(r, COLS.quizWrite.lineId))) return;
+    var e = String(pick_(r, COLS.quizWrite.email) || "").trim().toLowerCase();
+    if (e) lineEmail[e] = String(pick_(r, COLS.quizWrite.time) || "").slice(0, 10);
+  });
+
+  var out = [], sendable = 0;
+  qrows.forEach(function(r){
     var id = String(pick_(r, COLS.quizWrite.lineId) || "").trim();
     var low = id.toLowerCase();
     if (low.indexOf("web:") !== 0 && low.indexOf("dev:") !== 0) return;
     var email = String(pick_(r, COLS.quizWrite.email) || (low.indexOf("web:") === 0 ? id.slice(4) : "")).trim();
+    var back = lineEmail[email.toLowerCase()];
     var ms = QK.map(function(k){ return Number(pick_(r, COLS.quizWrite[k])); });
     var good = ms.every(function(v){ return v >= 1 && v <= 5; });
-    var link = !good ? "⚠️ 12 格分數不全，接不回來——請他重測一次"
-             : !email ? "（沒有 Email，寄不了信）只能等他用 LINE 回來時自動接："
-                        + "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",")
-             : "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",");
-    out.push([ String(pick_(r, COLS.quizWrite.time) || ""), email || id,
+    var status = back  ? "🔴 別寄——他 " + back + " 已經用 LINE 回來過了"
+               : !good ? "⚠️ 12 格分數不全，接不回來——請他重測一次"
+               : !email ? "⚪️ 沒有 Email，寄不了信，只能等他自己用 LINE 回來"
+               : "🟢 要寄";
+    if (status === "🟢 要寄") sendable++;
+    out.push([ String(pick_(r, COLS.quizWrite.time) || ""), status, email || id,
                String(pick_(r, COLS.quizWrite.name) || pick_(r, COLS.quizWrite.displayName) || ""),
-               good ? ms.join(",") : "", link ]);
+               good ? ms.join(",") : "",
+               (back || !good || !email) ? ""
+                 : "https://app.atpifit.com/?from=quiz&ms=" + ms.join(",") ]);
   });
+  out.sort(function(a, b){ return a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0; });
+
   var name = "(暫)LINE外孤兒";
   var ss = ss_(), sh = ss.getSheetByName(name);
   if (sh) ss.deleteSheet(sh);
   sh = ss.insertSheet(name);
-  var head = ["測驗時間", "Email", "姓名", "12格分數", "接回連結（請他用手機在 LINE 裡打開）"];
+  var head = ["測驗時間", "要不要寄", "Email", "姓名", "12格分數",
+              "接回連結（請他用手機在 LINE 裡打開）"];
   sh.getRange(1, 1, 1, head.length).setValues([head]);
   sh.setFrozenRows(1);
   if (out.length) sh.getRange(2, 1, out.length, head.length).setValues(out);
-  sh.autoResizeColumns(1, 4);
-  return "找到 " + out.length + " 筆 LINE 外孤兒，已寫進「" + name + "」分頁。";
+  sh.autoResizeColumns(1, 5);
+  return "掃到 " + out.length + " 筆非 LINE 身份，其中 " + sendable
+       + " 筆真的還卡著要寄信，已寫進「" + name + "」分頁。";
 }
 
 /* ═══════════════════════════════════════════════════════════
