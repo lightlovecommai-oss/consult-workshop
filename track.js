@@ -105,7 +105,11 @@ function funnelStage_() {
   try {
     /* 兩個站都有 index.html，光看檔名會把測驗跟健身房入口算成同一階段 */
     if (/^quiz\./.test(location.hostname)) return "quiz";
-    var p = (location.pathname.split("/").pop() || "index").replace(".html", "");
+    /* ⚠️ 官網是目錄型網址（/about/），尾斜線會讓 pop() 拿到空字串，
+       整站每一頁都被算成 entry＝漏斗維度等於沒作用。先濾掉空段再取最後一段。
+       健身房那種 /member.html 扁平檔名不受影響。 */
+    var segs = location.pathname.split("/").filter(Boolean);
+    var p = (segs.pop() || "index").replace(".html", "");
     var map = { "": "entry", index: "entry", visitor: "visitor", join: "join",
                 member: "member", pro: "pro", dashboard: "legacy", showcase: "showcase" };
     return map[p] || p;
