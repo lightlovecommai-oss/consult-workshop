@@ -752,24 +752,37 @@ async function loadHonorFeed(limit) {
    ═══════════════════════════════════════════════════════════ */
 var LIFF_URL = "https://liff.line.me/" + LIFF_ID;
 
-function rememberUid_(uid) {
-  try { if (uid) localStorage.setItem("cw_uid", uid); } catch (e) {}
+/* 身分的可信度分兩級（2026-09-24）：
+   trusted＝LIFF 的 profile 給的，那一定是他本人；不帶＝網址上的 ?id=，任何人都能打。
+
+   以前不分級：拿學員的 ?id= 看一眼後台，自己這台裝置的 cw_uid 就被蓋成那個學員，
+   下次不帶參數進來看到的是別人的儀表板，追蹤也記成別人。實際踩過。
+   LINE userId 對同一個人永遠不變，所以「網址上的 id ≠ 這台裝置記得的 id」＝這不是本人，
+   那就只用在這一次頁面載入，不留在裝置上、也不綁進追蹤。
+   ⚠️ 萬一某台裝置已經被記錯：在 LINE 裡開一次（走 trusted）就會蓋回正確的。 */
+function rememberUid_(uid, trusted) {
+  if (!uid) return;
+  try {
+    var saved = localStorage.getItem("cw_uid") || "";
+    if (!trusted && saved && saved !== uid) return;   // 在看別人，不要留在這台裝置上
+    localStorage.setItem("cw_uid", uid);
+  } catch (e) {}
   /* 一拿到身分就綁進追蹤：在這之前發生的事件靠 session_id 串，
      綁上之後才接得起「同一個人跨測驗站與健身房站」的完整旅程（規範 §3）。 */
-  try { if (uid && typeof setTrackUser === "function") setTrackUser(uid); } catch (e) {}
+  try { if (typeof setTrackUser === "function") setTrackUser(uid); } catch (e) {}
 }
 
 /* 取得使用者身分。回傳 lineId，或 null＝已經接手畫了橋接畫面，呼叫端直接 return 就好。
    順序：?id= → LIFF 已登入 →（只在 LINE 內）自動登入 → 這台瀏覽器記過的 cw_uid → 橋接畫面。 */
 async function resolveLineId(bodyElId) {
   var uid = new URLSearchParams(location.search).get("id");
-  if (uid) { rememberUid_(uid); return uid; }
+  if (uid) { rememberUid_(uid); return uid; }   // 網址上的 id＝不可信，不一定是這台裝置的主人
 
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
       uid = (await liff.getProfile()).userId;
-      rememberUid_(uid);
+      rememberUid_(uid, true);                  // LIFF 的 profile＝本人，可以蓋掉裝置記錄
       return uid;
     }
     /* 只有在 LINE 內才自動登入——那是無縫的，不會要密碼。外部瀏覽器故意不走這裡。 */
@@ -778,7 +791,7 @@ async function resolveLineId(bodyElId) {
 
   try {
     var saved = localStorage.getItem("cw_uid");
-    if (saved) { rememberUid_(saved); return saved; }   // 這台瀏覽器來過，認得出他是誰，就不用逼他回 LINE
+    if (saved) { rememberUid_(saved, true); return saved; }   // 這台瀏覽器來過，認得出他是誰，就不用逼他回 LINE
   } catch (e) {}
 
   renderLineBridge(bodyElId);
@@ -853,6 +866,70 @@ function cycleFontScale() {
   applyFontScale_(next);
 }
 applyFontScale_(fontScaleNow_());
+
+/* ═══════════════════════════════════════════════════════════
+   席位路由：全站唯一一份規則（2026-09-24 從 index.html 搬過來）
+
+   以前這份對照表只長在 index.html 裡，所以「他該在哪一頁」這個問題只有進站那一刻
+   問得到。手機主畫面的捷徑鎖在加入時的那一頁（manifest.json 沒有 start_url），
+   於是在體驗席加過捷徑的人升成會員／私教之後，捷徑還是天天開舊那一頁——實際發生過。
+   現在四頁都掛 seatEscape_()，答案不合就交回 index.html 重新路由。
+   ⚠️ 規則只准寫在 expectedPage_() 裡面。任何頁面都不要自己再抄一份判斷。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 白名單：這兩門課＝私教席；tenlead-1＝天麗那一批走舊版 dashboard。
+   日後天麗那一梯結束、要收掉舊版時，把 LEGACY_WORKSHOPS 清空即可。 */
+var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
+var LEGACY_WORKSHOPS = ["tenlead-1"];
+
+/* 手動指定席位（2026-09-07）：開通名單的「指定席位」欄一填，就蓋過下面所有自動規則。
+   跑 Code.gs 的 setupSeatColumn() 會把這欄跟下拉選單建好。中英文都收，免得手打對不上。
+   「健檢」＝把他丟回測驗重測一次（跨站，所以是絕對網址）。 */
+var SEAT_MAP = {
+  "體驗席":"visitor.html", "體驗客":"visitor.html", "visitor":"visitor.html",
+  "會員席":"member.html",  "會員":"member.html",   "member":"member.html",
+  "私教席":"pro.html",     "私教":"pro.html",      "pro":"pro.html",
+  "舊版":"dashboard.html", "學員":"dashboard.html", "dashboard":"dashboard.html",
+  "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
+};
+
+/* 他該在哪一頁。student 可以是 null（完全不在名單上＝路人）。
+   enrollments 只收「他自己的」那幾筆——bootstrap 回的已經過濾過，index.html 那邊
+   要自己先 filter lineId。
+   ⚠️ 名單的 enrolled 旗標＝「至少開通一門課」（見 Code.gs computeConfig_），所以
+      bootstrap 沒有這個欄位也沒關係，enrollments.length 是同一個答案。 */
+function expectedPage_(student, enrollments) {
+  var s = student || null;
+  /* 空白一律洗掉（含全形　）再比：手打的席位常混進空白，後端 seatNorm_ 也是同一套。
+     對不上就是空的＝退回自動規則，不會壞，但那個人會被靜默降級，所以要洗。 */
+  var raw = s && s.seat ? String(s.seat).replace(/[\s　]/g, "") : "";
+  var seat = raw ? (SEAT_MAP[raw.toLowerCase()] || SEAT_MAP[raw] || "") : "";
+  if (seat) return seat;
+  var mine = enrollments || [];
+  var has = function(list){ return mine.some(function(e){ return list.indexOf(e.workshopId) > -1; }); };
+  if (has(PRO_WORKSHOPS)) return "pro.html";
+  if (has(LEGACY_WORKSHOPS)) return "dashboard.html";
+  if (mine.length || (s && (s.enrolled || s.paidMember))) return "member.html";
+  return "visitor.html";
+}
+
+/* 走錯房間就自己走出去。四頁都在 loadBootstrap 回來之後叫一次，thisPage 傳自己的
+   檔名（"visitor.html" 這種）。回 true＝正在轉走了，別再往下畫。
+
+   搭 loadBootstrap 的便車，不另外打後端；答案還沒來之前那一頁照常能用（低摩擦守則）。
+   ⚠️ sessionStorage 擋一次：萬一 index 的判斷跟這裡不同又把他送回來，會變成無限轉圈。
+   ⚠️ demo／參觀模式在 loadBootstrap 之前就 return 了，不會走到這裡。 */
+function seatEscape_(uid, d, thisPage) {
+  try {
+    if (!uid || !d) return false;
+    var mark = uid + "|" + thisPage;
+    if (sessionStorage.getItem("cw_seatchk") === mark) return false;
+    if (expectedPage_(d.student, d.enrollments || []) === thisPage) return false;
+    sessionStorage.setItem("cw_seatchk", mark);
+    location.replace("index.html?id=" + encodeURIComponent(uid));
+    return true;
+  } catch (e) { return false; }
+}
 
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];

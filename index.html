@@ -86,20 +86,12 @@
       改成白名單制：只有 LEGACY_WORKSHOPS 裡的課走舊版，其餘全部進新版。
       ⚠️ dashboard.html 本身一個像素都沒動——天麗「加到主畫面」的捷徑是
          dashboard.html?id=…&addhome=1 的直接網址，繞過本頁，所以他們完全不受影響。
-      日後天麗那一梯結束、要收掉舊版時，把 LEGACY_WORKSHOPS 清空即可。 */
-var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
-var LEGACY_WORKSHOPS = ["tenlead-1"];
+      日後天麗那一梯結束、要收掉舊版時，把 LEGACY_WORKSHOPS 清空即可。
 
-/* 手動指定席位（2026-09-07）：開通名單的「指定席位」欄一填，就蓋過下面所有自動規則。
-   跑 Code.gs 的 setupSeatColumn() 會把這欄跟下拉選單建好。中英文都收，免得手打對不上。
-   「健檢」＝把他丟回測驗重測一次（跨站，所以是絕對網址）。 */
-var SEAT_MAP = {
-  "體驗席":"visitor.html", "體驗客":"visitor.html", "visitor":"visitor.html",
-  "會員席":"member.html",  "會員":"member.html",   "member":"member.html",
-  "私教席":"pro.html",     "私教":"pro.html",      "pro":"pro.html",
-  "舊版":"dashboard.html", "學員":"dashboard.html", "dashboard":"dashboard.html",
-  "健檢":"https://quiz.atpifit.com/", "測驗":"https://quiz.atpifit.com/", "quiz":"https://quiz.atpifit.com/"
-};
+   ⭐ 2026-09-24：對照表（SEAT_MAP／PRO_WORKSHOPS／LEGACY_WORKSHOPS）與判斷本體
+      （expectedPage_）都搬到 common.js 了，因為 visitor／member／pro／dashboard 四頁
+      也要能回頭問「他到底該不該在我這一頁」（主畫面捷徑鎖頁的問題）。改規則改那邊。 */
+
 /* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
 var FROM = "", MSQ = "", QSID = "";
 try {
@@ -181,27 +173,21 @@ async function routeFor(id) {
   await loadStudents(id);
   await loadConfig(id);   // 帶出 ENROLLMENTS，才判斷得出是不是超引力那兩門課
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
-  var q = "?id=" + encodeURIComponent(id) + fromQ_();
-
-  var seat = s && s.seat ? SEAT_MAP[String(s.seat).trim().toLowerCase()] || SEAT_MAP[String(s.seat).trim()] : "";
-  if (seat) return seat + q;
-
   var mine = ENROLLMENTS.filter(function(e){ return e.lineId === id; });
-  var has = function(list){ return mine.some(function(e){ return list.indexOf(e.workshopId) > -1; }); };
-  if (has(PRO_WORKSHOPS)) return "pro.html" + q;
-  if (has(LEGACY_WORKSHOPS)) return "dashboard.html" + q;
-  if (s && (s.enrolled || s.paidMember)) return "member.html" + q;
-  return "visitor.html" + q;
+  /* 判斷本體在 common.js（四頁的 seatEscape_ 也問同一個函式，答案才不會兩套） */
+  return expectedPage_(s, mine) + "?id=" + encodeURIComponent(id) + fromQ_();
 }
 
 async function init() {
   try {
-    /* 優先：URL 參數 ?id=（方便測試） */
+    /* 優先：URL 參數 ?id=（方便測試、也是導師看學員後台的方式） */
     var params = new URLSearchParams(window.location.search);
     var urlId = params.get("id");
 
     if (urlId) {
-      rememberUid_(urlId);   // 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程
+      /* 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程。
+         第二個參數故意不給＝不可信：這台裝置已經記得別人時不覆蓋（見 common.js 的 rememberUid_）。 */
+      rememberUid_(urlId);
       sendQuizBaseline_(urlId, "");
       sayHello_(urlId, "");
       window.location.href = await routeFor(urlId);
@@ -216,7 +202,7 @@ async function init() {
 
     if (liff.isLoggedIn()) {
       var p = await liff.getProfile();
-      rememberUid_(p.userId);
+      rememberUid_(p.userId, true);   // LIFF profile＝本人，可以蓋掉裝置上記錯的 id
       sendQuizBaseline_(p.userId, p.displayName || "");
       sayHello_(p.userId, p.displayName || "");
       window.location.href = await routeFor(p.userId);

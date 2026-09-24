@@ -407,7 +407,7 @@ button.mat{font-family:inherit;cursor:pointer;width:100%;}
    - stage＝打卡新標準（這個客戶走到哪）；舊筆沒 stage 欄用 entryStage() 從 reaction 推回
    - 分數＝calcMuscleScores/calcDimScores5；金額＝revenueLog；金庫＝note 裡的「」原話
    - 人設照最強兩維自動判、狀態照 revenueLog 判（教練拍板可改＝下次 1v1 的事，不編後端沒有的欄位） */
-var PRO_WORKSHOPS = ["超引力-顧問課", "超引力-公眾演說"];
+/* PRO_WORKSHOPS 在 common.js（席位路由那一段）＝全站唯一一份，這裡只是用它 */
 var S = null, WID = null, REC = null;
 
 var STAGES = [
@@ -1551,6 +1551,9 @@ async function boot() {
   if (!uid) return;
   var d = await loadBootstrap(uid, "");
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
+  /* 走錯房間就自己走出去（判斷在 common.js 的 seatEscape_／expectedPage_）：
+     主畫面捷徑鎖在加入時的那一頁，課程結束改回會員席之後，捷徑還是天天開這一頁。 */
+  if (seatEscape_(uid, d, "pro.html")) return;
   if (d.tasks) TASKS = d.tasks;
   if (d.workshops) WORKSHOPS = d.workshops;
   var st = d.student || {};

@@ -451,14 +451,16 @@ var BOOK_URL = "https://time.atpifit.com";
 /* 免費講座報名連結——生出來就填這裡（空字串＝次鈕不出現，不放假連結） */
 var FREE_TALK_URL = "";
 /* ═══ 以下＝執行層：demo-member-v5 的版面函式，只把假資料源換成 S 真資料 ═══ */
-var PRO_WS = ["超引力-顧問課", "超引力-公眾演說"]; /* member 的 WID 排除私教班 */
+/* member 的 WID 要排除私教班；名單本體在 common.js 的 PRO_WORKSHOPS（全站唯一一份） */
 var LOG = [], FEED = [], CHEERED = {};
 var MS = {}, D5 = {};            /* 每次 render 重算：calcMuscleScores / calcDimScores5 */
 /* DONE_TODAY＝任務輪（中午換日，管按鈕能不能按）；DONE_CAL＝真實今天有沒有紀錄（管日曆格）。
    兩個混用會讓上午那筆昨天的紀錄同時點亮「昨天」跟「今天」兩格、週天數也多算一天。 */
 var FOCUS = "A1", DONE_TODAY = false, DONE_CAL = false, IS_MEMBER = true;
-/* 「指定席位」欄的值 → 這頁要掛哪一席。對照表跟 index.html 的 SEAT_MAP 是同一份來源，
-   那邊決定去哪一頁、這邊決定到站後掛什麼頭。私教直開 member.html 當會員席看待。 */
+/* 「指定席位」欄的值 → 這頁要掛哪一席的頭。跟 common.js 的 SEAT_MAP 同一份來源：
+   那邊決定去哪一頁、這邊決定到站後掛什麼頭。
+   ⚠️ 真身份的人已經先過 seatEscape_（席位不合早就轉走了），這張表現在只服務
+      ?demo=1 參觀模式和直開網址的防呆。 */
 var SEAT_FORCE = {"體驗席":false, "體驗客":false, "visitor":false,
                   "會員席":true, "會員":true, "member":true,
                   "私教席":true, "私教":true, "pro":true};
@@ -1090,6 +1092,9 @@ async function boot(){
   if (!uid) return;
   var d = await loadBootstrap(uid, "");
   if (!d) { el("bd").innerHTML = '<div class="loading">讀不到資料，請稍後再試。</div>'; return; }
+  /* 走錯房間就自己走出去（判斷在 common.js 的 seatEscape_／expectedPage_）：
+     主畫面捷徑鎖在加入時的那一頁，在會員席加過捷徑的人升成私教席會卡在這裡。 */
+  if (seatEscape_(uid, d, "member.html")) return;
   if (d.tasks) TASKS = d.tasks;
   if (d.workshops) WORKSHOPS = d.workshops;
   var st = d.student || {};
@@ -1101,7 +1106,7 @@ async function boot(){
      判成體驗席，所以不能只靠它。 */
   var forced = SEAT_FORCE[String(st.seat || "").trim().toLowerCase()];
   setSeat(forced == null ? !!st.paidMember : forced);
-  var en = (d.enrollments || []).filter(function(e){ return isMe(e, S) && PRO_WS.indexOf(e.workshopId) < 0; });
+  var en = (d.enrollments || []).filter(function(e){ return isMe(e, S) && PRO_WORKSHOPS.indexOf(e.workshopId) < 0; });
   WID = en.length ? en[0].workshopId : "";
   LOG = buildLog();
   FOCUS = weakestThree(S)[0] || "A1";

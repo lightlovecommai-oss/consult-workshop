@@ -579,10 +579,13 @@ function ensureRosterRow_(lineId, name) {
     if (nameCol < 0 && COLS.students.name.indexOf(headers[c]) > -1) nameCol = c;
   }
   if (idCol < 0) return;
+  /* 比對不分大小寫（2026-09-24）：web: 身份是 Email，「Michelle@Gmail.com」與
+     「michelle@gmail.com」是同一個人，分大小寫比會再建一列，同一個人變兩列。 */
+  var want = lineId.toLowerCase();
   if (lastRow > 1) {
     var ids = sh.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
     for (var i = 0; i < ids.length; i++) {
-      if (String(ids[i][0]).trim() !== lineId) continue;
+      if (String(ids[i][0]).trim().toLowerCase() !== want) continue;
       if (name && nameCol > -1) {
         var cell = sh.getRange(i + 2, nameCol + 1);
         if (String(cell.getValue()).trim() === "") cell.setValue(name);
@@ -666,8 +669,14 @@ var SEAT_PAID = { "體驗席":false, "體驗客":false, "visitor":false,
                   "會員席":true,  "會員":true,   "member":true,
                   "私教席":true,  "私教":true,   "pro":true,
                   "舊版":true,    "學員":true,   "dashboard":true };
+/* 席位字串正規化（2026-09-24）：下拉選單只套用在跑 setupSeatColumn() 當下已經存在的列，
+   後來自動長出來的列是自由文字，手打會混進全形空白／半形空白／前後空白。
+   對不上表就會靜默退回自動規則（不報錯、畫面也看不出來），所以在比對前先洗乾淨。 */
+function seatNorm_(v) {
+  return String(v == null ? "" : v).replace(/[\s　]/g, "").toLowerCase();
+}
 function seatPaid_(seat, cell) {
-  var v = SEAT_PAID[String(seat || "").trim().toLowerCase()];
+  var v = SEAT_PAID[seatNorm_(seat)];
   return v === undefined ? granted_(cell) : v;
 }
 /* 開通格判定：核取方塊 TRUE、或打勾類文字(✅/是/v/o…)＝開通；空白或叉/否/0＝沒開通。 */
@@ -758,7 +767,9 @@ function computeStudent_(uid) {
   rows_(TABS.students).forEach(function(r) {
     var id = String(pick_(r, COLS.students.lineId));
     if (id === uid) {
-      var seat = String(pick_(r, COLS.students.seat) || "").trim();
+      /* 席位往前端送正規化後的值（見 seatNorm_）：手打混進空白時，前端的 SEAT_MAP
+         才對得上，不會被靜默當成空白。 */
+      var seat = seatNorm_(pick_(r, COLS.students.seat));
       st = { lineId: id, pid: pid_(id), name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
              paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
     }
@@ -1112,7 +1123,7 @@ function doGet(e) {
       computeConfig_().enrollments.forEach(function(en){ enrolledSet[en.lineId] = true; });
       var students = rows_(TABS.students).map(function(r) {
         var id = String(pick_(r, COLS.students.lineId));
-        var seat = String(pick_(r, COLS.students.seat) || "").trim();
+        var seat = seatNorm_(pick_(r, COLS.students.seat));   // 手打混進空白時前端才對得上
         return { lineId: id, name: String(pick_(r, COLS.students.name)), team: String(pick_(r, COLS.students.team)),
                  enrolled: !!enrolledSet[id],
                  paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
@@ -1883,7 +1894,10 @@ function setupSeatColumn() {
   var h = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(x){ return String(x).trim(); });
   var c = h.indexOf("指定席位");
   if (c < 0) return "補欄失敗：找不到「指定席位」欄";
-  var lastRow = Math.max(sh.getLastRow(), 2);
+  /* 整欄都套（getMaxRows 不是 getLastRow）：以前只套到「跑這支的當下有資料的最後一列」，
+     之後 ensureRosterRow_ 自動長出來的列就沒有下拉、變成自由文字，手打錯了不會被擋，
+     對不上 SEAT_MAP 就靜默退回自動規則。整欄套住，新列一長出來就有規則。 */
+  var lastRow = Math.max(sh.getMaxRows(), 2);
   var rule = SpreadsheetApp.newDataValidation()
     .requireValueInList(SEAT_OPTIONS, true).setAllowInvalid(false)
     .setHelpText("每個人都要填。一次一個角色，這欄決定他進哪一頁").build();

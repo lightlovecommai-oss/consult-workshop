@@ -1406,9 +1406,12 @@ document.getElementById("rv-submit").addEventListener("click", function() {
 async function init() {
   var params = new URLSearchParams(window.location.search);
   var userId = params.get("id");
+  var fromUrl = !!userId;
   if (!userId) { try { userId = localStorage.getItem("cw_uid") || ""; } catch (e) {} }  // 書籤沒帶 id 時，用上次記住的
   if (!userId) { window.location.href = "index.html"; return; }
-  try { localStorage.setItem("cw_uid", userId); } catch (e) {}                            // 記住供下次還原
+  /* 記住供下次還原。走 rememberUid_ 不直接寫：網址上的 id 不可信，這台裝置已經記得
+     別人（導師在看學員）時不能覆蓋掉主人的身分——見 common.js 的 rememberUid_。 */
+  rememberUid_(userId, !fromUrl);
   var w = params.get("w") || "";           // 入口帶進來的課程（只切畫面，不給權限）
   var key = "boot_" + userId;
 
@@ -1422,6 +1425,10 @@ async function init() {
   var fresh = await loadBootstrap(userId, w);
   if (fresh) {
     if (!fresh.student) { window.location.href = "index.html"; return; }
+    /* 走錯房間就自己走出去（判斷在 common.js 的 seatEscape_／expectedPage_）：
+       天麗那批的捷徑是 dashboard.html?id=… 的直接網址、繞過 index.html，所以有人
+       之後開通超引力、或被指定其他席位，捷徑還是天天開舊版這一頁。 */
+    if (seatEscape_(userId, fresh, "dashboard.html")) return;
     LB_CACHE = {}; TEAM_CACHE = {};
     applyBootstrap(fresh, userId);
     if (!current.workshops.length) { window.location.href = "showcase.html"; return; }  // 一門都沒開通 → 展示頁

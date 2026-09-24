@@ -452,8 +452,11 @@ st.seq = seq + 1; save(st);
 /* 專屬招＋數字連續性的資料源：?id=（路由帶進來）或上次記住的 cw_uid */
 var UID = "";
 try {
-  UID = new URLSearchParams(location.search).get("id") || localStorage.getItem("cw_uid") || "";
-  if (UID) localStorage.setItem("cw_uid", UID);
+  var urlUid_ = new URLSearchParams(location.search).get("id") || "";
+  UID = urlUid_ || localStorage.getItem("cw_uid") || "";
+  /* 走 rememberUid_ 不直接寫 localStorage：網址上的 id 不可信，這台裝置已經記得別人
+     （導師在看學員）時不能覆蓋掉主人的身分。 */
+  if (UID) rememberUid_(UID, !urlUid_);
 } catch(e){}
 /* 不知道他是誰＝有可能是付費學員被當成路人，給他一條回 LINE 的路（見上面那段註解）。 */
 if (!UID) {
@@ -765,35 +768,14 @@ document.getElementById("ov").addEventListener("click", sheetHide);
 document.getElementById("sheet").addEventListener("click", sheetHide);
 render();
 
-/* 走錯房間就自己走出去（2026-09-24）。
-   手機主畫面的捷徑鎖在「加入時的那一頁」（manifest.json 沒有 start_url），所以在體驗席
-   加過捷徑的人，後來升成會員／私教席，捷徑還是天天開這一頁——實際發生過。
-   這一頁本身從來不回頭問「他該不該在這裡」，就永遠出不去。
-
-   判斷只做一件事：他是不是「乾淨的體驗席」（沒指定席位或指定就是體驗席、沒開通任何課、沒付費）。
-   不是的話就交回 index.html 重新路由——**路由規則只有那一份，這裡不複製一套**。
-   ⚠️ sessionStorage 擋一次：萬一 index 的判斷跟這裡不同又把他送回來，會變成無限轉圈。
-   ⚠️ 搭 loadBootstrap 的便車，不另外打後端；答案還沒來之前這頁照常能用（低摩擦守則）。 */
-function seatEscape_(d) {
-  try {
-    if (!UID || sessionStorage.getItem("cw_seatchk") === UID) return false;
-    var st_ = d.student;
-    if (!st_) return false;
-    var seat = String(st_.seat || "").trim().toLowerCase();
-    var plainSeat = (seat === "" || seat === "體驗席" || seat === "體驗客" || seat === "visitor");
-    if (plainSeat && !st_.paidMember && !(d.enrollments || []).length) return false;
-    sessionStorage.setItem("cw_seatchk", UID);
-    location.replace("index.html?id=" + encodeURIComponent(UID));
-    return true;
-  } catch (e) { return false; }
-}
-
 /* 讀健檢基線（quiz 寫進體測紀錄的 12 格 1–5）→ 生成專屬招＋已解鎖影響力。
    拿不到 id、還沒測、或後端慢：畫面維持 2 塊地基，不多不少。 */
 if (UID && typeof loadBootstrap === "function") {
   loadBootstrap(UID).then(function(d){
     if (!d) return;
-    if (seatEscape_(d)) return;   // 他其實不屬於這一頁：已經在轉走了，別再往下畫
+    /* 走錯房間就自己走出去（判斷在 common.js 的 seatEscape_／expectedPage_）：
+       主畫面捷徑鎖在加入時的那一頁，體驗席加過捷徑的人升級後會卡在這裡。 */
+    if (seatEscape_(UID, d, "visitor.html")) return;   // 已經在轉走了，別再往下畫
 
     /* 連續天數以 Sheet 為準再併回本機：換手機、或他已經在會員席練過，這條線都不該從零開始。 */
     var merged = false;
