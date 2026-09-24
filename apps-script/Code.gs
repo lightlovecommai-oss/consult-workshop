@@ -1874,8 +1874,8 @@ function listWebOrphans() {
   sh.setFrozenRows(1);
   if (out.length) sh.getRange(2, 1, out.length, head.length).setValues(out);
   sh.autoResizeColumns(1, 5);
-  return "掃到 " + out.length + " 筆非 LINE 身份，其中 " + sendable
-       + " 筆真的還卡著要寄信，已寫進「" + name + "」分頁。";
+  return logRun_("listWebOrphans", "掃到 " + out.length + " 筆非 LINE 身份，其中 " + sendable
+       + " 筆真的還卡著要寄信，已寫進「" + name + "」分頁。");
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1958,6 +1958,37 @@ function backfillQuizMuscles() {
    新列的日期用**他測驗那天**（不是今天），因為那才是這份資料真正的量測時間。
    ═══════════════════════════════════════════════════════════ */
 function backfillQuizMuscles12() {
+  try { return logRun_("backfillQuizMuscles12", backfillQuizMuscles12_()); }
+  catch (e) {
+    logRun_("backfillQuizMuscles12", "❌ 出錯，一列都沒改：" + (e && e.message ? e.message : e));
+    throw e;
+  }
+}
+
+/* 手動執行的函式，回傳值在編輯器畫面上**看不到**（只有「執行紀錄」才有，而那個面板不是
+   每個人都打得開）。所以結果一律再寫進「(暫)執行結果」分頁，最新的在最上面——
+   人看得到，之後也可以直接從試算表確認某支到底跑了沒、跑出什麼。 */
+function logRun_(fn, msg) {
+  try {
+    Logger.log(fn + "：" + msg);
+    var ss = ss_(), name = "(暫)執行結果", sh = ss.getSheetByName(name);
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      sh.getRange(1, 1, 1, 3).setValues([["時間", "函式", "結果"]]);
+      sh.setFrozenRows(1);
+      sh.setColumnWidth(3, 700);
+    }
+    sh.insertRowAfter(1);
+    sh.getRange(2, 1, 1, 3).setValues([[
+      Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy-MM-dd HH:mm:ss"), fn, msg
+    ]]);
+  } catch (e) {
+    Logger.log("logRun_ 寫不進去（不影響主要工作）：" + e);
+  }
+  return msg;
+}
+
+function backfillQuizMuscles12_() {
   var MORD_ = ["A1","A2","A3","T1","T2","T3","P1","P2","P3","I1","I2","I3"];
   var dnorm = function(v){
     return (v instanceof Date) ? Utilities.formatDate(v, "Asia/Taipei", "yyyy-MM-dd")
@@ -1976,7 +2007,10 @@ function backfillQuizMuscles12() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
     if (!real[uid] || d >= real[uid].d) real[uid] = { ms: ms, d: d };
   });
-  if (!Object.keys(real).length) return "測驗分頁裡找不到任何 12 格齊全的列。";
+  if (!Object.keys(real).length) {
+    return "測驗分頁「" + TABS.quiz + "」掃了 " + rows_(TABS.quiz).length
+         + " 列，沒有一列同時滿足「真 LINE 身份 ＋ Q1–Q12 都是 1–5 ＋ 時間看得懂」。";
+  }
 
   /* ② 讀體測分頁，把 source=quiz 的列按「人＋日期」分組 */
   var sh = evalSheet_(), last = sh.getLastRow();
@@ -2013,7 +2047,10 @@ function backfillQuizMuscles12() {
     MORD_.forEach(function(mk, i){ add.push([uid, mk, t.ms[i], "quiz", t.d, ""]); });
     filled++;
   });
-  if (!filled) return "沒有人需要補：" + alreadyOk + " 位的體格已經是真實 12 格了。";
+  if (!filled) {
+    return "沒有人需要補：掃到 " + Object.keys(real).length + " 位有完整 12 格，其中 "
+         + alreadyOk + " 位的體格已經是真實 12 格了。";
+  }
 
   /* ④ 先備份整張，再重寫 */
   var ss = ss_();
