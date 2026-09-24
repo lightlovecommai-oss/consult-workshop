@@ -491,7 +491,7 @@ function applyBootstrap(d, userId) {
   WS_HONORS = normalizeWsHonors(d.honors);
   HONOR_FEED = d.honorFeed || [];
   var st = d.student || { lineId: userId, name: userId, team: "" };
-  current = { lineId: st.lineId, name: st.name, team: st.team,
+  current = { lineId: st.lineId, pid: st.pid || "", name: st.name, team: st.team,
               checkinLog: d.checkins || [], revenueLog: d.revenue || [],
               evalLog: d.evals || [],          // v2：12 小肌群體測紀錄（1–5）
               selfEval: d.selfEval || null };
@@ -967,7 +967,7 @@ async function refreshLeaderboard(s) {
   var rows = LB_CACHE[activeWorkshop];
   if (!rows) { rows = await loadLeaderboard(activeWorkshop); LB_CACHE[activeWorkshop] = rows; }
 
-  var myIdx = rows.findIndex(function(r){ return r.lineId === s.lineId; });
+  var myIdx = rows.findIndex(function(r){ return isMe(r, s); });
   var myRank = myIdx > -1 ? myIdx + 1 : rows.length + 1;
   var ahead = myIdx > 0 ? rows[myIdx - 1] : null;   // 前一名（用來算差多少、激勵往前）
   document.getElementById("r-rank").textContent = "第 " + myRank + " 名";
@@ -1012,7 +1012,7 @@ async function refreshLeaderboard(s) {
     row.appendChild(mk("div", "lbscore", r.score + " 分"));
     return row;
   }
-  rows.slice(0, 8).forEach(function(r, i) { box.appendChild(lbRow(r, i + 1, r.lineId === s.lineId, false)); });
+  rows.slice(0, 8).forEach(function(r, i) { box.appendChild(lbRow(r, i + 1, isMe(r, s), false)); });
   /* 自己不在前 8：釘一列在底部，永遠看得到自己在第幾名、差前一名多少 */
   if (myIdx >= 8) {
     var div = mk("div", null, "⋯");
@@ -1050,7 +1050,7 @@ async function refreshTeam(s) {
 
   function esc(t) { return String(t).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
 
-  var myGroup = s.team || (members.find(function(m){ return m.lineId === s.lineId; }) || {}).group || "";
+  var myGroup = s.team || (members.find(function(m){ return isMe(m, s); }) || {}).group || "";
   var mine = members.filter(function(m){ return (m.group || "") === myGroup; });
   if (!mine.length) mine = members;
 
@@ -1068,11 +1068,11 @@ async function refreshTeam(s) {
   var ok = mine.filter(function(m){ return m.weekPct >= weekAvg; }).sort(function(a,b){ return b.weekPct - a.weekPct; });
 
   function row(m, boostFlag) {
-    var you = m.lineId === s.lineId ? '<span style="color:#7a5636;font-size:14px;font-weight:400;">（你）</span>' : '';
+    var you = isMe(m, s) ? '<span style="color:#7a5636;font-size:14px;font-weight:400;">（你）</span>' : '';
     var btn = boostFlag ? '<button class="btn-go" style="padding:5px 12px;font-size:15px;flex-shrink:0;" onclick="nudge(this)">👊 加油</button>' : '';
     return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0e9df;">'
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-size:15px;color:#2d1f0f;' + (m.lineId === s.lineId ? 'font-weight:600;' : '') + '">' + esc(m.name) + you + '</div>'
+      + '<div style="font-size:15px;color:#2d1f0f;' + (isMe(m, s) ? 'font-weight:600;' : '') + '">' + esc(m.name) + you + '</div>'
       + '<div style="font-size:14px;color:' + (boostFlag ? '#c26b3a' : '#a08060') + ';">連 ' + m.streak + ' 天　本週 ' + m.weekPct + '%　投入 ' + m.invest + '</div>'
       + '</div>' + btn + '</div>';
   }
@@ -1114,7 +1114,7 @@ function relTime(ts) {
   return d === 1 ? "昨天" : d + " 天前";
 }
 function buildHonorFeed(s) {
-  var real = (HONOR_FEED || []).filter(function(e){ return e.lineId !== s.lineId && e.honorName; })
+  var real = (HONOR_FEED || []).filter(function(e){ return !isMe(e, s) && e.honorName; })
     .map(function(e){ return { name: e.name, icon: e.icon || "🏅", label: "解鎖了 " + e.honorName, ts: e.ts }; });
   if (real.length) return real;
   return buildHonorFeedFallback(s);
@@ -1127,13 +1127,13 @@ function buildHonorFeedFallback(s) {
     if (name && !seen[k]) { seen[k] = 1; feed.push({ name: name, icon: icon, label: label }); }
   }
   (TEAM_CACHE[activeWorkshop] || []).forEach(function(m) {
-    if (m.lineId === s.lineId) return;
+    if (isMe(m, s)) return;
     if (m.weekPct >= 100)     push(m.name, "📅", "本週任務全勤，穩穩收尾");
     if (m.streak >= 30)       push(m.name, "🏔️", "連續打卡 " + m.streak + " 天，鐵人之姿");
     else if (m.streak >= 7)   push(m.name, "🔥", "連續打卡 " + m.streak + " 天不間斷");
   });
   var rows = LB_CACHE[activeWorkshop] || [];
-  if (rows.length && rows[0].lineId !== s.lineId) push(rows[0].name, "👑", "登上本班修為榜首");
+  if (rows.length && !isMe(rows[0], s)) push(rows[0].name, "👑", "登上本班修為榜首");
   return feed;
 }
 var honorToastIdx = 0, honorToastTimer = null;

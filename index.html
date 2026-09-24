@@ -175,7 +175,11 @@ function sayHello_(id, name) {
   try { localStorage.setItem("cw_hello_v1", sig); } catch(e){}
 }
 
-function routeFor(id) {
+/* 2026-09-24：名單與開通改成「帶著自己的 id 去問」，所以要先知道 id 才能載。
+   以前是進來就撈全體名單（含每個人的 LINE userId）到瀏覽器裡，才在裡面找自己。 */
+async function routeFor(id) {
+  await loadStudents(id);
+  await loadConfig(id);   // 帶出 ENROLLMENTS，才判斷得出是不是超引力那兩門課
   var s = STUDENTS.find(function(x) { return x.lineId === id; });
   var q = "?id=" + encodeURIComponent(id) + fromQ_();
 
@@ -196,14 +200,11 @@ async function init() {
     var params = new URLSearchParams(window.location.search);
     var urlId = params.get("id");
 
-    await loadStudents();
-    await loadConfig();  // 帶出 ENROLLMENTS，routeFor() 才能判斷是不是超引力那兩門課
-
     if (urlId) {
       rememberUid_(urlId);   // 記住身分＋綁進追蹤，之後 visitor/member 才接得起同一段旅程
       sendQuizBaseline_(urlId, "");
       sayHello_(urlId, "");
-      window.location.href = routeFor(urlId);
+      window.location.href = await routeFor(urlId);
       return;
     }
 
@@ -218,7 +219,7 @@ async function init() {
       rememberUid_(p.userId);
       sendQuizBaseline_(p.userId, p.displayName || "");
       sayHello_(p.userId, p.displayName || "");
-      window.location.href = routeFor(p.userId);
+      window.location.href = await routeFor(p.userId);
       return;
     } else if (liff.isInClient()) {
       // 只在 LINE 內才走登入（無縫）；外部瀏覽器不強制登入，避免跳出 access.line.me 網頁登入頁
@@ -232,7 +233,7 @@ async function init() {
   /* 桌面捷徑若沒帶 id，用上次記住的 id 進場（同樣走身分路由，未開通的人才不會被 dashboard 再彈一次） */
   try {
     var savedId = localStorage.getItem("cw_uid");
-    if (savedId) { sendQuizBaseline_(savedId, ""); sayHello_(savedId, ""); window.location.href = routeFor(savedId); return; }
+    if (savedId) { sendQuizBaseline_(savedId, ""); sayHello_(savedId, ""); window.location.href = await routeFor(savedId); return; }
   } catch (e) {}
 
   /* 完全拿不到 id（沒帶 ?id=、不在 LINE 內、沒有存過的 id）＝真路人 → 體驗席。

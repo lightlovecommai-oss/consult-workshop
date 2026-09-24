@@ -1554,10 +1554,10 @@ async function boot() {
   if (d.tasks) TASKS = d.tasks;
   if (d.workshops) WORKSHOPS = d.workshops;
   var st = d.student || {};
-  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "",
+  S = { lineId: st.lineId || uid, pid: st.pid || "", name: st.name || "", team: st.team || "",
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [],
         submissions: d.submissions || [] };
-  var enrolledPro = (d.enrollments || []).filter(function(e){ return e.lineId === S.lineId && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
+  var enrolledPro = (d.enrollments || []).filter(function(e){ return isMe(e, S) && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
   WID = enrolledPro.length ? enrolledPro[0].workshopId : PRO_WORKSHOPS[0];
   LOG = buildLog();
   el("nav").classList.remove("hide");

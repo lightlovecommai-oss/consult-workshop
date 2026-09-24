@@ -554,6 +554,9 @@ function quizReportUrl_(qraw, body) {
     if (body.targetNeed) u += "&sc=" + encodeURIComponent(body.targetNeed);
     if (body.name)       u += "&n="  + encodeURIComponent(String(body.name).slice(0, 20));
     if (body.userId)     u += "&id=" + encodeURIComponent(body.userId);   // 有 LINE 身份就讓報告的出口直接接上體格單
+    // utm 寫死在這裡，不靠 LaunChill 的自動 UTM——那是帳號層級的一組預設值，會把所有信壓成
+    // 同一個 campaign，也會跟週報／養客序列各自手寫的 utm 打架。少了這段報告頁會被算成 direct。
+    u += "&utm_source=email&utm_medium=report&utm_campaign=quiz-report-01";
     return u;
   } catch (uerr) {
     Logger.log("報告連結組裝失敗: " + uerr);
@@ -705,6 +708,50 @@ function weekPct_(dates, today, tz) {
   return Math.round(hit / elapsed * 100);
 }
 
+/* ── 對外身份代號 pid（2026-09-24）──
+   端點以前把全體成員的 LINE userId 直接回給瀏覽器：任何人拿到網址就能枚舉全員，
+   再拿別人的 userId 去 ?action=bootstrap 讀他的打卡、體測與每一筆成交金額。
+   前端其實從來不需要別人的真 ID——它只做兩件事：①比對「這列是不是我」②用自己的 ID 寫入。
+   所以對外一律換成 pid＝HMAC-SHA256(lineId, PID_SALT) 前 12 碼：同一個人永遠同一個 pid
+   （比對得出來）、單向（推不回 userId）、拿去打 bootstrap 也讀不到東西。
+   ⚠️ 試算表裡存的仍是完整 userId，`(系統)身份對照` 也照常累積——
+   行銷追蹤與日後的身份合併完全不受影響，後端隨時能重算 lineId→pid。 */
+function pidSalt_() {
+  var sp = PropertiesService.getScriptProperties(), s = sp.getProperty("PID_SALT");
+  if (!s) { s = Utilities.getUuid() + Utilities.getUuid(); sp.setProperty("PID_SALT", s); }
+  return s;
+}
+var PID_CACHE_ = {};
+function pid_(id) {
+  id = String(id || "");
+  if (!id) return "";
+  if (PID_CACHE_[id]) return PID_CACHE_[id];
+  var raw = Utilities.computeHmacSha256Signature(id, pidSalt_()), hex = "";
+  for (var i = 0; i < 6; i++) {
+    var b = raw[i] < 0 ? raw[i] + 256 : raw[i];
+    hex += (b < 16 ? "0" : "") + b.toString(16);
+  }
+  return (PID_CACHE_[id] = hex);
+}
+/* 導師視角（report.html 解盤要看到真名與真 ID）走一把金鑰，同樣放指令碼屬性、不寫死。
+   屬性沒設＝永遠 false，也就是預設只給 pid。 */
+function isAdmin_(p) {
+  var k = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
+  return !!k && String((p || {}).key || "") === k;
+}
+/* 出門前的過濾器：每列都補 pid，`lineId` 只留給「自己那列」和導師。
+   前端比對改看 pid（見 common.js 的 isMe()），所以少了別人的 lineId 不會壞。 */
+function pubRows_(rows, selfUid, admin) {
+  return (rows || []).map(function(r){
+    if (admin) return r;
+    var o = {};
+    for (var k in r) if (k !== "lineId") o[k] = r[k];
+    o.pid = pid_(r.lineId);
+    if (selfUid && String(r.lineId) === selfUid) o.lineId = r.lineId;
+    return o;
+  });
+}
+
 /* ── 共用計算（各端點與 bootstrap 共用，單一真相）── */
 function computeStudent_(uid) {
   var st = null;
@@ -712,7 +759,7 @@ function computeStudent_(uid) {
     var id = String(pick_(r, COLS.students.lineId));
     if (id === uid) {
       var seat = String(pick_(r, COLS.students.seat) || "").trim();
-      st = { lineId: id, name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
+      st = { lineId: id, pid: pid_(id), name: String(pick_(r, COLS.students.name)) || id, team: String(pick_(r, COLS.students.team)),
              paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
     }
   });
@@ -1055,6 +1102,10 @@ function doGet(e) {
     var p = e.parameter || {};
     var action = p.action || "";
 
+    /* 2026-09-24 起，凡是「會回傳多個人」的端點都走 pubRows_()：別人的那幾列只有 pid。
+       admin=導師金鑰（report.html 解盤用），給完整資料。 */
+    var admin = isAdmin_(p), self = String(p.userId || "");
+
     if (action === "students") {
       // enrolled = 該 userId 至少開通一門課（進遊戲的閘門）；由合併後學員名單的課程欄判斷
       var enrolledSet = {};
@@ -1066,16 +1117,22 @@ function doGet(e) {
                  enrolled: !!enrolledSet[id],
                  paidMember: seatPaid_(seat, pick_(r, COLS.students.paidMember)), seat: seat };
       }).filter(function(s){ return s.lineId; });
-      return json_({ status: "ok", students: students });
+      /* 帶了 userId＝前端在問「我是誰、我該進哪一頁」，只回他自己那列就夠（index.html 的用法）。
+         沒帶＝只給 pid 與姓名，枚舉不出可拿去打 bootstrap 的 userId。 */
+      if (!admin && self) students = students.filter(function(s){ return s.lineId === self; });
+      return json_({ status: "ok", students: pubRows_(students, self, admin) });
     }
 
     if (action === "config") {
       var cfg = computeConfig_();
-      return json_({ status: "ok", workshops: cfg.workshops, tasks: cfg.tasks, enrollments: cfg.enrollments, honors: cfg.honors });
+      /* 開通名單同理：帶 userId 就只回他自己的開通（前端只用得到自己的）。 */
+      var cEnroll = (!admin && self) ? cfg.enrollments.filter(function(en){ return en.lineId === self; }) : cfg.enrollments;
+      return json_({ status: "ok", workshops: cfg.workshops, tasks: cfg.tasks,
+                     enrollments: pubRows_(cEnroll, self, admin), honors: cfg.honors });
     }
 
     if (action === "bootstrap") {  // 一通回傳整個儀表板需要的資料（B：減少往返）
-      var buid = String(p.userId || "");
+      var buid = self;
       var bcfg = computeConfig_();
       var blogs = computeLogs_(buid);
       var enrolledWids = bcfg.enrollments.filter(function(e){ return e.lineId === buid; }).map(function(e){ return e.workshopId; });
@@ -1083,30 +1140,34 @@ function doGet(e) {
       var defWid = "";
       if (bw && enrolledWids.indexOf(bw) > -1) defWid = bw;
       else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
+      var bEnroll = admin ? bcfg.enrollments : bcfg.enrollments.filter(function(en){ return en.lineId === buid; });
       return json_({ status: "ok", student: computeStudent_(buid),
-                     workshops: bcfg.workshops, tasks: bcfg.tasks, enrollments: bcfg.enrollments, honors: bcfg.honors,
+                     workshops: bcfg.workshops, tasks: bcfg.tasks,
+                     enrollments: pubRows_(bEnroll, buid, admin), honors: bcfg.honors,
                      checkins: blogs.checkins, revenue: blogs.revenue, evals: blogs.evals, selfEval: computeSelfEval_(buid),
-                     defaultWorkshop: defWid, leaderboard: computeLeaderboard_(defWid), team: computeTeam_(defWid),
-                     honorFeed: computeHonorFeed_(30),
+                     defaultWorkshop: defWid,
+                     leaderboard: pubRows_(computeLeaderboard_(defWid), buid, admin),
+                     team: pubRows_(computeTeam_(defWid), buid, admin),
+                     honorFeed: pubRows_(computeHonorFeed_(30), buid, admin),
                      rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
                      pending: computePending_(buid), submissions: computeSubmissions_(buid) });
     }
 
     if (action === "logs") {
-      var logs = computeLogs_(String(p.userId || ""));
+      var logs = computeLogs_(self);
       return json_({ status: "ok", checkins: logs.checkins, revenue: logs.revenue, evals: logs.evals });
     }
 
     if (action === "leaderboard") {
-      return json_({ status: "ok", rows: computeLeaderboard_(String(p.workshopId || "")) });
+      return json_({ status: "ok", rows: pubRows_(computeLeaderboard_(String(p.workshopId || "")), self, admin) });
     }
 
     if (action === "team") {
-      return json_({ status: "ok", members: computeTeam_(String(p.workshopId || "")) });
+      return json_({ status: "ok", members: pubRows_(computeTeam_(String(p.workshopId || "")), self, admin) });
     }
 
     if (action === "honorFeed") {
-      return json_({ status: "ok", events: computeHonorFeed_(Number(p.limit) || 30) });
+      return json_({ status: "ok", events: pubRows_(computeHonorFeed_(Number(p.limit) || 30), self, admin) });
     }
 
     if (action === "gymPosts") {
@@ -1234,9 +1295,17 @@ function doPost(e) {
       return json_({ status: "ok", written: evList.length });
     }
     if (body.action === "revenue") {
+      /* 成交金額是最敏感的一欄（解盤與升單都看它），而這支端點沒有驗證，
+         所以至少擋掉「明顯不是人手動記的東西」：沒身份、金額不是數字、負數、
+         或大得不像一筆真實成交。⚠️ 這是防呆不是防惡意——真正的解法是 ID Token 驗證。 */
+      var rvUid = String(body.lineId || "");
+      if (!isLineId_(rvUid)) return json_({ status: "error", message: "missing lineId" });
+      var rvAmt = Number(body.amount);
+      if (!isFinite(rvAmt) || rvAmt < 0 || rvAmt > 100000000) return json_({ status: "error", message: "金額不合理" });
       appendMapped_(TABS.revenue, COLS.revenue, withTrack_({
-        lineId: body.lineId, workshopId: body.workshopId || "", amount: body.amount || 0, date: body.date || today,
-        note: body.note || "", A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0
+        lineId: rvUid, workshopId: body.workshopId || "", amount: Math.round(rvAmt), date: body.date || today,
+        note: String(body.note || "").slice(0, 500),
+        A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0
       }, body));
       return json_({ status: "ok" });
     }
@@ -1275,12 +1344,20 @@ function doPost(e) {
       if (sq1 && sq1.replace(/\s/g, "").length < 150) return json_({ status: "error", message: "Q1 心得需至少 150 字" });
       var fileUrl = "";
       if (body.fileData) {
+        /* 這支以前是「任意大小、任意格式，上傳完自動設成任何人可看」——
+           等於一個公開的免費檔案空間掛在我們的 Drive 上。改成：
+           ①只收學員真的會交的四種格式 ②單檔 10MB ③不再自動公開。
+           不公開仍然看得到——待審核那一列存的是 Drive 連結，你本來就是用自己的帳號點開。 */
+        var okMime = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+        var sMime = String(body.mimeType || "").toLowerCase().split(";")[0].trim();
+        if (okMime.indexOf(sMime) < 0) return json_({ status: "error", message: "只接受 JPG／PNG／WebP／PDF" });
+        /* base64 每 4 個字元＝3 bytes，先用字串長度估，免得先 decode 才發現太大。 */
+        if (String(body.fileData).length * 3 / 4 > 10 * 1024 * 1024) return json_({ status: "error", message: "檔案請小於 10MB" });
         try {
           var bytes = Utilities.base64Decode(body.fileData);
-          var blob = Utilities.newBlob(bytes, body.mimeType || "application/octet-stream", body.filename || ("繳交_" + Date.now()));
-          var f = getSubmitFolder_().createFile(blob);
-          try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (se) {}
-          fileUrl = f.getUrl();
+          var sName = String(body.filename || "").replace(/[\/\\:*?"<>|]/g, "_").slice(0, 120) || ("繳交_" + Date.now());
+          var blob = Utilities.newBlob(bytes, sMime, sName);
+          fileUrl = getSubmitFolder_().createFile(blob).getUrl();
         } catch (fe) { fileUrl = "(上傳失敗)"; }
       }
       var sst = computeStudent_(suid);

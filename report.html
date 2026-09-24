@@ -199,10 +199,26 @@ async function boot() {
     dp.value = "DEMO1"; S = ds.DEMO1; render();
     return;
   }
+  /* 2026-09-24：後端不再把全體學員的 LINE userId 送給瀏覽器（見 common.js 的 pid 說明）。
+     解盤工作台是唯一需要「看得到所有人的真資料」的頁，所以走一把導師金鑰：
+     金鑰存在指令碼屬性 ADMIN_KEY，第一次進來輸入一次、之後記在這台裝置上。 */
+  if (!ADMIN_KEY) {
+    var k = prompt("導師金鑰（只需輸入一次，之後記在這台裝置）");
+    if (!k) { el("body").innerHTML = '<div class="empty">解盤工作台需要導師金鑰。</div>'; return; }
+    ADMIN_KEY = k.trim();
+    try { localStorage.setItem("cw_admin_key", ADMIN_KEY); } catch (e) {}
+  }
   try {
     await Promise.all([loadConfig(), loadStudents()]);
   } catch (e) {
     el("body").innerHTML = '<div class="empty">載入失敗，請重新整理。<br><span style="font-size:12px;">' + esc_(e.message || e) + '</span></div>';
+    return;
+  }
+  /* 金鑰不對的話後端只回 pid，沒有一列帶 lineId——直接講清楚，不要讓他對著空下拉選單猜 */
+  if (!STUDENTS.some(function(s){ return s.lineId; })) {
+    try { localStorage.removeItem("cw_admin_key"); } catch (e) {}
+    el("body").innerHTML = '<div class="empty">導師金鑰不對（或後端還沒設 ADMIN_KEY）。<br>'
+      + '<span style="font-size:12px;">重新整理可以再輸入一次。</span></div>';
     return;
   }
   var p = el("pick");
@@ -222,7 +238,7 @@ async function pickStudent(uid) {
   var st = d.student || {};
   /* 任務池要灌進全域，logMuscles_ 才回查得到舊打卡列的小肌群 */
   if (d.tasks) TASKS = d.tasks;
-  S = { lineId: st.lineId || uid, name: st.name || uid, team: st.team || "",
+  S = { lineId: st.lineId || uid, pid: st.pid || "", name: st.name || uid, team: st.team || "",
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   CAL = {};
   render();

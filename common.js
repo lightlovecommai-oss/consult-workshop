@@ -87,9 +87,29 @@ function normalizeWsHonors(arr) {
   }).filter(function(h){ return h.id && h.name; });
 }
 
-async function loadConfig() {
+/* ── 對外身份代號 pid（2026-09-24）──
+   後端不再把別人的 LINE userId 送到瀏覽器（見 Code.gs 的 pid_()）：排行榜、夥伴、榮譽流
+   這些「多人列表」只帶 pid，`lineId` 只出現在「自己那列」。
+   所以凡是「這列是不是我」的比對，一律改用 isMe()——有 lineId 就比 lineId，
+   沒有就比 pid。少了別人的 lineId，畫面完全不受影響：前端從來只用得到自己的。
+   ⚠️ 寫入（打卡／成交／體測）仍然用自己的真 lineId，那個永遠拿得到。 */
+function isMe(row, s) {
+  if (!row || !s) return false;
+  if (row.lineId && s.lineId) return String(row.lineId) === String(s.lineId);
+  return !!row.pid && !!s.pid && String(row.pid) === String(s.pid);
+}
+/* 導師金鑰（只有 report.html 會設）。有設就一起帶上，後端才給完整名單與真名。 */
+var ADMIN_KEY = "";
+try { ADMIN_KEY = localStorage.getItem("cw_admin_key") || ""; } catch (e) {}
+function keyQ() { return ADMIN_KEY ? "&key=" + encodeURIComponent(ADMIN_KEY) : ""; }
+function uidQ(uid) { return uid ? "&userId=" + encodeURIComponent(uid) : ""; }
+/* 「我是誰」——帶進多人端點，後端才知道哪一列要保留 lineId 給我自己用 */
+var SELF_UID = "";
+try { SELF_UID = localStorage.getItem("cw_uid") || ""; } catch (e) {}
+
+async function loadConfig(uid) {
   try {
-    var r = await fetch(SHEET_API + "?action=config");
+    var r = await fetch(SHEET_API + "?action=config" + uidQ(uid) + keyQ());
     var d = await r.json();
     if (d.status === "ok") {
       WORKSHOPS = d.workshops || [];
@@ -110,6 +130,7 @@ function taskDef(workshopId, key) {
 }
 /* 某學員報名的 workshop（依 enrollments，比對 WORKSHOPS 取名稱） */
 function enrolledWorkshops(lineId) {
+  /* ENROLLMENTS 帶 userId 取回時只有自己的列，沒帶 lineId 的（pid 版）就不是我的 */
   var ids = ENROLLMENTS.filter(function(e){ return e.lineId === lineId; }).map(function(e){ return e.workshopId; });
   return WORKSHOPS.filter(function(w){ return ids.indexOf(w.id) > -1; });  // 只回開通的；一門都沒有＝空（呼叫端會導去 showcase）
 }
@@ -525,7 +546,7 @@ async function loadLogs(userId) {
 /* ── 排行榜：後端彙總（各 workshop 各一張），回傳所有人的分數，跨人才公平 ── */
 async function loadLeaderboard(workshopId) {
   try {
-    var r = await fetch(SHEET_API + "?action=leaderboard&workshopId=" + encodeURIComponent(workshopId || ""));
+    var r = await fetch(SHEET_API + "?action=leaderboard&workshopId=" + encodeURIComponent(workshopId || "") + uidQ(SELF_UID) + keyQ());
     var d = await r.json();
     return d.status === "ok" ? d.rows : [];
   } catch (e) {
@@ -538,7 +559,8 @@ async function loadLeaderboard(workshopId) {
    回傳 student/workshops/tasks/enrollments/checkins/revenue/selfEval/defaultWorkshop/leaderboard/team。 */
 async function loadBootstrap(userId, w) {
   try {
-    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || ""));
+    if (userId) SELF_UID = userId;   // 之後 leaderboard／team／honorFeed 要帶著它
+    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || "") + keyQ());
     var d = await r.json();
     if (d.status !== "ok") return null;
     d.checkins = (d.checkins || []).map(function(c){
@@ -572,7 +594,7 @@ async function loadBootstrap(userId, w) {
 /* ── 夥伴頁：該課程每位組員的努力指標（連續天數/本週完成率/投入分）── */
 async function loadTeam(workshopId) {
   try {
-    var r = await fetch(SHEET_API + "?action=team&workshopId=" + encodeURIComponent(workshopId || ""));
+    var r = await fetch(SHEET_API + "?action=team&workshopId=" + encodeURIComponent(workshopId || "") + uidQ(SELF_UID) + keyQ());
     var d = await r.json();
     return d.status === "ok" ? d.members : [];
   } catch (e) {
@@ -712,7 +734,7 @@ function postHonorEvent(lineId, h) {
 /* 讀回最近的榮譽解鎖事件（bootstrap 已帶一份，這支供之後刷新用）。 */
 async function loadHonorFeed(limit) {
   try {
-    var r = await fetch(SHEET_API + "?action=honorFeed&limit=" + (limit || 30));
+    var r = await fetch(SHEET_API + "?action=honorFeed&limit=" + (limit || 30) + uidQ(SELF_UID) + keyQ());
     var d = await r.json();
     return d.status === "ok" ? d.events : [];
   } catch (e) { console.log("loadHonorFeed error:", e); return []; }
@@ -834,13 +856,17 @@ applyFontScale_(fontScaleNow_());
 
 /* ── 學員身份（只讀 lineId／姓名／團隊；分數一律來自打卡紀錄）── */
 var STUDENTS = [];
-async function loadStudents() {
-  var sr = await fetch(SHEET_API + "?action=students");
+/* 帶 uid＝「我只想知道我自己」（index.html 判身分路由的用法），後端就只回那一列。
+   不帶＝拿全名單，但別人那幾列只有 pid（導師金鑰才拿得到真 lineId）。 */
+async function loadStudents(uid) {
+  if (uid) SELF_UID = uid;
+  var sr = await fetch(SHEET_API + "?action=students" + uidQ(uid) + keyQ());
   var sd = await sr.json();
   if (sd.status === "ok" && sd.students) {
     STUDENTS = sd.students.map(function(s){
       return {
-        lineId: s.lineId || s["LINE userId"],
+        lineId: s.lineId || s["LINE userId"] || "",
+        pid:    s.pid    || "",
         name:   s.name   || s["姓名"],
         team:   s.team   || s["團隊"],
         enrolled: !!s.enrolled,

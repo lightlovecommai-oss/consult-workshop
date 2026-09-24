@@ -1093,7 +1093,7 @@ async function boot(){
   if (d.tasks) TASKS = d.tasks;
   if (d.workshops) WORKSHOPS = d.workshops;
   var st = d.student || {};
-  S = { lineId: st.lineId || uid, name: st.name || "", team: st.team || "",
+  S = { lineId: st.lineId || uid, pid: st.pid || "", name: st.name || "", team: st.team || "",
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [] };
   /* 席位判定順序：①STUDENTS 的「指定席位」手動蓋台欄（index.html 的 routeFor 也吃這欄，
      兩邊要同一個答案，否則會被路由送進 member.html 卻掛體驗席的頭）②paidMember 勾選欄。
@@ -1101,7 +1101,7 @@ async function boot(){
      判成體驗席，所以不能只靠它。 */
   var forced = SEAT_FORCE[String(st.seat || "").trim().toLowerCase()];
   setSeat(forced == null ? !!st.paidMember : forced);
-  var en = (d.enrollments || []).filter(function(e){ return e.lineId === S.lineId && PRO_WS.indexOf(e.workshopId) < 0; });
+  var en = (d.enrollments || []).filter(function(e){ return isMe(e, S) && PRO_WS.indexOf(e.workshopId) < 0; });
   WID = en.length ? en[0].workshopId : "";
   LOG = buildLog();
   FOCUS = weakestThree(S)[0] || "A1";
