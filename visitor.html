@@ -60,6 +60,10 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .tb-s{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:5px;letter-spacing:.02em;}
 .hall{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:auto;}
 .aa-btn{margin-left:10px;font-size:13px;font-weight:800;letter-spacing:0;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.45);border-radius:14px;padding:3px 10px;cursor:pointer;font-family:inherit;line-height:1.4;white-space:nowrap;}
+/* 回 LINE 認人的細條：綠底橫幅下面接一條同色系的淺條，不搶行動色橘 */
+.backin{background:#EDF2EE;border-bottom:1px solid #DCE7DE;padding:9px 20px;font-size:13px;color:#5C7464;text-align:center;}
+.backin a{color:#5C7464;text-decoration:none;}
+.backin b{font-weight:700;border-bottom:1px solid rgba(92,116,100,.45);padding-bottom:1px;}
 
 .bd{padding:20px 20px 16px;}
 .sec{font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin:20px 4px 10px;}
@@ -275,6 +279,12 @@ body{--sd:#5C7464;--st:#DCE7DE;}
     <div class="tb-s">影響力是肌肉，練了就有</div>
   </div>
 
+  <!-- 在 LINE 外面（Safari／Chrome）開 app.atpifit.com 的人，index.html 拿不到 LINE 身份，
+       一律被當路人送到這一頁——已經付費的會員／私教學員也一樣。這條是他唯一的自救出口。
+       ⚠️ 只在「完全不知道他是誰」時才出現：認得出人的話路由早就把他送去對的席位了。
+       ⚠️ 連的是 liff.line.me deep link 不是 liff.login()，理由見 common.js 的「進 LINE 的橋」。 -->
+  <div class="backin" id="backin" hidden><a id="backinA" href="#">已經是會員或私教學員？<b>用 LINE 開啟 →</b></a></div>
+
   <div class="bd">
 
     <!-- 剛從 quiz 過來的人（?from=quiz）：先接住他，說健檢結果已經接上了 -->
@@ -445,6 +455,13 @@ try {
   UID = new URLSearchParams(location.search).get("id") || localStorage.getItem("cw_uid") || "";
   if (UID) localStorage.setItem("cw_uid", UID);
 } catch(e){}
+/* 不知道他是誰＝有可能是付費學員被當成路人，給他一條回 LINE 的路（見上面那段註解）。 */
+if (!UID) {
+  try {
+    var bi_ = document.getElementById("backin"), ba_ = document.getElementById("backinA");
+    if (bi_ && ba_ && typeof LIFF_URL === "string") { ba_.href = LIFF_URL; bi_.hidden = false; }
+  } catch(e){}
+}
 var OWN = null;   // {key:"own", mk, name, good, bad, exs} 從健檢最弱塊生成
 var POT = null;   // 已解鎖影響力（字典⑦ γ=0.6）
 var MS12 = null;  // 健檢 12 格 1–5（儀表板用；沒基線＝null）
