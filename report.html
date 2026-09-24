@@ -185,6 +185,33 @@ function demoStudents() {
   };
 }
 
+/* 導師金鑰輸入（2026-09-24）。後端不再把全體學員的 LINE userId 送給瀏覽器
+   （見 common.js 的 pid 說明），解盤工作台是唯一需要看到所有人真資料的頁。
+   金鑰＝Apps Script 指令碼屬性 ADMIN_KEY，輸入一次就記在這台裝置上。
+   ⚠️ 用頁面內的輸入框、不要用 prompt()——Chrome 會靜默擋掉，結果是空白頁。 */
+function askKey_(msg) {
+  el("body").innerHTML =
+    '<div class="empty" style="max-width:340px;margin:60px auto;text-align:center;">'
+    + (msg ? '<div style="color:#C6603A;margin-bottom:14px;">' + esc_(msg) + '</div>' : '')
+    + '<div style="margin-bottom:14px;">解盤工作台是內部工具，請先輸入導師金鑰。</div>'
+    + '<input id="akey" type="password" autocomplete="off" placeholder="導師金鑰"'
+    + ' style="width:100%;padding:12px 14px;font-size:16px;border:1px solid #d8c9b8;border-radius:10px;background:#fff;">'
+    + '<button id="akgo" style="margin-top:12px;width:100%;padding:12px;font-size:16px;border:0;border-radius:10px;'
+    + 'background:#C6603A;color:#fff;font-weight:600;cursor:pointer;">進入</button>'
+    + '<div style="margin-top:12px;font-size:12px;color:#9C8873;">只需要輸入一次，之後這台裝置會記住。</div>'
+    + '</div>';
+  var go = function() {
+    var v = (el("akey").value || "").trim();
+    if (!v) return;
+    ADMIN_KEY = v;
+    try { localStorage.setItem("cw_admin_key", v); } catch (e) {}
+    boot();
+  };
+  el("akgo").onclick = go;
+  el("akey").onkeydown = function(ev) { if (ev.key === "Enter") go(); };
+  el("akey").focus();
+}
+
 async function boot() {
   SINCE = daysAgoStr(30);
   if (new URLSearchParams(location.search).get("demo") === "1") {
@@ -202,12 +229,7 @@ async function boot() {
   /* 2026-09-24：後端不再把全體學員的 LINE userId 送給瀏覽器（見 common.js 的 pid 說明）。
      解盤工作台是唯一需要「看得到所有人的真資料」的頁，所以走一把導師金鑰：
      金鑰存在指令碼屬性 ADMIN_KEY，第一次進來輸入一次、之後記在這台裝置上。 */
-  if (!ADMIN_KEY) {
-    var k = prompt("導師金鑰（只需輸入一次，之後記在這台裝置）");
-    if (!k) { el("body").innerHTML = '<div class="empty">解盤工作台需要導師金鑰。</div>'; return; }
-    ADMIN_KEY = k.trim();
-    try { localStorage.setItem("cw_admin_key", ADMIN_KEY); } catch (e) {}
-  }
+  if (!ADMIN_KEY) { askKey_(); return; }   // ⚠️ 不要用 prompt()，Chrome 會擋掉
   try {
     await Promise.all([loadConfig(), loadStudents()]);
   } catch (e) {
@@ -216,9 +238,9 @@ async function boot() {
   }
   /* 金鑰不對的話後端只回 pid，沒有一列帶 lineId——直接講清楚，不要讓他對著空下拉選單猜 */
   if (!STUDENTS.some(function(s){ return s.lineId; })) {
+    ADMIN_KEY = "";
     try { localStorage.removeItem("cw_admin_key"); } catch (e) {}
-    el("body").innerHTML = '<div class="empty">導師金鑰不對（或後端還沒設 ADMIN_KEY）。<br>'
-      + '<span style="font-size:12px;">重新整理可以再輸入一次。</span></div>';
+    askKey_("金鑰不對，或後端還沒設 ADMIN_KEY。");
     return;
   }
   var p = el("pick");
