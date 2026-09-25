@@ -425,6 +425,7 @@ function postToSheet(payload) {
   try {
     if (typeof trackPayload === "function" && payload && !payload.track) payload.track = trackPayload();
   } catch (e) {}
+  try { authStamp_(payload); } catch (e) {}
   return fetch(SHEET_API, {
     method: "POST",
     headers: {"Content-Type": "text/plain;charset=utf-8"},
@@ -513,7 +514,7 @@ async function redeem(lineId, rewardId) {
     var r = await fetch(SHEET_API, {
       method: "POST",
       headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify({ action: "redeem", lineId: lineId, rewardId: rewardId })
+      body: JSON.stringify(authStamp_({ action: "redeem", lineId: lineId, rewardId: rewardId }))
     });
     return await r.json();
   } catch (e) {
@@ -772,6 +773,62 @@ function rememberUid_(uid, trusted) {
   try { if (typeof setTrackUser === "function") setTrackUser(uid); } catch (e) {}
 }
 
+/* ═══════════════════════════════════════════════════════════
+   通行證（2026-09-25）：在 LINE 裡換一次，之後到哪都證明得了身份
+
+   後端以前是「body 裡寫誰就是誰」，任何人都能冒名打卡、記假成交、
+   拿別人的餘額兌換代幣。LIFF 的 ID Token 是 LINE 親自簽的，能證明身份，
+   但**只有在 LINE App 裡拿得到**——主畫面捷徑是外部瀏覽器，沒有 LIFF session。
+
+   所以：在 LINE 裡開的時候用 ID Token 換一張後端簽的通行證（九十天，見 Code.gs authIssue_），
+   存在這台裝置上。之後主畫面捷徑帶著它就驗得過，不必回去打 LINE 密碼。
+
+   ⚠️ 換證是**背景升級，不准擋任何動作**（低摩擦守則）：拿不到就維持舊行為，
+   後端觀測期照收，只是那一列會被記成「未驗證」。
+   ═══════════════════════════════════════════════════════════ */
+function authTokGet_() {
+  try {
+    var t = localStorage.getItem("cw_tok") || "";
+    if (!t) return "";
+    var exp = Number(t.split(".")[1]);
+    if (!isFinite(exp) || exp < Date.now()) { localStorage.removeItem("cw_tok"); return ""; }
+    return t;
+  } catch (e) { return ""; }
+}
+/* 章的主人是誰（通行證第一段就是 lineId，後端簽章綁著它，改了就驗不過）。 */
+function authTokUid_() { return authTokGet_().split(".")[0] || ""; }
+
+/* 只有「章的主人＝這筆要寫的人」才夾帶。
+   ⚠️ 不比對會出事：導師在 report.html 用自己的瀏覽器寫**學員的**體測
+   （postMuscleEval(S.lineId, …, "coach")），若夾帶導師自己的章，
+   後端會拿章上的 uid 當作者，整筆體測靜默記到導師頭上。 */
+function authStamp_(payload) {
+  var t = authTokGet_();
+  if (!t || !payload) return payload;
+  var who = String(payload.lineId || payload.userId || "");
+  if (who && who === authTokUid_()) payload.tok = t;
+  return payload;
+}
+/* 在 LINE 裡才做得到：拿 ID Token 去換通行證。剩不到兩週就提前續，
+   否則過期那天人正好只用主畫面捷徑，就換不到了（強制期會被鎖在門外）。 */
+var AUTH_RENEW_MS = 14 * 86400000;
+async function ensureAuthTok_(uid) {
+  try {
+    var cur = authTokGet_();
+    if (cur && authTokUid_() === uid && Number(cur.split(".")[1]) - Date.now() > AUTH_RENEW_MS) return;
+    if (typeof liff === "undefined" || !liff.isLoggedIn || !liff.isLoggedIn()) return;
+    var idt = liff.getIDToken();
+    if (!idt) return;
+    var r = await fetch(SHEET_API, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({ action: "auth", idToken: idt })
+    });
+    var d = await r.json();
+    if (d && d.status === "ok" && d.tok) localStorage.setItem("cw_tok", d.tok);
+  } catch (e) {}
+}
+
 /* 取得使用者身分。回傳 lineId，或 null＝已經接手畫了橋接畫面，呼叫端直接 return 就好。
    順序：?id= → LIFF 已登入 →（只在 LINE 內）自動登入 → 這台瀏覽器記過的 cw_uid → 橋接畫面。 */
 async function resolveLineId(bodyElId) {
@@ -783,6 +840,8 @@ async function resolveLineId(bodyElId) {
     if (liff.isLoggedIn()) {
       uid = (await liff.getProfile()).userId;
       rememberUid_(uid, true);                  // LIFF 的 profile＝本人，可以蓋掉裝置記錄
+      /* 刻意不 await：換證是背景升級，讓它慢一秒也不該拖慢這一屏的第一次繪製。 */
+      ensureAuthTok_(uid);
       return uid;
     }
     /* 只有在 LINE 內才自動登入——那是無縫的，不會要密碼。外部瀏覽器故意不走這裡。 */

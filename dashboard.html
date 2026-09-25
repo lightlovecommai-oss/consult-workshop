@@ -936,7 +936,8 @@ async function submitHomework(t, s) {
       taskKey: t.key, taskName: t.name, dim: t.dim, pts: t.pts,
       q1: q1.trim(), q2scene: q2s.trim(), q2how: q2h.trim(), q3: q3.trim() };
     if (file) { payload.filename = file.name; payload.mimeType = file.type || "application/octet-stream"; payload.fileData = b64; }
-    var r = await fetch(SHEET_API, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+    /* authStamp_＝夾帶身份通行證（這支沒走 postToSheet，要自己讀 response，所以手動補）。 */
+    var r = await fetch(SHEET_API, { method: "POST", body: JSON.stringify(authStamp_(payload)), headers: { "Content-Type": "text/plain;charset=utf-8" } });
     var d = await r.json().catch(function(){ return {}; });
     if (d.status !== "ok") throw new Error(d.message || "fail");
     (current.pending = current.pending || []).push({ taskKey: t.key, workshopId: activeWorkshop });

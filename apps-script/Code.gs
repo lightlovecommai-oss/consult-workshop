@@ -118,25 +118,31 @@ var COLS = {
    ⚠️ 體測紀錄分頁不加：它是 append 固定六欄的寫法，而且規範 §3-1 只點名
       「測驗結果／打卡紀錄／成交紀錄」三張。少動一張就少一個壞掉的機會。
    ═══════════════════════════════════════════════════════════ */
-var TRACK_HEADERS = ["session_id", "ga_client_id", "fbc", "fbp", "utm_source", "utm_medium", "utm_campaign"];
+var TRACK_HEADERS = ["session_id", "ga_client_id", "fbc", "fbp", "utm_source", "utm_medium", "utm_campaign", "驗證"];
 var TRACK_COLS = {
   sessionId:  ["session_id", "quiz_session_id"], gaClientId: ["ga_client_id"],
   fbc:        ["fbc"],        fbp:         ["fbp"],
-  utmSource:  ["utm_source"], utmMedium:   ["utm_medium"], utmCampaign: ["utm_campaign"]
+  utmSource:  ["utm_source"], utmMedium:   ["utm_medium"], utmCampaign: ["utm_campaign"],
+  /* 驗證＝這一列的身份是證明過的還是只是 body 自己說的（見 authOf_）。
+     搭在追蹤欄旁邊是因為兩者都是「每一筆都要有、漏一筆事後補不回來」的東西。
+     這欄就是決定 AUTH_ENFORCE 何時能翻 true 的依據。 */
+  auth:       ["驗證"]
 };
 [COLS.checkins, COLS.revenue, COLS.quizWrite, COLS.subscribe, COLS.signup].forEach(function(m){
   for (var k in TRACK_COLS) m[k] = TRACK_COLS[k];
 });
 
 /* 把前端送來的 body.track 攤成欄位值，合併進要寫入的那一列。
-   前端沒送（舊版頁面、bot、本機測試）就是七個空字串，不影響任何既有行為。 */
-function withTrack_(values, body) {
+   前端沒送（舊版頁面、bot、本機測試）就是空字串，不影響任何既有行為。
+   第三個參數＝authOf_ 的結果，帶了就順便把「驗證」欄填上（沒帶就留空）。 */
+function withTrack_(values, body, a) {
   var t = (body && body.track) || {};
   for (var k in TRACK_COLS) values[k] = String(t[k] || "");
+  if (a) values.auth = a.verified ? "已驗證" : "未驗證";
   return values;
 }
 
-/* 在三張分頁補上這七欄。在編輯器選 setupTrackingColumns → 執行，跑一次就好（可重複執行）。 */
+/* 在三張分頁補上這幾欄。在編輯器選 setupTrackingColumns → 執行，跑一次就好（可重複執行）。 */
 function setupTrackingColumns() {
   var out = [];
   [TABS.quiz, TABS.checkins, TABS.revenue].forEach(function(tab){
@@ -761,6 +767,108 @@ function pubRows_(rows, selfUid, admin) {
   });
 }
 
+/* ═══════════════════════════════════════════════════════════
+   身份驗證（2026-09-25）：ID Token 換長效通行證
+
+   在這之前，所有寫入端點都是「body 裡寫誰就是誰」——任何人都能冒名打卡、
+   記一筆假成交、拿別人的餘額兌換代幣。LIFF 有 ID Token（LINE 親自簽的 JWT）
+   可以證明「你就是你」，但**只有在 LINE App 裡拿得到**。
+
+   而這個站刻意支援手機主畫面的捷徑＝外部瀏覽器、沒有 LIFF session
+   （見 common.js resolveLineId 最後那段：認得 cw_uid 就放他進來，
+   不逼他回去打 LINE 密碼——八成的人記不得那組密碼）。
+   所以「一律要求 ID Token」＝把主畫面那條路砍掉，不能這樣做。
+
+   拆成兩段解：
+   ① 在 LINE 裡開的時候，拿 ID Token 去換一張**我們自己簽的通行證**（綁 lineId＋到期日）
+   ② 之後不管在哪個瀏覽器，帶那張通行證就證明得了身份——驗章是本機 HMAC，
+      不用再打 LINE 的 API。順便躲過 UrlFetch 授權會失效那顆雷（那條只在發證時走）。
+
+   ⚠️ 現在是**觀測期，不是強制期**（AUTH_ENFORCE = false）：
+   沒帶通行證的寫入照舊收，但會在「驗證」欄記下 未驗證。
+   等試算表看到絕大多數寫入都帶章了，再把那個常數翻 true——在那之前翻，
+   會把還沒回 LINE 換過章的人全部鎖在門外。
+   ═══════════════════════════════════════════════════════════ */
+var AUTH_TTL_DAYS = 90;      // 通行證有效天數：長到不必一直回 LINE，短到被撿走也會過期
+var AUTH_ENFORCE  = false;   // ⚠️ 翻 true 前先看「驗證」欄的比例（見上方說明）
+
+function authSecret_() {
+  var sp = PropertiesService.getScriptProperties(), s = sp.getProperty("AUTH_SECRET");
+  if (!s) { s = Utilities.getUuid() + Utilities.getUuid(); sp.setProperty("AUTH_SECRET", s); }
+  return s;
+}
+function authSign_(lineId, exp) {
+  var raw = Utilities.computeHmacSha256Signature(lineId + "." + exp, authSecret_()), hex = "";
+  for (var i = 0; i < raw.length; i++) {
+    var b = raw[i] < 0 ? raw[i] + 256 : raw[i];
+    hex += (b < 16 ? "0" : "") + b.toString(16);
+  }
+  return hex;
+}
+function authIssue_(lineId) {
+  var exp = Date.now() + AUTH_TTL_DAYS * 86400000;
+  return lineId + "." + exp + "." + authSign_(lineId, exp);
+}
+/* 驗通行證，回傳 lineId 或 ""。改一個字元簽章就不合，所以 lineId 與到期日都篡改不了。 */
+function authCheckTok_(tok) {
+  var p = String(tok || "").split(".");
+  if (p.length !== 3) return "";
+  if (!isLineId_(p[0])) return "";
+  var exp = Number(p[1]);
+  if (!isFinite(exp) || exp < Date.now()) return "";
+  return authSign_(p[0], p[1]) === p[2] ? p[0] : "";
+}
+/* 拿 ID Token 去問 LINE「這是誰」。
+   ⚠️ 一定要比 aud：不比的話，別的 channel 簽的 token 也會驗過，
+   等於任何一個 LINE Login 開發者都能冒充我們的使用者。 */
+var LINE_CHANNEL_ID = "2010316474";   // ＝ common.js LIFF_ID "2010316474-wmb1ODe0" 的前半段
+function authVerifyIdToken_(idToken) {
+  try {
+    var r = UrlFetchApp.fetch("https://api.line.me/oauth2/v2.1/verify", {
+      method: "post",
+      payload: { id_token: String(idToken || ""), client_id: LINE_CHANNEL_ID },
+      muteHttpExceptions: true
+    });
+    if (r.getResponseCode() !== 200) return "";
+    var d = JSON.parse(r.getContentText());
+    if (String(d.aud) !== LINE_CHANNEL_ID) return "";
+    return isLineId_(d.sub) ? String(d.sub) : "";
+  } catch (e) { return ""; }
+}
+/* 每支寫入端點開頭問這一句。回傳 {uid, verified, bad, tok}：
+   verified＝身份是 LINE 或我們的簽章證明的，這時 body.lineId 一律不採信。
+   bad＝帶了證明但驗不過——那不是「沒帶」，是可疑，就算在觀測期也直接退件。 */
+function authOf_(body) {
+  var b = body || {};
+  if (b.tok) {
+    var t = authCheckTok_(b.tok);
+    return t ? { uid: t, verified: true } : { uid: "", verified: false, bad: true };
+  }
+  if (b.idToken) {
+    var v = authVerifyIdToken_(b.idToken);
+    /* 驗過就順手發一張通行證回去，下次不用再打 LINE 的 API。 */
+    return v ? { uid: v, verified: true, tok: authIssue_(v) } : { uid: "", verified: false, bad: true };
+  }
+  return { uid: String(b.lineId || b.userId || ""), verified: false };
+}
+/* 寫入端點的統一守門。回傳 null＝放行（之後一律用 a.uid，不要再讀 body.lineId）。 */
+function authGate_(a) {
+  if (a.bad) return json_({ status: "error", message: "身份驗證沒過，請回 LINE 重新開啟一次" });
+  if (AUTH_ENFORCE && !a.verified) return json_({ status: "error", message: "需要重新確認身份，請回 LINE 開啟一次" });
+  return null;
+}
+/* 一次性：在編輯器選 authorizeExternalRequest → 執行 → 允許。
+   ⚠️ 非跑不可。script.external_request 的授權不會因為 doPost 裡有 UrlFetchApp 就自動拿到，
+   少了它 authVerifyIdToken_ 會整支靜默失敗（回 ""），結果是「所有人都驗不過」。 */
+function authorizeExternalRequest() {
+  var code = UrlFetchApp.fetch("https://api.line.me/oauth2/v2.1/verify",
+    { method: "post", payload: { id_token: "ping", client_id: LINE_CHANNEL_ID }, muteHttpExceptions: true }
+  ).getResponseCode();
+  /* 400 ＝ LINE 收到了、只是嫌 token 是假的＝**這就是成功**，代表外部連線權限已授權。 */
+  Logger.log("✅ 外部連線已授權（LINE 回 " + code + "，400 是預期的）");
+  return "外部連線已授權，LINE 回應 " + code + "（400 ＝正常）";
+}
+
 /* ── 共用計算（各端點與 bootstrap 共用，單一真相）── */
 function computeStudent_(uid) {
   var st = null;
@@ -1276,28 +1384,47 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+
+    /* 身份：先問一次，之後每支「跟某個人有關」的寫入都用 A.uid，不要再讀 body.lineId。
+       ⚠️ 名單類端點（quiz／subscribe／hello／signup）刻意不套——那些是在 LINE 外收名單的，
+       本來就沒有身份可以驗，套上去等於把 LINE 外的漏斗整條關掉。 */
+    var A = authOf_(body);
+
+    /* 用 ID Token 換通行證（common.js ensureAuthTok_ 呼叫，一台裝置九十天一次）。
+       身份沿用上面 authOf_ 的結果——那裡已經打過一次 LINE，不要再打第二次。 */
+    if (body.action === "auth") {
+      if (!A.verified) return json_({ status: "error", message: "ID Token 驗不過" });
+      return json_({ status: "ok", uid: A.uid, tok: A.tok || authIssue_(A.uid), ttlDays: AUTH_TTL_DAYS });
+    }
+
     if (body.action === "checkin") {
+      var cGate = authGate_(A); if (cGate) return cGate;
       appendMapped_(TABS.checkins, COLS.checkins, withTrack_({
-        lineId: body.lineId, workshopId: body.workshopId || "", taskKey: body.taskKey,
+        lineId: A.uid, workshopId: body.workshopId || "", taskKey: body.taskKey,
         cadence: body.cadence || body.taskType || "daily", dim: body.dim || "",
         muscle: String(body.muscle || "").toUpperCase(), pts: body.pts || 0, date: body.date || today,
         /* v2 會員模式：低摩擦守則——這三欄全部可空，不擋打卡 */
         reaction: body.reaction || "", target: body.target || "", rel: body.rel || "", note: body.note || "",
         stage: body.stage || "",
         share: body.share ? true : false
-      }, body));
-      return json_({ status: "ok" });
+      }, body, A));
+      return json_({ status: "ok", tok: A.tok || "" });
     }
     /* v2 體測：一次寫多筆小肌群評分。evals＝[{muscle:"A1", score:3}, ...]
        用 appendRows 一次寫，別逐列 append（大量寫入會卡「發生不明錯誤」）。 */
     if (body.action === "eval") {
-      var evUid = String(body.lineId || "");
+      var evSrc = String(body.source || "self");
+      if (["quiz", "self", "coach"].indexOf(evSrc) < 0) evSrc = "self";
+      /* source=quiz ＝ comconverttest 送來的測驗基線，那支在 LINE 外也能測，
+         身份可能是 web:email／dev:裝置碼，本來就驗不了——強制期也要放它過，
+         不然 LINE 外測完的人整份基線寫不進來（漏斗第一關就斷）。
+         會員自己按的週測（self）則要驗，那是會進解盤的數字。 */
+      var eGate = (evSrc === "quiz") ? null : authGate_(A); if (eGate) return eGate;
+      var evUid = A.uid;
       var evList = (body.evals || []).map(function(e){
         return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) };
       }).filter(function(e){ return e.muscle && e.score >= 1 && e.score <= 5; });
       if (!evUid || !evList.length) return json_({ status: "error", message: "缺少 lineId 或有效的 evals" });
-      var evSrc = String(body.source || "self");
-      if (["quiz", "self", "coach"].indexOf(evSrc) < 0) evSrc = "self";
       var evSh = evalSheet_();
       var evDate = body.date || today, evWeek = String(body.week || "");
       evSh.getRange(evSh.getLastRow() + 1, 1, evList.length, 6).setValues(
@@ -1306,10 +1433,11 @@ function doPost(e) {
       return json_({ status: "ok", written: evList.length });
     }
     if (body.action === "revenue") {
-      /* 成交金額是最敏感的一欄（解盤與升單都看它），而這支端點沒有驗證，
-         所以至少擋掉「明顯不是人手動記的東西」：沒身份、金額不是數字、負數、
-         或大得不像一筆真實成交。⚠️ 這是防呆不是防惡意——真正的解法是 ID Token 驗證。 */
-      var rvUid = String(body.lineId || "");
+      /* 成交金額是最敏感的一欄（解盤與升單都看它）。
+         2026-09-25 起身份走 authOf_（帶通行證就是證明過的）；下面這些數值防呆照舊留著，
+         因為觀測期還收得到沒帶章的寫入，而且就算身份是真的，手滑打錯金額還是要擋。 */
+      var rGate = authGate_(A); if (rGate) return rGate;
+      var rvUid = A.uid;
       if (!isLineId_(rvUid)) return json_({ status: "error", message: "missing lineId" });
       var rvAmt = Number(body.amount);
       if (!isFinite(rvAmt) || rvAmt < 0 || rvAmt > 100000000) return json_({ status: "error", message: "金額不合理" });
@@ -1317,11 +1445,12 @@ function doPost(e) {
         lineId: rvUid, workshopId: body.workshopId || "", amount: Math.round(rvAmt), date: body.date || today,
         note: String(body.note || "").slice(0, 500),
         A: body.scoreA || 0, T: body.scoreT || 0, P: body.scoreP || 0, I: body.scoreI || 0
-      }, body));
-      return json_({ status: "ok" });
+      }, body, A));
+      return json_({ status: "ok", tok: A.tok || "" });
     }
     if (body.action === "honorEvent") {  // 榮譽解鎖事件：一人一榮譽只記一次（去重）
-      var eid = String(body.lineId || ""), hid = String(body.honorId || "");
+      var hGate = authGate_(A); if (hGate) return hGate;
+      var eid = A.uid, hid = String(body.honorId || "");
       if (!eid || !hid) return json_({ status: "error", message: "missing lineId/honorId" });
       var existing = rows_(TABS.honorEvents);
       for (var k = 0; k < existing.length; k++) {
@@ -1335,7 +1464,10 @@ function doPost(e) {
       return json_({ status: "ok" });
     }
     if (body.action === "redeem") {  // 代幣兌換申請：伺服器端重算餘額防竄改，送出後狀態＝待審核，人工審核
-      var uid = String(body.lineId || ""), rid = String(body.rewardId || "");
+      /* 這支的身份最不能亂：餘額雖然是伺服器重算的，但算的是「body 說的那個人」——
+         身份沒驗，就等於誰都能把別人的餘額拿去兌換。 */
+      var dGate = authGate_(A); if (dGate) return dGate;
+      var uid = A.uid, rid = String(body.rewardId || "");
       var reward = computeRewards_().filter(function(r){ return r.rewardId === rid; })[0];
       if (!reward) return json_({ status: "error", message: "找不到兌換品項" });
       var bal = computeTokenBalance_(uid);
@@ -1348,7 +1480,8 @@ function doPost(e) {
       return json_({ status: "ok" });
     }
     if (body.action === "submit") {  // 作業繳交：三題文字（線上學習單）＋可帶檔案(base64)存 Drive，寫待審核分頁，等導師打勾通過
-      var suid = String(body.userId || body.lineId || "");
+      var sGate = authGate_(A); if (sGate) return sGate;
+      var suid = A.uid;
       if (!suid) return json_({ status: "error", message: "missing userId" });
       var sq1 = String(body.q1 || "").trim(), sq2s = String(body.q2scene || "").trim(),
           sq2h = String(body.q2how || "").trim(), sq3 = String(body.q3 || "").trim();
