@@ -92,7 +92,7 @@ function normalizeWsHonors(arr) {
    這些「多人列表」只帶 pid，`lineId` 只出現在「自己那列」。
    所以凡是「這列是不是我」的比對，一律改用 isMe()——有 lineId 就比 lineId，
    沒有就比 pid。少了別人的 lineId，畫面完全不受影響：前端從來只用得到自己的。
-   ⚠️ 寫入（打卡／成交／體測）仍然用自己的真 lineId，那個永遠拿得到。 */
+   ⚠️ 寫入（打卡／成交／健檢）仍然用自己的真 lineId，那個永遠拿得到。 */
 function isMe(row, s) {
   if (!row || !s) return false;
   if (row.lineId && s.lineId) return String(row.lineId) === String(s.lineId);
@@ -471,7 +471,7 @@ async function loadGymPosts(limit) {
     return d.posts;
   } catch (e) { console.log("loadGymPosts error:", e); return []; }
 }
-/* ── 體測：寫一筆小肌群評分（1–5）──
+/* ── 健檢：寫一筆小肌群評分（1–5）──
    source＝self（會員週測）｜coach（教練校準）｜quiz（測驗基線，由 comconverttest 寫）
    一次可送多筆：evals＝[{muscle:"A1", score:3}, ...] */
 function postMuscleEval(lineId, evals, source) {
@@ -497,7 +497,7 @@ function applyMuscleEval(s, evals, source) {
     s.evalLog.push({ muscle: mk, score: Number(e.score), source: source || "self", date: d, week: w });
   });
 }
-/* 這一週體測過了沒（決定第一頁要不要把主行動換成「今天量體格」） */
+/* 這一週健檢過了沒（決定第一頁要不要把主行動換成「今天量體格」） */
 function evaledThisWeek(s) {
   var w = weekStr();
   return (s.evalLog || []).some(function(e){ return e.source !== "quiz" && String(e.week) === w; });
@@ -585,7 +585,7 @@ async function loadBootstrap(userId, w) {
                reaction: String(c.reaction || ""), target: String(c.target || ""), rel: String(c.rel || ""), note: String(c.note || ""),
                stage: String(c.stage || "") };
     });
-    /* v2 體測紀錄（12 小肌群 1–5）。舊後端還沒部署時會是 undefined → 給空陣列，畫面顯示「還沒量」。 */
+    /* v2 健檢紀錄（12 小肌群 1–5）。舊後端還沒部署時會是 undefined → 給空陣列，畫面顯示「還沒量」。 */
     d.evals = (d.evals || []).map(function(e){
       return { muscle: String(e.muscle || "").toUpperCase(), score: Number(e.score) || 0,
                source: String(e.source || "self"), date: normDate(e.date), week: String(e.week || "") };
@@ -803,9 +803,9 @@ function authTokGet_() {
 function authTokUid_() { return authTokGet_().split(".")[0] || ""; }
 
 /* 只有「章的主人＝這筆要寫的人」才夾帶。
-   ⚠️ 不比對會出事：導師在 report.html 用自己的瀏覽器寫**學員的**體測
+   ⚠️ 不比對會出事：導師在 report.html 用自己的瀏覽器寫**學員的**健檢
    （postMuscleEval(S.lineId, …, "coach")），若夾帶導師自己的章，
-   後端會拿章上的 uid 當作者，整筆體測靜默記到導師頭上。 */
+   後端會拿章上的 uid 當作者，整筆健檢靜默記到導師頭上。 */
 function authStamp_(payload) {
   var t = authTokGet_();
   if (!t || !payload) return payload;

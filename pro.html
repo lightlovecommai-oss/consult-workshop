@@ -786,7 +786,7 @@ function flightHTML(){
     + '<div class="qmark" onclick="toggleDef()">?</div></div>'
     + (SHOW_DEF ? '<div class="defline">甜蜜路徑＝<b style="color:#cfdcea;">走哪條</b>（最強兩塊肌肉定人設）×<b style="color:#cfdcea;">現在踩哪一步</b>（三個狀態）。口訣：跑通用兩個強項｜優化練起第三塊｜創造練最後一塊。不順手的不硬練，讓工具上場。</div>' : '');
   if (!pn) {
-    h += '<div class="sub-t" style="margin-top:12px;">你的路照<b>最強兩塊肌肉</b>自動判——做完 ATPI 體測（至少兩維），這條路就會浮出來。</div>'
+    h += '<div class="sub-t" style="margin-top:12px;">你的路照<b>最強兩塊肌肉</b>自動判——做完影響力健檢（至少兩維），這條路就會浮出來。</div>'
       + '<div class="rule4" style="margin-top:14px;"></div></div>';
     return h;
   }
@@ -850,8 +850,8 @@ function flightHTML(){
   h += '<div class="rule4" style="margin-top:14px;"></div></div>';
   return h;
 }
-/* ── 課程星圖（2026-09-18 改版）：解鎖看「上一堂交了學習單沒」，不看體測分數。
-   體測分數是「你現在多強」，課程進度是「你走到哪」——兩件事，之前混在一起。
+/* ── 課程星圖（2026-09-18 改版）：解鎖看「上一堂交了學習單沒」，不看健檢分數。
+   健檢分數是「你現在多強」，課程進度是「你走到哪」——兩件事，之前混在一起。
    L1 永遠開；L(n+1) 要 L(n) 交過才亮。送出即解鎖，不等導師打勾（老師拍板）。
    八堂大綱全部看得到（全貌感），鎖住的只有教材、口袋卡、作業。
    ⚠️ 課名：L2–L4 原本的副標（完整溝通 3 步驟／攻心 3 策略／大絕招）老師 2026-09-18 說先省略，
@@ -1172,7 +1172,7 @@ function focusHTML(){
   var mk = (SEL_MK && MUSCLES[SEL_MK]) ? SEL_MK : rec;
   var head = '<div class="cd"><div class="sec">FIELD DRILL · <b>落地練肌肉</b></div>';
   if (!mk) {
-    return head + '<div class="empty">做完 ATPI 體測，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div></div>';
+    return head + '<div class="empty">做完影響力健檢，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div></div>';
   }
   var m = MUSCLES[mk], d = (typeof DRILL !== "undefined" && DRILL[mk]) || null, f = muscleField(mk);
   var h = head
@@ -1390,7 +1390,7 @@ function outHTML(){
       return {h: Math.round(24 + (v-1)/4*96), state: k===focusDim ? "now" : "past", dimKey:k,
               vTop: pctFromEval(v), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
     }), {vals:true, full:120})
-    + '<div class="open-note">私教席 12 塊全開——分數來自 ATPI 體測，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
+    + '<div class="open-note">私教席 12 塊全開——分數來自影響力健檢，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
     + DORD.map(function(k){ return dimDetailHTML(k, scores, fm); }).join("")
     + '</div>';
   var VAULT = buildVault();

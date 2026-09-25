@@ -281,13 +281,13 @@ function render() {
   html += '<div class="card"><div class="who">'
     + '<div class="who-av">' + esc_(initials(S.name)) + '</div>'
     + '<div><div class="who-n">' + esc_(S.name) + '</div>'
-    + '<div class="who-m">' + (S.team ? esc_(S.team) + '・' : '') + '打卡 ' + S.checkinLog.length + ' 次・體測 ' + measured + ' / 12 塊</div></div>'
+    + '<div class="who-m">' + (S.team ? esc_(S.team) + '・' : '') + '打卡 ' + S.checkinLog.length + ' 次・健檢 ' + measured + ' / 12 塊</div></div>'
     + '<div class="who-r"><div class="who-r-v">' + measured + '<span style="font-size:13px;color:#8a7266;font-weight:400;"> / 12</span></div>'
     + '<div class="who-r-l">已量到的小肌群</div></div>'
     + '</div></div>';
 
   if (!measured) {
-    html += '<div class="card"><div class="empty">這位學員還沒有任何體測紀錄。<br>'
+    html += '<div class="card"><div class="empty">這位學員還沒有任何健檢紀錄。<br>'
       + '請他先做 ATPI 測驗（基線），或用下方「教練校準」直接量一次。</div></div>'
       + calibrateHTML(scores, meta);
     el("body").innerHTML = html;

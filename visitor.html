@@ -768,7 +768,7 @@ document.getElementById("ov").addEventListener("click", sheetHide);
 document.getElementById("sheet").addEventListener("click", sheetHide);
 render();
 
-/* 讀健檢基線（quiz 寫進體測紀錄的 12 格 1–5）→ 生成專屬招＋已解鎖影響力。
+/* 讀健檢基線（quiz 寫進健檢紀錄的 12 格 1–5）→ 生成專屬招＋已解鎖影響力。
    拿不到 id、還沒測、或後端慢：畫面維持 2 塊地基，不多不少。 */
 if (UID && typeof loadBootstrap === "function") {
   loadBootstrap(UID).then(function(d){

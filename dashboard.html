@@ -493,7 +493,7 @@ function applyBootstrap(d, userId) {
   var st = d.student || { lineId: userId, name: userId, team: "" };
   current = { lineId: st.lineId, pid: st.pid || "", name: st.name, team: st.team,
               checkinLog: d.checkins || [], revenueLog: d.revenue || [],
-              evalLog: d.evals || [],          // v2：12 小肌群體測紀錄（1–5）
+              evalLog: d.evals || [],          // v2：12 小肌群健檢紀錄（1–5）
               selfEval: d.selfEval || null };
   current.workshops = enrolledWorkshops(userId);
   activeWorkshop = d.defaultWorkshop || (current.workshops.length ? current.workshops[0].id : null);

@@ -109,8 +109,8 @@ function fromQ_(){ return FROM ? "&from=" + encodeURIComponent(FROM) : ""; }
 /* ⭐ 2026-09-08 接住「LINE 外測驗的孤兒結果」：
    在 LINE 外開測驗拿不到 userId，quiz 那站寫不進試算表；他點「進健身房」時 quiz 把
    12 格分數夾在 ?ms= 帶過來。這裡在拿到身份（LIFF／?id=／記住的 cw_uid）的那一刻，
-   回頭補寫「能力測驗一列＋體測基線 12 列」——人跟分數就接上了。
-   · 同一組 (id, ms) 只送一次（localStorage 簽名防重複，體測是 append 不能疊）
+   回頭補寫「能力測驗一列＋健檢基線 12 列」——人跟分數就接上了。
+   · 同一組 (id, ms) 只送一次（localStorage 簽名防重複，健檢是 append 不能疊）
    · 用 sendBeacon（頁面馬上要跳走，fetch 會被砍）；沒有就退回 keepalive fetch
    · 補寫的列姓名/Email 是空的——Code.gs 的 quiz upsert 已設「空值不洗掉舊資料」 */
 function sendQuizBaseline_(id, name) {

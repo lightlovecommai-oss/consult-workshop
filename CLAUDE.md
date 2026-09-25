@@ -15,7 +15,7 @@
 - 「四維度 **A吸引力 / T信任力 / P專業力 / I推進力**」→ **「〇〇力」全面作廢**，一律「吸引肌肉／信任肌肉／專業肌肉／推進肌肉」
 - 「`member.html` **今天／體格／館／我** 四分頁」→ 已改 **夥伴 · 練習 · 進步**（三分頁，**館排第一**）
 - 「**巡場**清單」→ 動作改叫 **場邊回饋**，人叫 **場邊教練**（已進 01 字典職稱條）
-- 「開練／動作／體格／體測」→ demo 暫用 **練溝通／一個秘訣／溝通肌肉／週回顧・溝通健檢**（🟡 尚未進字典，還可能改）
+- 「開練／動作／體格／體測」→ demo 暫用 **練溝通／一個秘訣／溝通肌肉／週回顧・溝通健檢**（🟡 尚未進字典，還可能改）（2026-09-25：「體測」已全面禁用，這裡是替換紀錄故保留原詞）
 - `common.js:12-15` 的 `DIMS` **T/P/I 三個色值是錯的**（現為科技版霓虹用在暖底）。正確暖版原版＝A `#C6603A`／T `#6E8B77`／P `#6E8CA8`／I `#C99A4E`
 - 「**關係軌跡**」在 `member.html` 是**放錯層**，要搬到私教學員層，且重建時**要改讀對方反應**（現行 `arcHTML` 完全沒讀 `e.reaction`）
 
@@ -63,7 +63,7 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 - **tasks**（取代寫死的任務池）：`workshopId | taskKey | cadence | dim | muscle | pts | name | icon | needReview`。cadence＝`once`(專案)/`special`(需審核)/`daily`/`weekly`；dim＝`A|T|P|I`；**muscle＝`A1`–`I3`（v2 新增，可留空、可多值 `A1,T1`）**；needReview=true 的任務學員端顯示「待審核」不可自打，由導師補列打卡才計分。
 - **enrollments**：`lineId | workshopId`（誰報了哪些課；沒設則暫時給看全部）。
 - **打卡紀錄**：`lineId | workshopId | taskKey | cadence | dim | muscle | pts | date | 對方反應 | 對象 | 發生什麼`（投入的唯一真相來源）。後四欄 v2 新增，**全部可空**（見「低摩擦守則」）。
-- **(遊戲)體測紀錄**（v2 新增，`migrateV2()` 自動建）：`lineId | 小肌群 | 分數(1–5) | 來源 | 日期 | 週次`。來源＝`quiz`(測驗基線)/`self`(週測自評)/`coach`(教練校準)。
+- **(遊戲)體測紀錄**（v2 新增，`migrateV2()` 自動建）：`lineId | 小肌群 | 分數(1–5) | 來源 | 日期 | 週次`。來源＝`quiz`(測驗基線)/`self`(週測自評)/`coach`(教練校準)。（分頁真名＝活識別字，未拍板改名；敘述一律寫健檢）
 - **成交紀錄**：`lineId | workshopId | amount | date | note | A | T | P | I`。
 - **測驗結果**：自評來源（comconverttest 寫入），`userId | scoreA | scoreT | scoreP | scoreI`。
 
@@ -82,7 +82,7 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 
 | | 來源 | 是什麼 | 函式 |
 |---|---|---|---|
-| **體格分 1–5** | 體測紀錄分頁（quiz／self／coach） | 能力・解盤念的是這個 | `calcMuscleScores(s)`、大肌肉平均 `calcDimScores5(s)` |
+| **體格分 1–5** | 健檢紀錄分頁（分頁真名見 L66）（quiz／self／coach） | 能力・解盤念的是這個 | `calcMuscleScores(s)`、大肌肉平均 `calcDimScores5(s)` |
 | **投入分／%** | 打卡紀錄的 `muscle` 欄 | 努力・看他有沒有在練 | `calcMuscleInvest(s)`、`muscleTrainCount(s, mk, since)` |
 
 - **半滿點** `muscleHalfPoint_()` ＝ `DIMS[dim].k / 3`——**推導不是另拍一組數字**，這樣「三塊各投入 x」時小肌群% 會跟大肌肉% 對得起來，之後校準 `DIMS[].k` 會自動跟著動。
@@ -91,7 +91,7 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
   - `plateau`（分數低＋練很多，門檻 `PLATEAU_MIN_COUNT`）→ 要客製 debug ＝ **升單訊號**
 - **沒量過的小肌群不給預設值**——「還沒量」和「量出來很低」是兩件事，`weakestThree` 也不會選中它。
 - **舊資料零回填**：打卡列沒有 `muscle` 時，`logMuscles_()` 回查任務池；查不到就只計進大肌肉，不會亂灌小肌群。
-- 體測寫入 `postMuscleEval(lineId, evals, source)`（一次多筆）＋樂觀更新 `applyMuscleEval()`；`evaledThisWeek(s)` 判斷第一頁要不要把主行動換成體測（quiz 基線不算）。
+- 健檢寫入 `postMuscleEval(lineId, evals, source)`（一次多筆）＋樂觀更新 `applyMuscleEval()`；`evaledThisWeek(s)` 判斷第一頁要不要把主行動換成健檢（quiz 基線不算）。
 - 開練帶額外欄位：`doCheckin(s, task, workshopId, {reaction, target, note})`——**三欄全可空**，低摩擦守則規定不可拿它們擋打卡。
 
 ## 姊妹專案
@@ -113,10 +113,10 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 
 ## 已知待處理
 - ~~一階大改版・子肌群層~~ → **12 小肌群已進計分**（見上節）。**剩下的是 UI 與資料**：
-  1. **後端要跑一次 `migrateV2()`**（Apps Script 編輯器執行）＋重新部署，否則新欄位與體測分頁不存在。
+  1. **後端要跑一次 `migrateV2()`**（Apps Script 編輯器執行）＋重新部署，否則新欄位與健檢紀錄分頁（分頁真名見 L66）不存在。
   2. **任務分頁的 `muscle` 欄要填**（A1–I3）——不填的話小肌群投入分全是 0，只有大肌肉算得到。
-  3. **測驗要出 12 小肌群基線**：`comconverttest` 目前只輸出 4 維，要改成 12 塊並以 `source=quiz` 寫進體測紀錄，否則新會員入館時體格是空的、`weakestThree` 選不出東西（productkit 04 使用者五點邏輯鏈第 1 點）。
-  4. **剩下的 UI**：①**體測填答**（會員週日自評 9 或 12 題，`postMuscleEval(source:"self")` 已備妥、畫面還沒做）②**巡場清單**（暖暖包看誰沒來，10 月前要有）③`index.html` **依身分路由**到 member / dashboard（現在只導 dashboard）。
+  3. **測驗要出 12 小肌群基線**：`comconverttest` 目前只輸出 4 維，要改成 12 塊並以 `source=quiz` 寫進健檢紀錄，否則新會員入館時體格是空的、`weakestThree` 選不出東西（productkit 04 使用者五點邏輯鏈第 1 點）。
+  4. **剩下的 UI**：①**健檢填答**（會員週日自評 9 或 12 題，`postMuscleEval(source:"self")` 已備妥、畫面還沒做）②**巡場清單**（暖暖包看誰沒來，10 月前要有）③`index.html` **依身分路由**到 member / dashboard（現在只導 dashboard）。
 - **會員模式的社群區塊是 mock**：「今天 N 位夥伴在練」「館裡熱議」是寫死的示意（畫面上標了「示意」）。要真的接 Skool，還有 27§8.6 的硬規則「**開練紀錄自動流一份進 Skool**」——那是環境柱與社群柱的量測前提，目前完全沒做。
 - **dashboard（學員模式）用語尚未跟上語彙表**：仍寫「打卡／任務」，字典已定為「開練／動作」（器材＝App、館＝Skool、一組＝3 動作封頂）。member.html 已用新語彙。
 - **`atpi-core.js` 的長篇文案仍是「〇〇力」**（`STRONG_PATH`／`COMBO_PATH`／`WEAK_DESC`），**改動會同時影響 comconverttest**，需另開一輪處理。結構化維度名 `DIMS[].name` 已改為「〇〇肌肉」。
