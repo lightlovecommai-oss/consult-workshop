@@ -153,6 +153,45 @@ function setupTrackingColumns() {
   return out.join("\n");
 }
 
+/* ═══ 觀測期的儀表 ═══
+   「驗證」欄只有寫入端（withTrack_）會填，沒有任何端點讀得回來，於是
+   「多數已經是已驗證了嗎」——翻 AUTH_ENFORCE／READ_ENFORCE 的唯一前提——
+   只能靠人肉翻試算表。翻錯的代價是把人鎖在門外，這種判斷要有儀表。
+
+   ⭐ 在編輯器選 authStatsLog → 執行，結果看「執行記錄」。**不用金鑰、不用網址**：
+      從編輯器跑本來就已經是擁有者身分，金鑰是給對外那條 Web App 網址用的。
+      （網址那條仍在＝?action=authStats&key=…，給 report.html 之類的前端用。） */
+function authStatsData_(tailN) {
+  var n = Math.min(Number(tailN) || 10, 50);
+  var stats = [TABS.checkins, TABS.revenue, TABS.quiz].map(function(tab) {
+    var rs = rows_(tab), yes = 0, no = 0, blank = 0;
+    rs.forEach(function(r) {
+      var v = String(r["驗證"] || "").trim();
+      if (v === "已驗證") yes++; else if (v === "未驗證") no++; else blank++;
+    });
+    return { tab: tab, total: rs.length, verified: yes, unverified: no, blank: blank,
+             tail: rs.slice(-n).map(function(r) {
+               return { when: String(r["日期"] || r["date"] || r["時間"] || ""), auth: String(r["驗證"] || "") };
+             }) };
+  });
+  /* 刻意不回 lineId：這份東西就是要能安心貼給別人看，數字才是重點。 */
+  return { status: "ok", enforce: { write: AUTH_ENFORCE, read: READ_ENFORCE },
+           channelId: LINE_CHANNEL_ID, stats: stats };
+}
+
+function authStatsLog() {
+  var d = authStatsData_(10);
+  Logger.log("寫入面 AUTH_ENFORCE=%s／讀取面 READ_ENFORCE=%s／LINE_CHANNEL_ID=%s",
+             d.enforce.write, d.enforce.read, d.channelId);
+  d.stats.forEach(function(s) {
+    Logger.log("─────────────");
+    Logger.log("【%s】共 %s 列　已驗證 %s／未驗證 %s／空白 %s", s.tab, s.total, s.verified, s.unverified, s.blank);
+    Logger.log("  最後 %s 列：%s", s.tail.length,
+               s.tail.map(function(t){ return (t.when || "?") + "=" + (t.auth || "空白"); }).join("、"));
+  });
+  return d;
+}
+
 /* 測驗分頁補欄位（可重複執行，已存在就跳過）。改完 COLS.quizWrite 之後在編輯器跑一次。
    ⚠️ 只補欄名，不動既有資料；補完之後 comconverttest 送來的情境座標才寫得進去。 */
 function migrateQuizCols() {
@@ -1319,20 +1358,7 @@ function doGet(e) {
        導師金鑰專用：它會數到全體的列。刻意不回 lineId，只回數字與時間。 */
     if (action === "authStats") {
       if (!admin) return json_({ status: "error", message: "need-admin", why: adminWhy_(p) });
-      var tailN = Math.min(Number(p.limit) || 10, 50);
-      var stats = [TABS.checkins, TABS.revenue, TABS.quiz].map(function(tab) {
-        var rs = rows_(tab), yes = 0, no = 0, blank = 0;
-        rs.forEach(function(r) {
-          var v = String(r["驗證"] || "").trim();
-          if (v === "已驗證") yes++; else if (v === "未驗證") no++; else blank++;
-        });
-        return { tab: tab, total: rs.length, verified: yes, unverified: no, blank: blank,
-                 tail: rs.slice(-tailN).map(function(r) {
-                   return { when: String(r["日期"] || r["date"] || r["時間"] || ""), auth: String(r["驗證"] || "") };
-                 }) };
-      });
-      return json_({ status: "ok", enforce: { write: AUTH_ENFORCE, read: READ_ENFORCE },
-                     channelId: LINE_CHANNEL_ID, stats: stats });
+      return json_(authStatsData_(Number(p.limit) || 10));
     }
 
     /* action=logs 已於 2026-09-25 移除：bootstrap 出現之後前端就不再呼叫它，
