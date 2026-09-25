@@ -59,7 +59,7 @@ var COLS = {
               stage:["圈層","stage"],
               /* share＝「分享到館裡」勾選（v9 補死碼：以前前端有勾選、這裡沒欄位接） */
               share:["分享到館裡","share"] },
-  /* v2 體測：小肌群 1–5 評分。source＝quiz(測驗基線)／self(週測自評)／coach(教練校準) */
+  /* v2 健檢：小肌群 1–5 評分。source＝quiz(測驗基線)／self(週測自評)／coach(教練校準) */
   evals:    { lineId:["LINE userId","lineId"], muscle:["小肌群","muscle"], score:["分數","score"],
               source:["來源","source"], date:["日期","date"], week:["週次","week"] },
   revenue:  { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], amount:["金額","amount"],
@@ -115,7 +115,7 @@ var COLS = {
 
    ⚠️ 這裡刻意用英文欄名（不翻中文）——它們是機器欄位，
       名稱要跟 GA4／Meta 官方參數一字不差，翻譯過去對接時會對不上。
-   ⚠️ 體測紀錄分頁不加：它是 append 固定六欄的寫法，而且規範 §3-1 只點名
+   ⚠️ 健檢紀錄分頁（TABS.evals）不加：它是 append 固定六欄的寫法，而且規範 §3-1 只點名
       「測驗結果／打卡紀錄／成交紀錄」三張。少動一張就少一個壞掉的機會。
    ═══════════════════════════════════════════════════════════ */
 var TRACK_HEADERS = ["session_id", "ga_client_id", "fbc", "fbp", "utm_source", "utm_medium", "utm_campaign", "驗證"];
@@ -160,7 +160,7 @@ function migrateQuizCols() {
     .forEach(function(h){ ensureColumn_(TABS.quiz, h); });
   for (var i = 1; i <= 12; i++) ensureColumn_(TABS.quiz, "Q" + i);
   evalSheet_();  // 順便確保「(遊戲)體測紀錄」存在——測驗的 action:"eval" 要寫進去
-  Logger.log("完成：測驗分頁欄位已補齊，體測分頁已就緒。");
+  Logger.log("完成：測驗分頁欄位已補齊，健檢分頁已就緒。");
 }
 
 function ss_() { return SS_ID ? SpreadsheetApp.openById(SS_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
@@ -725,7 +725,7 @@ function weekPct_(dates, today, tz) {
 
 /* ── 對外身份代號 pid（2026-09-24）──
    端點以前把全體成員的 LINE userId 直接回給瀏覽器：任何人拿到網址就能枚舉全員，
-   再拿別人的 userId 去 ?action=bootstrap 讀他的打卡、體測與每一筆成交金額。
+   再拿別人的 userId 去 ?action=bootstrap 讀他的打卡、健檢與每一筆成交金額。
    前端其實從來不需要別人的真 ID——它只做兩件事：①比對「這列是不是我」②用自己的 ID 寫入。
    所以對外一律換成 pid＝HMAC-SHA256(lineId, PID_SALT) 前 12 碼：同一個人永遠同一個 pid
    （比對得出來）、單向（推不回 userId）、拿去打 bootstrap 也讀不到東西。
@@ -1121,7 +1121,7 @@ function computeLogs_(uid) {
   });
   return { checkins: checkins, revenue: revenue, evals: computeEvals_(uid) };
 }
-/* v2 體測紀錄（小肌群 1–5）。分頁不存在就回空陣列——舊試算表不跑 migrate 也不會壞。 */
+/* v2 健檢紀錄（小肌群 1–5）。分頁不存在就回空陣列——舊試算表不跑 migrate 也不會壞。 */
 function computeEvals_(uid) {
   var ss = ss_();
   if (!ss.getSheetByName(TABS.evals)) return [];
@@ -1133,7 +1133,7 @@ function computeEvals_(uid) {
              week: String(pick_(r, COLS.evals.week) || "") };
   }).filter(function(e){ return e.muscle && e.score >= 1 && e.score <= 5; });
 }
-/* 體測分頁：不存在就建（標題對齊 COLS.evals 的中文欄名）。 */
+/* 健檢分頁：不存在就建（標題對齊 COLS.evals 的中文欄名）。 */
 function evalSheet_() {
   var ss = ss_(), sh = ss.getSheetByName(TABS.evals);
   if (!sh) {
@@ -1142,10 +1142,10 @@ function evalSheet_() {
   }
   return sh;
 }
-/* ⭐ 2026-09-22：測驗的 12 格答案 → 體測基線。
+/* ⭐ 2026-09-22：測驗的 12 格答案 → 健檢基線。
    以前這件事只有 index.html 的 ?ms= 那條路會做，而在 LINE 裡測完的交接連結
    是 ?id=…&from=quiz、沒帶 ms=，所以走正常路徑的人 12 格答案永遠到不了體格——
-   體測分頁從 2026-09-07（攤平回填那天）之後一列都沒長過，49 位測驗者裡
+   健檢分頁從 2026-09-07（攤平回填那天）之後一列都沒長過，49 位測驗者裡
    35 位是三格同分的佔位值、14 位完全空白。weakestThree／甜蜜路徑／解盤腳本
    全都讀體格，等於整套判讀跑在佔位資料上。
    改放在後端＝不管從哪條路進來（LINE 內測驗、?ms= 回頭補、之後的原生 App）
@@ -1485,7 +1485,7 @@ function doPost(e) {
       }, body, A));
       return json_({ status: "ok", tok: A.tok || "" });
     }
-    /* v2 體測：一次寫多筆小肌群評分。evals＝[{muscle:"A1", score:3}, ...]
+    /* v2 健檢：一次寫多筆小肌群評分。evals＝[{muscle:"A1", score:3}, ...]
        用 appendRows 一次寫，別逐列 append（大量寫入會卡「發生不明錯誤」）。 */
     if (body.action === "eval") {
       var evSrc = String(body.source || "self");
@@ -1638,7 +1638,7 @@ function doPost(e) {
       upsertMapped_(TABS.quiz, COLS.quizWrite, "lineId", qvals, Object.keys(TRACK_COLS).concat(
         ["displayName","pictureUrl","name","email","job","income","goalIncome","customerSource",
          "targetContext","targetNeed","targetKeyMuscle"]));  // 同 userId 更新那列，重測/重開不重複
-      writeQuizBaseline_(quid, qraw);   // 12 格答案順手寫成體測基線——這是體格的唯一來源，別再只靠 ?ms=
+      writeQuizBaseline_(quid, qraw);   // 12 格答案順手寫成健檢基線——這是體格的唯一來源，別再只靠 ?ms=
       if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）；web:xxx 假身份進不了館，不進名單
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
@@ -2124,7 +2124,7 @@ function setupSeatColumn() {
    他們是誰：在電腦上做測驗拿不到 LINE userId，那一列的鍵是 web:<email>，
    刻意不進開通名單（那個身份進不了館）。分數躺在測驗分頁、人沒接上。
    怎麼接回：連結帶著他自己的 12 格分數（?ms=），他**用手機在 LINE 裡**打開，
-   index.html 拿到真 userId 的那一刻就補寫「測驗一列＋體測基線 12 列」，
+   index.html 拿到真 userId 的那一刻就補寫「測驗一列＋健檢基線 12 列」，
    同時報到進開通名單——人、分數、名單一次全接上。
    ⚠️ 在電腦瀏覽器開沒有用（拿不到 LINE 身份），信裡一定要講「用手機、在 LINE 裡打開」。 */
 function listWebOrphans() {
@@ -2203,7 +2203,7 @@ function backfillQuizMuscles() {
   var qrows = rows_(TABS.quiz);
   if (!qrows.length) return "測驗分頁「" + TABS.quiz + "」讀到 0 筆。";
 
-  /* 已經有任何體測紀錄的人一律跳過——新測驗寫的 quiz 基線、教練校準、週自評都不能被蓋掉 */
+  /* 已經有任何健檢紀錄的人一律跳過——新測驗寫的 quiz 基線、教練校準、週自評都不能被蓋掉 */
   var has = {};
   rows_(TABS.evals).forEach(function(r){
     var id = String(pick_(r, COLS.evals.lineId)).trim(); if (id) has[id] = true;
@@ -2234,17 +2234,17 @@ function backfillQuizMuscles() {
     sh.getRange(sh.getLastRow() + 1, 1, out.length, 6).setValues(out);
   }
   return "舊測驗基線回填：" + filled + " 人 × 12 格＝" + out.length + " 列；"
-       + "已有體測紀錄跳過 " + skipped + " 人；分數不完整略過 " + bad + " 列。"
+       + "已有健檢紀錄跳過 " + skipped + " 人；分數不完整略過 " + bad + " 列。"
        + "（三格同分＝只搬大肌肉水位，等他們在 App 做一次自評就會被新軸覆蓋）";
 }
 
 /* ═══════════════════════════════════════════════════════════
-   一次性：把測驗分頁裡**真實的 12 格答案**補成體測基線，並清掉攤平佔位值。
+   一次性：把測驗分頁裡**真實的 12 格答案**補成健檢基線，並清掉攤平佔位值。
    在 Apps Script 選 backfillQuizMuscles12 → 執行。可重複執行（第二次會說 0 人要補）。
 
    為什麼要有這支：2026-09-07 跑的 backfillQuizMuscles 是在「只有四維分數」的年代
    寫的，一個維度三格同分＝佔位。但那之後大家測的是新版 12 題，真實答案一直
-   躺在測驗分頁的 Q1–Q12，只是沒有人把它搬進體測分頁（後端 quiz 端點以前不寫）。
+   躺在測驗分頁的 Q1–Q12，只是沒有人把它搬進健檢分頁（後端 quiz 端點以前不寫）。
    三格同分的後果是 weakestThree() 選不出最弱那塊——解盤、甜蜜路徑、專屬招
    全部跑在佔位資料上。
 
@@ -2253,7 +2253,7 @@ function backfillQuizMuscles() {
    · 只刪「同一人同一天、12 格齊全、且每個維度內三格完全同分」的整組——
      那個形狀只有 backfillQuizMuscles 會產生，就是佔位值的指紋
    · 只刪「這次真的有真實 12 格可以補上去」的人
-   · 執行前自動把整張體測分頁複製成「(備份)體測-時間戳」，出事可以整張搬回來
+   · 執行前自動把整張健檢分頁複製成「(備份)體測-時間戳」，出事可以整張搬回來
    新列的日期用**他測驗那天**（不是今天），因為那才是這份資料真正的量測時間。
    ═══════════════════════════════════════════════════════════ */
 function backfillQuizMuscles12() {
@@ -2311,7 +2311,7 @@ function backfillQuizMuscles12_() {
          + " 列，沒有一列同時滿足「真 LINE 身份 ＋ Q1–Q12 都是 1–5 ＋ 時間看得懂」。";
   }
 
-  /* ② 讀體測分頁，把 source=quiz 的列按「人＋日期」分組 */
+  /* ② 讀健檢分頁，把 source=quiz 的列按「人＋日期」分組 */
   var sh = evalSheet_(), last = sh.getLastRow();
   var vals = last > 1 ? sh.getRange(2, 1, last - 1, 6).getValues() : [];
   var groups = {};
