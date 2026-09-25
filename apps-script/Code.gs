@@ -823,22 +823,36 @@ function authCheckTok_(tok) {
   if (!isFinite(exp) || exp < Date.now()) return "";
   return authSign_(p[0], p[1]) === p[2] ? p[0] : "";
 }
-/* 拿 ID Token 去問 LINE「這是誰」。
-   ⚠️ 一定要比 aud：不比的話，別的 channel 簽的 token 也會驗過，
-   等於任何一個 LINE Login 開發者都能冒充我們的使用者。 */
+/* 拿 ID Token 去問 LINE「這是誰」。 */
 var LINE_CHANNEL_ID = "2010316474";   // ＝ common.js LIFF_ID "2010316474-wmb1ODe0" 的前半段
+/* 回傳 {uid, why}。uid 空＝沒驗過，why 說是哪一種沒驗過——**這一欄是刻意加的**：
+   原本四種失敗（沒授權／LINE 說 token 假／aud 不對／sub 不是 lineId）全都回空字串，
+   對外長得一模一樣，於是「授權沒跑」會假扮成「大家的 token 都是假的」，
+   而且不報錯。分不出來就沒辦法在翻 AUTH_ENFORCE 之前確認這條鏈是活的。 */
 function authVerifyIdToken_(idToken) {
+  var r;
   try {
-    var r = UrlFetchApp.fetch("https://api.line.me/oauth2/v2.1/verify", {
+    r = UrlFetchApp.fetch("https://api.line.me/oauth2/v2.1/verify", {
       method: "post",
       payload: { id_token: String(idToken || ""), client_id: LINE_CHANNEL_ID },
       muteHttpExceptions: true
     });
-    if (r.getResponseCode() !== 200) return "";
-    var d = JSON.parse(r.getContentText());
-    if (String(d.aud) !== LINE_CHANNEL_ID) return "";
-    return isLineId_(d.sub) ? String(d.sub) : "";
-  } catch (e) { return ""; }
+  } catch (e) {
+    /* 走到這裡幾乎只有一個原因：script.external_request 沒授權。
+       那個授權不會因為程式裡有 UrlFetchApp 就自動拿到，要在編輯器手動跑
+       authorizeExternalRequest()。 */
+    return { uid: "", why: "no-authz:" + String(e).slice(0, 80) };
+  }
+  var code = r.getResponseCode();
+  /* LINE 回 400＝它收到了、只是嫌這個 token——代表外部連線是通的，鏈是活的。 */
+  if (code !== 200) return { uid: "", why: "line-" + code };
+  var d;
+  try { d = JSON.parse(r.getContentText()); } catch (e2) { return { uid: "", why: "bad-json" }; }
+  /* ⚠️ 一定要比 aud：不比的話，別的 channel 簽的 token 也會驗過，
+     等於任何一個 LINE Login 開發者都能冒充我們的使用者。 */
+  if (String(d.aud) !== LINE_CHANNEL_ID) return { uid: "", why: "aud-mismatch:token=" + String(d.aud) + " 我們設=" + LINE_CHANNEL_ID };
+  if (!isLineId_(d.sub)) return { uid: "", why: "bad-sub" };
+  return { uid: String(d.sub), why: "" };
 }
 /* 每支寫入端點開頭問這一句。回傳 {uid, verified, bad, tok}：
    verified＝身份是 LINE 或我們的簽章證明的，這時 body.lineId 一律不採信。
@@ -852,7 +866,8 @@ function authOf_(body) {
   if (b.idToken) {
     var v = authVerifyIdToken_(b.idToken);
     /* 驗過就順手發一張通行證回去，下次不用再打 LINE 的 API。 */
-    return v ? { uid: v, verified: true, tok: authIssue_(v) } : { uid: "", verified: false, bad: true };
+    return v.uid ? { uid: v.uid, verified: true, tok: authIssue_(v.uid) }
+                 : { uid: "", verified: false, bad: true, why: v.why };
   }
   return { uid: String(b.lineId || b.userId || ""), verified: false };
 }
@@ -864,7 +879,8 @@ function authGate_(a) {
 }
 /* 一次性：在編輯器選 authorizeExternalRequest → 執行 → 允許。
    ⚠️ 非跑不可。script.external_request 的授權不會因為 doPost 裡有 UrlFetchApp 就自動拿到，
-   少了它 authVerifyIdToken_ 會整支靜默失敗（回 ""），結果是「所有人都驗不過」。 */
+   少了它 authVerifyIdToken_ 會整支失敗，結果是「所有人都驗不過」。
+   現在至少不再是靜默的：那種失敗會回 why="no-authz:..."，打一次 action=auth 就看得出來。 */
 function authorizeExternalRequest() {
   var code = UrlFetchApp.fetch("https://api.line.me/oauth2/v2.1/verify",
     { method: "post", payload: { id_token: "ping", client_id: LINE_CHANNEL_ID }, muteHttpExceptions: true }
@@ -1409,7 +1425,11 @@ function doPost(e) {
     /* 用 ID Token 換通行證（common.js ensureAuthTok_ 呼叫，一台裝置九十天一次）。
        身份沿用上面 authOf_ 的結果——那裡已經打過一次 LINE，不要再打第二次。 */
     if (body.action === "auth") {
-      if (!A.verified) return json_({ status: "error", message: "ID Token 驗不過" });
+      /* why 一起回：前端不看它，是給我們自己判「這條鏈到底活著沒有」。
+         `no-authz`＝授權沒跑（要回編輯器跑 authorizeExternalRequest）；
+         `line-400`＝LINE 收到了只是嫌 token＝鏈是活的；
+         `aud-mismatch`＝LINE_CHANNEL_ID 設錯了，會直接印出兩邊的值。 */
+      if (!A.verified) return json_({ status: "error", message: "ID Token 驗不過", why: A.why || "" });
       return json_({ status: "ok", uid: A.uid, tok: A.tok || authIssue_(A.uid), ttlDays: AUTH_TTL_DAYS });
     }
 
