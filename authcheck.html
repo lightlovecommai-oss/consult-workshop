@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>身份驗證自檢</title>
+<style>
+body{margin:0;background:#0c131e;color:#DCE7F0;font:15px/1.8 -apple-system,"Noto Sans TC",sans-serif;padding:20px;}
+h1{font-size:17px;font-weight:500;margin:0 0 4px;}
+.sub{font-size:13px;color:#7D92A8;margin-bottom:20px;}
+.row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #1d2937;align-items:baseline;}
+.k{flex:0 0 116px;font-size:13px;color:#7D92A8;}
+.v{flex:1;word-break:break-all;}
+.ok{color:#33c495;} .bad{color:#e8734a;} .warn{color:#e6a93a;}
+.verdict{margin-top:22px;padding:14px 16px;border-radius:12px;background:#141d2b;font-size:14px;line-height:1.85;}
+</style>
+</head>
+<body>
+<h1>身份驗證自檢</h1>
+<div class="sub">在 LINE 裡打開這一頁，把整個畫面截圖。這裡不會顯示通行證本身。</div>
+<div id="out"></div>
+<div class="verdict" id="verdict">檢查中…</div>
+
+<script src="atpi-core.js"></script>
+<script src="common.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+var out = document.getElementById("out");
+function say(k, v, cls) {
+  out.insertAdjacentHTML("beforeend",
+    '<div class="row"><div class="k">' + k + '</div><div class="v ' + (cls || "") + '">' + v + '</div></div>');
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+(async function () {
+  var verdict = document.getElementById("verdict");
+  try {
+    await liff.init({ liffId: LIFF_ID });
+  } catch (e) {
+    say("liff.init", esc(e), "bad");
+    verdict.innerHTML = "<b class='bad'>LIFF 起不來。</b>後面的都測不了——先確認這個網址是從 LINE 裡點進來的。";
+    return;
+  }
+  say("在 LINE 裡", liff.isInClient() ? "是" : "否（外部瀏覽器）", liff.isInClient() ? "ok" : "warn");
+  say("已登入", liff.isLoggedIn() ? "是" : "否", liff.isLoggedIn() ? "ok" : "bad");
+
+  if (!liff.isLoggedIn()) {
+    verdict.innerHTML = "<b class='bad'>沒登入，所以拿不到 ID Token。</b>"
+      + "這種狀態下換不到通行證是正常的，不能用來判斷 channel ID 對不對。請從 LINE 裡開這一頁。";
+    return;
+  }
+
+  var idt = "";
+  try { idt = liff.getIDToken() || ""; } catch (e) {}
+  say("拿到 ID Token", idt ? "是（" + idt.length + " 字元）" : "否", idt ? "ok" : "bad");
+  if (!idt) {
+    verdict.innerHTML = "<b class='bad'>登入了卻拿不到 ID Token。</b>"
+      + "通常是 LIFF 的 scope 少了 <code>openid</code>——去 LINE Developers 的 LIFF 設定看一眼。";
+    return;
+  }
+
+  /* 直接打 action=auth，把後端的 why 原封不動印出來。ensureAuthTok_ 會把失敗吞掉
+     （它的工作是「換得到就換」，不是診斷），所以這裡故意自己打一次。 */
+  var d = {};
+  try {
+    var r = await fetch(SHEET_API, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "auth", idToken: idt })
+    });
+    d = await r.json();
+  } catch (e) {
+    say("後端 action=auth", esc(e), "bad");
+    verdict.innerHTML = "<b class='bad'>連不到後端。</b>";
+    return;
+  }
+
+  say("後端 status", esc(d.status || "?"), d.status === "ok" ? "ok" : "bad");
+  if (d.why) say("why", esc(d.why), "bad");
+  say("拿到通行證", d.tok ? "是" : "否", d.tok ? "ok" : "bad");
+
+  var cur = "";
+  try { cur = localStorage.getItem("cw_tok") || ""; } catch (e) {}
+  if (cur) {
+    var p = cur.split(".");
+    var days = Math.round((Number(p[1]) - Date.now()) / 86400000);
+    /* 只印使用者代號的前八碼與剩餘天數——通行證本身等於九十天的鑰匙，不能出現在截圖裡。 */
+    say("這台裝置已有的章", String(p[0]).slice(0, 8) + "… ／ 還剩 " + days + " 天", days > 0 ? "ok" : "bad");
+  } else {
+    say("這台裝置已有的章", "沒有", "warn");
+  }
+
+  if (d.status === "ok" && d.tok) {
+    verdict.innerHTML = "<b class='ok'>整條鏈都通了。</b>"
+      + "LINE 驗簽過、aud 比對過、通行證發出來了——代表 <code>LINE_CHANNEL_ID</code> 設對了。"
+      + "接下來打卡應該就會記成「已驗證」。";
+  } else if (String(d.why || "").indexOf("aud-mismatch") === 0) {
+    verdict.innerHTML = "<b class='bad'>找到了：channel ID 設錯。</b>"
+      + "上面那行 why 會寫「token=（真正的） 我們設=（現在寫的）」，把真正的那串給我，我改 <code>Code.gs</code>。";
+  } else if (String(d.why || "").indexOf("no-authz") === 0) {
+    verdict.innerHTML = "<b class='bad'>外部連線授權掉了。</b>"
+      + "回 Apps Script 編輯器跑一次 <code>authorizeExternalRequest</code>。";
+  } else {
+    verdict.innerHTML = "<b class='warn'>沒換到章，原因看上面的 why。</b>";
+  }
+})();
+</script>
+</body>
+</html>
