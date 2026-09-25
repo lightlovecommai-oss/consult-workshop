@@ -750,9 +750,15 @@ function pid_(id) {
 }
 /* 導師視角（report.html 解盤要看到真名與真 ID）走一把金鑰，同樣放指令碼屬性、不寫死。
    屬性沒設＝永遠 false，也就是預設只給 pid。 */
-function isAdmin_(p) {
-  var k = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
-  return !!k && String((p || {}).key || "") === k;
+function isAdmin_(p) { return adminWhy_(p) === ""; }
+/* 回 ""＝是導師，否則是「為什麼不是」。分開講是因為屬性沒設跟金鑰打錯長得一模一樣，
+   兩者的處置完全不同（一個要去新增屬性、一個是複製貼上出錯），分不出來就只能猜。
+   ⚠️ 兩邊都 trim：手打的值前後很容易黏到空白或換行，不洗的話比對永遠不相等，
+      而且看起來就跟「金鑰打錯」一樣。 */
+function adminWhy_(p) {
+  var k = String(PropertiesService.getScriptProperties().getProperty("ADMIN_KEY") || "").trim();
+  if (!k) return "no-admin-key-set";
+  return String((p || {}).key || "").trim() === k ? "" : "bad-key";
 }
 /* 出門前的過濾器：每列都補 pid，`lineId` 只留給「自己那列」和導師。
    前端比對改看 pid（見 common.js 的 isMe()），所以少了別人的 lineId 不會壞。 */
@@ -1312,7 +1318,7 @@ function doGet(e) {
        只能靠人肉翻試算表。翻錯的代價是把人鎖在門外，所以這個判斷要有儀表。
        導師金鑰專用：它會數到全體的列。刻意不回 lineId，只回數字與時間。 */
     if (action === "authStats") {
-      if (!admin) return json_({ status: "error", message: "need-admin" });
+      if (!admin) return json_({ status: "error", message: "need-admin", why: adminWhy_(p) });
       var tailN = Math.min(Number(p.limit) || 10, 50);
       var stats = [TABS.checkins, TABS.revenue, TABS.quiz].map(function(tab) {
         var rs = rows_(tab), yes = 0, no = 0, blank = 0;
