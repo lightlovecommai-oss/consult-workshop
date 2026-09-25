@@ -523,26 +523,12 @@ async function redeem(lineId, rewardId) {
   }
 }
 
-/* ── 讀回某學員的打卡＋成交紀錄 ── */
-async function loadLogs(userId) {
-  try {
-    var r = await fetch(SHEET_API + "?action=logs&userId=" + encodeURIComponent(userId));
-    var d = await r.json();
-    if (d.status !== "ok") return {checkins: [], revenue: []};
-    var checkins = (d.checkins || []).map(function(c){
-      return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
-               dim: String(c.dim || ""), pts: Number(c.pts) || 0, date: normDate(c.date), week: weekStr(new Date(c.date)) };
-    });
-    var revenue = (d.revenue || []).map(function(e){
-      return { workshopId: String(e.workshopId || ""), date: normDate(e.date), amount: Number(e.amount) || 0, note: e.note || "",
-               A: Number(e.A) || 0, T: Number(e.T) || 0, P: Number(e.P) || 0, I: Number(e.I) || 0 };
-    });
-    return {checkins: checkins, revenue: revenue};
-  } catch (e) {
-    console.log("loadLogs error:", e);
-    return {checkins: [], revenue: []};
-  }
-}
+/* loadLogs() 與 loadSelfEval() 已於 2026-09-25 移除。
+   兩支都是 bootstrap 出現之前的舊路（打卡＋成交、自評），改用 bootstrap 之後
+   五頁都不再呼叫它們，掃過整個 workspace 也沒有第二個使用者。
+   留著的唯一效果是後端得繼續開著兩個「知道 userId 就讀得到那個人」的入口，
+   所以連同後端的 ?action=logs 與裸 ?userId= 一起關掉。
+   要讀這些資料一律走 loadBootstrap()。 */
 
 /* ── 排行榜：後端彙總（各 workshop 各一張），回傳所有人的分數，跨人才公平 ── */
 async function loadLeaderboard(workshopId) {
@@ -556,14 +542,42 @@ async function loadLeaderboard(workshopId) {
   }
 }
 
+/* 怎麼把 bootstrap 抓回來（2026-09-25）：
+   有通行證、而且章的主人就是要看的這個人 → 走 POST，章放在 body 裡。
+   **通行證不放在網址上**：網址會留進瀏覽器歷史、Referer、各種 access log，
+   等於把九十天的鑰匙到處複印。
+
+   其他情況（沒章、在看別人＝導師預覽、後端還沒部署新版）→ 退回原本的 GET。
+   ⚠️ 這個退路必須留著：GitHub Pages 一兩分鐘就上線，而 Code.gs 要人工貼，
+   前端一定會先到。沒退路的話中間那段時間所有人的儀表板會一起空白。 */
+async function bootstrapFetch_(userId, w) {
+  var tok = authTokGet_();
+  if (tok && authTokUid_() === userId) {
+    try {
+      var pr = await fetch(SHEET_API, {
+        method: "POST",
+        headers: {"Content-Type": "text/plain;charset=utf-8"},
+        body: JSON.stringify({ action: "bootstrap", w: w || "", tok: tok })
+      });
+      var pd = await pr.json();
+      if (pd && pd.status === "ok") return pd;
+    } catch (e) {}
+  }
+  var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || "") + keyQ());
+  return await r.json();
+}
+
 /* ── Bootstrap：一通把整個儀表板需要的資料抓回來（取代 6 通分開呼叫，大幅降延遲）──
    回傳 student/workshops/tasks/enrollments/checkins/revenue/selfEval/defaultWorkshop/leaderboard/team。 */
 async function loadBootstrap(userId, w) {
   try {
     if (userId) SELF_UID = userId;   // 之後 leaderboard／team／honorFeed 要帶著它
-    var r = await fetch(SHEET_API + "?action=bootstrap&userId=" + encodeURIComponent(userId) + "&w=" + encodeURIComponent(w || "") + keyQ());
-    var d = await r.json();
-    if (d.status !== "ok") return null;
+    var d = await bootstrapFetch_(userId, w);
+    /* need-auth＝後端的 READ_ENFORCE 開了、而這個人沒有章（POST 走不通、GET 也被擋）。
+       這種人不是壞了，是**還沒回 LINE 換章**，所以要看到橋接畫面而不是永遠的讀取中。
+       回 null 之後呼叫端的 `if (!d) return;` 就會停手，跟 resolveLineId 同一個約定。 */
+    if (d && d.status === "need-auth") { renderLineBridge(BRIDGE_HOST_ID); return null; }
+    if (!d || d.status !== "ok") return null;
     d.checkins = (d.checkins || []).map(function(c){
       return { workshopId: String(c.workshopId || ""), taskKey: String(c.taskKey || ""), cadence: String(c.cadence || "daily"),
                dim: String(c.dim || ""), muscle: String(c.muscle || ""), pts: Number(c.pts) || 0,
@@ -604,18 +618,8 @@ async function loadTeam(workshopId) {
   }
 }
 
-/* ── 自評起點：讀回測驗自評 ATPI（只當對照顯示，不進計分）── */
-async function loadSelfEval(userId) {
-  try {
-    var r = await fetch(SHEET_API + "?userId=" + encodeURIComponent(userId));
-    var d = await r.json();
-    if (d.status !== "ok") return null;
-    return { A: Number(d.scoreA)||0, T: Number(d.scoreT)||0, P: Number(d.scoreP)||0, I: Number(d.scoreI)||0 };
-  } catch (e) {
-    console.log("loadSelfEval error:", e);
-    return null;
-  }
-}
+/* 自評起點（測驗的 ATPI）現在由 loadBootstrap 的 d.selfEval 一起帶回來，
+   不再另打一支端點——見上面 loadLogs 那段的說明。 */
 
 /* ═══════════════════════════════════════════════════════════
    榮譽系統 ctx：把本專案的打卡/成交聚合成 atpi-core 的 evalHonors 吃的正規化 ctx。
@@ -829,9 +833,15 @@ async function ensureAuthTok_(uid) {
   } catch (e) {}
 }
 
+/* 橋接畫面要畫在哪個容器。resolveLineId 被呼叫時記下來，
+   讓後面 loadBootstrap 撞到 need-auth 時畫在同一個地方——
+   loadBootstrap 自己收不到這個參數，沒記的話會落到 renderLineBridge 的預設值。 */
+var BRIDGE_HOST_ID = "bd";
+
 /* 取得使用者身分。回傳 lineId，或 null＝已經接手畫了橋接畫面，呼叫端直接 return 就好。
    順序：?id= → LIFF 已登入 →（只在 LINE 內）自動登入 → 這台瀏覽器記過的 cw_uid → 橋接畫面。 */
 async function resolveLineId(bodyElId) {
+  if (bodyElId) BRIDGE_HOST_ID = bodyElId;
   var uid = new URLSearchParams(location.search).get("id");
   if (uid) { rememberUid_(uid); return uid; }   // 網址上的 id＝不可信，不一定是這台裝置的主人
 

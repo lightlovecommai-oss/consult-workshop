@@ -790,7 +790,12 @@ function pubRows_(rows, selfUid, admin) {
    會把還沒回 LINE 換過章的人全部鎖在門外。
    ═══════════════════════════════════════════════════════════ */
 var AUTH_TTL_DAYS = 90;      // 通行證有效天數：長到不必一直回 LINE，短到被撿走也會過期
-var AUTH_ENFORCE  = false;   // ⚠️ 翻 true 前先看「驗證」欄的比例（見上方說明）
+var AUTH_ENFORCE  = false;   // ⚠️ 寫入面。翻 true 前先看「驗證」欄的比例（見上方說明）
+/* 讀取面的開關，跟寫入面**分開**：讀取的退路是 GET（?action=bootstrap&userId=），
+   而 GET 帶不了通行證（章不能放網址，會留進歷史與 log）。所以這個一翻 true，
+   GET 就只剩導師（帶 ADMIN_KEY）走得通，一般人全部得走 POST＋通行證。
+   ⚠️ 比寫入面更晚翻：翻早了，還沒換到章的人連儀表板都打不開（寫入面只是寫不進去）。 */
+var READ_ENFORCE  = false;
 
 function authSecret_() {
   var sp = PropertiesService.getScriptProperties(), s = sp.getProperty("AUTH_SECRET");
@@ -1216,6 +1221,33 @@ function computeTeam_(wid) {
   });
 }
 
+/* 儀表板的整包資料。GET 與 POST 兩條路都呼叫這一支——
+   ⚠️ 規則只准寫在這裡。抄成兩份的話，改了一邊、另一邊會靜默回舊答案。
+
+   為什麼要有 POST 這條路（2026-09-25）：這包東西最敏感（姓名、席位、成交金額、
+   作業內容、代幣餘額），要收緊就得帶通行證，而**通行證不能放在網址上**——
+   網址會留進瀏覽器歷史、Referer、各種 access log，等於把九十天的鑰匙到處複印。
+   所以帶章的讀取走 POST，章放在 body 裡。 */
+function readBootstrap_(buid, bw, admin) {
+  var bcfg = computeConfig_();
+  var blogs = computeLogs_(buid);
+  var enrolledWids = bcfg.enrollments.filter(function(e){ return e.lineId === buid; }).map(function(e){ return e.workshopId; });
+  var defWid = "";   // 入口帶的課程：有開通才用它當預設，否則落在第一門開通的
+  if (bw && enrolledWids.indexOf(bw) > -1) defWid = bw;
+  else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
+  var bEnroll = admin ? bcfg.enrollments : bcfg.enrollments.filter(function(en){ return en.lineId === buid; });
+  return json_({ status: "ok", student: computeStudent_(buid),
+                 workshops: bcfg.workshops, tasks: bcfg.tasks,
+                 enrollments: pubRows_(bEnroll, buid, admin), honors: bcfg.honors,
+                 checkins: blogs.checkins, revenue: blogs.revenue, evals: blogs.evals, selfEval: computeSelfEval_(buid),
+                 defaultWorkshop: defWid,
+                 leaderboard: pubRows_(computeLeaderboard_(defWid), buid, admin),
+                 team: pubRows_(computeTeam_(defWid), buid, admin),
+                 honorFeed: pubRows_(computeHonorFeed_(30), buid, admin),
+                 rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
+                 pending: computePending_(buid), submissions: computeSubmissions_(buid) });
+}
+
 function doGet(e) {
   try {
     var p = e.parameter || {};
@@ -1250,32 +1282,18 @@ function doGet(e) {
                      enrollments: pubRows_(cEnroll, self, admin), honors: cfg.honors });
     }
 
-    if (action === "bootstrap") {  // 一通回傳整個儀表板需要的資料（B：減少往返）
-      var buid = self;
-      var bcfg = computeConfig_();
-      var blogs = computeLogs_(buid);
-      var enrolledWids = bcfg.enrollments.filter(function(e){ return e.lineId === buid; }).map(function(e){ return e.workshopId; });
-      var bw = String(p.w || "");  // 入口帶的課程：有開通才用它當預設，否則落在第一門開通的
-      var defWid = "";
-      if (bw && enrolledWids.indexOf(bw) > -1) defWid = bw;
-      else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
-      var bEnroll = admin ? bcfg.enrollments : bcfg.enrollments.filter(function(en){ return en.lineId === buid; });
-      return json_({ status: "ok", student: computeStudent_(buid),
-                     workshops: bcfg.workshops, tasks: bcfg.tasks,
-                     enrollments: pubRows_(bEnroll, buid, admin), honors: bcfg.honors,
-                     checkins: blogs.checkins, revenue: blogs.revenue, evals: blogs.evals, selfEval: computeSelfEval_(buid),
-                     defaultWorkshop: defWid,
-                     leaderboard: pubRows_(computeLeaderboard_(defWid), buid, admin),
-                     team: pubRows_(computeTeam_(defWid), buid, admin),
-                     honorFeed: pubRows_(computeHonorFeed_(30), buid, admin),
-                     rewards: computeRewards_(), tokenBalance: computeTokenBalance_(buid), redemptions: computeRedemptions_(buid),
-                     pending: computePending_(buid), submissions: computeSubmissions_(buid) });
+    /* GET 的 bootstrap＝沒有通行證時的退路（LINE 外的人、web:email／dev:裝置碼 身份，
+       以及還沒回 LINE 換過章的舊使用者）。它的本質是「你說你要看誰就給你看誰」，
+       所以 READ_ENFORCE 一翻 true 就只剩導師（帶 ADMIN_KEY）走得通，
+       一般人回 need-auth、由前端帶著章改走 POST。 */
+    if (action === "bootstrap") {
+      if (READ_ENFORCE && !admin) return json_({ status: "need-auth" });
+      return readBootstrap_(self, String(p.w || ""), admin);
     }
 
-    if (action === "logs") {
-      var logs = computeLogs_(self);
-      return json_({ status: "ok", checkins: logs.checkins, revenue: logs.revenue, evals: logs.evals });
-    }
+    /* action=logs 已於 2026-09-25 移除：bootstrap 出現之後前端就不再呼叫它，
+       掃過整個 workspace 也沒有第二個使用者。留著的唯一效果是多開一個
+       「知道 userId 就讀得到那個人的打卡與成交金額」的入口。 */
 
     if (action === "leaderboard") {
       return json_({ status: "ok", rows: pubRows_(computeLeaderboard_(String(p.workshopId || "")), self, admin) });
@@ -1297,11 +1315,9 @@ function doGet(e) {
                      monthTop: { muscle: ms.topMuscle, dim: ms.topDim } });
     }
 
-    if (p.userId) {  // 自評（測驗結果），無 action
-      var se = computeSelfEval_(String(p.userId));
-      if (!se) return json_({ status: "none" });
-      return json_({ status: "ok", scoreA: se.A, scoreT: se.T, scoreP: se.P, scoreI: se.I });
-    }
+    /* 「沒有 action、只帶 userId＝回傳那個人的自評」這條路也在 2026-09-25 移除。
+       自評現在由 bootstrap 的 selfEval 一起帶回來（前端 loadSelfEval 已刪）。
+       ⚠️ 這條特別該關：它沒有 action、看起來不像端點，很容易在盤點時被漏掉。 */
 
     return json_({ status: "error", message: "unknown action" });
   } catch (err) {
@@ -1395,6 +1411,17 @@ function doPost(e) {
     if (body.action === "auth") {
       if (!A.verified) return json_({ status: "error", message: "ID Token 驗不過" });
       return json_({ status: "ok", uid: A.uid, tok: A.tok || authIssue_(A.uid), ttlDays: AUTH_TTL_DAYS });
+    }
+
+    /* 讀取面（2026-09-25）：帶章的 bootstrap 走這裡。
+       身份**一律以章為準**，body.userId 完全不看——這正是重點：
+       GET 那條路是「你說你要看誰就給你看誰」，只要知道一組 userId 就讀得到那個人；
+       這條路只給得出章上那個人的資料，撿到別人的 userId 也沒用。
+       ⚠️ 沒帶章就不要走這條（會回 need-auth），讓前端退回 GET，
+       否則後端還沒重新部署的那幾分鐘，所有人的儀表板會一起空白。 */
+    if (body.action === "bootstrap") {
+      if (!A.verified) return json_({ status: "need-auth" });
+      return readBootstrap_(A.uid, String(body.w || ""), false);
     }
 
     if (body.action === "checkin") {
