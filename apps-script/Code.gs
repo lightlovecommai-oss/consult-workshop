@@ -1307,6 +1307,28 @@ function doGet(e) {
       return readBootstrap_(self, String(p.w || ""), admin);
     }
 
+    /* 觀測期的儀表。「驗證」欄只有寫入端（withTrack_）會填，沒有任何端點讀得回來，
+       於是「多數已經是已驗證了嗎」——翻 AUTH_ENFORCE／READ_ENFORCE 的唯一前提——
+       只能靠人肉翻試算表。翻錯的代價是把人鎖在門外，所以這個判斷要有儀表。
+       導師金鑰專用：它會數到全體的列。刻意不回 lineId，只回數字與時間。 */
+    if (action === "authStats") {
+      if (!admin) return json_({ status: "error", message: "need-admin" });
+      var tailN = Math.min(Number(p.limit) || 10, 50);
+      var stats = [TABS.checkins, TABS.revenue, TABS.quiz].map(function(tab) {
+        var rs = rows_(tab), yes = 0, no = 0, blank = 0;
+        rs.forEach(function(r) {
+          var v = String(r["驗證"] || "").trim();
+          if (v === "已驗證") yes++; else if (v === "未驗證") no++; else blank++;
+        });
+        return { tab: tab, total: rs.length, verified: yes, unverified: no, blank: blank,
+                 tail: rs.slice(-tailN).map(function(r) {
+                   return { when: String(r["日期"] || r["date"] || r["時間"] || ""), auth: String(r["驗證"] || "") };
+                 }) };
+      });
+      return json_({ status: "ok", enforce: { write: AUTH_ENFORCE, read: READ_ENFORCE },
+                     channelId: LINE_CHANNEL_ID, stats: stats });
+    }
+
     /* action=logs 已於 2026-09-25 移除：bootstrap 出現之後前端就不再呼叫它，
        掃過整個 workspace 也沒有第二個使用者。留著的唯一效果是多開一個
        「知道 userId 就讀得到那個人的打卡與成交金額」的入口。 */
