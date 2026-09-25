@@ -205,7 +205,12 @@ async function init() {
       rememberUid_(p.userId, true);   // LIFF profile＝本人，可以蓋掉裝置上記錯的 id
       sendQuizBaseline_(p.userId, p.displayName || "");
       sayHello_(p.userId, p.displayName || "");
-      window.location.href = await routeFor(p.userId);
+      /* 換通行證要在**離開這一頁之前**做完。index 是唯一保證有 LIFF 的入口，
+         visitor.html／dashboard.html 都沒有自己的 liff.init——轉過去就再也拿不到
+         ID Token，那些人的打卡會永遠是「未驗證」，開關一翻就被鎖在門外。
+         跟 routeFor 併行跑：它自己要等兩趟，所以這一趟不多花時間。 */
+      var r_ = await Promise.all([routeFor(p.userId), ensureAuthTok_(p.userId)]);
+      window.location.href = r_[0];
       return;
     } else if (liff.isInClient()) {
       // 只在 LINE 內才走登入（無縫）；外部瀏覽器不強制登入，避免跳出 access.line.me 網頁登入頁
