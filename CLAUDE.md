@@ -46,7 +46,7 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
 
 ## 檔案分工
 - `atpi-core.js` — **跨專案共用核心**（另一個專案 comconverttest 也用同一套）。放 ATPI 通用邏輯：`DORD`、潛力值公式 `calcPotential`、甜蜜路徑資料 `COMBO_PATH`/`STRONG_PATH`/`WEAK_DESC`、判斷函式 `getCombo`，以及共用渲染函式 `drawRadarSVG`/`renderGrowthCard`/`renderTrendChart`。**改這裡兩個專案會一起生效。**
-- `common.js` — 本專案資料層：四維度 `DIMS`、等級 `LEVELS`、徽章、計分函式，以及接 Google Sheet 的 `loadStudents()`/`loadConfig()`/`loadLogs()`/`loadLeaderboard()`。**任務不再寫死**——由 `loadConfig()` 從 `tasks` 分頁讀進 `TASKS`/`WORKSHOPS`/`ENROLLMENTS`。
+- `common.js` — 本專案資料層：四維度 `DIMS`、等級 `LEVELS`、徽章、計分函式，以及接 Google Sheet 的 `loadStudents()`/`loadConfig()`/`loadBootstrap()`/`loadLeaderboard()`。**任務不再寫死**——由 `loadConfig()` 從 `tasks` 分頁讀進 `TASKS`/`WORKSHOPS`/`ENROLLMENTS`。
 - `apps-script/Code.gs` — 後端 Google Apps Script（Web App）。所有 GET/POST 端點都在這；改分頁名稱在檔頭 `TABS`。部署方式見檔頭註解與下方「Google Sheet 設定」。
 - `judgement.js` — **判讀規則表 v1**（v2 新增）：12 塊各自的 `symptom/homework/opener/evidence`＋`VERDICT`＋`buildScript()`（解盤逐字腳本）＋**內建動作庫 fallback**（`pickTodaySet()`／`fallbackMove()`）。真相日後以 productkit 27§8.7 的正式判讀規則表為準。
 - `index.html` — 入口：用 `?id=` 或 LIFF 取得學員 lineId，導向 dashboard。
@@ -124,7 +124,12 @@ LINE LIFF 的學員遊戲化儀表板，用任務打卡累積 ATPI 四力、畫�
   - ⚠️ **舊口徑已作廢**：`calcDims` 曾經再乘上 `validationFactor`（由成交金額×筆數算出）＝「用成交回推能力、再用能力預測變現」的循環論證。該函式已改名 `marketValidation(s)`、改用途成**獨立顯示的外部驗證欄位**（回傳 `{amount,count,amtAchieve,cntAchieve,index,pct,legacyFactor}`），**不乘進任何分數**。常數 `TARGET_AMOUNT`/`TARGET_COUNT` 現在只當市場驗證的分母；`VALID_FLOOR` 只剩 `legacyFactor` 用來對照舊快照，**禁止再乘進能力分**。
   - 成交紀錄分頁的 `A|T|P|I` 快照欄語意同步換了：2026-08-28 之後存的是「當下練出來的投入分」，之前的舊列是「投入×驗證係數」且**不回頭改寫**（歷史保留原樣），走勢圖跨那條線比較時要知道。
 - 等級門檻 `LEVELS`（0/10/18/24/29）是舊「29 滿分」模型留下的；`totalScore` 現含每日/每週會無限累積，血條已改 `levelProgress()` 走「到下一級的進度」不爆表，但門檻本身要不要納入每日/每週、重新設計，待定。
-- 打卡與成交**都已接 Google Sheet 持久化**：載入用 `loadLogs()`（GET `?action=logs`）讀回、`postCheckin()`/`postRevenue()`（POST）寫入「打卡紀錄」/「成交紀錄」分頁；成交會存下當下四維分數快照供走勢圖用。自評起點用 `loadSelfEval()`（GET `?userId=`）讀同一試算表的測驗結果，只顯示不計分。
+- 打卡與成交**都已接 Google Sheet 持久化**：載入一律走 `loadBootstrap()`、`postCheckin()`/`postRevenue()`（POST）寫入「打卡紀錄」/「成交紀錄」分頁；成交會存下當下四維分數快照供走勢圖用。自評起點由 bootstrap 的 `selfEval` 一起帶回來，只顯示不計分。
+- **身份驗證（2026-09-25 已上線）**：LIFF ID Token → 後端向 LINE 驗簽 → 換一張 90 天通行證（存 localStorage `cw_tok`）。
+  - **通行證不放在網址上**（網址會留進瀏覽器歷史、Referer、各種 access log），所以帶章的請求一律 **POST、章放 body**。讀取因此有兩條路：`doPost` 的 `bootstrap`（身份以章為準，body 寫誰不看）與 `doGet` 的 `bootstrap`（`userId` 寫誰就是誰＝**沒章時的退路**）。兩條共用 `readBootstrap_()`，**規則只准寫在那一支**。
+  - 已移除：前端 `loadLogs()`/`loadSelfEval()`、後端 `?action=logs` 與裸 `?userId=`。
+  - 兩個開關 `AUTH_ENFORCE`（寫入）/`READ_ENFORCE`（讀取）目前都 `false`＝觀測期。**讀取要比寫入更晚翻**：寫入翻早了人只是寫不進去，讀取翻早了人連儀表板都打不開。
+  - 名單類端點（`quiz`/`subscribe`/`hello`/`signup`，與 `eval` 的 `source=quiz`）**刻意不套驗證**——那些在 LINE 外也要能用，套上去等於把 LINE 外的漏斗整條關掉。
 
 ## Git
 改完直接 commit + push 到 main，GitHub Pages 約 1-2 分鐘更新。

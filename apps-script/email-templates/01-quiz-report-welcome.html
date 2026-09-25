@@ -27,7 +27,14 @@
   ⚠️ 這封**只有一顆鈕**（看完整報告）。以前還有第二顆「進影響力健身房」跟它打架——
      進健身房這件事現在由養客序列 d03／d07 負責，這封的單一任務就是讓他把報告打開。
 
-  設計對齊測驗結果頁：深棕 header (#4A1B0C) + 米底 (#FDF6EF) + 磚橘漸層 CTA (#C6603A→#AF5433)。
+  ⚠️ 2026-09-25 視覺改版：零件值的真相在 productkit 的
+     `2-行銷素材/Email行銷/email_vi.py`（它對齊 app 的 member.html inline style）。
+     這支是手寫檔，改樣式要**照著 email_vi 的值改**，不要自己調色。
+     這一輪改掉的：header 平面色塊→135deg 漸層且靠左、膠囊鈕→整寬圓角 16 方塊鈕、
+     卡片補 1px 描邊、細線→ATPI 四色線。
+     ⚠️ 分數格的 P 原本寫 #4A6FA5／I 原本寫 #B8893C——那兩個值**不在 21-品牌色彩系統裡**，
+        是當初手調的，跟 app 對不上。已改回表上的 P #6E8CA8／I #C99A4E。
+        I 原版只能當填色（暖底上 2.28:1），小字一律用深版 #8E682B。
   用 table 排版＋inline style，Gmail／Outlook／Apple Mail 都吃。
 -->
 <!DOCTYPE html>
@@ -37,26 +44,43 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>影響力健檢報告</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f0eb;font-family:'PingFang TC','Microsoft JhengHei','Helvetica Neue',Arial,sans-serif;color:#2a1810;line-height:1.7;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:#F7F1EC;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei','Helvetica Neue',Arial,sans-serif;color:#4A1B0C;line-height:1.75;-webkit-font-smoothing:antialiased;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">四塊肌肉的分數在裡面，還有先練哪一塊最有感。</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f0eb;padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F7F1EC;padding:24px 12px;">
   <tr>
     <td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#FDF6EF;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(74,27,12,0.08);">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#FDF6EF;border:1px solid #E8DDD3;border-radius:18px;overflow:hidden;">
 
-        <!-- Header：深棕塊 -->
+        <!-- Header＝member.html 的 .tb：135deg 深棕漸層、靠左、kicker 11/ls3、主名 19/900 -->
         <tr>
-          <td style="background:#4A1B0C;padding:26px 32px;text-align:center;">
-            <div style="color:#C9A87A;font-size:11px;letter-spacing:3px;font-weight:bold;">ATPIFit · 影響力健檢</div>
-            <div style="color:#FDF6EF;font-size:22px;font-weight:bold;margin-top:8px;letter-spacing:1px;">你的健檢報告</div>
+          <td bgcolor="#4A1B0C" style="background:#4A1B0C;background-image:linear-gradient(135deg,#4A1B0C 0%,#6B3018 100%);padding:24px 32px 20px;">
+            <div style="color:#C9A87A;font-size:11px;letter-spacing:3px;font-weight:bold;">影響力健身房 · 影響力健檢</div>
+            <div style="color:#FFFFFF;font-size:19px;font-weight:900;margin-top:9px;letter-spacing:.02em;line-height:1.5;">你的健檢報告</div>
+            <div style="color:#D9C3B4;font-size:12.5px;margin-top:6px;line-height:1.6;">平凡人光頭　四塊肌肉的現況</div>
+          </td>
+        </tr>
+
+        <!-- 身分條：先介紹環境再給報告，否則沒頭沒尾（34-ATPI用在單向載體 §2）。
+             這封的視覺主體是下面的 2×2 分數格，所以這裡只放一段話＋一行耗時，
+             不再放第二個圖形元素（§4b 規則二：一頁裡兩個視覺元素不能長太像）。
+             耗時 1 分鐘＝productkit `_tools/流程化.py` 的 readmin() 量出來的，改內文要重算 -->
+        <tr>
+          <td style="padding:20px 32px 14px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;border:1px solid #E8DDD3;border-radius:18px;">
+              <tr>
+                <td style="padding:18px 20px;">
+                  <p style="margin:0;font-size:14px;line-height:1.85;color:#6E4A3C;">這裡是<strong style="color:#4A1B0C;">影響力健身房</strong>，一個讓你<strong style="color:#4A1B0C;">系統性提升影響力</strong>的地方。<br>剛做完的健檢，量的是四塊影響力肌肉現在的狀態——知道先練哪一塊，才不會亂練。</p><p style="margin:10px 0 0;font-size:11.5px;color:#8A7266;">這封信約 1 分鐘看完。</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
 
         <!-- Greeting + 開場 -->
         <tr>
-          <td style="padding:30px 32px 0;">
-            <p style="margin:0 0 14px;font-size:17px;color:#2a1810;font-weight:bold;">{{inboundWebhookRequest.first_name}} 你好，</p>
-            <p style="margin:0;font-size:15px;line-height:1.85;color:#3d2a1f;">
+          <td style="padding:8px 32px 0;">
+            <p style="margin:0 0 14px;font-size:17px;color:#4A1B0C;font-weight:bold;">{{inboundWebhookRequest.first_name}} 你好，</p>
+            <p style="margin:0;font-size:15px;line-height:1.9;color:#4A1B0C;">
               剛剛那 12 題，換算出來是下面這四個數字。
             </p>
           </td>
@@ -68,36 +92,36 @@
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td width="50%" style="padding:0 5px 10px 0;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-left:4px solid #C6603A;border-radius:0 8px 8px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;border:1px solid #E8DDD3;border-left:3px solid #C6603A;border-radius:0 14px 14px 0;">
                     <tr><td style="padding:12px 14px;">
-                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#C6603A;">A · 吸引肌肉</div>
-                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_a}}<span style="font-size:13px;color:#9b8a79;font-weight:normal;"> / 100</span></div>
+                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#AF5433;">A · 吸引肌肉</div>
+                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_a}}<span style="font-size:13px;color:#8A7266;font-weight:normal;"> / 100</span></div>
                     </td></tr>
                   </table>
                 </td>
                 <td width="50%" style="padding:0 0 10px 5px;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-left:4px solid #6E8B77;border-radius:0 8px 8px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;border:1px solid #E8DDD3;border-left:3px solid #6E8B77;border-radius:0 14px 14px 0;">
                     <tr><td style="padding:12px 14px;">
                       <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#5C7464;">T · 信任肌肉</div>
-                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_t}}<span style="font-size:13px;color:#9b8a79;font-weight:normal;"> / 100</span></div>
+                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_t}}<span style="font-size:13px;color:#8A7266;font-weight:normal;"> / 100</span></div>
                     </td></tr>
                   </table>
                 </td>
               </tr>
               <tr>
                 <td width="50%" style="padding:0 5px 0 0;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-left:4px solid #4A6FA5;border-radius:0 8px 8px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;border:1px solid #E8DDD3;border-left:3px solid #6E8CA8;border-radius:0 14px 14px 0;">
                     <tr><td style="padding:12px 14px;">
-                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#3D5C8A;">P · 專業肌肉</div>
-                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_p}}<span style="font-size:13px;color:#9b8a79;font-weight:normal;"> / 100</span></div>
+                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#54718D;">P · 專業肌肉</div>
+                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_p}}<span style="font-size:13px;color:#8A7266;font-weight:normal;"> / 100</span></div>
                     </td></tr>
                   </table>
                 </td>
                 <td width="50%" style="padding:0 0 0 5px;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-left:4px solid #B8893C;border-radius:0 8px 8px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;border:1px solid #E8DDD3;border-left:3px solid #C99A4E;border-radius:0 14px 14px 0;">
                     <tr><td style="padding:12px 14px;">
-                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#9E7430;">I · 推進肌肉</div>
-                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_i}}<span style="font-size:13px;color:#9b8a79;font-weight:normal;"> / 100</span></div>
+                      <div style="font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#8E682B;">I · 推進肌肉</div>
+                      <div style="font-size:26px;font-weight:bold;color:#4A1B0C;line-height:1.2;margin-top:2px;">{{inboundWebhookRequest.score_i}}<span style="font-size:13px;color:#8A7266;font-weight:normal;"> / 100</span></div>
                     </td></tr>
                   </table>
                 </td>
@@ -109,32 +133,34 @@
         <!-- 場景 + 先練哪塊 -->
         <tr>
           <td style="padding:22px 32px 0;">
-            <p style="margin:0;font-size:15px;line-height:1.9;color:#3d2a1f;">
+            <p style="margin:0;font-size:15px;line-height:1.9;color:#4A1B0C;">
               你選的場景是<strong style="color:#4A1B0C;">{{inboundWebhookRequest.scene}}</strong>。<br>
               在這個場景裡，先練<strong style="color:#4A1B0C;">{{inboundWebhookRequest.weak_muscle}}</strong>，你會最快感覺到差別。
             </p>
-            <p style="margin:14px 0 0;font-size:15px;line-height:1.9;color:#3d2a1f;">
+            <p style="margin:14px 0 0;font-size:15px;line-height:1.9;color:#4A1B0C;">
               完整報告裡有 12 塊小肌群各自的分數，還有這一塊具體要練什麼。
             </p>
           </td>
         </tr>
 
-        <!-- 唯一一顆鈕 -->
+        <!-- 唯一一顆鈕＝member.html 的 .gobtn：整寬、圓角 16、17px/700。⛔ 不是膠囊鈕 -->
         <tr>
-          <td style="padding:24px 32px 28px;text-align:center;">
-            <a href="{{inboundWebhookRequest.report_url}}" style="display:inline-block;background:#C6603A;background-image:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#ffffff !important;text-decoration:none;padding:15px 36px;border-radius:999px;font-size:16px;font-weight:bold;letter-spacing:1px;box-shadow:0 3px 10px rgba(198,96,58,0.3);">
-              👉 看我的完整報告
-            </a>
+          <td style="padding:18px 32px 26px;">
+            <a href="{{inboundWebhookRequest.report_url}}" style="display:block;width:100%;box-sizing:border-box;background:#C6603A;background-image:linear-gradient(135deg,#C6603A 0%,#AF5433 100%);color:#FFFFFF !important;border:0;text-decoration:none;border-radius:16px;padding:17px 20px;font-size:17px;font-weight:bold;text-align:center;line-height:1.45;">看我的完整報告 →</a>
           </td>
         </tr>
 
-        <!-- 分隔線 -->
-        <tr><td style="padding:0 32px;"><div style="border-top:1px solid #E8DFD3;"></div></td></tr>
+        <!-- ATPI 四色線＝member.html 的 .rule4。email 不能賭漸層，切成四格實色 -->
+        <tr>
+          <td style="padding:0 32px;font-size:0;line-height:0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr><td width="25%" style="background:#C6603A;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#6E8B77;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#6E8CA8;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#C99A4E;font-size:0;line-height:0;height:2px;">&nbsp;</td></tr></table>
+          </td>
+        </tr>
 
         <!-- 骨層句 -->
         <tr>
-          <td style="padding:24px 32px 14px;">
-            <p style="margin:0;font-size:15px;color:#6E5A47;line-height:1.85;font-style:italic;">
+          <td style="padding:22px 32px 14px;">
+            <p style="margin:0;font-size:15px;color:#6E4A3C;line-height:1.9;font-style:italic;">
               練這個不是為了贏過誰，<br>是為了讓身邊的人因為你變好。
             </p>
           </td>
@@ -142,21 +168,24 @@
 
         <!-- Reply prompt + Signature -->
         <tr>
-          <td style="padding:6px 32px 8px;">
-            <p style="margin:0 0 10px;font-size:14px;color:#6E5A47;">這幾天我會再寄幾封信給你，一次講一件事。看完有問題，直接回這封信。</p>
-            <p style="margin:0 0 14px;font-size:13px;color:#8a7767;">順手把 <span style="color:#6E5A47;">hello@atpifit.com</span> 加進聯絡人，後面幾封才不會掉到促銷信件裡。</p>
+          <td style="padding:4px 32px 22px;">
+            <p style="margin:0 0 10px;font-size:14px;color:#6E4A3C;line-height:1.8;">這幾天我會再寄幾封信給你，一次講一件事。看完有問題，直接回這封信。</p>
+            <p style="margin:0 0 16px;font-size:13px;color:#8A7266;line-height:1.8;">順手把 <span style="color:#6E4A3C;">hello@atpifit.com</span> 加進聯絡人，後面幾封才不會掉到促銷信件裡。</p>
             <p style="margin:0;font-size:15px;color:#4A1B0C;font-weight:bold;">—— 平凡人光頭</p>
           </td>
         </tr>
 
-        <!-- 底 padding -->
-        <tr><td style="padding:16px;"></td></tr>
-
-        <!-- Footer -->
+        <!-- Footer：上緣壓一條四色線，跟 app 的 hero 底下那條同一個語言 -->
         <tr>
-          <td style="background:#4A1B0C;padding:18px 32px;text-align:center;">
-            <div style="color:#C9A87A;font-size:11px;letter-spacing:2px;">ATPIFit · 影響力健身房</div>
-            <div style="margin-top:8px;">
+          <td style="padding:0;font-size:0;line-height:0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr><td width="25%" style="background:#C6603A;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#6E8B77;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#6E8CA8;font-size:0;line-height:0;height:2px;">&nbsp;</td><td width="25%" style="background:#C99A4E;font-size:0;line-height:0;height:2px;">&nbsp;</td></tr></table>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#4A1B0C" style="background:#4A1B0C;background-image:linear-gradient(135deg,#4A1B0C 0%,#6B3018 100%);padding:22px 32px;text-align:center;">
+            <div style="color:#C9A87A;font-size:11px;letter-spacing:3px;font-weight:bold;">ATPIFIT · 影響力健身房</div>
+            <div style="color:#B99C8A;font-size:11.5px;margin-top:7px;line-height:1.7;">系統性提升影響力的地方</div>
+            <div style="margin-top:12px;">
               <a href="{{unsubscribe_url}}" style="color:#C9A87A;font-size:11px;text-decoration:underline;">取消訂閱 · Unsubscribe</a>
             </div>
           </td>
