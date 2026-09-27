@@ -80,14 +80,17 @@ function dimOfMuscle(mk) {
   return (MUSCLES[mk] || {}).dim || null;
 }
 /* 大肌肉分 ＝ 該維 3 小肌群平均（字典 ATPI 條的計分規則）。
-   scores＝{A1:..,A2:..}；缺的小肌群不計入平均（分母只算有值的），全缺回 0。 */
+   scores＝{A1:..,A2:..}；缺的小肌群不計入平均（分母只算有值的）。
+   ⚠️ 三塊全缺回 null 不回 0——「還沒量」和「量出來很低」是兩件事，跟
+   calcMuscleScores 對沒量過的小肌群不給 key 是同一把尺。回 0 的話呼叫端
+   那些 `!= null` 的誠實空狀態會全部失效（member/pro 共六個出口都靠這個判斷）。 */
 function dimFromMuscles(muscleScores) {
   var out = {};
   DORD.forEach(function(d) {
     var vals = musclesOfDim(d)
       .map(function(k){ return muscleScores[k]; })
       .filter(function(v){ return typeof v === "number" && !isNaN(v); });
-    out[d] = vals.length ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : 0;
+    out[d] = vals.length ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : null;
   });
   return out;
 }
