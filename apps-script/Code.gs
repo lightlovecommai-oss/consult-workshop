@@ -179,6 +179,66 @@ function setupTrackingColumns() {
 */
 var SEAT_PRO = { "私教席":true, "私教":true, "pro":true };
 
+/* ═══════════════════════════════════════════════════════════
+   自檢：跑完上面那幾支之後用這支確認「到底有沒有生效」。唯讀，不改任何東西。
+   它同時回答四件事，因為上次「跑好了」但改名沒進試算表，分不出是哪一關卡住：
+     ① 我現在在哪個腳本、接的是哪一份試算表（可以直接比對是不是開錯專案）
+     ② 這份程式是不是 09-28 那版（看得到這行字就是，看不到代表沒貼成功）
+     ③ 改名有沒有進試算表（直接讀 social2 跟 consult 現在的名字）
+     ④ 推薦四欄在不在、發了幾組碼
+   ═══════════════════════════════════════════════════════════ */
+function refCheck() {
+  var out = ["=== 版本 2026-09-28（推薦追蹤版）==="];
+  out.push("腳本 id：" + ScriptApp.getScriptId());
+  var ss;
+  try { ss = ss_(); } catch (e) { out.push("❌ 開不了試算表：" + e); Logger.log(out.join("\n")); return out.join("\n"); }
+  out.push("試算表：" + ss.getName() + "（id " + ss.getId() + "）");
+
+  var tsh = ss.getSheetByName(TABS.tasks);
+  if (!tsh) out.push("❌ 找不到任務分頁 " + TABS.tasks);
+  else {
+    var th = tsh.getRange(1, 1, 1, tsh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+    out.push("任務分頁標題列：" + th.join(" | "));
+    var wC = th.indexOf("workshopId"), kC = th.indexOf("taskKey"), nC = th.indexOf("name");
+    if (wC < 0 || kC < 0) out.push("❌ 缺 workshopId 或 taskKey 欄 → updateLevel1Tasks 會直接放棄（這就是改名沒生效的原因）");
+    else {
+      var d = tsh.getDataRange().getValues(), hit = "（沒找到 social2）";
+      for (var i = 1; i < d.length; i++) {
+        if (String(d[i][wC]).trim() === "一階" && String(d[i][kC]).trim() === "social2") { hit = String(d[i][nC]); break; }
+      }
+      out.push((hit.indexOf("平凡人光頭") > -1 ? "✅" : "❌") + " social2 現在叫：" + hit);
+    }
+  }
+
+  var rsh = ss.getSheetByName(TABS.rewards);
+  if (!rsh) out.push("❌ 找不到兌換品項分頁 " + TABS.rewards);
+  else {
+    var rh = rsh.getRange(1, 1, 1, rsh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+    var iC = rh.indexOf("rewardId"), rnC = rh.indexOf("name");
+    var rd = rsh.getDataRange().getValues(), rhit = "（沒找到 consult）";
+    for (var j = 1; j < rd.length; j++) if (String(rd[j][iC]).trim() === "consult") { rhit = String(rd[j][rnC]); break; }
+    out.push((rhit.indexOf("平凡人光頭") > -1 ? "✅" : "❌") + " consult 品名現在叫：" + rhit);
+  }
+
+  var ssh = ss.getSheetByName(TABS.students);
+  if (!ssh) out.push("❌ 找不到人主檔 " + TABS.students);
+  else {
+    var sh1 = ssh.getRange(1, 1, 1, ssh.getLastColumn()).getValues()[0].map(function(h){ return String(h).trim(); });
+    var need = ["推薦碼", "推薦人", "推薦日", "獎金狀態"], miss = [];
+    need.forEach(function(h){ if (sh1.indexOf(h) < 0) miss.push(h); });
+    out.push(miss.length ? "❌ 人主檔缺欄：" + miss.join("／") : "✅ 推薦四欄都在");
+    var cC = sh1.indexOf("推薦碼");
+    if (cC > -1 && ssh.getLastRow() > 1) {
+      var cv = ssh.getRange(2, cC + 1, ssh.getLastRow() - 1, 1).getValues(), n = 0;
+      cv.forEach(function(r){ if (String(r[0]).trim()) n++; });
+      out.push("已發出推薦碼：" + n + " 組 / 名單 " + cv.length + " 人");
+    }
+  }
+  var msg = out.join("\n");
+  Logger.log(msg);
+  return msg;
+}
+
 /* 在人主檔補上推薦四欄。第一次啟用跑這支；之後再跑不會重複加。 */
 function setupReferralColumns() {
   var tab = TABS.students;
