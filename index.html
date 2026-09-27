@@ -93,7 +93,7 @@
       也要能回頭問「他到底該不該在我這一頁」（主畫面捷徑鎖頁的問題）。改規則改那邊。 */
 
 /* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
-var FROM = "", MSQ = "", QSID = "";
+var FROM = "", MSQ = "", QSID = "", REF = "";
 try {
   var sp_ = new URLSearchParams(window.location.search);
   FROM = sp_.get("from") || "";
@@ -103,6 +103,12 @@ try {
   QSID = sp_.get("sid") || "";
   if (QSID) localStorage.setItem("cw_qsid", QSID);       // 之後幾次進來沒帶參數也還接得上
   else QSID = localStorage.getItem("cw_qsid") || "";
+  /* ref＝是誰帶他來的（推薦碼）。走跟 sid 一樣的路：先從網址收、存起來，
+     之後幾次沒帶參數也還記得。決定歸誰的 30 天規則在後端（Code.gs ensureRosterRow_），
+     這裡只負責「把碼原封不動送到」。⚠️ 畫面上不顯示任何跟推薦有關的東西。 */
+  REF = (sp_.get("ref") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 12);
+  if (REF) localStorage.setItem("cw_ref", REF);
+  else REF = localStorage.getItem("cw_ref") || "";
 } catch(e){}
 function fromQ_(){ return FROM ? "&from=" + encodeURIComponent(FROM) : ""; }
 
@@ -124,7 +130,7 @@ function sendQuizBaseline_(id, name) {
   DORD.forEach(function(k){ pct[k] = pctFromEval(d5[k]); });
   var sk = DORD.reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
   var uk = DORD.filter(function(k){ return k !== sk; }).reduce(function(a, b){ return pct[a] > pct[b] ? a : b; });
-  var quiz = { action: "quiz", userId: id, displayName: name || "", name: "", email: "", job: "", quizSid: QSID,
+  var quiz = { action: "quiz", userId: id, displayName: name || "", name: "", email: "", job: "", quizSid: QSID, ref: REF,
     scoreA: pct.A, scoreT: pct.T, scoreP: pct.P, scoreI: pct.I,
     rawAnswers: parts.join(","), mainAbility: DIMS[sk].name, subAbility: DIMS[uk].name,
     timestamp: new Date().toISOString() };
@@ -152,9 +158,9 @@ function sendQuizBaseline_(id, name) {
    · 跟 sendQuizBaseline_ 一樣用 sendBeacon——這行的下一行就跳頁了 */
 function sayHello_(id, name) {
   if (!/^U[0-9a-f]{32}$/i.test(String(id || ""))) return;   // 假身份／測試 id 不進名單
-  var sig = id + "|" + (name || "") + "|" + QSID;   // 名字或測驗裝置碼晚一步才拿到時要能再送一次
+  var sig = id + "|" + (name || "") + "|" + QSID + "|" + REF;   // 名字/測驗裝置碼/推薦碼晚一步才拿到時要能再送一次
   try { if (localStorage.getItem("cw_hello_v1") === sig) return; } catch(e){}
-  var payload = { action: "hello", userId: id, displayName: name || "", quizSid: QSID };
+  var payload = { action: "hello", userId: id, displayName: name || "", quizSid: QSID, ref: REF };
   var ok = false;
   try {
     if (navigator.sendBeacon) {

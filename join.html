@@ -167,6 +167,14 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,B
    我改這一行、部署，按鈕就會真的帶去 PayUni 收銀台，不用等 Code.gs 那邊的加解密問題解決。 */
 var PAYUNI_URL = "";
 
+/* 推薦碼只是路過這頁：這裡不寫試算表，但它可能是他在這個網域看到的第一頁
+   （報告信的錢鈕會帶 ?ref= 直接進來）。存起來，等他之後用 LINE 進館報到時一起送出去。
+   不存的話，去 PayUni 繞一圈回來，是誰帶他來的就掉了。 */
+try {
+  var ref0 = (new URLSearchParams(location.search).get("ref") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 12);
+  if (ref0) localStorage.setItem("cw_ref", ref0);
+} catch (e) {}
+
 function bindPay(){
   var btn = document.getElementById("btnPay"), note = document.getElementById("devNotice");
   if (PAYUNI_URL) {

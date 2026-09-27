@@ -45,9 +45,15 @@ var COLS = {
      合法值（中英都收，前端 SEAT_MAP 對照）：體驗席／會員席／私教席／舊版／健檢。空白＝走自動規則。
      paidMember 現在由 seatPaid_() 從席位推得；「溝通健身房會員」打勾欄只在席位空白時當 fallback，
      不必再人工維護（別把這個欄位別名刪掉，舊列還靠它）。 */
+  /* 推薦四欄（2026-09-28）：refCode＝這個人自己的碼（發給他去推薦人用）；
+     referrer＝是誰帶他來的（對方的碼）；referDate＝寫入那天（30 天保護期的計時器）；
+     refPayout＝獎金狀態（空／待匯／已匯／不適用）。
+     ⚠️ 這四欄純後台，App 畫面一個字都不顯示——獎金不是誘因（20§4b-2）。 */
   students: { lineId:["LINE userId","lineId"], name:["姓名","LINE名稱","name"], team:["團隊","team"],
               paidMember:["溝通健身房會員","影響力健身房會員","paidMember"],
-              seat:["指定席位","seat"] },
+              seat:["指定席位","seat"],
+              refCode:["推薦碼","refCode"], referrer:["推薦人","referrer"],
+              referDate:["推薦日","referDate"], refPayout:["獎金狀態","refPayout"] },
   enroll:   { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"] },
   checkins: { lineId:["LINE userId","lineId"], workshopId:["課程","workshopId"], taskKey:["任務key","taskKey"],
               cadence:["類型","cadence"], dim:["維度","dim"], pts:["分數","pts"], date:["日期","date"],
@@ -151,6 +157,121 @@ function setupTrackingColumns() {
     out.push(tab + "：七個追蹤欄已就緒");
   });
   return out.join("\n");
+}
+
+/* ═══ 推薦分潤（2026-09-28 拍板，規格在 productkit 20-健身房會員落地方案 §4b-2）═══
+
+   三件事要知道，不然這段程式會被讀錯：
+   ① **分潤只發生在「升私教」那一層**（會員→私教學員）。99 那層不分潤。
+   ② **(遊戲)成交紀錄 跟這件事無關**——那張表記的是學員自己跟他客戶成交多少，
+      不是我們賣課給他。我們賣出去那一筆的憑證是「指定席位改成私教席」。
+   ③ **獎金零露出**：不做推薦人專頁、不做排行榜、App 畫面不提錢。
+      推薦碼只在試算表裡，由平凡人光頭私下複製成連結給他想邀的人。
+
+   連結長這樣（推薦人拿到的就是這一條，指向測驗，不是直接進 App）：
+     https://quiz.atpifit.com/?ref=ABC123
+   測驗站會把 ref 交棒給 App（跟 sid 走同一條橋），App 報到時寫進人主檔。
+
+   三支手動函式，在編輯器選了按「執行」，都可以重複跑：
+     setupReferralColumns() → 把四個欄位補上（第一次用跑這支）
+     assignRefCodes()       → 發推薦碼（新的人也用這支補）
+     refPayoutList()        → 看這個月該匯給誰（結果在「執行記錄」）
+*/
+var SEAT_PRO = { "私教席":true, "私教":true, "pro":true };
+
+/* 在人主檔補上推薦四欄。第一次啟用跑這支；之後再跑不會重複加。 */
+function setupReferralColumns() {
+  var tab = TABS.students;
+  if (!ss_().getSheetByName(tab)) return tab + "：找不到分頁";
+  ["推薦碼", "推薦人", "推薦日", "獎金狀態"].forEach(function(h){ ensureColumn_(tab, h); });
+  return tab + "：推薦碼／推薦人／推薦日／獎金狀態 四欄已就緒";
+}
+
+/* 發推薦碼：名單上每個有真 LINE 身份、還沒有碼的人都發一組六碼。
+   為什麼人人都發：老師裁定「推薦每個人都可以推薦」，只是拿獎金限私教學員。
+   而且碼本身不露出、不值錢，先發好就不必等人問才補。
+   碼不重複（跟現有的比對過），已經有碼的不會被換掉——換掉會讓已經發出去的連結失效。 */
+function assignRefCodes() {
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return "找不到 " + TABS.students;
+  setupReferralColumns();
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2) return "名單是空的";
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var idCol = headers.indexOf("LINE userId"), codeCol = headers.indexOf("推薦碼");
+  if (idCol < 0) idCol = colIndexOf_(headers, COLS.students.lineId);
+  if (codeCol < 0) return "找不到「推薦碼」欄（先跑 setupReferralColumns）";
+  var vals = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  var used = {};
+  vals.forEach(function(r){ var c = cleanRefCode_(r[codeCol]); if (c) used[c] = true; });
+  var made = 0;
+  for (var i = 0; i < vals.length; i++) {
+    if (cleanRefCode_(vals[i][codeCol])) continue;              // 已經有碼
+    if (!isLineId_(String(vals[i][idCol]).trim())) continue;     // web:／dev: 假身份不發
+    var code = "";
+    do { code = newRefCode_(); } while (used[code]);
+    used[code] = true;
+    sh.getRange(i + 2, codeCol + 1).setValue(code);
+    made++;
+  }
+  return "發出 " + made + " 組推薦碼（已有碼的沒動）";
+}
+
+/* 六碼：去掉容易看錯的 0/O/1/I/L——這個碼會被人用眼睛抄進 LINE 訊息裡。 */
+function newRefCode_() {
+  var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", s = "";
+  for (var i = 0; i < 6; i++) s += abc.charAt(Math.floor(Math.random() * abc.length));
+  return s;
+}
+
+function colIndexOf_(headers, aliases) {
+  for (var c = 0; c < headers.length; c++) if (aliases.indexOf(headers[c]) > -1) return c;
+  return -1;
+}
+
+/* 該匯給誰：掃人主檔，把「已經是私教席 ＋ 有推薦人 ＋ 獎金狀態還空著」的列列出來，
+   順手判斷推薦人本人現在是不是私教席（不是就沒有獎金，這是老師定的權益範圍）。
+
+   ⚠️ 這支只列清單、不自己寫狀態、不自己算錢：
+      · 錢要匯多少在 productkit 28（那份刻意不進 git），這裡不寫任何比例或金額。
+      · 匯完款請自己在「獎金狀態」欄填「已匯」或「不適用」——填了下次就不會再列出來。
+      · 資格以**你看到這張清單那天**推薦人的席位為準；判完就把結果寫進那一欄凍結起來，
+        免得他之後席位變動又要重新吵一次。 */
+function refPayoutList() {
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return "找不到 " + TABS.students;
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2) return "名單是空的";
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var iName = colIndexOf_(headers, COLS.students.name),
+      iSeat = colIndexOf_(headers, COLS.students.seat), iCode = colIndexOf_(headers, COLS.students.refCode),
+      iRef = colIndexOf_(headers, COLS.students.referrer), iDate = colIndexOf_(headers, COLS.students.referDate),
+      iPay = colIndexOf_(headers, COLS.students.refPayout);
+  if (iRef < 0 || iCode < 0) return "找不到推薦欄（先跑 setupReferralColumns）";
+  var vals = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  var byCode = {};
+  vals.forEach(function(r){
+    var c = cleanRefCode_(r[iCode]);
+    if (c) byCode[c] = { name: iName > -1 ? String(r[iName]).trim() : "", seat: iSeat > -1 ? String(r[iSeat]).trim() : "" };
+  });
+  var lines = [], n = 0;
+  for (var i = 0; i < vals.length; i++) {
+    var r = vals[i];
+    if (iSeat < 0 || !SEAT_PRO[seatNorm_(r[iSeat])]) continue;          // 還沒升私教＝還沒有這筆
+    var refCode = cleanRefCode_(r[iRef]);
+    if (!refCode) continue;                                            // 自己來的，沒有推薦人
+    if (iPay > -1 && String(r[iPay]).trim()) continue;                  // 已經處理過
+    var who = byCode[refCode];
+    var pro = who && SEAT_PRO[seatNorm_(who.seat)];
+    n++;
+    lines.push("第 " + (i + 2) + " 列｜" + (iName > -1 ? String(r[iName]).trim() : "") +
+               " 已升私教｜推薦人 " + refCode + "（" + (who ? (who.name || "無姓名") + "・" + (who.seat || "沒填席位") : "⚠️ 名單裡找不到這個碼") + "）" +
+               "｜推薦日 " + (iDate > -1 ? String(r[iDate]).trim() : "沒欄位") +
+               "｜" + (pro ? "✅ 有獎金資格" : "❌ 推薦人不是私教席 → 這筆填「不適用」"));
+  }
+  var out = n ? ("待處理 " + n + " 筆：\n" + lines.join("\n")) : "沒有待處理的（升私教的人裡沒有還沒結的推薦）";
+  Logger.log(out);
+  return out;
 }
 
 /* ═══ 觀測期的儀表 ═══
@@ -612,18 +733,21 @@ function quizReportUrl_(qraw, body) {
 /* 自動在開通名單(=人主檔)建一列：只填 userId/姓名，團隊與各課開通欄留空（＝未開通）。
    已存在同 userId 就不重複建；但**姓名還空著**時會補上（測驗補寫那條路徑姓名是空的，
    等他真的用 LINE 進館才拿得到 displayName）。只補空格，不覆蓋人工填過的名字。 */
-function ensureRosterRow_(lineId, name) {
+function ensureRosterRow_(lineId, name, ref) {
   if (!lineId) return;
   var sh = ss_().getSheetByName(TABS.students);
   if (!sh) return;
   var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
   var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
-  var idCol = -1, nameCol = -1;
+  var idCol = -1, nameCol = -1, refCol = -1, refDateCol = -1;
   for (var c = 0; c < headers.length; c++) {
     if (idCol < 0 && COLS.students.lineId.indexOf(headers[c]) > -1) idCol = c;
     if (nameCol < 0 && COLS.students.name.indexOf(headers[c]) > -1) nameCol = c;
+    if (refCol < 0 && COLS.students.referrer.indexOf(headers[c]) > -1) refCol = c;
+    if (refDateCol < 0 && COLS.students.referDate.indexOf(headers[c]) > -1) refDateCol = c;
   }
   if (idCol < 0) return;
+  var refCode = cleanRefCode_(ref);
   /* 比對不分大小寫（2026-09-24）：web: 身份是 Email，「Michelle@Gmail.com」與
      「michelle@gmail.com」是同一個人，分大小寫比會再建一列，同一個人變兩列。 */
   var want = lineId.toLowerCase();
@@ -635,11 +759,41 @@ function ensureRosterRow_(lineId, name) {
         var cell = sh.getRange(i + 2, nameCol + 1);
         if (String(cell.getValue()).trim() === "") cell.setValue(name);
       }
+      if (refCode) writeReferrer_(sh, i + 2, refCol, refDateCol, refCode);
       return;  // 已在名單，不重複建列
     }
   }
   appendMapped_(TABS.students, { lineId: COLS.students.lineId, name: COLS.students.name },
                 { lineId: lineId, name: name || "" });
+  if (refCode) writeReferrer_(sh, sh.getLastRow(), refCol, refDateCol, refCode);
+}
+
+/* 推薦碼只收英數、最長 12 碼。網址上的東西不可信，而這個值會被寫進人主檔。 */
+function cleanRefCode_(ref) {
+  return String(ref || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 12).toUpperCase();
+}
+
+/* ⭐ 30 天保護期，過期後最後一個算（2026-09-28 老師裁定）。
+   空著就寫進去；已經有人在裡面時，只有「推薦日超過 30 天」且「這次來的是不同的碼」才換人。
+   30 天內不管他又點了誰的連結，功勞都還是原本那個人的。
+   ⚠️ 換人是直接蓋掉，沒有另外開歷史紀錄分頁——第一版靠試算表自己的「修訂記錄」當憑證就夠，
+      量起來（或第一次有人來吵）再談要不要留 log。 */
+function writeReferrer_(sh, row, refCol, refDateCol, refCode) {
+  if (refCol < 0 || row < 2) return;       // 沒欄位就當沒這回事（先跑 setupReferralColumns）
+  var cur = String(sh.getRange(row, refCol + 1).getValue()).trim().toUpperCase();
+  if (cur === refCode) return;             // 同一個人重複點自己的連結，不用一直寫
+  if (cur) {
+    if (refDateCol < 0) return;            // 有人了、又沒有日期可判 → 不敢動，維持原推薦人
+    var prev = sh.getRange(row, refDateCol + 1).getValue();
+    var prevTime = (prev instanceof Date) ? prev.getTime() : Date.parse(String(prev));
+    if (!prevTime) return;                 // 日期壞掉／空白＝判不出來，維持原推薦人
+    if (Date.now() - prevTime < 30 * 24 * 60 * 60 * 1000) return;   // 還在保護期內
+  }
+  sh.getRange(row, refCol + 1).setValue(refCode);
+  if (refDateCol > -1) {
+    sh.getRange(row, refDateCol + 1).setValue(
+      Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd"));
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1665,7 +1819,7 @@ function doPost(e) {
         ["displayName","pictureUrl","name","email","job","income","goalIncome","customerSource",
          "targetContext","targetNeed","targetKeyMuscle"]));  // 同 userId 更新那列，重測/重開不重複
       writeQuizBaseline_(quid, qraw);   // 12 格答案順手寫成健檢基線——這是體格的唯一來源，別再只靠 ?ms=
-      if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "");  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）；web:xxx 假身份進不了館，不進名單
+      if (hasLineId) ensureRosterRow_(quid, body.name || body.displayName || "", body.ref);  // 測驗完自動在開通名單建一列（課程欄留空＝未開通）＋記下是誰帶他來的；web:xxx 假身份進不了館，不進名單
       addToKit_(body.email, body.name || body.displayName || "", {  // 同步進 Kit 電子報（有 email 才會送；失敗不影響上面寫入）
         atpi_a: body.scoreA || 0, atpi_t: body.scoreT || 0, atpi_p: body.scoreP || 0, atpi_i: body.scoreI || 0,
         main_ability: body.mainAbility || "", income_level: body.incomeLevel || "", job: body.job || ""
@@ -1712,7 +1866,7 @@ function doPost(e) {
     if (body.action === "hello") {
       var hid = String(body.userId || body.lineId || "").trim();
       if (!isLineId_(hid)) return json_({ status: "ok", skipped: true });
-      ensureRosterRow_(hid, String(body.displayName || body.name || "").trim());
+      ensureRosterRow_(hid, String(body.displayName || body.name || "").trim(), body.ref);
       /* quizSid＝測驗那一站的裝置碼，由交接連結的 ?sid= 帶過來。
          quiz.atpifit.com 與 app.atpifit.com 的 localStorage 不互通，
          所以兩邊各有一組裝置碼；沒有這條參數，匿名測驗那列就永遠接不到這個 LINE 身份。 */
