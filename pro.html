@@ -153,6 +153,13 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
    這頁的錢鈕讓給最下面的升單卡，「記下反應」是練習動作不是掏錢。 */
 .softbtn{display:block;width:100%;background:rgba(232,200,154,.12);border:1px solid rgba(232,200,154,.45);border-radius:16px;color:#E8C89A;font-size:16px;font-weight:800;padding:16px;text-align:center;cursor:pointer;font-family:inherit;min-height:56px;margin-top:18px;}
 .softbtn:active{transform:scale(.98);}
+/* 分享卡：刻意做成最安靜的一張（幽靈框、無漸層）——它不是要成交誰，
+   跟同頁的錢鈕不能長得像，不然會被讀成「再賣你一次」。 */
+.shr-t{font-size:17px;font-weight:800;color:#DCE7F0;line-height:1.5;margin-bottom:8px;}
+.shr-s{font-size:13.5px;color:#8ea1b6;line-height:1.85;}
+.shr-b{display:block;width:100%;margin-top:16px;background:transparent;border:1px solid #33c495;border-radius:16px;color:#33c495;font-size:16px;font-weight:800;padding:15px;text-align:center;cursor:pointer;font-family:inherit;min-height:52px;}
+.shr-b:active{transform:scale(.98);}
+.shr-m{font-size:12.5px;color:#7d90a3;text-align:center;margin-top:10px;min-height:18px;word-break:break-all;}
 /* 小肌肉切換：12 塊自己挑要練哪塊。系統推薦的那顆掛一點，不是幫你決定 */
 .mkpick{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0 2px;}
 .mkp{font-family:inherit;font-size:12.5px;font-weight:800;border-radius:9px;padding:7px 10px;min-height:32px;cursor:pointer;background:transparent;border:1px solid #2a3c50;color:#8ea1b6;letter-spacing:.5px;}
@@ -408,7 +415,7 @@ button.mat{font-family:inherit;cursor:pointer;width:100%;}
    - 分數＝calcMuscleScores/calcDimScores5；金額＝revenueLog；金庫＝note 裡的「」原話
    - 人設照最強兩維自動判、狀態照 revenueLog 判（教練拍板可改＝下次 1v1 的事，不編後端沒有的欄位） */
 /* PRO_WORKSHOPS 在 common.js（席位路由那一段）＝全站唯一一份，這裡只是用它 */
-var S = null, WID = null, REC = null;
+var S = null, WID = null, REC = null, REFCODE = "";
 
 var STAGES = [
   {k:"none", zh:"沒反應", full:"他沒什麼反應", c:"#5d7692", t:"#8ea1b6", tint:"rgba(125,144,163,.18)", h:30},
@@ -1452,11 +1459,49 @@ function seatPathHTML(bare){
 
 /* ═══ render ═══ */
 var ANIM = true; /* 進頁/切分頁時薄片從基線長上來一次；頁內重繪（點星圖等）不重播 */
+/* ═══ 分享健身房（2026-09-28）═══
+   ⚠️ 這張卡不准出現任何獎金／回饋／分潤字樣——老師 09-28 裁定：獎金不是誘因，
+   推廣的理由只有「讓身邊的人變得更好」（productkit 20§4b-2）。
+   碼由後端 bootstrap 帶回來（沒有就當場發），前端不顯示碼本身，只組連結。 */
+function refLink(){ return REFCODE ? "https://quiz.atpifit.com/?ref=" + encodeURIComponent(REFCODE) : ""; }
+function shareHTML(){
+  if (!refLink()) return "";
+  return '<div class="cd"><div class="sec">一起練</div>'
+    + '<div class="shr-t">影響力是可以一起練的。</div>'
+    + '<div class="shr-s">傳個連結給朋友，他先做一次影響力健檢，<br>看見現在的自己，再決定要不要進館。</div>'
+    + '<button class="shr-b" id="shrBtn">分享健身房給朋友</button>'
+    + '<div class="shr-m" id="shrMsg"></div></div>';
+}
+function bindShare(){
+  var b = el("shrBtn"); if (!b) return;
+  b.onclick = function(){
+    var url = refLink(), msg = el("shrMsg");
+    track("share_gym", { seat: "pro" });
+    var txt = "影響力健檢——5 分鐘看見自己現在最強跟最有空間的那一塊：\n" + url;
+    try {
+      if (window.liff && liff.isApiAvailable && liff.isApiAvailable("shareTargetPicker")) {
+        liff.shareTargetPicker([{ type: "text", text: txt }])
+          .then(function(){ msg.textContent = "傳出去了。"; })
+          .catch(function(){ copyLink_(url, msg); });
+        return;
+      }
+    } catch (e) {}
+    copyLink_(url, msg);
+  };
+}
+function copyLink_(url, msg){
+  var ok = function(){ msg.textContent = "連結已複製，貼給他就好。"; };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, function(){ msg.textContent = url; });
+  else msg.textContent = url;
+}
+
 function render(){
   el("joinday").textContent = S.lineId === "DEMO" ? "DEMO" : "第 " + daysSinceJoin(S) + " 天";
-  var h = REC ? recHTML() : (PANE==="crm" ? crmHTML() : PANE==="out" ? outHTML() : mapHTML());
+  /* 分享卡當三頁共用的頁尾：它不屬於任何一頁的論述，塞進客戶管理會被讀成「去推你的客戶」，
+     塞在課程地圖又會貼著升單錢鈕。放頁尾才維持得住「安靜的邀請」。 */
+  var h = REC ? recHTML() : (PANE==="crm" ? crmHTML() : PANE==="out" ? outHTML() : mapHTML()) + shareHTML();
   el("bd").innerHTML = h;
-  if (REC) bindRec();
+  if (REC) bindRec(); else bindShare();
   if (ANIM) {
     ANIM = false;
     document.querySelectorAll("#bd .sl").forEach(function(s){
@@ -1536,7 +1581,7 @@ async function boot() {
   if (qs.get("next") === "quiz" && _nq) { _nq.classList.remove("hide"); }
   if (qs.get("demo") === "1") {
     postToSheet = function(){ return Promise.resolve(); };   // demo 不寫 Sheet
-    TASKS = []; S = demoStatePro_(); WID = PRO_WORKSHOPS[0];
+    TASKS = []; S = demoStatePro_(); WID = PRO_WORKSHOPS[0]; REFCODE = "DEMO99";
     LOG = buildLog();
     /* 截圖驗收捷徑（同 demo-pro-v5 慣例）：?rec=2&who=張總&stage=P／?selL=5／?drill=1 */
     if (qs.get("rec")) REC = { who: qs.get("who")||"張總", rel: qs.get("rel")||"客戶", stage: qs.get("stage"),
@@ -1562,6 +1607,7 @@ async function boot() {
   S = { lineId: st.lineId || uid, pid: st.pid || "", name: st.name || "", team: st.team || "",
         checkinLog: d.checkins || [], revenueLog: d.revenue || [], evalLog: d.evals || [],
         submissions: d.submissions || [] };
+  REFCODE = String(d.refCode || "");
   var enrolledPro = (d.enrollments || []).filter(function(e){ return isMe(e, S) && PRO_WORKSHOPS.indexOf(e.workshopId) > -1; });
   WID = enrolledPro.length ? enrolledPro[0].workshopId : PRO_WORKSHOPS[0];
   LOG = buildLog();

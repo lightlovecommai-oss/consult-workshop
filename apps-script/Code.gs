@@ -277,6 +277,37 @@ function assignRefCodes() {
   return "發出 " + made + " 組推薦碼（已有碼的沒動）";
 }
 
+/* 自己的推薦碼，沒有就當場發一組。bootstrap 用，只回他本人的。
+   為什麼要能當場發：新升上來的人不在上次 assignRefCodes 跑過的名單裡，
+   若要等人再跑一次函式，就是老師說的「多一道人工」。 */
+function myRefCode_(uid) {
+  if (!isLineId_(uid)) return "";
+  var sh = ss_().getSheetByName(TABS.students);
+  if (!sh) return "";
+  var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+  if (lastRow < 2) return "";
+  var headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); });
+  var codeCol = headers.indexOf("推薦碼");
+  if (codeCol < 0) return "";                                   // 還沒跑 setupReferralColumns
+  var idCol = headers.indexOf("LINE userId");
+  if (idCol < 0) idCol = colIndexOf_(headers, COLS.students.lineId);
+  if (idCol < 0) return "";
+  var vals = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  var used = {}, myRow = -1;
+  for (var i = 0; i < vals.length; i++) {
+    var c = cleanRefCode_(vals[i][codeCol]);
+    if (c) used[c] = true;
+    if (String(vals[i][idCol]).trim() === uid) myRow = i;
+  }
+  if (myRow < 0) return "";
+  var mine = cleanRefCode_(vals[myRow][codeCol]);
+  if (mine) return mine;
+  var code = "";
+  do { code = newRefCode_(); } while (used[code]);
+  sh.getRange(myRow + 2, codeCol + 1).setValue(code);
+  return code;
+}
+
 /* 六碼：去掉容易看錯的 0/O/1/I/L——這個碼會被人用眼睛抄進 LINE 訊息裡。 */
 function newRefCode_() {
   var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", s = "";
@@ -1511,7 +1542,8 @@ function readBootstrap_(buid, bw, admin) {
   if (bw && enrolledWids.indexOf(bw) > -1) defWid = bw;
   else { for (var bi = 0; bi < bcfg.workshops.length; bi++) { if (enrolledWids.indexOf(bcfg.workshops[bi].id) > -1) { defWid = bcfg.workshops[bi].id; break; } } }
   var bEnroll = admin ? bcfg.enrollments : bcfg.enrollments.filter(function(en){ return en.lineId === buid; });
-  return json_({ status: "ok", student: computeStudent_(buid),
+  /* 只回他本人的碼，而且是頂層欄位——放進 student 會有一天跟著多人清單被 pubRows_ 送出去。 */
+  return json_({ status: "ok", student: computeStudent_(buid), refCode: myRefCode_(buid),
                  workshops: bcfg.workshops, tasks: bcfg.tasks,
                  enrollments: pubRows_(bEnroll, buid, admin), honors: bcfg.honors,
                  checkins: blogs.checkins, revenue: blogs.revenue, evals: blogs.evals, selfEval: computeSelfEval_(buid),
