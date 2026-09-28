@@ -162,7 +162,8 @@ footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:40p
   if (!uid) return;
   var d = await loadBootstrap(uid, "");
   if (!d) return;
-  if (expectedPage_(d.student, d.enrollments || []) !== "pro.html") {
+  var mine = d.enrollments || [];
+  if (expectedPage_(d.student, mine) !== "pro.html") {
     return deny("這份腳本是超引力顧問課的課程內容，<br>開通之後就看得到。");
   }
   gate.remove();
