@@ -283,7 +283,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
        一律被當路人送到這一頁——已經付費的會員／私教學員也一樣。這條是他唯一的自救出口。
        ⚠️ 只在「完全不知道他是誰」時才出現：認得出人的話路由早就把他送去對的席位了。
        ⚠️ 連的是 liff.line.me deep link 不是 liff.login()，理由見 common.js 的「進 LINE 的橋」。 -->
-  <div class="backin" id="backin" hidden><a id="backinA" href="#">已經是會員或私教學員？<b>用 LINE 開啟 →</b></a></div>
+  <div class="backin" id="backin" hidden><a id="backinA" href="#">已經是會員或私教學員？<b>用 LINE 登入 →</b></a></div>
 
   <div class="bd">
 
@@ -461,8 +461,11 @@ try {
 /* 不知道他是誰＝有可能是付費學員被當成路人，給他一條回 LINE 的路（見上面那段註解）。 */
 if (!UID) {
   try {
+    /* 不指回 LIFF_URL（那只是把人踢回 LINE App，這個瀏覽器還是不認得他）。
+       走 index 的 ?login=line＝在這個瀏覽器裡真的登入一次，之後這台就記得了。 */
     var bi_ = document.getElementById("backin"), ba_ = document.getElementById("backinA");
-    if (bi_ && ba_ && typeof LIFF_URL === "string") { ba_.href = LIFF_URL; bi_.hidden = false; }
+    var from_ = new URLSearchParams(location.search).get("from") || "";
+    if (bi_ && ba_) { ba_.href = "index.html?login=line" + (from_ ? "&from=" + encodeURIComponent(from_) : ""); bi_.hidden = false; }
   } catch(e){}
 }
 var OWN = null;   // {key:"own", mk, name, good, bad, exs} 從健檢最弱塊生成

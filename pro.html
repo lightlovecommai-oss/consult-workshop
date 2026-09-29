@@ -736,7 +736,7 @@ function crmHTML(){
       + '<div class="sub-t">出手一次就記一筆——<b>顏色＝你用哪塊肌肉，高度＝他走到哪</b>。記了第一筆，引力場就會亮起來。</div>'
       + '<div class="rule4"></div></div>'
       + '<div class="cd"><div class="empty">還沒有客戶紀錄——按下面的按鈕，記下你今天推進的第一個人。</div>'
-      + '<button class="gobtn" id="firstRec">記下第一筆 →</button></div>';
+      + '<button class="gobtn" id="newRec">記下第一筆 →</button></div>';
     return h + seatPathHTML();
   }
   var onTrack = cs.filter(function(c){ return SOFT_REL.indexOf(c.rel) < 0; }).length;
@@ -746,6 +746,9 @@ function crmHTML(){
     + '<div class="sub-t">你出手的每一筆都長在他的地圖上——<b>顏色＝你用哪塊肌肉，高度＝他走到哪</b>。順序＋結果，下一步教練陪你判。</div>'
     + '<div class="sub-t" style="margin-top:10px;"><b>' + onTrack + '</b> 個客戶在引力場裡 · <b>' + high + '</b> 個走到「要找你」以上</div>'
     + '<div class="rule4"></div></div>';
+  /* 客戶卡上的「推進他」只能記已經在名單裡的人。挑人／新增對象那條流程（openRec）
+     原本只掛在空狀態那顆按鈕上，記了第一筆之後就再也叫不出來了。 */
+  h += '<button class="gobtn" id="newRec" style="margin-top:0;">記下一筆 →</button>';
   h += gravityHTML();
   var bk = crmBuckets(cs);
   h += CL_GROUPS.map(function(g){
@@ -1520,7 +1523,7 @@ function render(){
     el("clRest").hidden = false;
     cm.remove();   /* 展開就不收回去——收合鈕在這裡只會多一個沒人按的狀態 */
   };
-  var fr = el("firstRec"); if (fr) fr.onclick = openRec;
+  var fr = el("newRec"); if (fr) fr.onclick = openRec;
   var rf = el("recFocus"); if (rf) rf.onclick = openRec;
   document.querySelectorAll(".nv").forEach(function(b){
     b.className = "nv" + (b.getAttribute("data-pane")===PANE ? " on" : "");

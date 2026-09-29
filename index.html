@@ -218,9 +218,13 @@ async function init() {
       var r_ = await Promise.all([routeFor(p.userId), ensureAuthTok_(p.userId)]);
       window.location.href = r_[0];
       return;
-    } else if (liff.isInClient()) {
-      // 只在 LINE 內才走登入（無縫）；外部瀏覽器不強制登入，避免跳出 access.line.me 網頁登入頁
-      liff.login();
+    } else if (liff.isInClient() || params.get("login") === "line") {
+      /* LINE 內＝無縫登入。外部瀏覽器**預設仍不強制**——真路人不該被 access.line.me 擋在門口。
+         但 ?login=line 是本人自己按的（visitor 那條「用 LINE 登入」），那就讓他登：
+         同一支手機用 Chrome 開會掉到體驗席，就是因為 Chrome 的 localStorage 跟
+         LINE 內建瀏覽器是兩份，沒有 cw_uid 可撿，只有登入拿得到真身份。 */
+      var back_ = location.origin + location.pathname + (FROM ? "?from=" + encodeURIComponent(FROM) : "");
+      liff.login({ redirectUri: back_ });
       return;
     }
   } catch(e) {
