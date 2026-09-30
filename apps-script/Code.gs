@@ -1161,8 +1161,8 @@ function authVerifyIdToken_(idToken) {
 
 /* 用戶端 ID 不是秘密——它本來就印在前端 HTML 裡給所有人看，
    安全性靠的是「已授權的 JavaScript 來源」白名單，不是靠藏這串。
-   要跟 common.js 的 GOOGLE_CLIENT_ID 一字不差。 */
-var GOOGLE_CLIENT_ID = "";
+   要跟 common.js 的 GOOGLE_CLIENT_ID 一字不差（GCP 專案 atpifit-web，2026-09-30 建）。 */
+var GOOGLE_CLIENT_ID = "625808581147-7issp2dl6626gvds3vnn4guvc6no8gqt.apps.googleusercontent.com";
 
 /* 回傳 {email, sub, why}。why 的用途跟 authVerifyIdToken_ 一樣：
    讓「授權沒跑」不會假扮成「大家的 token 都是假的」。 */

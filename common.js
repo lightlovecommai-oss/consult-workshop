@@ -11,7 +11,7 @@ var SHEET_API = "https://script.google.com/macros/s/AKfycbz7VxeV8ZmjSiGNO-G3ZwRL
 /* Google 登入用（2026-09-30）。這串**不是秘密**——它本來就印在前端給所有人看，
    安全性靠 Google Console 那邊的「已授權的 JavaScript 來源」白名單。
    要跟 Code.gs 的 GOOGLE_CLIENT_ID 一字不差，改一邊就會 aud-mismatch。 */
-var GOOGLE_CLIENT_ID = "";
+var GOOGLE_CLIENT_ID = "625808581147-7issp2dl6626gvds3vnn4guvc6no8gqt.apps.googleusercontent.com";
 
 /* ── 4 大肌肉定義 ──
    k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
