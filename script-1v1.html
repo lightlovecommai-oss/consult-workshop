@@ -121,11 +121,6 @@ p { margin:10px 0; }
   cursor:pointer; border-radius:999px; padding:8px 16px;
   box-shadow:0 3px 14px rgba(74,27,12,.12); }
 
-#gate { max-width:860px; margin:0 auto; padding:80px 24px; text-align:center; }
-.gmsg { color:var(--muted); line-height:2; }
-.gbtn { display:inline-block; margin-top:18px; background:var(--A); color:#fff;
-  border-radius:26px; padding:13px 30px; text-decoration:none; font-weight:700; }
-
 footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:40px; }
 @media (max-width:640px) {
   .wrap { padding:16px 12px 70px; }
@@ -135,8 +130,8 @@ footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:40p
   .item { padding:18px 18px 20px; }
 }
 </style></head><body id="bd">
-<div id="gate"><p class="gmsg">讀取中…</p></div>
-<div class="wrap" id="doc" style="display:none">
+
+<div class="wrap" id="doc">
   <div class="hero">
     <h1>1v1 顧問腳本・60 分鐘</h1>
     <p class="bone1">這 60 分鐘不是為了拿下他，是把他的問題弄清楚——弄清楚了，成交只是順路。</p>
@@ -147,28 +142,5 @@ footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:40p
   <footer>© 溝通變現塾・平凡人光頭</footer>
 </div>
 <button id="aaBtn" class="fs1" onclick="cycleFontScale()">Aa</button>
-
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="atpi-core.js"></script>
 <script src="common.js"></script>
-<script>
-(async function () {
-  var doc = document.getElementById("doc"), gate = document.getElementById("gate");
-  function deny(msg) {
-    gate.innerHTML = '<p class="gmsg">' + msg + '</p>'
-      + '<a class="gbtn" href="index.html">回影響力健身房</a>';
-  }
-  var uid = await resolveLineId("bd");   // 回 null＝已經畫了「用 LINE 開啟」的橋接畫面
-  if (!uid) return;
-  var d = await loadBootstrap(uid, "");
-  if (!d) return;
-  var mine = d.enrollments || [];
-  if (expectedPage_(d.student, mine) !== "pro.html") {
-    return deny("這份腳本是超引力顧問課的課程內容，<br>開通之後就看得到。");
-  }
-  gate.remove();
-  doc.style.display = "";
-})();
-</script>
-
 </body></html>
