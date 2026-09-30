@@ -93,10 +93,13 @@
       也要能回頭問「他到底該不該在我這一頁」（主畫面捷徑鎖頁的問題）。改規則改那邊。 */
 
 /* from=quiz 等來源標記要跟著人走到落地頁（visitor 用它接「剛測完？」那句） */
-var FROM = "", MSQ = "", QSID = "", REF = "";
+var FROM = "", MSQ = "", QSID = "", REF = "", BINDG = false;
 try {
   var sp_ = new URLSearchParams(window.location.search);
   FROM = sp_.get("from") || "";
+  /* bind=google＝他是來「把 Google 綁上」的，不是來進場的。拿到身份後停在這一頁
+     畫綁定面板，不要照席位跳走。綁定只能在 LINE 認得出他的裝置上做（＝手機）。 */
+  BINDG = sp_.get("bind") === "google";
   MSQ = sp_.get("ms") || "";   // LINE 外測完的 12 格分數（quiz 夾帶過來，MORD 序、1–5）
   /* sid＝測驗那一站的裝置碼。quiz.atpifit.com 與 app.atpifit.com 的 localStorage 不互通，
      所以它只能靠網址過來；記下來一起送給後端，匿名測驗那列才接得到這個 LINE 身份。 */
@@ -184,6 +187,58 @@ async function routeFor(id) {
   return expectedPage_(s, mine) + "?id=" + encodeURIComponent(id) + fromQ_();
 }
 
+/* 綁定面板。走到這裡身份已經確定（章的主人＝uid），只差「證明他擁有哪一個 Google 帳號」。
+   ⚠️ Google 封鎖 webview 裡的 OAuth（disallowed_useragent），所以這一屏**必須**在
+      LINE 外面的瀏覽器跑。但綁定的 QR 很多人會用 LINE 內建掃描器掃——那會開在
+      LINE webview 裡，按鈕畫不出來、整頁變死路。所以先攔下來，給一顆外開的鈕。 */
+function showBindPanel_(uid) {
+  var w = document.querySelector(".wrap");
+  if (!w) return;
+  if (inLineClient_()) {
+    w.innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1.25rem;max-width:360px;margin:0 auto;">'
+      + '<div style="font-size:17px;font-weight:500;color:#4A1B0C;line-height:1.85;">這一步要在瀏覽器裡做</div>'
+      + '<div style="margin:14px auto 18px;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);"></div>'
+      + '<div style="font-size:14px;color:#6B5847;line-height:1.9;margin-bottom:18px;">Google 不讓人在 LINE 內建的瀏覽器登入。<br>按下面這顆，會用你手機的瀏覽器打開同一頁。</div>'
+      + '<a id="gext" href="' + gesc_(bindUrl_()) + '" style="display:inline-block;background:linear-gradient(135deg,#C6603A,#A94E2C);color:#fff;border-radius:22px;padding:13px 26px;text-decoration:none;font-size:16px;">用瀏覽器開啟 →</a>'
+      + '</div>';
+    var ext = document.getElementById("gext");
+    if (ext) ext.addEventListener("click", function(ev){
+      try {
+        if (window.liff && liff.openWindow) { ev.preventDefault(); liff.openWindow({ url: bindUrl_(), external: true }); }
+      } catch (e) {}   /* 攔不到就讓 href 自己跑，總比沒反應好 */
+    });
+    return;
+  }
+  w.innerHTML =
+    '<div style="text-align:center;padding:2.5rem 1.25rem;max-width:360px;margin:0 auto;">'
+    + '<div style="font-size:17px;font-weight:500;color:#4A1B0C;line-height:1.85;">綁一次，以後電腦也認得你</div>'
+    + '<div style="margin:14px auto 18px;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);"></div>'
+    + '<div style="font-size:14px;color:#6B5847;line-height:1.9;margin-bottom:18px;">選一個你在電腦上會登入的 Google 帳號。<br>之後在任何裝置按它一下就進得來，<br>紀錄都是同一份。</div>'
+    + '<div id="gbtn" style="display:flex;justify-content:center;"></div>'
+    + '<div id="gmsg" style="font-size:13px;color:#9C8873;line-height:1.8;margin-top:14px;"></div>'
+    + '</div>';
+  googleButton_("gbtn", "bind", function(d){
+    var msg = document.getElementById("gmsg"), btn = document.getElementById("gbtn");
+    if (btn) btn.style.display = "none";
+    if (!msg) return;
+    var goIn = '<a href="index.html" style="display:inline-block;margin-top:12px;background:linear-gradient(135deg,#C6603A,#A94E2C);color:#fff;border-radius:22px;padding:11px 22px;text-decoration:none;font-size:15px;">進健身房 →</a>';
+    if (d.status === "ok") {
+      msg.innerHTML = '綁好了：' + gesc_(d.email || "") + '<br>電腦上開 app.atpifit.com，按 Google 就進得來。' + goIn;
+      return;
+    }
+    if (d.status === "taken") {
+      msg.innerHTML = gesc_(d.email || "") + ' 已經連到另一個帳號了。<br>換一個 Google 帳號，或跟教練說一聲。' + goIn;
+      return;
+    }
+    if (d.status === "need-auth") {
+      msg.innerHTML = '身份確認過期了，<a href="' + bindUrl_() + '" style="color:inherit;">再認證一次 →</a>';
+      return;
+    }
+    msg.innerHTML = '沒綁成功' + (d.why ? '（' + gesc_(d.why) + '）' : '') + '。' + goIn;
+  });
+}
+
 async function init() {
   try {
     /* 優先：URL 參數 ?id=（方便測試、也是導師看學員後台的方式） */
@@ -215,6 +270,9 @@ async function init() {
          visitor.html／dashboard.html 都沒有自己的 liff.init——轉過去就再也拿不到
          ID Token，那些人的打卡會永遠是「未驗證」，開關一翻就被鎖在門外。
          跟 routeFor 併行跑：它自己要等兩趟，所以這一趟不多花時間。 */
+      /* 綁定要用通行證證明「我是誰」，所以這裡一定要等 ensureAuthTok_ 跑完才畫面板。
+         正常進場則兩件事併行——routeFor 自己要等兩趟，換證不多花時間。 */
+      if (BINDG) { await ensureAuthTok_(p.userId); showBindPanel_(p.userId); return; }
       var r_ = await Promise.all([routeFor(p.userId), ensureAuthTok_(p.userId)]);
       window.location.href = r_[0];
       return;
@@ -223,7 +281,12 @@ async function init() {
          但 ?login=line 是本人自己按的（visitor 那條「用 LINE 登入」），那就讓他登：
          同一支手機用 Chrome 開會掉到體驗席，就是因為 Chrome 的 localStorage 跟
          LINE 內建瀏覽器是兩份，沒有 cw_uid 可撿，只有登入拿得到真身份。 */
-      var back_ = location.origin + location.pathname + (FROM ? "?from=" + encodeURIComponent(FROM) : "");
+      var q_ = [];
+      if (FROM) q_.push("from=" + encodeURIComponent(FROM));
+      /* bind 要跟著繞完 access.line.me 那一圈回來，掉了的話他登完就被送去席位，
+         綁定永遠做不完（實際會變成「按了按鈕什麼都沒發生」）。 */
+      if (BINDG) q_.push("bind=google");
+      var back_ = location.origin + location.pathname + (q_.length ? "?" + q_.join("&") : "");
       liff.login({ redirectUri: back_ });
       return;
     }
@@ -234,6 +297,9 @@ async function init() {
   /* 桌面捷徑若沒帶 id，用上次記住的 id 進場（同樣走身分路由，未開通的人才不會被 dashboard 再彈一次） */
   try {
     var savedId = localStorage.getItem("cw_uid");
+    /* 這台裝置已經有章＝它證明得出身份，可以直接綁。沒章就往下走，
+       上面 ?login=line 那條會先把身份拿到再回來。 */
+    if (savedId && BINDG && authTokUid_() === savedId) { showBindPanel_(savedId); return; }
     if (savedId) { sendQuizBaseline_(savedId, ""); sayHello_(savedId, ""); window.location.href = await routeFor(savedId); return; }
   } catch (e) {}
 

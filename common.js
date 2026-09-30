@@ -8,6 +8,10 @@ if (typeof window !== "undefined" && typeof window.track !== "function") {
 var LIFF_ID = "2010316474-wmb1ODe0";
 /* 2026-09-11 Apps Script 搬家後的現行 URL（舊 _yRMWt 專案被 Google 鎖、已作廢）——真相＝《數位資產.md》 */
 var SHEET_API = "https://script.google.com/macros/s/AKfycbz7VxeV8ZmjSiGNO-G3ZwRLPg-H1H2NjXHy6brCU5yVaVoYOXB-LItU750j81Q3eno/exec";
+/* Google 登入用（2026-09-30）。這串**不是秘密**——它本來就印在前端給所有人看，
+   安全性靠 Google Console 那邊的「已授權的 JavaScript 來源」白名單。
+   要跟 Code.gs 的 GOOGLE_CLIENT_ID 一字不差，改一邊就會 aud-mismatch。 */
+var GOOGLE_CLIENT_ID = "";
 
 /* ── 4 大肌肉定義 ──
    k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
@@ -877,16 +881,73 @@ function renderLineBridge(bodyElId) {
   var c1 = dark ? "#DCE7F0" : "#4A1B0C";   // 主句
   var c2 = dark ? "#7D92A8" : "#9C8873";   // 註解
   var wide = window.innerWidth >= 700;     // 桌機才需要 QR；手機直接點按鈕最快
+
+  var lineBlock =
+      '<a href="' + LIFF_URL + '" style="display:block;margin:28px 0 10px;background:linear-gradient(135deg,#C6603A,#A94E2C);color:#fff;border-radius:26px;padding:15px;font-size:17px;font-weight:500;text-decoration:none;">用 LINE 開啟 →</a>'
+    + '<div style="font-size:13px;color:' + c2 + ';line-height:1.8;">在手機上點一下就會跳進 LINE，<br>不用輸入密碼。</div>';
+
+  /* Google 一鍵：在 LINE 裡不畫（webview 跑不了 Google OAuth），沒設 client id 也不畫。 */
+  var showG = !!GOOGLE_CLIENT_ID && !inLineClient_();
+  var gBlock = showG
+    ? '<div style="margin:22px auto 0;max-width:320px;">'
+      + '<div style="font-size:13px;color:' + c2 + ';margin-bottom:10px;">' + (wide ? '在電腦上最快的方式' : '或者') + '</div>'
+      + '<div id="gbtn" style="display:flex;justify-content:center;"></div>'
+      + '<div id="gmsg" style="font-size:13px;color:' + c2 + ';line-height:1.8;margin-top:10px;"></div>'
+      + '</div>'
+    : '';
+
   host.innerHTML =
     '<div style="text-align:center;padding:2.5rem 1.25rem;">'
-    + '<div style="font-size:17px;font-weight:500;color:' + c1 + ';line-height:1.85;">你的紀錄都還在<br>只是要從 LINE 進來，我們才認得出你</div>'
+    + '<div style="font-size:17px;font-weight:500;color:' + c1 + ';line-height:1.85;">你的紀錄都還在<br>只是要先讓我們認得出你</div>'
     + '<div style="margin:14px auto 0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);"></div>'
-    + '<a href="' + LIFF_URL + '" style="display:block;margin:28px 0 10px;background:linear-gradient(135deg,#C6603A,#A94E2C);color:#fff;border-radius:26px;padding:15px;font-size:17px;font-weight:500;text-decoration:none;">用 LINE 開啟 →</a>'
-    + '<div style="font-size:13px;color:' + c2 + ';line-height:1.8;">在手機上點一下就會跳進 LINE，<br>不用輸入密碼。</div>'
+    /* 桌機把 Google 擺前面：那裡按 LINE 會被 access.line.me 要帳密（多數人沒設過），
+       Google 反而是一鍵。手機相反——點 LINE 直接跳 App，比什麼都快。 */
+    + (wide ? gBlock + lineBlock : lineBlock + gBlock)
     + (wide ? '<div id="lnqr" style="margin:22px auto 0;display:inline-block;padding:12px;background:#fff;border-radius:14px;"></div>'
             + '<div style="font-size:13px;color:' + c2 + ';margin-top:8px;">用手機掃這個 QR code 也可以</div>' : '')
     + '</div>';
   if (wide) loadQR_();
+  if (showG) googleButton_("gbtn", "login", googleLoginResult_);
+}
+
+/* Google 登入回來之後畫什麼。每一種 status 都要有話講——
+   一句「登入失敗」會讓「你還沒綁過」跟「伺服器掛了」長得一樣，人就不知道下一步該幹嘛。 */
+function googleLoginResult_(d) {
+  var msg = document.getElementById("gmsg"), btn = document.getElementById("gbtn");
+  var say = function(html){ if (msg) msg.innerHTML = html; if (btn) btn.style.display = "none"; };
+  if (d.status === "ok" && d.uid && d.tok) {
+    try { localStorage.setItem("cw_uid", d.uid); localStorage.setItem("cw_tok", d.tok); } catch (e) {}
+    /* 回 index＝讓它照席位重新決定該去哪一頁，不要原地 reload 停在這一頁。 */
+    location.href = "index.html";
+    return;
+  }
+  if (d.status === "unknown" || d.status === "no-line") {
+    var wide = window.innerWidth >= 700;
+    var head = d.status === "unknown"
+      ? '這個 Google 帳號（' + gesc_(d.email || "") + '）還沒跟你的紀錄連起來。'
+      : '我們認得 ' + gesc_(d.email || "") + '，但它還沒接上 LINE 身份。';
+    /* 綁定只能在「LINE 認得出他」的裝置上做＝手機。所以電腦上給 QR，
+       不要給一條在電腦上必須打 LINE 帳密才走得完的連結——那就繞回原本的痛點了。 */
+    say(head + '<br>' + (wide
+      ? '用手機掃這個綁一次，<br>之後這台電腦按 Google 就進得來：'
+        + '<div id="gqr" style="margin:12px auto 0;display:inline-block;padding:12px;background:#fff;border-radius:14px;"></div>'
+      : '<a href="' + bindUrl_() + '" style="display:inline-block;margin-top:10px;text-decoration:underline;color:inherit;">用 LINE 認證一次，把這個 Google 綁上 →</a>'));
+    if (wide) loadQR_("gqr", bindUrl_());
+    return;
+  }
+  if (d.status === "ambiguous") {
+    say('這個 email 在我們這邊對到不止一個人，<br>我們不敢猜。請用 LINE 進來，或跟教練說一聲。');
+    return;
+  }
+  say('Google 登入沒過' + (d.why ? '（' + gesc_(d.why) + '）' : '') + '<br>用上面的 LINE 進來一樣可以。');
+}
+
+/* 後端回來的 email／why 會進 innerHTML，一律先轉義。
+   刻意不叫 esc_——member／pro／report 各自已經有一份同名的，同一個全域空間會互相蓋掉。 */
+function gesc_(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
 }
 
 function isDarkBg_() {
@@ -899,11 +960,11 @@ function isDarkBg_() {
 
 /* QR 只在桌機、只在需要時才載——載不到就當沒這回事，上面的按鈕本來就夠用了。
    追蹤與輔助功能一律不可以擋住使用者往下走（低摩擦守則）。 */
-function loadQR_() {
-  var box = document.getElementById("lnqr");
+function loadQR_(boxId, text) {
+  var box = document.getElementById(boxId || "lnqr");
   if (!box) return;
   var draw = function(){
-    try { new QRCode(box, { text: LIFF_URL, width: 150, height: 150, colorDark: "#4A1B0C", colorLight: "#ffffff" }); }
+    try { new QRCode(box, { text: text || LIFF_URL, width: 150, height: 150, colorDark: "#4A1B0C", colorLight: "#ffffff" }); }
     catch (e) { box.style.display = "none"; }
   };
   if (window.QRCode) return draw();
@@ -912,6 +973,80 @@ function loadQR_() {
   sc.onload = draw;
   sc.onerror = function(){ box.style.display = "none"; };
   document.head.appendChild(sc);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Google 登入（2026-09-30）：進不去 LINE 的裝置靠這條拿身份
+
+   後端只做「拿 Google 掛保證的 email 去查主鍵」，查到才發章（Code.gs googleLogin）。
+   所以這裡從頭到尾不會產生新的人——查不到就走綁定那條退路。
+
+   ⚠️ LINE 內不要畫這顆按鈕：Google 封鎖 embedded webview 裡的 OAuth
+   （disallowed_useragent），LINE 內建瀏覽器就是 webview，畫了只會讓人撞牆。
+   ═══════════════════════════════════════════════════════════ */
+/* 綁定頁的絕對網址。從當前路徑推目錄，app.atpifit.com/ 與
+   github.io/consult-workshop/ 兩種部署都對得起來（QR 裡面不能放相對路徑）。 */
+function bindUrl_() {
+  return location.origin + location.pathname.replace(/[^/]*$/, "") + "index.html?login=line&bind=google";
+}
+
+function inLineClient_() {
+  try { return !!(window.liff && liff.isInClient && liff.isInClient()); } catch (e) { return false; }
+}
+
+/* GIS 的 script 載一次就好。載不到就 reject，呼叫端當沒這回事——
+   低摩擦守則：橋接畫面本來就有「用 LINE 開啟」那條路，Google 是加分不是必要。 */
+function googleLoadGsi_() {
+  return new Promise(function(resolve, reject){
+    if (!GOOGLE_CLIENT_ID) return reject("no-client-id");
+    if (window.google && google.accounts && google.accounts.id) return resolve();
+    var sc = document.createElement("script");
+    sc.src = "https://accounts.google.com/gsi/client";
+    sc.async = true;
+    sc.onload = function(){ resolve(); };
+    sc.onerror = function(){ reject("gsi-load-failed"); };
+    document.head.appendChild(sc);
+  });
+}
+
+/* 把 Google 回來的 JWT 送去後端。mode="login" 換章、mode="bind" 綁帳號。 */
+async function googlePost_(mode, credential) {
+  var payload = { action: mode === "bind" ? "googleBind" : "googleLogin", gToken: credential };
+  /* 綁定要先證明「我是誰」才綁得上，所以夾帶通行證。
+     authStamp_ 只在「章的主人＝payload 裡那個人」時才夾，綁定沒有那個欄位，
+     所以這裡直接放——後端 authOf_ 會從章上讀出身份。 */
+  if (mode === "bind") payload.tok = authTokGet_();
+  var r = await fetch(SHEET_API, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+  return await r.json();
+}
+
+/* 在 hostId 這個容器裡畫一顆 Google 按鈕。
+   onResult(d) 收後端原封不動的回應，由呼叫端決定畫什麼字（登入頁與綁定頁的話不一樣）。 */
+function googleButton_(hostId, mode, onResult) {
+  if (inLineClient_()) return;
+  var host = document.getElementById(hostId);
+  if (!host) return;
+  googleLoadGsi_().then(function(){
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: function(resp){
+        if (!resp || !resp.credential) return;
+        host.innerHTML = '<div style="font-size:13px;opacity:.7;">確認中…</div>';
+        googlePost_(mode, resp.credential)
+          .then(function(d){ onResult(d || { status: "error" }); })
+          .catch(function(){ onResult({ status: "error", message: "連不上伺服器" }); });
+      }
+    });
+    google.accounts.id.renderButton(host, {
+      theme: isDarkBg_() ? "filled_black" : "outline",
+      size: "large", shape: "pill", text: "continue_with",
+      locale: "zh_TW", width: Math.min(300, Math.max(200, host.clientWidth || 280))
+    });
+  }).catch(function(){ host.style.display = "none"; });
 }
 
 /* ── Aa 字級開關（2026-09-15 無障礙）：60 歲客群看不到字。

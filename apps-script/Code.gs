@@ -1144,6 +1144,77 @@ function authVerifyIdToken_(idToken) {
   if (!isLineId_(d.sub)) return { uid: "", why: "bad-sub" };
   return { uid: String(d.sub), why: "" };
 }
+/* ═══════════════════════════════════════════════════════════
+   Google 登入（2026-09-30）：通行證的第二條發放管道
+
+   原本只有一條＝LIFF 的 ID Token，所以「進不去 LINE 的裝置」永遠拿不到章。
+   四種裝置（手機／電腦 × LINE／Chrome）裡電腦 Chrome 整個進不來，
+   而 AUTH_ENFORCE 一翻就會把那批人鎖在門外——所以這不只是體驗問題。
+
+   ⚠️ Google **不是第二個主鍵**。它只做一件事：拿 Google 掛保證的 email
+   去查「這個 email 是誰」，查到主鍵才發章。主鍵永遠是 lineId，
+   所以沒有任何合併問題（三個並列主鍵＝同一個人三列＝之後打卡算誰的都算不清）。
+
+   ⚠️ LINE 內不要用它：Google 封鎖 embedded webview 裡的 OAuth
+   （disallowed_useragent），LINE 內建瀏覽器就是 webview。LINE 內一律走 LIFF。
+   ═══════════════════════════════════════════════════════════ */
+
+/* 用戶端 ID 不是秘密——它本來就印在前端 HTML 裡給所有人看，
+   安全性靠的是「已授權的 JavaScript 來源」白名單，不是靠藏這串。
+   要跟 common.js 的 GOOGLE_CLIENT_ID 一字不差。 */
+var GOOGLE_CLIENT_ID = "";
+
+/* 回傳 {email, sub, why}。why 的用途跟 authVerifyIdToken_ 一樣：
+   讓「授權沒跑」不會假扮成「大家的 token 都是假的」。 */
+function googleVerifyIdToken_(idToken) {
+  if (!GOOGLE_CLIENT_ID) return { email: "", why: "no-client-id" };
+  var r;
+  try {
+    r = UrlFetchApp.fetch("https://oauth2.googleapis.com/tokeninfo?id_token="
+      + encodeURIComponent(String(idToken || "")), { muteHttpExceptions: true });
+  } catch (e) {
+    return { email: "", why: "no-authz:" + String(e).slice(0, 80) };
+  }
+  if (r.getResponseCode() !== 200) return { email: "", why: "google-" + r.getResponseCode() };
+  var d;
+  try { d = JSON.parse(r.getContentText()); } catch (e2) { return { email: "", why: "bad-json" }; }
+  /* ⚠️ aud 一定要比：不比的話任何 Google 開發者簽的 token 都驗得過，
+     誰都能冒充我們的使用者（同 authVerifyIdToken_ 的 aud 那一行）。 */
+  if (String(d.aud) !== GOOGLE_CLIENT_ID) return { email: "", why: "aud-mismatch:token=" + String(d.aud) };
+  /* tokeninfo 的欄位都是字串，所以比 "true" 不是比 true。
+     沒驗過所有權的 email 不可以當身份——那等於讓人隨便宣告自己是誰。 */
+  if (String(d.email_verified) !== "true") return { email: "", why: "email-unverified" };
+  var em = String(d.email || "").trim().toLowerCase();
+  if (!em || em.indexOf("@") < 0) return { email: "", why: "no-email" };
+  return { email: em, sub: String(d.sub || ""), why: "" };
+}
+
+/* 這個 email 指到誰。兩處都找：
+   ①(系統)身份對照 的 email 線索——2026-09-21 起才開始記
+   ②(漏斗)能力測驗 的 Email 欄——09-21 之前留資的人只在這裡，不找會漏掉一整批舊人
+   ⚠️ 回傳陣列不是單一值：同一個 email 指到兩個 lineId 時呼叫端必須知道有歧義，
+      隨便挑一個就是把 A 的章發給 B。 */
+function findPrimaryByEmail_(email) {
+  var em = String(email || "").trim().toLowerCase();
+  if (!em) return { ids: [], others: [] };
+  var ids = {}, others = {};
+  var put = function(k) {
+    k = String(k || "").trim();
+    if (!k) return;
+    if (isLineId_(k)) ids[k] = true; else others[k] = true;
+  };
+  rows_(TABS.identity).forEach(function(r){
+    if (String(r["類型"]).trim() !== "email") return;
+    if (String(r["值"]).trim().toLowerCase() !== em) return;
+    put(r["主鍵"]);
+  });
+  rows_(TABS.quiz).forEach(function(r){
+    if (String(pick_(r, COLS.quizWrite.email)).trim().toLowerCase() !== em) return;
+    put(pick_(r, COLS.quizWrite.lineId));
+  });
+  return { ids: Object.keys(ids), others: Object.keys(others) };
+}
+
 /* 每支寫入端點開頭問這一句。回傳 {uid, verified, bad, tok}：
    verified＝身份是 LINE 或我們的簽章證明的，這時 body.lineId 一律不採信。
    bad＝帶了證明但驗不過——那不是「沒帶」，是可疑，就算在觀測期也直接退件。 */
@@ -1731,6 +1802,42 @@ function doPost(e) {
          `aud-mismatch`＝LINE_CHANNEL_ID 設錯了，會直接印出兩邊的值。 */
       if (!A.verified) return json_({ status: "error", message: "ID Token 驗不過", why: A.why || "" });
       return json_({ status: "ok", uid: A.uid, tok: A.tok || authIssue_(A.uid), ttlDays: AUTH_TTL_DAYS });
+    }
+
+    /* Google 登入 → 換通行證。進不去 LINE 的裝置（主要是電腦 Chrome）靠這條。
+       ⚠️ Google token 走 gToken 這個欄位，**不可以塞在 idToken**——
+          authOf_ 看到 idToken 會當成 LINE 的去驗，驗不過就整支被當成「可疑」退件。
+       ⚠️ 查不到就回 unknown，**絕對不要順手開一列新的人**：
+          那會製造第二個主鍵，之後合併是地獄。沒查到就走綁定那條退路。 */
+    if (body.action === "googleLogin") {
+      var G = googleVerifyIdToken_(body.gToken);
+      if (!G.email) return json_({ status: "error", message: "Google 登入驗不過", why: G.why || "" });
+      var hit = findPrimaryByEmail_(G.email);
+      if (hit.ids.length === 1) {
+        return json_({ status: "ok", uid: hit.ids[0], tok: authIssue_(hit.ids[0]), ttlDays: AUTH_TTL_DAYS });
+      }
+      /* 兩個以上＝同一個 email 在表上指到不同的人。不猜——挑錯就是把 A 的章發給 B。 */
+      if (hit.ids.length > 1) return json_({ status: "ambiguous", email: G.email, count: hit.ids.length });
+      /* 認得這個 email，但它只連到 web:／dev: 那種沒有 LINE 身份的主鍵。
+         章綁 lineId（authCheckTok_ 有 isLineId_ 那道檢查），所以發不出來＝已知界線。 */
+      if (hit.others.length) return json_({ status: "no-line", email: G.email });
+      return json_({ status: "unknown", email: G.email });
+    }
+
+    /* 綁定：在「已經證明是誰」的裝置上，把一個 Google 帳號接到自己的主鍵上。
+       之後那個 Google 帳號在任何裝置一鍵就進得來。
+       ⚠️ 一定要先有身份證明（章或 LIFF 的 ID Token）——沒有的話任何人都能把
+          自己的 Google 綁到別人的 lineId 上，一鍵接管帳號。 */
+    if (body.action === "googleBind") {
+      if (!A.verified) return json_({ status: "need-auth" });
+      var G2 = googleVerifyIdToken_(body.gToken);
+      if (!G2.email) return json_({ status: "error", message: "Google 登入驗不過", why: G2.why || "" });
+      /* 這個 email 已經指到別人＝先到先得，不覆蓋。
+         允許覆蓋的話，知道你 email 的人綁一次就把你的章搶走了。 */
+      var taken = findPrimaryByEmail_(G2.email).ids.filter(function(k){ return k !== A.uid; });
+      if (taken.length) return json_({ status: "taken", email: G2.email });
+      recordIdentity_(A.uid, { line: A.uid, email: G2.email }, "googleBind");
+      return json_({ status: "ok", uid: A.uid, email: G2.email });
     }
 
     /* 讀取面（2026-09-25）：帶章的 bootstrap 走這裡。
