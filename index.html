@@ -281,6 +281,17 @@ async function init() {
          但 ?login=line 是本人自己按的（visitor 那條「用 LINE 登入」），那就讓他登：
          同一支手機用 Chrome 開會掉到體驗席，就是因為 Chrome 的 localStorage 跟
          LINE 內建瀏覽器是兩份，沒有 cw_uid 可撿，只有登入拿得到真身份。 */
+      /* 外部瀏覽器 ＋ 本人按了「用 LINE 登入」＝桌機那個痛點的正中心：
+         直接 liff.login() 會跳 access.line.me 要 LINE 帳密，而多數人從沒設過密碼。
+         所以這裡先給一屏讓他選（Google 一鍵／LINE），不要替他決定。
+         兩個例外照舊直接登入：
+         ① LINE 內——本來就無縫，不會問密碼，多一屏只是擋路。
+         ② 綁定流程（BINDG）——綁定的前提就是先證明 LINE 身份，
+            在這裡給 Google 選項會變成雞生蛋。 */
+      if (!liff.isInClient() && !BINDG && GOOGLE_CLIENT_ID) {
+        var w_ = document.querySelector(".wrap");
+        if (w_) { w_.innerHTML = '<div id="bd"></div>'; renderLineBridge("bd"); return; }
+      }
       var q_ = [];
       if (FROM) q_.push("from=" + encodeURIComponent(FROM));
       /* bind 要跟著繞完 access.line.me 那一圈回來，掉了的話他登完就被送去席位，
