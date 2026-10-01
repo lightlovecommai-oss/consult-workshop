@@ -3396,3 +3396,52 @@ function tl_removeEnrollColumn_() {
   sh.deleteColumn(col);
   return "開通名單刪 tenlead-1 欄";
 }
+
+/* ═══ 唯讀自檢（2026-10-01）：「所有人都先進測驗」這道閘門會打到誰 ═══
+   在編輯器選這支 → 執行 → 看執行記錄。**純讀取，不寫任何一格。**
+
+   要回答的問題：體驗席現在對所有人全開，要不要改成「沒做過測驗就先去測」。
+   擋之前得先知道代價——現在有多少人正在用健身房、卻沒有測驗基線？
+   那些人就是閘門一開會被踢去重測的人，其中「已經付錢的」絕對不能踢。 */
+function quizGateImpact() {
+  var did = {}, quizNoId = 0;
+  rows_(TABS.quiz).forEach(function(r){
+    var id = String(pick_(r, COLS.quiz.lineId) || "").trim();
+    /* 沒有 lineId 的測驗列＝在 LINE 外面測的人。他們做過測驗，但健身房認不出來，
+       所以閘門會把他們當成沒測過——這個數字是這道閘門最大的誤殺來源。 */
+    if (isLineId_(id)) did[id] = true; else quizNoId++;
+  });
+  rows_(TABS.evals).forEach(function(r){
+    if (String(pick_(r, COLS.evals.source) || "").trim() !== "quiz") return;
+    var id = String(pick_(r, COLS.evals.lineId) || "").trim();
+    if (isLineId_(id)) did[id] = true;
+  });
+
+  var active = {};
+  rows_(TABS.checkins).forEach(function(r){
+    var id = String(pick_(r, COLS.checkins.lineId) || "").trim();
+    if (isLineId_(id)) active[id] = true;
+  });
+
+  var paid = {};
+  computeConfig_().enrollments.forEach(function(e){
+    var id = String(e.lineId || "").trim();
+    if (isLineId_(id)) paid[id] = true;
+  });
+
+  var count = function(set, pred){
+    return Object.keys(set).filter(pred || function(){ return true; }).length;
+  };
+  var notDone = function(id){ return !did[id]; };
+
+  var L = [
+    "做過測驗（認得出 LINE 身份）：" + count(did) + " 人",
+    "測驗紀錄但沒有 LINE 身份的列：" + quizNoId + " 列  ← 閘門會誤殺這批",
+    "有打卡＝真的在用：" + count(active) + " 人",
+    "　其中沒有測驗基線：" + count(active, notDone) + " 人  ← 會被踢去重測",
+    "開通名單上有課（付過錢）：" + count(paid) + " 人",
+    "　其中沒有測驗基線：" + count(paid, notDone) + " 人  ← 這批絕對不能踢"
+  ];
+  L.forEach(function(s){ Logger.log(s); });
+  return L.join("\n");
+}
