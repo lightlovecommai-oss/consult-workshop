@@ -164,6 +164,9 @@ body{--sd:#e6a93a;--st:rgba(230,169,58,.14);}
 .mkpick{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0 2px;}
 .mkp{font-family:inherit;font-size:12.5px;font-weight:800;border-radius:9px;padding:7px 10px;min-height:32px;cursor:pointer;background:transparent;border:1px solid #2a3c50;color:#8ea1b6;letter-spacing:.5px;}
 .mkp.rec::after{content:"●";font-size:7px;vertical-align:super;margin-left:3px;}
+/* 還沒上到那一堂：虛線＋灰字，跟星圖的 todo 薄片同一套語言。不是 disabled——點下去會帶他去星圖 */
+.mkp.lk{border-style:dashed;border-color:#334558;color:#5d7692;}
+.mkp.lk.rec::after{content:none;}
 /* 這塊肌肉在客戶身上留下什麼——邊練邊長出來的數字 */
 .fstat{display:flex;gap:8px;margin-top:12px;}
 .fstat>div{flex:1;background:rgba(230,237,245,.05);border:1px solid #1d2c3c;border-radius:12px;padding:10px 8px;text-align:center;}
@@ -944,6 +947,20 @@ function lessonsNow(){
   return { list: list, doneN: list.filter(function(l){ return l.sub; }).length,
            nextTodo: nextTodo, unlocked: !!sub[4] };
 }
+/* ── 技巧練習跟著課程開（2026-10-01 老師裁定）──
+   L1–L4 各管一個大肌肉的 3 小塊（L1→A、L2→T、L3→P、L4→I）：
+   交了 L(n-1) 的學習單 → L(n) 開 → 那 3 塊才練得了。
+   順序不能倒過來——沒上過 L3 就被叫去練 P2，他手上根本還沒有那一招。
+   L5–L8 不綁小肌群（腳本／路徑／導航／界線），所以這條鎖只管 12 塊裡的全部、4 堂裡的前 4 堂。 */
+function mkLesson_(mk){
+  var dim = MUSCLES[mk] && MUSCLES[mk].dim;
+  var hit = LESSONS_DEF.filter(function(l){ return l.dim && l.dim === dim; })[0];
+  return hit ? hit.L : 0;   /* 0＝沒有哪一堂管它＝不鎖 */
+}
+function mkOpen_(mk, sub){
+  var n = mkLesson_(mk);
+  return !n || lessonOpen(n, sub || submittedL());
+}
 var SPEECH = [
   {L:9,  zh:"舞台開場"}, {L:10, zh:"乾貨體驗感"}, {L:11, zh:"銷講收單"},
   {L:12, zh:"三種銷講稿"}, {L:13, zh:"大師之路"}
@@ -968,7 +985,7 @@ function starHTML(){
   }).join("");
   var s = LESSONS.filter(function(l){ return l.L === SEL_L; })[0] || LESSONS[0], p = lpal(s);
 
-  var h = '<div class="cd"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 交了 ' + ln.doneN + '/8 堂</span></div>'
+  var h = '<div class="cd" id="starmap"><div class="sec">STAR MAP · <b>課程星圖</b> <span style="color:#5d7692;font-weight:600;">超引力顧問課 · 交了 ' + ln.doneN + '/8 堂</span></div>'
     + '<div class="srow">' + slices + '</div><div class="slbl">' + lbls + '</div>'
     /* 大綱：八堂都給看。他要知道自己在走哪條路，不是走一格看一格 */
     + '<div class="olt">L' + s.L + '　' + esc_(s.zh) + '</div>'
@@ -1160,10 +1177,32 @@ function stageCTAHTML(){
   if (!isSpeech) h += '<a class="gobtn" href="https://www.atpifit.com/" target="_blank" style="text-decoration:none;">看「公眾演說」這一階 →</a>';
   return h + '</div>';
 }
-/* 系統推薦＝上升空間最大的那塊（weakestThree 第一塊）。只是預設值，他可以自己切。 */
-function focusMuscle(){ return weakestThree(S)[0] || null; }
+/* 系統推薦＝上升空間最大的那塊（weakestThree 第一塊），但只在「已經上過的課」裡挑：
+   推一塊他還沒學過的招，等於叫他空手上場。
+   回傳 why 是因為這三種情況的說法不一樣，混在一起講就會變成假話：
+     none＝還沒做健檢，沒有推薦可言　weak＝真的是上升空間最大　open＝最弱那幾塊還鎖著，退回開著的第一塊 */
+function focusRec_(){
+  var sub = submittedL(), w3 = weakestThree(S);
+  if (!w3.length) return { mk:null, why:"none" };
+  var weak = w3.filter(function(mk){ return mkOpen_(mk, sub); });
+  if (weak.length) return { mk:weak[0], why:"weak" };
+  return { mk: MORD.filter(function(mk){ return mkOpen_(mk, sub); })[0] || null, why:"open" };
+}
+function focusMuscle(){ return focusRec_().mk; }
+/* 任何要塞進 REC.mk 的來源（上次選的、網址帶的、客戶水溫推的）都先過這道夾子 */
+function okMK_(mk){
+  return (mk && MUSCLES[mk] && mkOpen_(mk)) ? mk : focusMuscle();
+}
 var SEL_MK = null;
-function pickMK(mk){ SEL_MK = mk; OPEN_DRILL = false; render(); }
+function pickMK(mk){
+  /* 鎖著的那顆不是死鈕：點下去直接把星圖切到管它的那一堂，他才知道要先交哪一份 */
+  if (!mkOpen_(mk)) { SEL_L = mkLesson_(mk); render(); gotoStar_(); return; }
+  SEL_MK = mk; OPEN_DRILL = false; render();
+}
+function gotoStar_(){
+  var e = document.getElementById("starmap");
+  if (e && e.scrollIntoView) e.scrollIntoView({behavior:"smooth", block:"start"});
+}
 /* 這塊肌肉在客戶身上留下什麼：推過幾個人、上次幾天前、有幾個因此往前走一圈。
    全部從打卡紀錄算（buildLog 已存 muscle／target／stage／date），不新增欄位、不動 Sheet。
    「往前走一圈」＝用這塊的那一筆，把他推到了他自己的新高——LOG 已按日期排序，所以邊走邊比就好。 */
@@ -1183,25 +1222,40 @@ function muscleField(mk){
            days: last ? Math.floor((Date.now() - new Date(last)) / 864e5) : null };
 }
 function focusHTML(){
-  var rec = focusMuscle();
-  var mk = (SEL_MK && MUSCLES[SEL_MK]) ? SEL_MK : rec;
+  var sub = submittedL(), ln = lessonsNow();
+  var R = focusRec_(), rec = R.mk;
+  var mk = (SEL_MK && MUSCLES[SEL_MK] && mkOpen_(SEL_MK, sub)) ? SEL_MK : rec;
   var head = '<div class="cd"><div class="sec">FIELD DRILL · <b>落地練肌肉</b></div>';
   if (!mk) {
-    return head + '<div class="empty">做完影響力健檢，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div></div>';
+    return head + '<div class="empty">做完影響力健檢，這裡就會標出<b style="color:#cfdcea;">上升空間最大</b>的那塊——先練它最有感。</div>'
+      + '<a class="mus-cta" href="' + QUIZ_URL + '" onclick="track(\'cta_click\',{cta_id:\'pro_drill_quiz\'})">影響力健檢 3 分鐘——先量出起點 →</a></div>';
   }
   var m = MUSCLES[mk], d = (typeof DRILL !== "undefined" && DRILL[mk]) || null, f = muscleField(mk);
+  /* 鎖著的那幾顆照樣印出來（全貌感：他要看得到還有幾塊在前面），但帶 🔒、點了是去星圖不是切過來 */
+  var lockN = MORD.filter(function(k){ return !mkOpen_(k, sub); }).length;
   var h = head
     + '<div class="mkpick">' + MORD.map(function(k){
-        var p = PALV[MUSCLES[k].dim], on = k === mk;
-        return '<button type="button" class="mkp' + (on ? " on" : "") + (k === rec ? " rec" : "") + '"'
+        var p = PALV[MUSCLES[k].dim], on = k === mk, lk = !mkOpen_(k, sub);
+        return '<button type="button" class="mkp' + (on ? " on" : "") + (lk ? " lk" : "") + (k === rec ? " rec" : "") + '"'
           + ' aria-pressed="' + on + '" onclick="pickMK(\'' + k + '\')"'
+          + (lk ? ' title="L' + mkLesson_(k) + ' 開了才練得了"' : '')
           + (on ? ' style="background:' + p.c + ';border-color:' + p.c + ';color:#0c131e;"'
-                : ' style="color:' + p.t + ';"') + '>' + k + '</button>';
+                : lk ? '' : ' style="color:' + p.t + ';"') + '>' + (lk ? '🔒' : '') + k + '</button>';
       }).join("") + '</div>'
+    + (lockN
+        ? '<div class="lockbar" style="margin-top:9px;">灰掉的 ' + lockN + ' 塊跟著課程開——'
+          + '交一份 <b>L' + ln.nextTodo + ' 的學習單</b>，L' + Math.min(ln.nextTodo + 1, 8) + ' 連同它那 3 塊一起亮。'
+          + '<br>先上課、再落地：還沒上過那一堂就去練，手上沒有那一招。</div>'
+        : '')
     + '<div style="font-size:19px;font-weight:900;line-height:1.5;margin-top:10px;">' + esc_(m.name) + '——' + esc_(m.tech.split("・")[0]) + '</div>'
     + '<div class="wall-note" style="margin-top:4px;">'
-    + (mk === rec ? '掛點的這塊<b style="color:#cfdcea;">上升空間最大</b>——先練它最有感，其他 11 塊隨時可以切過來。'
-                  : '你自己挑的這塊。系統原本推薦 <b style="color:#cfdcea;">' + rec + ' ' + esc_(MUSCLES[rec].name) + '</b>，要回去點掛點那顆。')
+    /* 「其他 N 塊」要扣掉還鎖著的，不然這句會叫他去點按不動的鈕 */
+    + (mk !== rec
+        ? '你自己挑的這塊。系統原本推薦 <b style="color:#cfdcea;">' + rec + ' ' + esc_(MUSCLES[rec].name) + '</b>，要回去點掛點那顆。'
+        : R.why === "open"
+          /* 健檢指到的那幾塊還在後面的課裡——這時候說「上升空間最大」是假話 */
+          ? '健檢指的那幾塊在後面的課，先從你已經上過的這塊開始。另外 ' + (11 - lockN) + ' 塊隨時可以切過來。'
+          : '你上過的課裡，這塊<b style="color:#cfdcea;">上升空間最大</b>——先練它最有感，另外 ' + (11 - lockN) + ' 塊隨時可以切過來。')
     + '</div>'
     /* 邊練邊長出來的客戶數字＝這塊肌肉的成績單，不是抽象分數 */
     + '<div class="fstat">'
@@ -1239,7 +1293,7 @@ function pkSay_(s){
     .replace(/＿+/g, '<span class="pk-bl"></span>');
 }
 function openRec(){
-  REC = {who:null, rel:null, stage:null, note:"", step:1, mk:focusMuscle() || "A1"};
+  REC = {who:null, rel:null, stage:null, note:"", step:1, mk:okMK_(SEL_MK) || "A1"};
   window.scrollTo(0,0); render();
 }
 function openRecFor(name){
@@ -1247,6 +1301,8 @@ function openRecFor(name){
   if (!c) return;
   var soft = SOFT_REL.indexOf(c.rel) > -1;
   var fm = focusMuscle() || "A1";
+  /* ⚠️ 這裡刻意不套課程鎖。鎖的是「技巧練習」（FIELD DRILL），不是「記一筆客戶發生了什麼」——
+     客戶水溫是真的，他走到哪就是走到哪。這裡偷換成別塊，教練那句建議就會跟畫面對不起來。 */
   var mk = soft ? fm : (NEXT[STAGES[clientHi(name)].k].mk || fm);
   REC = {who:name, rel:c.rel, stage:null, note:"", step:2, mk:mk};
   window.scrollTo(0,0); render();
@@ -1405,7 +1461,7 @@ function outHTML(){
       return {h: Math.round(24 + (v-1)/4*96), state: k===focusDim ? "now" : "past", dimKey:k,
               vTop: pctFromEval(v), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
     }), {vals:true, full:120})
-    + '<div class="open-note">私教席 12 塊全開——分數來自影響力健檢，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
+    + '<div class="open-note">私教席 12 塊分數全開——來自影響力健檢。<br>要先練哪一塊，去「課程地圖」看：上升空間最大的那塊，會在你上過的課裡挑。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
     /* 12 塊全空＝他還沒做過影響力健檢。上面那句已經講明分數來自健檢，這裡補一條真的點得進去的路，
        不然私教席會出現「12 塊全開」卻全是「—」、而且沒有任何辦法把它量起來。 */
     + (measured === 0
