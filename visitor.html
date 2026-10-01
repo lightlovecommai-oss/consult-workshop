@@ -283,7 +283,9 @@ body{--sd:#5C7464;--st:#DCE7DE;}
        一律被當路人送到這一頁——已經付費的會員／私教學員也一樣。這條是他唯一的自救出口。
        ⚠️ 只在「完全不知道他是誰」時才出現：認得出人的話路由早就把他送去對的席位了。
        ⚠️ 連的是 liff.line.me deep link 不是 liff.login()，理由見 common.js 的「進 LINE 的橋」。 -->
-  <div class="backin" id="backin" hidden><a id="backinA" href="#">已經是會員或私教學員？<b>用 LINE 登入 →</b></a></div>
+  <!-- 字不綁 LINE：後面那一屏同時給 Google 和 LINE 兩種進法，
+       寫「用 LINE 登入」會讓想用 Google 的人完全不點它。 -->
+  <div class="backin" id="backin" hidden><a id="backinA" href="#">已經是會員或私教學員？<b>回到你的紀錄 →</b></a></div>
 
   <div class="bd">
 
@@ -462,7 +464,8 @@ try {
 if (!UID) {
   try {
     /* 不指回 LIFF_URL（那只是把人踢回 LINE App，這個瀏覽器還是不認得他）。
-       走 index 的 ?login=line＝在這個瀏覽器裡真的登入一次，之後這台就記得了。 */
+       走 index 的 ?login=line＝在這個瀏覽器裡真的證明一次身份，之後這台就記得了。
+       參數名還叫 login=line 是歷史包袱：那一屏現在同時給 Google 和 LINE。 */
     var bi_ = document.getElementById("backin"), ba_ = document.getElementById("backinA");
     var from_ = new URLSearchParams(location.search).get("from") || "";
     if (bi_ && ba_) { ba_.href = "index.html?login=line" + (from_ ? "&from=" + encodeURIComponent(from_) : ""); bi_.hidden = false; }

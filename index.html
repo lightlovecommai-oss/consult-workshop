@@ -278,10 +278,10 @@ async function init() {
       return;
     } else if (liff.isInClient() || params.get("login") === "line") {
       /* LINE 內＝無縫登入。外部瀏覽器**預設仍不強制**——真路人不該被 access.line.me 擋在門口。
-         但 ?login=line 是本人自己按的（visitor 那條「用 LINE 登入」），那就讓他登：
+         但 ?login=line 是本人自己按的（visitor 那條「回到你的紀錄」），那就讓他登：
          同一支手機用 Chrome 開會掉到體驗席，就是因為 Chrome 的 localStorage 跟
          LINE 內建瀏覽器是兩份，沒有 cw_uid 可撿，只有登入拿得到真身份。 */
-      /* 外部瀏覽器 ＋ 本人按了「用 LINE 登入」＝桌機那個痛點的正中心：
+      /* 外部瀏覽器 ＋ 本人按了「回到你的紀錄」＝桌機那個痛點的正中心：
          直接 liff.login() 會跳 access.line.me 要 LINE 帳密，而多數人從沒設過密碼。
          所以這裡先給一屏讓他選（Google 一鍵／LINE），不要替他決定。
          兩個例外照舊直接登入：
