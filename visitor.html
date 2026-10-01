@@ -475,7 +475,6 @@ var OWN = null;   // {key:"own", mk, name, good, bad, exs} 從健檢最弱塊生
 var POT = null;   // 已解鎖影響力（字典⑦ γ=0.6）
 var MS12 = null;  // 健檢 12 格 1–5（儀表板用；沒基線＝null）
 var PCTV = null;  // 4 大肌肉成數 0–100（歸零換算）
-var QUIZ_URL = "https://lightlovecommai-oss.github.io/comconverttest/";
 var FROMQ = false;
 try { FROMQ = new URLSearchParams(location.search).get("from") === "quiz"; } catch(e){}
 
@@ -675,7 +674,7 @@ function musHTML(){
     + '<div class="core" onclick="pocketCore(\'story\')"><span class="core-en">STORY</span><span class="core-zh">講故事</span>'+tag+'<span class="core-bar"></span></div>'
     + '<div class="core" onclick="pocketCore(\'ask\')"><span class="core-en">QUESTION</span><span class="core-zh">問問題</span>'+tag+'<span class="core-bar"></span></div></div>';
   /* 沒基線＝整面牆虛線：開一個回測驗的口（很少人直開 visitor，但開了就別讓他撞牆） */
-  if (!MS12) h += '<a class="mus-cta" href="'+QUIZ_URL+'" onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'})">先做 3 分鐘影響力健檢，點亮你的第一塊 →</a>';
+  if (!MS12) h += '<a class="mus-cta" href="'+QUIZ_URL+'" onclick="track(\'cta_click\',{cta_id:\'visitor_quiz\'})">影響力健檢 3 分鐘——點亮你的第一塊 →</a>';
   var ownDim = OWN ? MUSCLES[OWN.mk].dim : null;
   h += slRow(DORD.map(function(k){
         var pc = PCTV ? PCTV[k] : null;

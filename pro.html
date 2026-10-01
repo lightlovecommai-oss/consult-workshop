@@ -266,6 +266,9 @@ button.mat{font-family:inherit;cursor:pointer;width:100%;}
 .fbc b{font-weight:800;}
 .wall-note{font-size:12.5px;color:#7d90a3;margin-top:10px;line-height:1.7;}
 .open-note{background:rgba(230,169,58,.10);border-radius:10px;padding:9px 12px;color:#E8C89A;margin-top:10px;font-weight:600;font-size:12.5px;line-height:1.7;}
+/* 整面牆都還沒量過時的回健檢口（同 visitor/member 的 .mus-cta，換科技版配色） */
+.mus-cta{display:block;text-align:center;margin:12px 0 0;padding:12px;border:1.5px dashed #E6A93A;border-radius:14px;color:#E8C89A;font-size:14px;font-weight:700;text-decoration:none;}
+.mus-cta:active{transform:scale(.98);}
 
 /* 成果數字＋金庫（改觀句＝骨層） */
 .stat-row{display:flex;align-items:baseline;gap:10px;background:rgba(230,237,245,.06);border-radius:12px;padding:13px;margin-bottom:8px;}
@@ -1403,6 +1406,11 @@ function outHTML(){
               vTop: pctFromEval(v), lbl:DIMS_V[k].name.replace("肌肉",""), lbl2:DIM_EN[k]};
     }), {vals:true, full:120})
     + '<div class="open-note">私教席 12 塊全開——分數來自影響力健檢，照上升空間最大的練。<br>0–100 ＝ 他在這把尺上已解鎖到哪，背後淡影＝滿格。</div>'
+    /* 12 塊全空＝他還沒做過影響力健檢。上面那句已經講明分數來自健檢，這裡補一條真的點得進去的路，
+       不然私教席會出現「12 塊全開」卻全是「—」、而且沒有任何辦法把它量起來。 */
+    + (measured === 0
+        ? '<a class="mus-cta" href="' + QUIZ_URL + '" onclick="track(\'cta_click\',{cta_id:\'pro_quiz\'})">影響力健檢 3 分鐘——12 塊的起點分數從這裡來 →</a>'
+        : '')
     + DORD.map(function(k){ return dimDetailHTML(k, scores, fm); }).join("")
     + '</div>';
   var VAULT = buildVault();

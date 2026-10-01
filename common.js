@@ -12,6 +12,10 @@ var SHEET_API = "https://script.google.com/macros/s/AKfycbz7VxeV8ZmjSiGNO-G3ZwRL
    安全性靠 Google Console 那邊的「已授權的 JavaScript 來源」白名單。
    要跟 Code.gs 的 GOOGLE_CLIENT_ID 一字不差，改一邊就會 aud-mismatch。 */
 var GOOGLE_CLIENT_ID = "625808581147-7issp2dl6626gvds3vnn4guvc6no8gqt.apps.googleusercontent.com";
+/* 影響力健檢（comconverttest）。沒分數的人從這裡回去量——visitor/member/pro 三頁共用同一條。
+   測完它會把人帶回 app.atpifit.com/?from=quiz&ms=…，index.html 再用記住的 cw_uid 回寫基線，
+   所以在電腦上（測驗拿不到 LIFF 身份）繞一圈回來，分數照樣落在他自己那一列。 */
+var QUIZ_URL = "https://quiz.atpifit.com/";
 
 /* ── 4 大肌肉定義 ──
    k＝投入飽和曲線的「半滿點」：該維累積到 k 分時投入%＝50%（見 calcDims）。
