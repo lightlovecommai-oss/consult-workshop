@@ -93,11 +93,21 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
 .post { background:#FAF5EA; border:1px solid var(--line); border-radius:10px;
         padding:16px 19px; white-space:pre-wrap; font-size:15.5px; line-height:1.85; }
-.ig-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.ig-grid div { border-radius:9px; padding:14px 11px; font-size:13px; white-space:pre-wrap;
-               text-align:center; line-height:1.6; min-height:132px; }
-.ig-grid .c0 { color:#fff; font-weight:bold; }
-.ig-grid .cx { background:#FAF5EA; border:1px solid var(--line); }
+/* 輪播圖。以前這一區是四個文字格子——那等於把「去做圖」留給使用者，
+   他站在手機前還是沒圖可發。現在放真圖，長按就存進相簿。
+   橫向捲動而不是擠成格子：4:5 的圖排成一列才看得出輪播的順序感，
+   而且手機上一次看一張剛好，跟 IG 裡滑過去的體感一致。 */
+.ig-strip { display:flex; gap:10px; overflow-x:auto; padding-bottom:6px;
+            scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+.ig-strip figure { flex:none; width:210px; scroll-snap-align:start; }
+.ig-strip img { width:100%; aspect-ratio:4/5; object-fit:cover; display:block;
+                border-radius:9px; border:1px solid var(--line); background:#FAF5EA; }
+.ig-strip figcaption { margin-top:6px; font-size:12px; color:var(--muted);
+                       line-height:1.5; text-align:center; }
+.ig-strip figcaption b { color:var(--ink); }
+.ig-hint { margin:8px 0 0; font-size:13px; color:var(--muted); line-height:1.7; }
+.ig-none { background:#FFE9E4; border-left:4px solid #A63A2E; padding:13px 17px;
+           border-radius:7px; font-size:14px; line-height:1.8; color:#6B2A20; }
 
 .cta-box { background:var(--accent-soft); border:1px dashed var(--accent);
            border-radius:10px; padding:15px 19px; }
@@ -121,7 +131,7 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
    所以這裡不是「縮小版桌機」，按鈕一律放大到拇指按得到（≥44px）。 */
 @media (max-width:640px) {
   .tone { grid-template-columns:1fr; }
-  .ig-grid { grid-template-columns:repeat(2,1fr); }
+  .ig-strip figure { width:46vw; }
   .tele { font-size:19px; }
   body { padding:18px 10px 90px; }
   .guts { padding:4px 16px 20px; }
@@ -200,59 +210,136 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb1">複製 FB 文案</button></div>
-      <div class="post">業務講一百次，不如客戶自己說一次。
+      <div class="post">業務最貴的一個習慣，
+是把話講完。
 
-這件事在心理學有個名字，叫自我說服。意思是：一個人自己說出口的話，對他的影響力，遠遠大於別人跟他講的。
+不是講得不夠好。是講得太完整。
 
-你想想看醫生。
+而這件事，心理學研究了半世紀。
 
-好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他沒有說服你，他只是讓你把自己的狀況講出來。
+一坐下，三大優勢、五大保障。
+講了二十分鐘，對方一路點頭。
 
-一直介紹產品的是藥商。先問哪裡痛的，才是醫生。
+然後說：「我再考慮一下。」
 
-多數業務訓練教的是反方向：把產品講得更清楚、把優勢講得更完整、把話術練得更順。但你講得越完整，對方的腦袋就越忙著評估你，而不是忙著理解自己的問題。
+複盤的時候會想，
+是哪一段講得不夠好。
 
-真正的差別不在你講得好不好，在他有沒有開口。
+▋📊 問題不在哪一段講得不夠好
 
-他開口講自己的狀況那一刻，他就不是在聽你推銷了，他是在整理自己的需求。而人整理完自己的需求，下一步自然是想解決它。
+不是誰講得比較清楚的問題。
 
-下次見客戶，把你準備好的那三十秒介紹換成一個問題。
+是這句話從誰嘴裡出來的。
 
-然後閉嘴，讓他講。</div>
+從你嘴裡出來的，他要先懷疑一輪才相信。
+他自己講出來的，不用。
+
+心理學叫這個自我說服。
+它比說服有效，而且撐得比較久。
+
+▋🔁 但這招有一個條件，很少人講
+
+自我說服不是永遠有效。
+
+2024 年的研究發現一個調節變項：
+當人覺得「這問題很難答」，
+自我說服的優勢就顯著變小。
+
+因為答不出來的時候，
+他開始懷疑的是自己答案的品質。
+
+所以關鍵不是「有沒有問」。
+
+是那個問題，好不好答。
+
+▋🎯 下次見客戶，問題照這三條挑
+
+1️⃣ 問他已經知道答案的
+　 現況、數字、上次怎麼處理的。
+　 不要問他得當場想的。
+
+2️⃣ 問發生過的，不要問要預測的
+　 「上次等料等了多久」他答得出來。
+　 「未來三年的規劃」他答不出來。
+
+3️⃣ 他答完，別急著接產品
+　 接下一個問題。
+　 讓他多講一句，你就少說十句。
+
+他自己算出來的那個數字，
+比你報的任何數字都有力。
+
+你不需要說服他。
+他自己想通的，才留得住。
+
+➖➖➖➖➖➖➖➖
+
+這種當場能用的判斷，我每週寄一封信。
+留言「問診」，我把訂閱連結寄給你。
+
+身邊有人明天要見客戶，
+把這篇傳給他。
+
+（Elliot Aronson, &quot;The Power of Self-Persuasion&quot;,
+　American Psychologist, 1999；
+　Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
+
+#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #自我說服</div>
 
       <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
         <button class="copy" data-src="th1">複製 Threads 文案</button></div>
-      <div class="post">業務講一百次，不如客戶自己說一次。
+      <div class="post">業務最怕的那三秒鐘安靜，
+其實是客戶在算數字。
 
-好醫生不會一坐下就說「你該吃這個藥」。
-他會先問哪裡不舒服、多久了、什麼時候最痛。
+你一開口補充，他就得重新算。
 
-你講完，自己就想拿藥單了。
+多數人受不了那個安靜，
+所以永遠拿不到他自己算出來的答案。
 
-一直介紹產品的是藥商。
-先問哪裡痛的，才是醫生。</div>
+而他自己算出來的那個數字，
+你報十次都比不上。</div>
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc1">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8CA8;">業務講一百次，
-不如客戶自己說一次</div><div class="cx">心理學叫「自我說服」。
+      <div class="ig-strip"><figure><img src="daily-img/d01a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d01b.png" alt="那一刻" loading="lazy"><figcaption><b>2</b>　那一刻</figcaption></figure><figure><img src="daily-img/d01c.png" alt="幫錯誤命名" loading="lazy"><figcaption><b>3</b>　幫錯誤命名</figcaption></figure><figure><img src="daily-img/d01d.png" alt="真正在發生什麼" loading="lazy"><figcaption><b>4</b>　真正在發生什麼</figcaption></figure><figure><img src="daily-img/d01e.png" alt="替換句 1" loading="lazy"><figcaption><b>5</b>　替換句 1</figcaption></figure><figure><img src="daily-img/d01f.png" alt="替換句 2" loading="lazy"><figcaption><b>6</b>　替換句 2</figcaption></figure><figure><img src="daily-img/d01g.png" alt="替換句 3" loading="lazy"><figcaption><b>7</b>　替換句 3</figcaption></figure><figure><img src="daily-img/d01i.png" alt="小抄" loading="lazy"><figcaption><b>8</b>　小抄</figcaption></figure><figure><img src="daily-img/d01j.png" alt="當場怎麼檢驗" loading="lazy"><figcaption><b>9</b>　當場怎麼檢驗</figcaption></figure><figure><img src="daily-img/d01k.png" alt="身分卡" loading="lazy"><figcaption><b>10</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 10 張。</p>
+      <div class="post" style="margin-top:9px;">問對問題，對方會自己說服自己。這件事有半世紀的研究撐著。
+但 2024 年有人把它的條件找出來了，而那個條件不在問話的人身上。
 
-一個人自己說出口的話，
-對他的影響力遠遠大於
-別人跟他講的。</div><div class="cx">好醫生不會一坐下就說
-「你該吃這個藥」。
+🔍 先講那半句大家都學過的
 
-他會先問：
-哪裡不舒服、多久了、
-什麼時候最痛。</div><div class="cx">一直介紹產品的是藥商。
-先問哪裡痛的，才是醫生。</div>
-      </div>
-      <div class="post" style="margin-top:9px;">真正的高手，不是講最清楚的，是能讓對方自己想通的。
+1999 年 Aronson 在 American Psychologist 上整理了自我說服：
+一個人自己生出來的理由，比別人給他的理由更站得住。
+多數人學到這裡就停了，然後開始把問題越問越深。
 
-多數業務訓練在教你怎麼把話講得更完整。但你講得越完整，對方越忙著評估你，而不是忙著理解自己的問題。
+⚖️ 2024 年補上的是後半句
 
-下次見客戶，把那三十秒的介紹換成一個問題，然後閉嘴。</div>
+兩個預註冊研究把邊界畫出來了：
+優勢的條件在問題身上，不在技巧身上。
+產生論點的難度一高，自我說服的優勢就縮回去。
+
+講白話就是，同一招：
+用在好答的問題上是加分，
+用在難答的問題上是扣分。
+
+✅ 所以替換的標準只有一個
+
+圖裡那三組替換句，共同點不是「比較深」，
+是他手上現在就有答案。
+帳單在手邊、等過多久、找過誰，這些都不用回想。
+
+問題太難答的時候，他答不出來，
+懷疑的不是你的產品，是他自己的判斷。
+人在懷疑自己的時候不會成交，只會客氣。
+
+影響力的盡頭不是成交，是有人因為你變好。
+
+📩 每週一則當場能用的判斷，留言「問診」，訂閱連結會寄給你。
+🩺 免費影響力健檢在個人檔案的連結裡。
+
+（Elliot Aronson, &quot;The Power of Self-Persuasion&quot;, American Psychologist, 1999；
+Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
+
+#平凡人光頭 #溝通變現 #業務日常 #自我說服 #問對問題</div>
     </div>
 
     <div class="sec">
@@ -291,8 +378,8 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
         <button class="copy" data-src="tele2">複製提詞器文案</button></div>
       <div class="tele-box">
-        <div class="tele">客戶說考慮一下，九成不是在拒絕你。是他算不出來。客戶說我再考慮一下的時候，多數人的反應是開始想，是不是太貴了，要不要再降一點。其實他回去也沒在考慮，他只是不知道要拿什麼跟什麼比。這就像站在餐廳門口看菜單。不是不想吃，是不知道點哪個才不會後悔。這時候服務生說，我們什麼都好吃，你只會更站不住。但他如果說，第一次來的人八成點這個，你馬上就決定了。他卡住的不是要不要，是用什麼標準決定。你再講一次產品，是把菜單變得更長。所以下次聽到考慮一下，先別急著講產品，要給他一把尺。問他一句，你現在主要是在比什麼，是價格、時間、還是誰來做。他講出來的那個字，就是你接下來唯一要談的事。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。</div>
-        <div class="tele-meta"><span>約 333 字</span><span>口播約 59 秒</span>
+        <div class="tele">客戶說考慮一下，多半不是在拒絕你。是他算不出來。客戶說我再考慮一下，多數人第一個反應是想，是不是太貴了。於是下次見面帶了個折扣過去，結果一樣沒有下文。這就像站在餐廳門口看菜單。不是不想吃，是不知道點哪個才不會後悔。服務生說我們每一道都好吃，你只會更站不住。但他如果問，你今天想吃飽還是想吃巧？你馬上就知道要看哪一區。他卡住的不是要不要，是不知道拿什麼跟什麼比。有兩個研究者聽完兩百五十萬通銷售錄音，發現輸掉的案子四到六成不是輸給對手，是輸給沒有決定。而這些人超過一半不是不想買，是怕選錯。所以下次聽到考慮一下，先別急著講產品，要給他一把尺。問他，你現在主要是在比價格，還是在比時間？二選一他才答得出來。他如果說就是想再想想，那就問他最擔心哪裡會出錯。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 374 字</span><span>口播約 67 秒</span>
           <span>封面字：「考慮一下」 不是拒絕</span></div>
       </div>
 
@@ -300,7 +387,7 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <div class="tone"><div><b>語氣</b>這支要「懂他」的口氣，不是指導的口氣。講「他算不出來」時語氣要軟，像在幫客戶講話</div><div><b>表情</b>從頭到尾放鬆，可以有一點點笑。這支是替客戶說話，不要嚴肅</div><div><b>背景</b>咖啡廳或暖色調場景都可以。這支是「理解」題，背景軟一點</div><div><b>停頓</b>「是他算不出來。」後停 1 秒｜「更站不住」後停半秒</div></div>
 
       <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
-      <table class="shots"><tr><td>鉤子</td><td>純口播臉。「是他算不出來」這句後面停半秒</td></tr><tr><td>餐廳菜單</td><td>插站在店門口看菜單的畫面（stock 搜「menu outside restaurant」）</td></tr><tr><td>什麼都好吃</td><td>可配服務生推薦的畫面，或直接打字幕卡</td></tr><tr><td>收口</td><td>口播臉，語速放慢</td></tr></table>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉。「是他算不出來」這句後面停半秒</td></tr><tr><td>餐廳菜單</td><td>插站在店門口看菜單的畫面（stock 搜「menu outside restaurant」）</td></tr><tr><td>想吃飽還是想吃巧</td><td>服務生問話的畫面，或直接打兩格字幕卡（吃飽｜吃巧）</td></tr><tr><td>兩百五十萬通</td><td>🔴 報數字一定要上字幕卡，不然觀眾會當成唬人：《The JOLT Effect》Dixon &amp; McKenna, 2022｜2.5M 通銷售錄音分析</td></tr><tr><td>二選一</td><td>打兩格字幕卡（比價格｜比時間）</td></tr><tr><td>收口</td><td>口播臉，語速放慢</td></tr></table>
 
       <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
       <div class="cover-chip">「考慮一下」
@@ -312,54 +399,102 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb2">複製 FB 文案</button></div>
-      <div class="post">客戶說「我考慮一下」，九成不是在拒絕你。是他算不出來。
+      <div class="post">四到六成的銷售案子，
+最後的贏家是「沒有人」。
 
-這句話在業務圈幾乎被當成禮貌性拒絕的同義詞。但多數時候他是真的在考慮，只是他卡的地方跟你以為的不一樣。
+不是輸給對手。是客戶誰都沒選。
 
-這就像你站在餐廳門口看菜單。
+這是聽完 250 萬通銷售錄音，算出來的。
 
-你不是不想吃，是不知道點哪一個才不會後悔。這時候服務生走過來跟你說「我們什麼都好吃」，你只會更站不住——因為他沒有給你任何能比較的東西。
+而多數人回頭檢討的，是價格。
 
-客戶卡住的時候，要的不是推一把，是一個能比較的標準。
+報價單寄出第三天，對話框顯示已讀。
+上一次他講的是「我考慮一下」。
+回了一句「有問題隨時找我」。
 
-他不是在考慮要不要，是在考慮用什麼標準決定。
+然後就沒有然後了。
 
-這兩件事差很多。如果他在考慮要不要，你該做的是加強理由。但如果他是在找標準，你再講十個理由他還是站在門口，因為理由不能拿來比較，標準才可以。
+這種案子最後都歸在「輸了」那一欄。
+但很少人回頭查，到底輸給誰。
 
-標準長什麼樣子？它通常是一句話，而且能用來排除選項。
+▋📊 那 250 萬通錄音，真正說的是
 
-「如果你最在意的是售後，那這三個方案只有一個做得到。」
-「如果你半年內要看到變化，那另外兩個都不用考慮。」
+那些沒買的人，超過一半不是不想買。
 
-你看出來了嗎，標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。
+是怕選錯。
 
-你能幫他的不是催他決定，是讓他知道怎麼決定。</div>
+剩下的才是單純不想改現狀。
+
+換句話說，多數談不成的案子，
+客戶是想要的。他只是不敢。
+
+▋🔁 為什麼這會翻掉原本的做法
+
+跟對手競爭，要講得更好。
+跟「不決定」競爭，講越多他越怕。
+
+因為每多一個優點，
+就多一個他得負責判斷的項目。
+
+以為在加分，
+他感覺到的是責任在疊。
+
+怕選錯的人，要的不是更多理由。
+是一把能拿來比的尺。
+
+▋🎯 下次聽到「我考慮一下」，改做三件事
+
+1️⃣ 先閉嘴，別補產品資訊
+　 補的每一句，都在加重他的負擔。
+
+2️⃣ 把問題換成二選一
+　 「你現在主要是在比價格，還是在比時間？」
+
+3️⃣ 不要問開放題
+　 問「還在考慮什麼」只會換來「再看看」，
+　 因為他自己也還沒把那團東西拆開。
+
+二選一，他才答得出來。
+
+這句話沒有在推銷任何東西。
+它只是給了他一把尺。
+
+你能幫他的不是催他決定，
+是讓他知道怎麼決定。
+
+➖➖➖➖➖➖➖➖
+
+想要一整套「給尺」的問法，
+留言「標準」，我把訂閱連結寄給你。
+每週一封信，一次一個當場能用的判斷。
+
+身邊有人正在等一句「我考慮一下」的回覆，
+把這篇傳給他。
+
+（250 萬通錄音出自 Matt Dixon 與 Ted McKenna
+　《The JOLT Effect》, 2022）
+
+#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #客戶心理</div>
 
       <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
         <button class="copy" data-src="th2">複製 Threads 文案</button></div>
-      <div class="post">「我考慮一下」九成不是在拒絕你。
-是他算不出來。
+      <div class="post">你有沒有過那種經驗：
 
-就像站在餐廳門口看菜單。
-你不是不想吃，是不知道點哪個才不會後悔。
+在貨架前站了三十分鐘，
+最後空手走出來。
 
-這時候說「我們什麼都好吃」，
-只會讓他更站不住。
+那不是不想買。
+是不知道照什麼標準選。
 
-他不是在考慮要不要，
-是在考慮用什麼標準決定。</div>
+客戶說「我考慮一下」的時候，
+多半就是站在那個貨架前。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+這時候再給他一張規格表，
+他只會站得更久。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc2">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8B77;">「我考慮一下」
-多數時候他是真的</div><div class="cx">他不是在拒絕你。
-是他算不出來。</div><div class="cx">就像站在餐廳門口看菜單。
-
-服務生說「我們什麼都好吃」，
-你只會更站不住。</div><div class="cx">他不是在考慮要不要。
-是在考慮用什麼標準決定。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d02a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d02i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d02k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">客戶卡住的時候，要的不是推一把，是一個能比較的標準。
 
 標準長什麼樣子？它通常是一句話，而且能用來排除選項。
@@ -406,8 +541,8 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
         <button class="copy" data-src="tele3">複製提詞器文案</button></div>
       <div class="tele-box">
-        <div class="tele">超市擺 24 種果醬，賣得比擺 6 種還差。這叫選擇癱瘓。有一種簡報，把產品十個優點全部講完。講的時候客戶一直點頭，看起來很順。結果回去之後沒有下文，連他卡在哪都不知道。這個實驗是真的。超市擺二十四種果醬，停下來試吃的人變多，掏錢的卻只剩十分之一。擺六種的時候，停下來的人比較少，買的人反而多很多。看得越多，決定越難。業務講產品，就像在擺那個果醬架。講十個優點，他記不住十個，他只記得好複雜。而複雜的東西，人的本能是先放著。所以下次講之前，先挑三個。挑的標準不是你最自豪的三個，是跟他剛剛那句話有關的三個。他說最近人手不夠，你就只講省人力那三個。其他七個留著，他問你再講。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。</div>
-        <div class="tele-meta"><span>約 332 字</span><span>口播約 59 秒</span>
+        <div class="tele">超市擺二十四種果醬，掏錢的人只剩擺六種的十分之一。有一種簡報，把產品十個優點全部講完。講的時候客戶一直點頭，看起來很順。結果回去之後沒有下文，連他卡在哪都不知道。這個實驗是真的，在超市做的。擺二十四種的時候，停下來試吃的人比較多，掏錢的反而少。擺六種倒過來。業務講產品，就像在擺那個果醬架。不過這個實驗後來被吵了很久，有人重做做不出來。直到有人把九十九個研究合起來算，才算出真正的條件：選項多會不會害人，看他自己知不知道要什麼。他心裡有譜，選項多是享受。他沒譜，選項多就是折磨。而坐在你對面那個人，就是沒譜的。所以下次講之前，先挑三個。挑的標準不是你最自豪的三個，是跟他剛剛那句話有關的三個。他說最近人手不夠，你就只講省人力那三個。其他七個留著，他問你再講。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 379 字</span><span>口播約 68 秒</span>
           <span>封面字：講越多， 成交越低</span></div>
       </div>
 
@@ -415,7 +550,7 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <div class="tone"><div><b>語氣</b>鉤子要像在爆料一個冷知識，帶一點「你不知道吧」的興奮感。後半轉成冷靜分析</div><div><b>表情</b>講果醬數字時可以用手比數量（24 跟 6），這支有數字，手勢幫得上</div><div><b>背景</b>白牆。這支靠字幕跟素材，背景越乾淨越好</div><div><b>停頓</b>「這叫選擇癱瘓。」後停 1 秒｜「好複雜」後停半秒</div></div>
 
       <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
-      <table class="shots"><tr><td>鉤子</td><td>插超市果醬貨架畫面（stock 搜「jam shelf supermarket」）。這是真實研究，可打字幕標「Iyengar &amp; Lepper, 1995」增加可信度</td></tr><tr><td>十個優點</td><td>可配密密麻麻的簡報頁或規格表特寫</td></tr><tr><td>先放著</td><td>插手指滑過手機把訊息滑掉的畫面</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+      <table class="shots"><tr><td>鉤子</td><td>插超市果醬貨架畫面（stock 搜「jam shelf supermarket」）。字幕卡標「Iyengar &amp; Lepper, 2000, JPSP 79:995」</td></tr><tr><td>十個優點</td><td>可配密密麻麻的簡報頁或規格表特寫</td></tr><tr><td>九十九個研究</td><td>🔴 這張字幕卡是這支片的誠信所在，不能省：「Chernev, Böckenholt &amp; Goodman, 2015, JCP 25(2)｜99 筆觀察・N=7202」</td></tr><tr><td>三個</td><td>打三格字幕卡，其他七格打叉或灰掉</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
 
       <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
       <div class="cover-chip">講越多，
@@ -427,55 +562,102 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb3">複製 FB 文案</button></div>
-      <div class="post">超市擺 24 種果醬，賣得比擺 6 種還差。
+      <div class="post">超市擺 24 種果醬，
+掏錢的只剩擺 6 種的十分之一。
 
-這是 1995 年一個很有名的研究（Iyengar &amp; Lepper）。研究者在超市擺試吃攤，一次擺 24 種果醬，一次擺 6 種。24 種吸引了更多人停下來試吃，但真正掏錢買的比例，遠低於只擺 6 種的時候。
+不是東西不好。是選項太多。
 
-選項越多，人越不敢決定。這叫選擇癱瘓。
+而這個實驗，後來被吵了二十年。
 
-業務講產品就像在擺果醬架。
+簡報把十個優點講完，
+客戶一路點頭，看起來很順。
 
-你講了十個優點，客戶記不住十個。他只記得一件事：好複雜。而複雜的東西，人的本能是先放著。不是不想要，是先放著。等有空再想。然後就沒有再想了。
+回去就沒下文了。
+連他卡在哪都不知道。
 
-這裡有個很反直覺的地方：你把產品講得越完整，其實是在增加他的決策成本。你以為你在幫他判斷，實際上你在讓他更難判斷。
+▋📊 那個實驗，後來做不出來
 
-講三個他記得住的，比講十個他聽不完的有用。
+擺 24 種時停下來的人比較多，
+掏錢的只有 3%。
+擺 6 種的時候是 30%。
 
-而且那三個要怎麼挑？不是挑你最自豪的三個，是挑**跟他剛剛講的話有關的**三個。他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。
+但這個結果重做常常失敗。
 
-專業不是把事情講滿，是幫他把事情變簡單。</div>
+2010 年有人把 50 幾個同類研究
+合起來算，平均效果幾乎是零。
+
+所以「選項多就賣得差」
+不是一條到處都成立的定律。
+
+▋🔁 真正的條件是「他有沒有譜」
+
+2015 年另一份統合分析
+找出了關鍵的那個條件：
+他自己還不確定要什麼。
+
+心裡有譜的人，選項多是享受。
+還沒有譜的人，選項多是折磨。
+
+而坐在你對面那個人，
+就是還沒有譜的那一個。
+
+他如果知道自己要什麼，
+不會坐在這裡聽你講。
+
+▋🎯 現場怎麼判斷他有沒有譜
+
+1️⃣ 聽他問的是哪一種問題
+　 問「哪個比較好」＝沒有譜。
+　 問「這個能不能做到」＝有譜。
+
+2️⃣ 沒有譜的，先給三個
+　 不是你最自豪的三個，
+　 是跟他剛剛那句話有關的三個。
+
+3️⃣ 剩下的留著當後手
+　 他問你再講。
+　 沒問就代表他不在意。
+
+挑的動作本身就在幫他降低不確定。
+那才是研究真正在說的事。
+
+專業不是把事情講滿。
+是幫他把事情變簡單。
+
+➖➖➖➖➖➖➖➖
+
+那三個該挑什麼，我每週寄一封信。
+留言「三個」，我把訂閱連結寄給你。
+
+身邊有人明天要做簡報，
+把這篇傳給他。
+
+（Iyengar &amp; Lepper, JPSP, 2000；
+　Scheibehenne et al., JCR, 2010；
+　Chernev, Böckenholt &amp; Goodman,
+　J Consumer Psych, 2015）
+
+#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #選擇癱瘓</div>
 
       <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
         <button class="copy" data-src="th3">複製 Threads 文案</button></div>
-      <div class="post">超市擺 24 種果醬，
-賣得比擺 6 種還差。
+      <div class="post">菜單越厚的餐廳，越難點。
 
-這叫選擇癱瘓。
+但你明明知道自己想吃什麼的時候，
+再厚的菜單也擋不住你。
 
-業務講產品也一樣。
-講了十個優點，客戶記不住十個，
-他只記得「好複雜」。
+所以難的不是菜單。
+是你有沒有譜。
 
-而複雜的東西，
-人的本能是先放著。</div>
+客戶聽你講十個優點記不住十個，
+不是他笨。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+是他還沒有譜，
+而你又多給了九個。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc3">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8CA8;">擺 24 種果醬，
-賣得比擺 6 種還差</div><div class="cx">選項越多，
-人越不敢決定。
-
-這叫選擇癱瘓。
-（Iyengar &amp; Lepper, 1995）</div><div class="cx">講了十個優點，
-客戶記不住十個。
-
-他只記得「好複雜」。
-
-複雜的東西，
-人的本能是先放著。</div><div class="cx">講三個他記得住的，
-比講十個他聽不完的有用。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d03a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d03i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d03k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">你把產品講得越完整，其實是在增加他的決策成本。
 
 那三個要怎麼挑？不是挑你最自豪的三個，是挑跟他剛剛講的話有關的三個。
@@ -542,58 +724,102 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb4">複製 FB 文案</button></div>
-      <div class="post">不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。
-
-想像你完全不懂車，走進展示間。銷售很熱心，講引擎、講底盤、講懸吊系統、講安全配備。他講得很好，但你一句都接不上。
-
-整場對話裡，唯一一個你完全看得懂的東西就是價格。
-
-所以你只能用價格判斷。不是因為你小氣，是因為那是你手上唯一的刻度。
-
-顧問、教練、設計、保險、諮詢都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。他不是不想認真判斷，是手上沒有別的尺。
-
-沒有對照的時候，任何數字都只是大。
-
-所以「客戶嫌貴」翻譯過來通常是：我還不知道這筆錢會換到什麼。
-
-這時候最糟的動作是解釋價格。你一解釋，等於叫他繼續用那把尺量你——而那把尺上面只有數字，沒有價值。
-
-要做的是給他一把新的尺。
-
-新的尺可以是時間（三個月後你的狀況會長什麼樣）、可以是對照（做跟不做的差別在哪）、可以是風險（不處理的話最差會怎樣）。任何一把，只要他手上多一個刻度，價格就不再是唯一的判斷依據。
-
-給他一把新的尺，貴這件事自己就不見了。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th4">複製 Threads 文案</button></div>
       <div class="post">不懂車的人去買車，
 他只看得懂價格。
 
-所以他只能嫌貴。
+不是他愛計較。是他手上只有一把尺。
 
-客戶嫌貴，多半不是嫌數字大，
-是他手上沒有別的刻度。
+而有些行業，天生沒有第二把。
 
-這時候解釋價格，
-等於叫他繼續用那把尺量你。</div>
+報價寄出去，對方只回一句
+怎麼這麼貴。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
-        <button class="copy" data-src="igc4">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8CA8;">嫌貴，
-不是嫌數字大</div><div class="cx">不懂車的人去買車，
-只看得懂價格。
+然後開始解釋。
+材料、團隊、做了幾年。
 
-所以他只能嫌貴。</div><div class="cx">沒有對照的時候，
-任何數字都只是大。
+解釋得越多，
+他記得的只剩那個數字。
 
-「嫌貴」翻譯過來是：
-我還不知道這筆錢
-會換到什麼。</div><div class="cx">解釋價格，等於叫他
+▋📊 你賣的東西，可能天生難判斷
+
+經濟學把商品分成三種。
+
+看得出來的，叫搜尋財。
+用過才知道的，叫經驗財。
+
+還有一種，買之前驗不了，
+買完也很難說自己買對沒有。
+
+顧問、教練、保險、設計、教育
+都落在第三種。
+
+對方不是不想認真判斷。
+是這件事他真的驗不了。
+
+▋🔁 所以解釋價格是在幫倒忙
+
+一解釋，等於叫他
 繼續用那把尺量你。
 
-要做的是給他一把新的尺。</div>
-      </div>
+而那把尺上面只有數字，
+沒有別的刻度。
+
+沒有對照的時候，
+任何數字都只是大。
+
+「太貴」翻譯過來通常是：
+我還不知道這筆錢換到什麼。
+
+▋🎯 給他一把新的尺，三種挑一種
+
+1️⃣ 時間的尺
+　 三個月後你的狀況會長什麼樣。
+
+2️⃣ 對照的尺
+　 做跟不做，差別在哪一件事上。
+
+3️⃣ 風險的尺
+　 不處理的話，最差會怎樣。
+
+三種不用都給。
+他手上多一個刻度就夠了。
+
+給他一把新的尺。
+貴這件事自己就不見了。
+
+➖➖➖➖➖➖➖➖
+
+想知道自己是哪一塊
+讓客戶只能看價格？
+
+留言「健檢」，我把影響力健檢寄給你。
+
+身邊有人正在解釋價格，
+把這篇傳給他。
+
+（信任財這個分類出自 Darby &amp; Karni,
+　Journal of Law and Economics, 1973）
+
+#平凡人光頭 #溝通變現 #業務日常 #嫌貴怎麼辦 #定價溝通</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th4">複製 Threads 文案</button></div>
+      <div class="post">去看牙醫，醫生說這顆要做牙套。
+
+你不會問牙套的材質跟結構。
+你會問多少錢。
+
+不是你只在意錢。
+是整場只有那個數字你看得懂。
+
+客戶嫌貴，多半是同一件事。
+
+他不是嫌數字大，
+是手上只剩這一把尺。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
+        <button class="copy" data-src="igc4">複製 IG 說明欄</button></div>
+      <div class="ig-strip"><figure><img src="daily-img/d04a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d04i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d04k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">顧問、教練、設計、保險都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。
 
 他不是不想認真判斷，是手上沒有別的尺。
@@ -660,59 +886,101 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb5">複製 FB 文案</button></div>
-      <div class="post">頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。
-
-這句話第一次聽會覺得很傲。但你看任何領域的高手，都是這樣運作的。
-
-這就像好的健身教練。
-
-他不會一見面就賣課。他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只能來一次，又不肯調整飲食，好的教練會跟你說實話：這樣練，三個月後你會失望，然後你會覺得是我不行。
-
-因為他知道，接錯客戶比少接一個客戶更傷。
-
-一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。
-
-外行人在推銷，高手在挑人。
-
-挑人聽起來像在篩掉別人，實際上是在保護兩件事：保護對方不要花錯錢，保護自己的交付品質撐得住。
-
-而且有個反效果很有趣——當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況；而你一問，他就感覺到你在評估合不合，不是在求成交。
-
-那個瞬間，位置就換了。
-
-挑人不是傲氣，是你對結果負責。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th5">複製 Threads 文案</button></div>
       <div class="post">頂級業務見客戶，
 想的不是怎麼成交。
 
 是這個客戶要不要接。
 
-好教練不會一見面就賣課，
-他會先問你平常怎麼吃、怎麼睡。
+第一次聽會覺得很傲。但高手都這樣運作。
 
-因為接錯客戶，
-比少接一個客戶更傷。
+有人來問服務，
+第一個念頭是太好了，有生意上門。
 
-外行人在推銷，高手在挑人。</div>
+接下來整場都在證明自己適合他。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+沒有一秒鐘在想，
+他適不適合我。
+
+▋📊 接錯一個客戶，要付三筆帳
+
+第一筆是時間。
+做不出結果的案子最難結案。
+
+第二筆是心力。
+他的焦慮會變成你的焦慮。
+
+第三筆最貴，是口碑。
+
+他不會說是自己沒配合，
+他會說找你沒用。
+
+而那不是他的錯。
+是你當初明知道不合還是收了。
+
+▋🔁 挑人跟擺架子，差在一條線
+
+同樣是說不，分界線在為了誰。
+
+為他的結果挑，叫負責。
+為自己方便挑，才叫擺架子。
+
+這條線客戶感覺得到。
+
+你問他狀況的那一刻，
+他就知道你在評估合不合，
+不是在求他答應。
+
+那個瞬間，位置就換了。
+
+▋🎯 下次有人來問，先問這三件
+
+1️⃣ 你現在卡在哪一塊
+　 他答不出來，表示還不急。
+
+2️⃣ 之前試過什麼
+　 試過的東西會告訴你
+　 他的期待值在哪裡。
+
+3️⃣ 願意花多少時間
+　 這題最會露餡，也最該問。
+
+三個答案有一個對不上，就直說。
+
+你講真話那一刻，
+他反而開始信你。
+
+挑人不是傲氣。
+是你對他的結果負責。
+
+➖➖➖➖➖➖➖➖
+
+你現在是在推銷，還是在挑人？
+留言「挑人」，我把影響力健檢寄給你。
+
+身邊有人正在硬接一個案子，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #挑客戶 #專業立場</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th5">複製 Threads 文案</button></div>
+      <div class="post">說不會流失一些人。
+
+但留下來的那些，
+從第一天就知道
+你不是來求他答應的。
+
+多數人不敢說不，是怕少接一個。
+
+而接錯一個的帳，
+最後是記在你的口碑上。
+
+他不會說是自己沒配合。
+他會說找你沒用。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc5">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#C6603A;">高手不推銷，
-高手挑人</div><div class="cx">頂級業務見客戶，
-想的不是怎麼成交。
-
-是這個客戶要不要接。</div><div class="cx">好教練不會一見面就賣課。
-
-他會先問你
-平常怎麼吃、怎麼睡。
-
-因為接錯客戶，
-比少接一個客戶更傷。</div><div class="cx">外行人在推銷，
-高手在挑人。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d05a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d05i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d05k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。
 
 有個反效果很有趣：當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況。
@@ -750,7 +1018,7 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
     <span class="pill">T｜信任</span>
   </div>
   <div class="guts">
-    <div class="ttl">最讓客戶反感的 5 句銷售話術</div>
+    <div class="ttl">最讓客戶反感的 3 句銷售話術</div>
 
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
@@ -758,19 +1026,19 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
         <button class="copy" data-src="tele6">複製提詞器文案</button></div>
       <div class="tele-box">
-        <div class="tele">有五句話業務天天在講，客戶天天在心裡扣分。這五句話的共同點是，講的人以為在拉近距離，聽的人每聽一句就往後退一步。而且對方不會講，他只是回訊息變慢。第一句，我跟你說實話。對方會想，那你前面講的是什麼。第二句，這個我幫很多人做過。他想，所以我只是第幾個。第三句最毒，相信我。這就像相親第一次見面就說，嫁給我不會後悔。這三句有一個共同點：它們都在要對方給。給信任、給時間、給機會。沒有一句在給他。所以把要改成給。不要說相信我，改成，這件事我可以先做一段給你看。不要說我幫很多人做過，改成，跟你情況最像的那個人，當時卡在這裡。你給得出細節，信任自己會長出來。這三句都在要他給，沒有一句在給他。　剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
+        <div class="tele">有三句話業務天天在講，客戶天天在心裡扣分。這三句話的共同點是，講的人以為在拉近距離，聽的人每聽一句就往後退一步。而且對方不會講，他只是回訊息變慢。第一句，我跟你說實話。對方會想，那你前面講的是什麼。第二句，這個我幫很多人做過。他想，所以我只是第幾個。第三句最毒，相信我。這就像相親第一次見面就說，嫁給我不會後悔。它們有一個共同點：都在要對方給。給信任、給時間、給機會。沒有一句在給他。所以把要改成給。不要說相信我，改成，這件事我可以先做一段給你看。不要說我幫很多人做過，改成，跟你情況最像的那個人，當時卡在這裡。不要說我跟你說實話，就直接把那句實話講出來。信任不是要來的，是給出來的。　這三句怎麼換成給，我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
         <div class="tele-meta"><span>約 323 字</span><span>口播約 58 秒</span>
-          <span>封面字：這 5 句， 客戶在心裡扣分</span></div>
+          <span>封面字：這 3 句， 客戶在心裡扣分</span></div>
       </div>
 
       <div class="lbl">語氣與背景</div>
-      <div class="tone"><div><b>語氣</b>這支是流量題，節奏要快。三句話術逐句點出來時語氣要帶一點戲謔，講到「相信我」可以稍微誇張</div><div><b>表情</b>鉤子時手比「五」。講相親類比那句一定要笑，那是全片最輕鬆的點</div><div><b>背景</b>白牆。這支靠字幕卡節奏，背景不要搶</div><div><b>停頓</b>每句話術唸完停半秒讓字幕上｜「嫁給我不會後悔」後停 1 秒（等觀眾笑）</div></div>
+      <div class="tone"><div><b>語氣</b>這支是流量題，節奏要快。三句話術逐句點出來時語氣要帶一點戲謔，講到「相信我」可以稍微誇張</div><div><b>表情</b>鉤子時手比「三」。講相親類比那句一定要笑，那是全片最輕鬆的點</div><div><b>背景</b>白牆。這支靠字幕卡節奏，背景不要搶</div><div><b>停頓</b>每句話術唸完停半秒讓字幕上｜「嫁給我不會後悔」後停 1 秒（等觀眾笑）</div></div>
 
       <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
-      <table class="shots"><tr><td>鉤子</td><td>純口播臉，手指做「五」的手勢</td></tr><tr><td>逐句</td><td>每句打一張字幕卡，用刪除線劃掉。這段靠字幕節奏，不用素材</td></tr><tr><td>相親</td><td>插相親／第一次約會尷尬的畫面，這是全片最好笑的點</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉，手指做「三」的手勢</td></tr><tr><td>逐句</td><td>每句打一張字幕卡，用刪除線劃掉。這段靠字幕節奏，不用素材</td></tr><tr><td>相親</td><td>插相親／第一次約會尷尬的畫面，這是全片最好笑的點</td></tr><tr><td>做法</td><td>三句各打一張「改成」對照卡（左邊劃掉，右邊亮起來）</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
 
       <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
-      <div class="cover-chip">這 5 句，
+      <div class="cover-chip">這 3 句，
 客戶在心裡扣分</div>
     </div>
 
@@ -787,60 +1055,102 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
       <details class="spare"><summary>日課這則 FB 長文（備用稿，今天不發）</summary>
         <div class="row" style="margin-top:12px;"><div class="lbl" style="margin:0;">備用</div>
           <button class="copy" data-src="fb6">複製備用稿</button></div>
-        <div class="post">有五句話業務天天在講，客戶天天在心裡扣分。
+        <div class="post">有三句話業務天天在講，
+客戶天天在心裡扣分。
+
+而且他不會講。他只是回訊息變慢。
+
+這三句有一個共同結構。
 
 第一句，「我跟你說實話」。
 
-這句話的問題是，客戶會立刻想：那你前面講的是什麼？你本來就該講實話，特別強調反而暴露了前面可能沒有。
+對方立刻會想：
+那你前面講的是什麼。
 
 第二句，「這個我幫很多人做過」。
 
-你想證明經驗，但他聽到的是：所以我只是第幾個。他不想當第幾個，他想當那個你特別在意的。經驗要證明，但要用他的狀況來證明，不是用數量。
+他聽到的是：
+所以我只是第幾個。
 
 第三句最毒，「相信我」。
 
-這就像相親第一次見面就說，嫁給我不會後悔。
+▋📊 三句話的共同結構
 
-信任是結果，不是要求來的。你越講相信我，對方越會想：為什麼你需要我相信你？真正讓人放心的人，從來不用開口要。
+它們都在要對方給。
 
-這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。
+給你信任、給你時間、給你機會。
 
-而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。
+沒有一句在給他。
 
-這三句都在要他給，沒有一句在給他。</div>
+更麻煩的是，
+每一句都把風險留在他那邊。
+
+要他先相信，
+萬一看錯了，是他自己的責任。
+
+▋🔁 一句話是在要還是在給
+
+有個三秒鐘的自我檢查。
+
+把那句話講完，問自己：
+這句話的受益人是誰。
+
+「相信我」的受益人是你。
+「你可以先驗證」的受益人是他。
+
+同一件事，位置完全不一樣。
+
+真正讓人放心的人，
+從來不用開口要。
+
+▋🎯 這三句，照這樣換成給
+
+1️⃣ 「相信我」
+　 改成：這件事我可以
+　 先做一段給你看。
+
+2️⃣ 「我幫很多人做過」
+　 改成：跟你情況最像的那個人，
+　 當時卡在這裡。
+
+3️⃣ 「我跟你說實話」
+　 改成：直接把那句實話講出來。
+
+真正的槓桿，永遠在「給」那一邊。
+
+信任不是要來的。
+是給出來的。
+
+➖➖➖➖➖➖➖➖
+
+這三句怎麼換成給，我每週寄一封信。
+留言「話術」，我把訂閱連結寄給你。
+
+身邊有人天天在講這三句，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #銷售話術 #信任怎麼建立</div>
       </details>
 
       <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
         <button class="copy" data-src="th6">複製 Threads 文案</button></div>
-      <div class="post">三句業務天天在講、
-客戶天天在心裡扣分的話：
+      <div class="post">客戶不會告訴你他在扣分。
 
-「我跟你說實話」
-→ 那你前面講的是什麼
+他只是回訊息變慢。
 
-「這個我幫很多人做過」
-→ 所以我只是第幾個
+而最容易被扣分的那幾句，
+講的人都覺得自己在拉近距離：
 
-「相信我」
-→ 這就像相親第一次見面
-　 就說嫁給我不會後悔
+我跟你說實話。
+這個我幫很多人做過。
+相信我。
 
-信任是結果，不是要求來的。</div>
+三句都在要他給。
+沒有一句在給他。</div>
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc6">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8B77;">這 5 句，
-客戶在心裡扣分</div><div class="cx">①「我跟你說實話」
-→ 那你前面講的是什麼？
-
-②「這個我幫很多人做過」
-→ 所以我只是第幾個。</div><div class="cx">③ 最毒的是「相信我」。
-
-這就像相親第一次見面就說
-「嫁給我不會後悔」。</div><div class="cx">信任是結果，
-不是要求來的。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d06a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d06i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d06k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。
 
 而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。
@@ -851,7 +1161,7 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
     <div class="sec">
       <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
       <div class="cta-box">
-        <div style="font-size:15.5px;line-height:1.75;">剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
+        <div style="font-size:15.5px;line-height:1.75;">這三句怎麼換成給，我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
         <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
           誘餌 <b>電子信</b>　｜　關鍵字 <code>話術</code>　｜　每週一封信，一次一個當場能用的判斷
         </div>
@@ -905,57 +1215,97 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb7">複製 FB 文案</button></div>
-      <div class="post">「只耽誤您三分鐘」這句一出口，三分鐘就沒了。
-
-因為這句話等於先承認：我接下來要講的事，對你沒好處。
-
-你想想，有人跟你說「借我三分鐘，讓你多賺一百萬」，他會先道歉嗎？
-
-不會。他會直接講那一百萬。
-
-開場就道歉，傳遞的訊息是「我知道我在打擾你」。而對方收到這個訊息之後，第一個反應不是給你時間，是想辦法脫身——因為你已經幫他定義了這場對話的性質：這是一個打擾。
-
-好的開場不用求時間。
-
-它的結構通常是：先講一件跟他有關的事，然後停住。
-
-「我看到你們上個月開了第三家分店。」停。
-「我剛從你同業那邊過來，他提到一個你可能也會遇到的狀況。」停。
-
-那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。
-
-你不需要客戶的三分鐘。你需要他的好奇。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th7">複製 Threads 文案</button></div>
       <div class="post">「只耽誤您三分鐘」
 這句一出口，三分鐘就沒了。
 
-因為它等於先承認：
-我要講的事對你沒好處。
+聽起來很有禮貌。對方卻開始找理由掛電話。
 
-你想想，有人說
-「借我三分鐘讓你多賺一百萬」，
+問題不在禮貌。在你幫這場對話定了性。
+
+打給陌生客戶，
+很多人開場先道歉。
+
+不好意思打擾了。
+
+話還沒進正題，
+對方已經在看手錶。
+
+▋📊 道歉的開場，先替他下了結論
+
+這句話等於先承認：
+我接下來要講的事，對你沒好處。
+
+你想想，如果有人說
+借我三分鐘讓你多賺一百萬，
 他會先道歉嗎？
 
-好的開場不用求時間。
-它會讓對方自己想多聽一句。</div>
+不會。他會直接講那一百萬。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+開場就道歉，
+傳遞的訊息是我知道我在打擾你。
+
+而他收到這個訊息之後，
+第一個反應不是給你時間。
+
+是想辦法脫身。
+
+▋🔁 開場真正的工作不是要時間
+
+是讓他自己決定要不要聽。
+
+求來的三分鐘，
+他整個三分鐘都在算還剩幾分鐘。
+
+自己決定要聽的，不會算時間。
+
+所以開場要的不是許可。
+是好奇。
+
+▋🎯 把道歉換成這三個動作
+
+1️⃣ 先講一件跟他有關的事實
+　 「你們上個月開了第三家店。」
+
+2️⃣ 講完停住
+　 停住之後，決定的人是他。
+
+3️⃣ 三秒內看他接不接
+　 他接了就是在意。
+　 他沒接，你也省下那三分鐘。
+
+三秒鐘的答案，
+比求來的三分鐘準。
+
+你不需要他的三分鐘。
+你需要他的好奇。
+
+➖➖➖➖➖➖➖➖
+
+不知道自己哪一塊讓人想跑？
+留言「開場」，我把影響力健檢寄給你。
+
+身邊有人明天要打陌生電話，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #開場白 #陌生開發</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th7">複製 Threads 文案</button></div>
+      <div class="post">有人傳訊息給你，
+第一句是「不好意思打擾」。
+
+你還沒看完就知道，
+後面那件事跟你沒關係。
+
+因為真的跟你有關的人不會道歉。
+他會直接講那件事。
+
+開場的客氣不是禮貌。
+是先替對方下了結論。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc7">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#C6603A;">這句開場，
-三分鐘就沒了</div><div class="cx">「只耽誤您三分鐘」
-
-這句等於先承認：
-我要講的事對你沒好處。</div><div class="cx">有人跟你說
-「借我三分鐘讓你多賺一百萬」，
-
-他會先道歉嗎？</div><div class="cx">好的開場不用求時間。
-
-它會讓對方
-自己想多聽一句。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d07a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d07i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d07k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">開場就道歉，傳遞的訊息是「我知道我在打擾你」。對方收到之後，第一個反應不是給你時間，是想辦法脫身。
 
 好的開場結構通常是：先講一件跟他有關的事，然後停住。
@@ -1022,59 +1372,99 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb8">複製 FB 文案</button></div>
-      <div class="post">「有需要再跟我說」這句一講完，訂單就死了。
-
-因為這句把決定權整個丟回去，而對方本來就不想做決定。
-
-這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。
-
-他不會覺得你尊重他。他會覺得你沒有在幫他。
-
-客戶要的不是空間，是一個下一步。
-
-很多業務把「不逼客戶」理解成「不給方向」，結果變成每次對話都在原地結束。但不逼跟不給方向是兩件事。不逼是不替他做決定，不給方向是連選項都不給。
-
-下一步不用大，但要具體。
-
-「我這週五把那兩個方案的差別整理一張表給你，你看完再決定要不要約。」
-「你剛提到交期是關鍵，我回去確認最快能到什麼時候，明天回你。」
-
-你看出來了嗎，這兩句都沒有在推成交。它們只做一件事：讓這場對話有下一個明確的時間點。
-
-有時間點，關係就還活著。沒有時間點，就算他有興趣，也會被下週的事情蓋過去。
-
-給他一個小動作，比給他一個大空間有用。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th8">複製 Threads 文案</button></div>
       <div class="post">「有需要再跟我說」
 這句一講完，訂單就死了。
 
-就像帶朋友吃飯，
-他問你哪家好，
-你說「都可以，你決定」。
+講的人覺得這樣才不會給壓力。
+
+而壓力從來不是他卡住的原因。
+
+聊得很順，氣氛很好。
+
+最後一句，那你再想想，
+有需要再跟我說。
+
+對方說好，謝謝。
+
+然後就沒有然後了。
+
+▋📊 不逼他，跟不給方向是兩件事
+
+很多人把不逼客戶
+理解成不給方向。
+
+結果每次對話都在原地結束。
+
+不逼，是不替他做決定。
+不給方向，是連選項都不給。
+
+就像有人問你哪家好，
+你說都可以，你決定。
 
 他不會覺得你尊重他。
 他會覺得你沒有在幫他。
 
-客戶要的不是空間，
-是一個下一步。</div>
+他本來就是決定不了才問你的。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+▋🔁 關係活不活著，看有沒有時間點
+
+有時間點，這件事還在進行中。
+
+沒有時間點，
+就算他有興趣，
+也會被下週的事情蓋過去。
+
+不是他變了。
+是沒有任何東西提醒他回來。
+
+所以下一步不用大。
+但要有一個日子。
+
+▋🎯 一個接得住的下一步，三個要素
+
+1️⃣ 有時間
+　 「我這週五整理給你。」
+
+2️⃣ 有內容
+　 「那兩個方案的差別，一張表。」
+
+3️⃣ 有長度
+　 「你看完我們再講十分鐘。」
+
+三個都具體，他才接得住。
+
+而且這三句都沒有在催他決定。
+
+給他一個小動作。
+比給他一個大空間有用。
+
+➖➖➖➖➖➖➖➖
+
+那個下一步要怎麼給，我每週寄一封信。
+留言「下一步」，我把訂閱連結寄給你。
+
+身邊有人今天剛講完這句話，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #跟進技巧 #訂單卡住</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th8">複製 Threads 文案</button></div>
+      <div class="post">「有需要再跟我說」一講完，
+這件事就離開你的行事曆了。
+
+也離開他的。
+
+他不是沒興趣。
+是下週會有別的事蓋過去，
+而沒有任何東西提醒他回來。
+
+關係活不活著，
+其實只看有沒有下一個日子。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc8">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#C99A4E;">這句講完，
-訂單就死了</div><div class="cx">「有需要再跟我說」
-
-這句把決定權整個丟回去，
-而對方本來就不想做決定。</div><div class="cx">就像帶朋友吃飯，
-他問你哪家好，
-你說「都可以，你決定」。
-
-他不會覺得你尊重他，
-他會覺得你沒有在幫他。</div><div class="cx">客戶要的不是空間，
-是一個下一步。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d08a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d08i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d08k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">很多人把「不逼客戶」理解成「不給方向」，結果每次對話都在原地結束。
 
 不逼是不替他做決定，不給方向是連選項都不給。這是兩件事。
@@ -1144,58 +1534,103 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb9">複製 FB 文案</button></div>
-      <div class="post">術語講越多，客戶聽到的不是專業。是「我不懂」。
+      <div class="post">術語講越多，
+客戶聽到的不是專業。
 
-你想想去修車。
+是「我不懂」。
 
-師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但完全不知道該不該修、修了會怎樣、不修會怎樣。
+而一個聽不懂的人，只能用價格判斷你。
 
-但他如果說「你停紅燈的時候車會抖，就是這個」，你立刻懂。
+簡報講完流程、架構、方法論。
 
-同一件事，一個把人推遠，一個把人拉近。
+一個字都沒講錯，
+客戶全程點頭。
 
-差別在哪？第二句裡面有一個你親身經歷過的畫面。你真的在紅燈前抖過，所以那句話一講，你的身體先懂了，腦袋才跟上。
+結束之後他跟同事說，
+聽起來很厲害，
+但我不知道他在幹嘛。
 
-專業不是用什麼字，是對方聽完有沒有畫面。
+▋📊 術語的功能不是讓客戶信你
 
-很多人把術語當成專業的證明。但術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離——而距離一出現，他就開始用別的東西判斷你，通常是價格。
+它是給同行用的，為了講快一點。
 
-要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？
+同行知道那個詞背後
+有哪些細節，所以省得掉。
 
-「喔」是禮貌。「對，我就是這樣」才是聽懂了。
+客戶不知道，所以省不掉。
 
-能把難的事講成人話，才是真的懂。</div>
+對客戶用術語，
+實際效果是製造距離。
+
+而距離一出現，
+他就開始用別的東西判斷你。
+
+通常就是價格。
+
+▋🔁 專業的標準不是你用什麼字
+
+是對方聽完腦袋裡有沒有畫面。
+
+沒有畫面，他沒辦法判斷。
+沒辦法判斷，就先放著。
+
+有個很簡單的檢查法。
+
+你講完一段，看他的反應
+是「喔」，還是「對，我就是這樣」。
+
+「喔」是禮貌。
+「對，我就是這樣」才是聽懂了。
+
+▋🎯 每個專有名詞後面，接一句也就是說
+
+1️⃣ 「導入流程」
+　 也就是說，你們下個月照舊。
+
+2️⃣ 「客製化」
+　 也就是說，照你現在的做法走，
+　 不用改。
+
+3️⃣ 「整合方案」
+　 也就是說，現在的三件事
+　 以後變一件。
+
+那句也就是說後面的東西，
+才是他真正買的。
+
+能把難的事講成人話。
+才是真的懂。
+
+➖➖➖➖➖➖➖➖
+
+想知道自己講的是專業還是術語？
+留言「人話」，我把影響力健檢寄給你。
+
+身邊有人簡報一向講得很完整，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #講人話 #專業表達</div>
 
       <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
         <button class="copy" data-src="th9">複製 Threads 文案</button></div>
-      <div class="post">術語講越多，
-客戶聽到的不是專業。
-是「我不懂」。
+      <div class="post">一個聽不懂你的人，
+只能用價格判斷你。
 
-「節氣門積碳導致怠速不穩」
-→ 你只會點頭
+這是術語真正的代價。
 
-「你停紅燈車會抖，就是這個」
-→ 你立刻懂
+他全程點頭，
+結束之後跟同事說
+聽起來很厲害，
+但我不知道他在幹嘛。
 
-同一件事，
-一個把人推遠，一個把人拉近。</div>
+然後他開始比價。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+不是他不懂你的專業。
+是你沒給他第二個判斷的方法。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc9">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8CA8;">術語講越多，
-客人跑越快</div><div class="cx">「節氣門積碳導致怠速不穩」
-→ 你只會點頭，
-　 但不知道該不該修。</div><div class="cx">「你停紅燈車會抖，
-　就是這個」
-→ 你立刻懂。
-
-同一件事，
-一個把人推遠，
-一個把人拉近。</div><div class="cx">專業不是用什麼字，
-是對方聽完有沒有畫面。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d09a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d09i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d09k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離。而距離一出現，他就開始用別的東西判斷你，通常是價格。
 
 要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？
@@ -1262,67 +1697,105 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb10">複製 FB 文案</button></div>
-      <div class="post">客戶說太貴，最爛的回答是「我幫你問折扣」。
-
-因為你一講折扣，就等於承認原價是喊的。
-
-這就像你在菜市場問一顆多少，老闆馬上說算你便宜。
-
-你第一個念頭不是賺到，是剛剛那個價是不是在騙我。
-
-折扣不會讓他覺得划算，會讓他重新懷疑整件事。而且更麻煩的是，你一旦降過一次，之後每一次報價他都會先預設還有空間——你永遠回不到原價了。
-
-他說貴，是在問值不值得，不是在問能不能少。
-
-這兩個問題要用完全不同的方式回。
-
-「能不能少」是價格問題，回答它要談條件。
-「值不值得」是價值問題，回答它要談結果。
-
-而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。
-
-所以該做的是把結果講清楚，不是把價格降下來。
-
-「如果三個月後你的狀況沒有變化，這筆錢確實不值得。所以我想先確認一件事——你現在最想改變的是哪一塊？」
-
-這句話沒有解釋價格，也沒有降價。它做的是把對話從數字拉回到結果。
-
-他問的是值不值得。回答那個問題就好。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th10">複製 Threads 文案</button></div>
       <div class="post">客戶說太貴，
 最爛的回答是「我幫你問折扣」。
 
-一講折扣，
-就等於承認原價是喊的。
+因為一講折扣，就等於承認原價是喊的。
 
-就像在菜市場問一顆多少，
-老闆馬上說算你便宜。
+而降過一次，你永遠回不到原價。
 
-你第一個念頭不是賺到，
-是剛剛那價是不是在騙我。
+客戶皺眉說太貴了。
 
-他說貴，是在問值不值得，
-不是在問能不能少。</div>
+怕單跑掉的人會馬上接，
+我幫你問問看有沒有折扣。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+講的人以為這是誠意。
+
+對方心裡想的是，
+原來還有得談。
+
+▋📊 折扣的代價不是這一單
+
+降價會讓他重新懷疑整件事。
+
+剛剛那個價是不是在騙我。
+
+而且一旦降過一次，
+之後每一次報價，
+他都會先預設還有空間。
+
+這一單的折扣是一次性的。
+那個預設是永久的。
+
+▋🔁 「太貴」其實有三種
+
+第一種是拿不出來。
+那是方式問題，要談付法。
+
+第二種是不值得。
+那是結果問題，要談他會拿到什麼。
+
+第三種最少人發現，
+是他不敢跟人交代。
+
+公司要他說明、家人會問他。
+
+他需要的不是便宜，
+是一個說得出口的理由。
+
+三種的回法完全不一樣。
+先分清楚再開口。
+
+▋🎯 下次聽到太貴，照這三句走
+
+1️⃣ 先把問題問回去
+　 「你是覺得金額拿不出來，
+　 還是覺得做完不值這個數？」
+
+2️⃣ 不值得的，談三個月後
+　 「如果三個月後狀況沒變，
+　 這筆錢確實不值得。」
+
+3️⃣ 不敢交代的，給他一句話
+　 給他一句能帶回去講的理由。
+
+這三句都沒有解釋價格。
+也都沒有降價。
+
+他問的是值不值得。
+回答那個問題就好。
+
+➖➖➖➖➖➖➖➖
+
+那該怎麼回，我每週寄一封信。
+留言「報價」，我把訂閱連結寄給你。
+
+身邊有人明天要報價，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #太貴了 #報價溝通</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th10">複製 Threads 文案</button></div>
+      <div class="post">折扣最貴的地方不是這一單。
+
+是你一旦降過一次，
+他之後每一次看你的報價，
+都會先預設還有空間。
+
+這一單的折扣是一次性的。
+那個預設是永久的。
+
+而他原本問的不是能不能少。
+是值不值得。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc10">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#6E8CA8;">回這句，等於承認
-原價是喊的</div><div class="cx">客戶說太貴，
-最爛的回答是
-「我幫你問折扣」。</div><div class="cx">就像在菜市場問一顆多少，
-老闆馬上說算你便宜。
-
-你第一個念頭不是賺到，
-是剛剛那價是不是在騙我。</div><div class="cx">他說貴，是在問值不值得，
-不是在問能不能少。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d10a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d10i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d10k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">「能不能少」是價格問題，回答它要談條件。
 「值不值得」是價值問題，回答它要談結果。
 
-而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。
+而多數時候的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。
 
 而且你一旦降過一次，之後每次報價他都會先預設還有空間。你永遠回不到原價了。
 
@@ -1386,58 +1859,104 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 
       <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
         <button class="copy" data-src="fb11">複製 FB 文案</button></div>
-      <div class="post">成交率最低的動作，是傳一堆資料給客戶看。
-
-你想想，有人傳給你十頁 PDF，你會認真看嗎？
-
-資料傳過去那一刻，事情就從你身上變成他的作業。
-
-而他不會做作業。他會把那則訊息往上滑掉，然後想著「晚點看」。那個晚點永遠不會來。
-
-這件事之所以這麼多人在做，是因為它讓人很安心——我有行動、我有給東西、我很專業。但安心的是你，不是他。
-
-給資料是把球丟回去，給判斷才是接住他。
-
-資料跟判斷差在哪？資料是「這裡有六個方案的完整比較」，判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。
-
-前者要他花力氣，後者幫他省力氣。
-
-而且判斷才是你真正的價值。同樣的資料客戶自己上網也查得到，他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。你把資料丟過去，等於把自己的價值也一起丟掉了。
-
-一句「你最在意哪一塊，我直接幫你看」，比十頁有用。
-
-別讓他回去做功課。那是你的工作。</div>
-
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
-        <button class="copy" data-src="th11">複製 Threads 文案</button></div>
       <div class="post">成交率最低的動作，
 是傳一堆資料給客戶看。
 
-有人傳給你十頁 PDF，
-你會認真看嗎？
+傳過去那一刻，事情就變成他的作業。
 
-資料傳過去那一刻，
-事情就從你身上變成他的作業。
+不過有三種情況例外，很少人分得清。
 
-而他不會做作業。
-他會把訊息往上滑掉。
+聊完之後說，
+我整理一份資料傳給你。
 
-給資料是把球丟回去，
-給判斷才是接住他。</div>
+花兩個小時做出來。
 
-      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+傳過去他回一個好，謝謝。
+
+然後就沒聲音了。
+以為他在看，他連打開都沒有。
+
+▋📊 給資料跟給判斷，差在誰出力
+
+資料是「這裡有六個方案的比較」。
+
+判斷是「以你的狀況，
+只有兩個值得看，差別在這裡」。
+
+前者要他花力氣。
+後者幫他省力氣。
+
+而判斷才是你真正的價值。
+
+同樣的資料他自己上網也查得到。
+
+他找你不是要資料，
+是要一個看過很多案例的人
+告訴他哪個適合他。
+
+把資料丟過去，
+等於把自己的價值一起丟掉。
+
+▋🔁 那什麼時候該給資料
+
+三種情況該給，而且要給足。
+
+他已經決定了，要走內部流程。
+他要拿給別人看，不是自己看。
+他明確問了某一份東西。
+
+這三種的共同點是，
+他已經知道要拿這份資料幹嘛。
+
+不知道要幹嘛的時候給，
+那叫把球丟回去。
+
+▋🎯 想傳資料之前，先做這三件
+
+1️⃣ 先問他最在意哪一塊
+　 「你最在意哪一塊，
+　 我直接幫你看。」
+
+2️⃣ 他講出來的那一塊，三句話回他
+　 三句為他寫的，比十頁有用。
+
+3️⃣ 真的要給，先標出哪一頁
+　 「只看第 4 頁，其他是附件。」
+
+這些動作都不花你兩個小時。
+但他接得住。
+
+別讓他回去做功課。
+那是你的工作。
+
+➖➖➖➖➖➖➖➖
+
+該給什麼不該給什麼，我每週寄一封信。
+留言「資料」，我把訂閱連結寄給你。
+
+身邊有人正在做一份沒人會看的資料，
+把這篇傳給他。
+
+#平凡人光頭 #溝通變現 #業務日常 #跟進技巧 #給判斷不給資料</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th11">複製 Threads 文案</button></div>
+      <div class="post">花兩個小時做一份資料傳過去，
+會讓人很安心。
+
+我有行動、我有給東西、我很專業。
+
+但安心的是你，不是他。
+
+那份東西到他手上就變成作業，
+而他本來就很忙。
+
+他要的不是更多資訊。
+是有人幫他把資訊變成決定。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 輪播</div>
         <button class="copy" data-src="igc11">複製 IG 說明欄</button></div>
-      <div class="ig-grid">
-        <div class="c0" style="background:#C99A4E;">這個動作，
-成交率最低</div><div class="cx">有人傳給你十頁 PDF，
-你會認真看嗎？</div><div class="cx">資料傳過去那一刻，
-事情就從你身上
-變成他的作業。
-
-而他不會做作業。
-他會把訊息往上滑掉。</div><div class="cx">給資料是把球丟回去，
-給判斷才是接住他。</div>
-      </div>
+      <div class="ig-strip"><figure><img src="daily-img/d11a.png" alt="封面" loading="lazy"><figcaption><b>1</b>　封面</figcaption></figure><figure><img src="daily-img/d11i.png" alt="小抄" loading="lazy"><figcaption><b>2</b>　小抄</figcaption></figure><figure><img src="daily-img/d11k.png" alt="身分卡" loading="lazy"><figcaption><b>3</b>　身分卡</figcaption></figure></div><p class="ig-hint">順序就是輪播順序，照著選。每張<b>長按 → 加入照片</b>存進相簿，開 IG 發輪播時一次選 3 張。</p>
       <div class="post" style="margin-top:9px;">這件事之所以這麼多人在做，是因為它讓人很安心。我有行動、我有給東西、我很專業。但安心的是你，不是他。
 
 資料是「這裡有六個方案的完整比較」。
@@ -1482,7 +2001,7 @@ function save(s) {
 }
 
 // 要複製的原文走 JSON，不走 HTML 屬性——屬性裡的換行會被正規化，貼出去會變一整段
-const DATA = {"tele1": "業務講一百次，不如客戶自己說一次。這叫自我說服。你一定看過這種業務。一坐下來就說，我們這個產品有三大優勢、五大保障。講了二十分鐘，客戶一路點頭，最後說，我再考慮一下。你想想看醫生。好醫生不會一坐下就說，你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他一顆藥都還沒介紹，你已經準備付錢。差別不在誰講得比較清楚。差別在，這句話是從誰嘴裡出來的。你講的，他要先懷疑一輪才相信。他自己講的，不用。所以下次想介紹產品的時候，先把那句話改成問句。不要說，我們這個可以幫你省成本。改成，你現在這塊一個月大概花多少？他自己算出來的那個數字，比你報的任何數字都有力。真正的高手，不是講最清楚的，是能讓對方自己想通的。　這種當場能用的判斷，我每週寄一封信。留言「問診」，我把訂閱連結給你。", "fb1": "業務講一百次，不如客戶自己說一次。\n\n這件事在心理學有個名字，叫自我說服。意思是：一個人自己說出口的話，對他的影響力，遠遠大於別人跟他講的。\n\n你想想看醫生。\n\n好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他沒有說服你，他只是讓你把自己的狀況講出來。\n\n一直介紹產品的是藥商。先問哪裡痛的，才是醫生。\n\n多數業務訓練教的是反方向：把產品講得更清楚、把優勢講得更完整、把話術練得更順。但你講得越完整，對方的腦袋就越忙著評估你，而不是忙著理解自己的問題。\n\n真正的差別不在你講得好不好，在他有沒有開口。\n\n他開口講自己的狀況那一刻，他就不是在聽你推銷了，他是在整理自己的需求。而人整理完自己的需求，下一步自然是想解決它。\n\n下次見客戶，把你準備好的那三十秒介紹換成一個問題。\n\n然後閉嘴，讓他講。", "th1": "業務講一百次，不如客戶自己說一次。\n\n好醫生不會一坐下就說「你該吃這個藥」。\n他會先問哪裡不舒服、多久了、什麼時候最痛。\n\n你講完，自己就想拿藥單了。\n\n一直介紹產品的是藥商。\n先問哪裡痛的，才是醫生。", "igc1": "真正的高手，不是講最清楚的，是能讓對方自己想通的。\n\n多數業務訓練在教你怎麼把話講得更完整。但你講得越完整，對方越忙著評估你，而不是忙著理解自己的問題。\n\n下次見客戶，把那三十秒的介紹換成一個問題，然後閉嘴。", "tele2": "客戶說考慮一下，九成不是在拒絕你。是他算不出來。客戶說我再考慮一下的時候，多數人的反應是開始想，是不是太貴了，要不要再降一點。其實他回去也沒在考慮，他只是不知道要拿什麼跟什麼比。這就像站在餐廳門口看菜單。不是不想吃，是不知道點哪個才不會後悔。這時候服務生說，我們什麼都好吃，你只會更站不住。但他如果說，第一次來的人八成點這個，你馬上就決定了。他卡住的不是要不要，是用什麼標準決定。你再講一次產品，是把菜單變得更長。所以下次聽到考慮一下，先別急著講產品，要給他一把尺。問他一句，你現在主要是在比什麼，是價格、時間、還是誰來做。他講出來的那個字，就是你接下來唯一要談的事。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。", "fb2": "客戶說「我考慮一下」，九成不是在拒絕你。是他算不出來。\n\n這句話在業務圈幾乎被當成禮貌性拒絕的同義詞。但多數時候他是真的在考慮，只是他卡的地方跟你以為的不一樣。\n\n這就像你站在餐廳門口看菜單。\n\n你不是不想吃，是不知道點哪一個才不會後悔。這時候服務生走過來跟你說「我們什麼都好吃」，你只會更站不住——因為他沒有給你任何能比較的東西。\n\n客戶卡住的時候，要的不是推一把，是一個能比較的標準。\n\n他不是在考慮要不要，是在考慮用什麼標準決定。\n\n這兩件事差很多。如果他在考慮要不要，你該做的是加強理由。但如果他是在找標準，你再講十個理由他還是站在門口，因為理由不能拿來比較，標準才可以。\n\n標準長什麼樣子？它通常是一句話，而且能用來排除選項。\n\n「如果你最在意的是售後，那這三個方案只有一個做得到。」\n「如果你半年內要看到變化，那另外兩個都不用考慮。」\n\n你看出來了嗎，標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。\n\n你能幫他的不是催他決定，是讓他知道怎麼決定。", "th2": "「我考慮一下」九成不是在拒絕你。\n是他算不出來。\n\n就像站在餐廳門口看菜單。\n你不是不想吃，是不知道點哪個才不會後悔。\n\n這時候說「我們什麼都好吃」，\n只會讓他更站不住。\n\n他不是在考慮要不要，\n是在考慮用什麼標準決定。", "igc2": "客戶卡住的時候，要的不是推一把，是一個能比較的標準。\n\n標準長什麼樣子？它通常是一句話，而且能用來排除選項。\n「如果你最在意的是售後，那這三個方案只有一個做得到。」\n\n標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。\n\n你能幫他的不是催他決定，是讓他知道怎麼決定。", "tele3": "超市擺 24 種果醬，賣得比擺 6 種還差。這叫選擇癱瘓。有一種簡報，把產品十個優點全部講完。講的時候客戶一直點頭，看起來很順。結果回去之後沒有下文，連他卡在哪都不知道。這個實驗是真的。超市擺二十四種果醬，停下來試吃的人變多，掏錢的卻只剩十分之一。擺六種的時候，停下來的人比較少，買的人反而多很多。看得越多，決定越難。業務講產品，就像在擺那個果醬架。講十個優點，他記不住十個，他只記得好複雜。而複雜的東西，人的本能是先放著。所以下次講之前，先挑三個。挑的標準不是你最自豪的三個，是跟他剛剛那句話有關的三個。他說最近人手不夠，你就只講省人力那三個。其他七個留著，他問你再講。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。", "fb3": "超市擺 24 種果醬，賣得比擺 6 種還差。\n\n這是 1995 年一個很有名的研究（Iyengar & Lepper）。研究者在超市擺試吃攤，一次擺 24 種果醬，一次擺 6 種。24 種吸引了更多人停下來試吃，但真正掏錢買的比例，遠低於只擺 6 種的時候。\n\n選項越多，人越不敢決定。這叫選擇癱瘓。\n\n業務講產品就像在擺果醬架。\n\n你講了十個優點，客戶記不住十個。他只記得一件事：好複雜。而複雜的東西，人的本能是先放著。不是不想要，是先放著。等有空再想。然後就沒有再想了。\n\n這裡有個很反直覺的地方：你把產品講得越完整，其實是在增加他的決策成本。你以為你在幫他判斷，實際上你在讓他更難判斷。\n\n講三個他記得住的，比講十個他聽不完的有用。\n\n而且那三個要怎麼挑？不是挑你最自豪的三個，是挑**跟他剛剛講的話有關的**三個。他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。\n\n專業不是把事情講滿，是幫他把事情變簡單。", "th3": "超市擺 24 種果醬，\n賣得比擺 6 種還差。\n\n這叫選擇癱瘓。\n\n業務講產品也一樣。\n講了十個優點，客戶記不住十個，\n他只記得「好複雜」。\n\n而複雜的東西，\n人的本能是先放著。", "igc3": "你把產品講得越完整，其實是在增加他的決策成本。\n\n那三個要怎麼挑？不是挑你最自豪的三個，是挑跟他剛剛講的話有關的三個。\n\n他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。\n\n專業不是把事情講滿，是幫他把事情變簡單。", "tele4": "不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。客戶聽完報價說怎麼這麼貴，大部分人的反應是開始解釋。我們用的材料、我們的團隊、我們做了幾年。解釋得越多，他越只記得那個數字。想像一個完全不懂車的人去買車。銷售一直講引擎、底盤、扭力。整場對話裡唯一看得懂的東西，就是價格。所以他只能用價格判斷。不是他愛計較，是他手上只有這一把尺。嫌貴多半不是嫌數字大，是沒有別的刻度。這時候解釋價格，等於叫他繼續用那把尺量你。所以先給他一把新的尺。不要說我們比較好，要問他，你會怎麼判斷這件事做得好不好。他答不出來的時候，你再給他一個標準。那個標準一旦成立，價格就不是唯一的那把尺了。給他一把新的尺，貴這件事自己就不見了。　想知道自己是哪一塊讓客戶只能看價格？留言「健檢」，我把連結給你。", "fb4": "不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。\n\n想像你完全不懂車，走進展示間。銷售很熱心，講引擎、講底盤、講懸吊系統、講安全配備。他講得很好，但你一句都接不上。\n\n整場對話裡，唯一一個你完全看得懂的東西就是價格。\n\n所以你只能用價格判斷。不是因為你小氣，是因為那是你手上唯一的刻度。\n\n顧問、教練、設計、保險、諮詢都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。他不是不想認真判斷，是手上沒有別的尺。\n\n沒有對照的時候，任何數字都只是大。\n\n所以「客戶嫌貴」翻譯過來通常是：我還不知道這筆錢會換到什麼。\n\n這時候最糟的動作是解釋價格。你一解釋，等於叫他繼續用那把尺量你——而那把尺上面只有數字，沒有價值。\n\n要做的是給他一把新的尺。\n\n新的尺可以是時間（三個月後你的狀況會長什麼樣）、可以是對照（做跟不做的差別在哪）、可以是風險（不處理的話最差會怎樣）。任何一把，只要他手上多一個刻度，價格就不再是唯一的判斷依據。\n\n給他一把新的尺，貴這件事自己就不見了。", "th4": "不懂車的人去買車，\n他只看得懂價格。\n\n所以他只能嫌貴。\n\n客戶嫌貴，多半不是嫌數字大，\n是他手上沒有別的刻度。\n\n這時候解釋價格，\n等於叫他繼續用那把尺量你。", "igc4": "顧問、教練、設計、保險都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。\n\n他不是不想認真判斷，是手上沒有別的尺。\n\n新的尺可以是時間、可以是對照、可以是風險。只要他手上多一個刻度，價格就不再是唯一的判斷依據。\n\n給他一把新的尺，貴這件事自己就不見了。", "tele5": "頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。有人來問服務，多數人的第一個念頭是，太好了，有生意上門。接下來整場都在證明自己適合他，沒有一秒鐘在想，他適不適合我。這就像好的健身教練。他不會一見面就賣課，他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只來一次又不肯改飲食，他會跟你說，現在買課你會後悔。因為他知道，接錯客戶比少接一個更傷。推銷的人在想，怎麼讓對方答應。挑人的人在想，這件事做下去會不會有結果。所以下次有人來問，先問三件事。他現在卡在哪、他之前試過什麼、他願意花多少時間。三個答案只要有一個對不上，你就直說。你講真話那一刻，他反而開始信你。挑人不是傲氣，是你對結果負責。　你現在是在推銷還是在挑人？留言「挑人」，我把影響力健檢給你。", "fb5": "頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。\n\n這句話第一次聽會覺得很傲。但你看任何領域的高手，都是這樣運作的。\n\n這就像好的健身教練。\n\n他不會一見面就賣課。他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只能來一次，又不肯調整飲食，好的教練會跟你說實話：這樣練，三個月後你會失望，然後你會覺得是我不行。\n\n因為他知道，接錯客戶比少接一個客戶更傷。\n\n一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。\n\n外行人在推銷，高手在挑人。\n\n挑人聽起來像在篩掉別人，實際上是在保護兩件事：保護對方不要花錯錢，保護自己的交付品質撐得住。\n\n而且有個反效果很有趣——當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況；而你一問，他就感覺到你在評估合不合，不是在求成交。\n\n那個瞬間，位置就換了。\n\n挑人不是傲氣，是你對結果負責。", "th5": "頂級業務見客戶，\n想的不是怎麼成交。\n\n是這個客戶要不要接。\n\n好教練不會一見面就賣課，\n他會先問你平常怎麼吃、怎麼睡。\n\n因為接錯客戶，\n比少接一個客戶更傷。\n\n外行人在推銷，高手在挑人。", "igc5": "一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。\n\n有個反效果很有趣：當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況。\n\n他會感覺到你在評估合不合，不是在求成交。那個瞬間，位置就換了。\n\n挑人不是傲氣，是你對結果負責。", "tele6": "有五句話業務天天在講，客戶天天在心裡扣分。這五句話的共同點是，講的人以為在拉近距離，聽的人每聽一句就往後退一步。而且對方不會講，他只是回訊息變慢。第一句，我跟你說實話。對方會想，那你前面講的是什麼。第二句，這個我幫很多人做過。他想，所以我只是第幾個。第三句最毒，相信我。這就像相親第一次見面就說，嫁給我不會後悔。這三句有一個共同點：它們都在要對方給。給信任、給時間、給機會。沒有一句在給他。所以把要改成給。不要說相信我，改成，這件事我可以先做一段給你看。不要說我幫很多人做過，改成，跟你情況最像的那個人，當時卡在這裡。你給得出細節，信任自己會長出來。這三句都在要他給，沒有一句在給他。　剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。", "fb6": "有五句話業務天天在講，客戶天天在心裡扣分。\n\n第一句，「我跟你說實話」。\n\n這句話的問題是，客戶會立刻想：那你前面講的是什麼？你本來就該講實話，特別強調反而暴露了前面可能沒有。\n\n第二句，「這個我幫很多人做過」。\n\n你想證明經驗，但他聽到的是：所以我只是第幾個。他不想當第幾個，他想當那個你特別在意的。經驗要證明，但要用他的狀況來證明，不是用數量。\n\n第三句最毒，「相信我」。\n\n這就像相親第一次見面就說，嫁給我不會後悔。\n\n信任是結果，不是要求來的。你越講相信我，對方越會想：為什麼你需要我相信你？真正讓人放心的人，從來不用開口要。\n\n這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。\n\n而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。\n\n這三句都在要他給，沒有一句在給他。", "th6": "三句業務天天在講、\n客戶天天在心裡扣分的話：\n\n「我跟你說實話」\n→ 那你前面講的是什麼\n\n「這個我幫很多人做過」\n→ 所以我只是第幾個\n\n「相信我」\n→ 這就像相親第一次見面\n　 就說嫁給我不會後悔\n\n信任是結果，不是要求來的。", "igc6": "這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。\n\n而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。\n\n真正讓人放心的人，從來不用開口要。", "tele7": "「只耽誤您三分鐘」這句一出口，三分鐘就沒了。打給陌生客戶，很多人開場先說，不好意思打擾了，只耽誤您三分鐘。聽起來很有禮貌。對方聽完的第一個反應，是開始找理由掛電話。因為這句話等於先承認，我接下來要講的事對你沒好處。你想想，如果有人說，借我三分鐘讓你多賺一百萬，他會先道歉嗎？他只會說，你現在方便嗎，這件事跟你有關。開場就道歉，對方第一個反應不是給你時間，是想辦法脫身。好的開場不用求時間，它會讓對方自己想多聽一句。所以把道歉換成一個跟他有關的事實。不要說只耽誤您三分鐘，改成，你們上個月開的那家新店，我想到一件事。他在不在意，三秒內你就知道了，比求來的三分鐘準。你不需要客戶的三分鐘。你需要他的好奇。　不知道自己哪一塊讓人想跑？留言「開場」，我把影響力健檢給你。", "fb7": "「只耽誤您三分鐘」這句一出口，三分鐘就沒了。\n\n因為這句話等於先承認：我接下來要講的事，對你沒好處。\n\n你想想，有人跟你說「借我三分鐘，讓你多賺一百萬」，他會先道歉嗎？\n\n不會。他會直接講那一百萬。\n\n開場就道歉，傳遞的訊息是「我知道我在打擾你」。而對方收到這個訊息之後，第一個反應不是給你時間，是想辦法脫身——因為你已經幫他定義了這場對話的性質：這是一個打擾。\n\n好的開場不用求時間。\n\n它的結構通常是：先講一件跟他有關的事，然後停住。\n\n「我看到你們上個月開了第三家分店。」停。\n「我剛從你同業那邊過來，他提到一個你可能也會遇到的狀況。」停。\n\n那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。\n\n你不需要客戶的三分鐘。你需要他的好奇。", "th7": "「只耽誤您三分鐘」\n這句一出口，三分鐘就沒了。\n\n因為它等於先承認：\n我要講的事對你沒好處。\n\n你想想，有人說\n「借我三分鐘讓你多賺一百萬」，\n他會先道歉嗎？\n\n好的開場不用求時間。\n它會讓對方自己想多聽一句。", "igc7": "開場就道歉，傳遞的訊息是「我知道我在打擾你」。對方收到之後，第一個反應不是給你時間，是想辦法脫身。\n\n好的開場結構通常是：先講一件跟他有關的事，然後停住。\n\n那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。\n\n你不需要客戶的三分鐘。你需要他的好奇。", "tele8": "「有需要再跟我說」這句一講完，訂單就死了。聊得很順，氣氛很好，最後一句，那你再想想，有需要再跟我說。講的人覺得這樣不會給壓力。然後就沒有然後了。這就像帶朋友去吃飯，他問你哪家好，你說都可以，你決定。他不會覺得你尊重他，他會覺得你沒有在幫他。他本來就是因為決定不了才問你的。這句話把決定權整個丟回去，而對方本來就不想做決定。客戶要的不是空間，是一個下一步。所以把空間換成一個小動作。不要說有需要再跟我說，改成，我週四整理一份給你，你看完我們再講十分鐘。下一步不用大，但要有時間、有內容、有長度。三個都具體，他才接得住。給他一個小動作，比給他一個大空間有用。　那個下一步要怎麼給，我寫在信裡。留言「下一步」，我把訂閱連結給你。", "fb8": "「有需要再跟我說」這句一講完，訂單就死了。\n\n因為這句把決定權整個丟回去，而對方本來就不想做決定。\n\n這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。\n\n他不會覺得你尊重他。他會覺得你沒有在幫他。\n\n客戶要的不是空間，是一個下一步。\n\n很多業務把「不逼客戶」理解成「不給方向」，結果變成每次對話都在原地結束。但不逼跟不給方向是兩件事。不逼是不替他做決定，不給方向是連選項都不給。\n\n下一步不用大，但要具體。\n\n「我這週五把那兩個方案的差別整理一張表給你，你看完再決定要不要約。」\n「你剛提到交期是關鍵，我回去確認最快能到什麼時候，明天回你。」\n\n你看出來了嗎，這兩句都沒有在推成交。它們只做一件事：讓這場對話有下一個明確的時間點。\n\n有時間點，關係就還活著。沒有時間點，就算他有興趣，也會被下週的事情蓋過去。\n\n給他一個小動作，比給他一個大空間有用。", "th8": "「有需要再跟我說」\n這句一講完，訂單就死了。\n\n就像帶朋友吃飯，\n他問你哪家好，\n你說「都可以，你決定」。\n\n他不會覺得你尊重他。\n他會覺得你沒有在幫他。\n\n客戶要的不是空間，\n是一個下一步。", "igc8": "很多人把「不逼客戶」理解成「不給方向」，結果每次對話都在原地結束。\n\n不逼是不替他做決定，不給方向是連選項都不給。這是兩件事。\n\n下一步不用大，但要具體：\n「我這週五整理一張表給你，你看完再決定要不要約。」\n\n有時間點，關係就還活著。\n\n給他一個小動作，比給他一個大空間有用。", "tele9": "術語講越多，客戶聽到的不是專業。是「我不懂」。有一種簡報，流程、架構、方法論講了一輪，一個字都沒講錯。客戶全程點頭。結束之後他跟同事說，聽起來很厲害，但我不知道他在幹嘛。你想想去修車。師傅說，節氣門積碳導致怠速不穩。你只會點頭，但不知道該不該修。他如果說，你停紅燈的時候車會抖，就是這個。你立刻懂，而且馬上想修。同一件事，一個把人推遠，一個把人拉近。專業不是用什麼字，是對方聽完腦袋裡有沒有畫面。沒有畫面，他就沒辦法判斷，只好先放著。所以每講一個專有名詞，後面接一句，也就是說。也就是說，你以後不用自己對帳。也就是說，客戶半夜下單你不會漏掉。那句也就是說後面的東西，才是他真正買的。能把難的事講成人話，才是真的懂。　想知道自己講的是專業還是術語？留言「人話」，我把影響力健檢給你。", "fb9": "術語講越多，客戶聽到的不是專業。是「我不懂」。\n\n你想想去修車。\n\n師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但完全不知道該不該修、修了會怎樣、不修會怎樣。\n\n但他如果說「你停紅燈的時候車會抖，就是這個」，你立刻懂。\n\n同一件事，一個把人推遠，一個把人拉近。\n\n差別在哪？第二句裡面有一個你親身經歷過的畫面。你真的在紅燈前抖過，所以那句話一講，你的身體先懂了，腦袋才跟上。\n\n專業不是用什麼字，是對方聽完有沒有畫面。\n\n很多人把術語當成專業的證明。但術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離——而距離一出現，他就開始用別的東西判斷你，通常是價格。\n\n要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？\n\n「喔」是禮貌。「對，我就是這樣」才是聽懂了。\n\n能把難的事講成人話，才是真的懂。", "th9": "術語講越多，\n客戶聽到的不是專業。\n是「我不懂」。\n\n「節氣門積碳導致怠速不穩」\n→ 你只會點頭\n\n「你停紅燈車會抖，就是這個」\n→ 你立刻懂\n\n同一件事，\n一個把人推遠，一個把人拉近。", "igc9": "術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離。而距離一出現，他就開始用別的東西判斷你，通常是價格。\n\n要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？\n\n「喔」是禮貌。「對，我就是這樣」才是聽懂了。\n\n能把難的事講成人話，才是真的懂。", "tele10": "客戶說太貴，最爛的回答是「我幫你問折扣」。客戶皺眉說太貴了。怕單跑掉的人會馬上接，我幫你問問看有沒有折扣。講的人以為這是誠意，對方心裡想的是，原來還有得談。這就像在菜市場問一顆多少，老闆馬上說算你便宜。你第一個念頭不是賺到，是剛剛那個價是不是在騙我。一降價，你懷疑的就不只是價格，是整攤東西。他說貴，是在問值不值得，不是在問能不能少。一講折扣，就等於承認原價是喊的。所以先把問題問回去。不要說我幫你問折扣，改成，你是覺得這個金額拿不出來，還是覺得做完不值這個數。拿不出來是談方式，不值得是談內容。兩件事完全不一樣，先分清楚再開口。他問的是值不值得。回答那個問題就好。　那該怎麼回，我寫在信裡。留言「報價」，我把訂閱連結給你。", "fb10": "客戶說太貴，最爛的回答是「我幫你問折扣」。\n\n因為你一講折扣，就等於承認原價是喊的。\n\n這就像你在菜市場問一顆多少，老闆馬上說算你便宜。\n\n你第一個念頭不是賺到，是剛剛那個價是不是在騙我。\n\n折扣不會讓他覺得划算，會讓他重新懷疑整件事。而且更麻煩的是，你一旦降過一次，之後每一次報價他都會先預設還有空間——你永遠回不到原價了。\n\n他說貴，是在問值不值得，不是在問能不能少。\n\n這兩個問題要用完全不同的方式回。\n\n「能不能少」是價格問題，回答它要談條件。\n「值不值得」是價值問題，回答它要談結果。\n\n而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。\n\n所以該做的是把結果講清楚，不是把價格降下來。\n\n「如果三個月後你的狀況沒有變化，這筆錢確實不值得。所以我想先確認一件事——你現在最想改變的是哪一塊？」\n\n這句話沒有解釋價格，也沒有降價。它做的是把對話從數字拉回到結果。\n\n他問的是值不值得。回答那個問題就好。", "th10": "客戶說太貴，\n最爛的回答是「我幫你問折扣」。\n\n一講折扣，\n就等於承認原價是喊的。\n\n就像在菜市場問一顆多少，\n老闆馬上說算你便宜。\n\n你第一個念頭不是賺到，\n是剛剛那價是不是在騙我。\n\n他說貴，是在問值不值得，\n不是在問能不能少。", "igc10": "「能不能少」是價格問題，回答它要談條件。\n「值不值得」是價值問題，回答它要談結果。\n\n而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。\n\n而且你一旦降過一次，之後每次報價他都會先預設還有空間。你永遠回不到原價了。\n\n他問的是值不值得。回答那個問題就好。", "tele11": "成交率最低的動作，是傳一堆資料給客戶看。聊完之後說，我整理一份資料傳給你。花兩個小時做出來，傳過去他回一個好，謝謝。然後就沒聲音了。以為他在看，他其實連打開都沒有。你想想，有人傳給你十頁PDF，你會認真看嗎？資料傳過去那一刻，事情就從你身上變成他的作業。而他本來就很忙，作業會被往後排，排到最後就滑掉了。給資料是把球丟回去，給判斷才是接住他。他要的不是更多資訊，是有人幫他把資訊變成決定。所以把傳資料換成一句話。不要說我傳份資料給你，改成，你最在意的是哪一塊，我直接幫你看。他講出來的那一塊，你用三句話回他。三句話比十頁有用，因為那三句是為他寫的。別讓他回去做功課。那是你的工作。　該給什麼不該給什麼，我寫在信裡。留言「資料」，我把訂閱連結給你。", "fb11": "成交率最低的動作，是傳一堆資料給客戶看。\n\n你想想，有人傳給你十頁 PDF，你會認真看嗎？\n\n資料傳過去那一刻，事情就從你身上變成他的作業。\n\n而他不會做作業。他會把那則訊息往上滑掉，然後想著「晚點看」。那個晚點永遠不會來。\n\n這件事之所以這麼多人在做，是因為它讓人很安心——我有行動、我有給東西、我很專業。但安心的是你，不是他。\n\n給資料是把球丟回去，給判斷才是接住他。\n\n資料跟判斷差在哪？資料是「這裡有六個方案的完整比較」，判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。\n\n前者要他花力氣，後者幫他省力氣。\n\n而且判斷才是你真正的價值。同樣的資料客戶自己上網也查得到，他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。你把資料丟過去，等於把自己的價值也一起丟掉了。\n\n一句「你最在意哪一塊，我直接幫你看」，比十頁有用。\n\n別讓他回去做功課。那是你的工作。", "th11": "成交率最低的動作，\n是傳一堆資料給客戶看。\n\n有人傳給你十頁 PDF，\n你會認真看嗎？\n\n資料傳過去那一刻，\n事情就從你身上變成他的作業。\n\n而他不會做作業。\n他會把訊息往上滑掉。\n\n給資料是把球丟回去，\n給判斷才是接住他。", "igc11": "這件事之所以這麼多人在做，是因為它讓人很安心。我有行動、我有給東西、我很專業。但安心的是你，不是他。\n\n資料是「這裡有六個方案的完整比較」。\n判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。\n\n同樣的資料客戶自己上網也查得到。他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。\n\n別讓他回去做功課。那是你的工作。"};
+const DATA = {"tele1": "業務講一百次，不如客戶自己說一次。這叫自我說服。你一定看過這種業務。一坐下來就說，我們這個產品有三大優勢、五大保障。講了二十分鐘，客戶一路點頭，最後說，我再考慮一下。你想想看醫生。好醫生不會一坐下就說，你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他一顆藥都還沒介紹，你已經準備付錢。差別不在誰講得比較清楚。差別在，這句話是從誰嘴裡出來的。你講的，他要先懷疑一輪才相信。他自己講的，不用。所以下次想介紹產品的時候，先把那句話改成問句。不要說，我們這個可以幫你省成本。改成，你現在這塊一個月大概花多少？他自己算出來的那個數字，比你報的任何數字都有力。真正的高手，不是講最清楚的，是能讓對方自己想通的。　這種當場能用的判斷，我每週寄一封信。留言「問診」，我把訂閱連結給你。", "fb1": "業務最貴的一個習慣，\n是把話講完。\n\n不是講得不夠好。是講得太完整。\n\n而這件事，心理學研究了半世紀。\n\n一坐下，三大優勢、五大保障。\n講了二十分鐘，對方一路點頭。\n\n然後說：「我再考慮一下。」\n\n複盤的時候會想，\n是哪一段講得不夠好。\n\n▋📊 問題不在哪一段講得不夠好\n\n不是誰講得比較清楚的問題。\n\n是這句話從誰嘴裡出來的。\n\n從你嘴裡出來的，他要先懷疑一輪才相信。\n他自己講出來的，不用。\n\n心理學叫這個自我說服。\n它比說服有效，而且撐得比較久。\n\n▋🔁 但這招有一個條件，很少人講\n\n自我說服不是永遠有效。\n\n2024 年的研究發現一個調節變項：\n當人覺得「這問題很難答」，\n自我說服的優勢就顯著變小。\n\n因為答不出來的時候，\n他開始懷疑的是自己答案的品質。\n\n所以關鍵不是「有沒有問」。\n\n是那個問題，好不好答。\n\n▋🎯 下次見客戶，問題照這三條挑\n\n1️⃣ 問他已經知道答案的\n　 現況、數字、上次怎麼處理的。\n　 不要問他得當場想的。\n\n2️⃣ 問發生過的，不要問要預測的\n　 「上次等料等了多久」他答得出來。\n　 「未來三年的規劃」他答不出來。\n\n3️⃣ 他答完，別急著接產品\n　 接下一個問題。\n　 讓他多講一句，你就少說十句。\n\n他自己算出來的那個數字，\n比你報的任何數字都有力。\n\n你不需要說服他。\n他自己想通的，才留得住。\n\n➖➖➖➖➖➖➖➖\n\n這種當場能用的判斷，我每週寄一封信。\n留言「問診」，我把訂閱連結寄給你。\n\n身邊有人明天要見客戶，\n把這篇傳給他。\n\n（Elliot Aronson, \"The Power of Self-Persuasion\",\n　American Psychologist, 1999；\n　Xu & Wegener, Soc Psych & Pers Sci, 2024）\n\n#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #自我說服", "th1": "業務最怕的那三秒鐘安靜，\n其實是客戶在算數字。\n\n你一開口補充，他就得重新算。\n\n多數人受不了那個安靜，\n所以永遠拿不到他自己算出來的答案。\n\n而他自己算出來的那個數字，\n你報十次都比不上。", "igc1": "問對問題，對方會自己說服自己。這件事有半世紀的研究撐著。\n但 2024 年有人把它的條件找出來了，而那個條件不在問話的人身上。\n\n🔍 先講那半句大家都學過的\n\n1999 年 Aronson 在 American Psychologist 上整理了自我說服：\n一個人自己生出來的理由，比別人給他的理由更站得住。\n多數人學到這裡就停了，然後開始把問題越問越深。\n\n⚖️ 2024 年補上的是後半句\n\n兩個預註冊研究把邊界畫出來了：\n優勢的條件在問題身上，不在技巧身上。\n產生論點的難度一高，自我說服的優勢就縮回去。\n\n講白話就是，同一招：\n用在好答的問題上是加分，\n用在難答的問題上是扣分。\n\n✅ 所以替換的標準只有一個\n\n圖裡那三組替換句，共同點不是「比較深」，\n是他手上現在就有答案。\n帳單在手邊、等過多久、找過誰，這些都不用回想。\n\n問題太難答的時候，他答不出來，\n懷疑的不是你的產品，是他自己的判斷。\n人在懷疑自己的時候不會成交，只會客氣。\n\n影響力的盡頭不是成交，是有人因為你變好。\n\n📩 每週一則當場能用的判斷，留言「問診」，訂閱連結會寄給你。\n🩺 免費影響力健檢在個人檔案的連結裡。\n\n（Elliot Aronson, \"The Power of Self-Persuasion\", American Psychologist, 1999；\nXu & Wegener, Soc Psych & Pers Sci, 2024）\n\n#平凡人光頭 #溝通變現 #業務日常 #自我說服 #問對問題", "tele2": "客戶說考慮一下，多半不是在拒絕你。是他算不出來。客戶說我再考慮一下，多數人第一個反應是想，是不是太貴了。於是下次見面帶了個折扣過去，結果一樣沒有下文。這就像站在餐廳門口看菜單。不是不想吃，是不知道點哪個才不會後悔。服務生說我們每一道都好吃，你只會更站不住。但他如果問，你今天想吃飽還是想吃巧？你馬上就知道要看哪一區。他卡住的不是要不要，是不知道拿什麼跟什麼比。有兩個研究者聽完兩百五十萬通銷售錄音，發現輸掉的案子四到六成不是輸給對手，是輸給沒有決定。而這些人超過一半不是不想買，是怕選錯。所以下次聽到考慮一下，先別急著講產品，要給他一把尺。問他，你現在主要是在比價格，還是在比時間？二選一他才答得出來。他如果說就是想再想想，那就問他最擔心哪裡會出錯。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。", "fb2": "四到六成的銷售案子，\n最後的贏家是「沒有人」。\n\n不是輸給對手。是客戶誰都沒選。\n\n這是聽完 250 萬通銷售錄音，算出來的。\n\n而多數人回頭檢討的，是價格。\n\n報價單寄出第三天，對話框顯示已讀。\n上一次他講的是「我考慮一下」。\n回了一句「有問題隨時找我」。\n\n然後就沒有然後了。\n\n這種案子最後都歸在「輸了」那一欄。\n但很少人回頭查，到底輸給誰。\n\n▋📊 那 250 萬通錄音，真正說的是\n\n那些沒買的人，超過一半不是不想買。\n\n是怕選錯。\n\n剩下的才是單純不想改現狀。\n\n換句話說，多數談不成的案子，\n客戶是想要的。他只是不敢。\n\n▋🔁 為什麼這會翻掉原本的做法\n\n跟對手競爭，要講得更好。\n跟「不決定」競爭，講越多他越怕。\n\n因為每多一個優點，\n就多一個他得負責判斷的項目。\n\n以為在加分，\n他感覺到的是責任在疊。\n\n怕選錯的人，要的不是更多理由。\n是一把能拿來比的尺。\n\n▋🎯 下次聽到「我考慮一下」，改做三件事\n\n1️⃣ 先閉嘴，別補產品資訊\n　 補的每一句，都在加重他的負擔。\n\n2️⃣ 把問題換成二選一\n　 「你現在主要是在比價格，還是在比時間？」\n\n3️⃣ 不要問開放題\n　 問「還在考慮什麼」只會換來「再看看」，\n　 因為他自己也還沒把那團東西拆開。\n\n二選一，他才答得出來。\n\n這句話沒有在推銷任何東西。\n它只是給了他一把尺。\n\n你能幫他的不是催他決定，\n是讓他知道怎麼決定。\n\n➖➖➖➖➖➖➖➖\n\n想要一整套「給尺」的問法，\n留言「標準」，我把訂閱連結寄給你。\n每週一封信，一次一個當場能用的判斷。\n\n身邊有人正在等一句「我考慮一下」的回覆，\n把這篇傳給他。\n\n（250 萬通錄音出自 Matt Dixon 與 Ted McKenna\n　《The JOLT Effect》, 2022）\n\n#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #客戶心理", "th2": "你有沒有過那種經驗：\n\n在貨架前站了三十分鐘，\n最後空手走出來。\n\n那不是不想買。\n是不知道照什麼標準選。\n\n客戶說「我考慮一下」的時候，\n多半就是站在那個貨架前。\n\n這時候再給他一張規格表，\n他只會站得更久。", "igc2": "客戶卡住的時候，要的不是推一把，是一個能比較的標準。\n\n標準長什麼樣子？它通常是一句話，而且能用來排除選項。\n「如果你最在意的是售後，那這三個方案只有一個做得到。」\n\n標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。\n\n你能幫他的不是催他決定，是讓他知道怎麼決定。", "tele3": "超市擺二十四種果醬，掏錢的人只剩擺六種的十分之一。有一種簡報，把產品十個優點全部講完。講的時候客戶一直點頭，看起來很順。結果回去之後沒有下文，連他卡在哪都不知道。這個實驗是真的，在超市做的。擺二十四種的時候，停下來試吃的人比較多，掏錢的反而少。擺六種倒過來。業務講產品，就像在擺那個果醬架。不過這個實驗後來被吵了很久，有人重做做不出來。直到有人把九十九個研究合起來算，才算出真正的條件：選項多會不會害人，看他自己知不知道要什麼。他心裡有譜，選項多是享受。他沒譜，選項多就是折磨。而坐在你對面那個人，就是沒譜的。所以下次講之前，先挑三個。挑的標準不是你最自豪的三個，是跟他剛剛那句話有關的三個。他說最近人手不夠，你就只講省人力那三個。其他七個留著，他問你再講。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。", "fb3": "超市擺 24 種果醬，\n掏錢的只剩擺 6 種的十分之一。\n\n不是東西不好。是選項太多。\n\n而這個實驗，後來被吵了二十年。\n\n簡報把十個優點講完，\n客戶一路點頭，看起來很順。\n\n回去就沒下文了。\n連他卡在哪都不知道。\n\n▋📊 那個實驗，後來做不出來\n\n擺 24 種時停下來的人比較多，\n掏錢的只有 3%。\n擺 6 種的時候是 30%。\n\n但這個結果重做常常失敗。\n\n2010 年有人把 50 幾個同類研究\n合起來算，平均效果幾乎是零。\n\n所以「選項多就賣得差」\n不是一條到處都成立的定律。\n\n▋🔁 真正的條件是「他有沒有譜」\n\n2015 年另一份統合分析\n找出了關鍵的那個條件：\n他自己還不確定要什麼。\n\n心裡有譜的人，選項多是享受。\n還沒有譜的人，選項多是折磨。\n\n而坐在你對面那個人，\n就是還沒有譜的那一個。\n\n他如果知道自己要什麼，\n不會坐在這裡聽你講。\n\n▋🎯 現場怎麼判斷他有沒有譜\n\n1️⃣ 聽他問的是哪一種問題\n　 問「哪個比較好」＝沒有譜。\n　 問「這個能不能做到」＝有譜。\n\n2️⃣ 沒有譜的，先給三個\n　 不是你最自豪的三個，\n　 是跟他剛剛那句話有關的三個。\n\n3️⃣ 剩下的留著當後手\n　 他問你再講。\n　 沒問就代表他不在意。\n\n挑的動作本身就在幫他降低不確定。\n那才是研究真正在說的事。\n\n專業不是把事情講滿。\n是幫他把事情變簡單。\n\n➖➖➖➖➖➖➖➖\n\n那三個該挑什麼，我每週寄一封信。\n留言「三個」，我把訂閱連結寄給你。\n\n身邊有人明天要做簡報，\n把這篇傳給他。\n\n（Iyengar & Lepper, JPSP, 2000；\n　Scheibehenne et al., JCR, 2010；\n　Chernev, Böckenholt & Goodman,\n　J Consumer Psych, 2015）\n\n#平凡人光頭 #溝通變現 #業務日常 #成交卡在哪 #選擇癱瘓", "th3": "菜單越厚的餐廳，越難點。\n\n但你明明知道自己想吃什麼的時候，\n再厚的菜單也擋不住你。\n\n所以難的不是菜單。\n是你有沒有譜。\n\n客戶聽你講十個優點記不住十個，\n不是他笨。\n\n是他還沒有譜，\n而你又多給了九個。", "igc3": "你把產品講得越完整，其實是在增加他的決策成本。\n\n那三個要怎麼挑？不是挑你最自豪的三個，是挑跟他剛剛講的話有關的三個。\n\n他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。\n\n專業不是把事情講滿，是幫他把事情變簡單。", "tele4": "不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。客戶聽完報價說怎麼這麼貴，大部分人的反應是開始解釋。我們用的材料、我們的團隊、我們做了幾年。解釋得越多，他越只記得那個數字。想像一個完全不懂車的人去買車。銷售一直講引擎、底盤、扭力。整場對話裡唯一看得懂的東西，就是價格。所以他只能用價格判斷。不是他愛計較，是他手上只有這一把尺。嫌貴多半不是嫌數字大，是沒有別的刻度。這時候解釋價格，等於叫他繼續用那把尺量你。所以先給他一把新的尺。不要說我們比較好，要問他，你會怎麼判斷這件事做得好不好。他答不出來的時候，你再給他一個標準。那個標準一旦成立，價格就不是唯一的那把尺了。給他一把新的尺，貴這件事自己就不見了。　想知道自己是哪一塊讓客戶只能看價格？留言「健檢」，我把連結給你。", "fb4": "不懂車的人去買車，\n他只看得懂價格。\n\n不是他愛計較。是他手上只有一把尺。\n\n而有些行業，天生沒有第二把。\n\n報價寄出去，對方只回一句\n怎麼這麼貴。\n\n然後開始解釋。\n材料、團隊、做了幾年。\n\n解釋得越多，\n他記得的只剩那個數字。\n\n▋📊 你賣的東西，可能天生難判斷\n\n經濟學把商品分成三種。\n\n看得出來的，叫搜尋財。\n用過才知道的，叫經驗財。\n\n還有一種，買之前驗不了，\n買完也很難說自己買對沒有。\n\n顧問、教練、保險、設計、教育\n都落在第三種。\n\n對方不是不想認真判斷。\n是這件事他真的驗不了。\n\n▋🔁 所以解釋價格是在幫倒忙\n\n一解釋，等於叫他\n繼續用那把尺量你。\n\n而那把尺上面只有數字，\n沒有別的刻度。\n\n沒有對照的時候，\n任何數字都只是大。\n\n「太貴」翻譯過來通常是：\n我還不知道這筆錢換到什麼。\n\n▋🎯 給他一把新的尺，三種挑一種\n\n1️⃣ 時間的尺\n　 三個月後你的狀況會長什麼樣。\n\n2️⃣ 對照的尺\n　 做跟不做，差別在哪一件事上。\n\n3️⃣ 風險的尺\n　 不處理的話，最差會怎樣。\n\n三種不用都給。\n他手上多一個刻度就夠了。\n\n給他一把新的尺。\n貴這件事自己就不見了。\n\n➖➖➖➖➖➖➖➖\n\n想知道自己是哪一塊\n讓客戶只能看價格？\n\n留言「健檢」，我把影響力健檢寄給你。\n\n身邊有人正在解釋價格，\n把這篇傳給他。\n\n（信任財這個分類出自 Darby & Karni,\n　Journal of Law and Economics, 1973）\n\n#平凡人光頭 #溝通變現 #業務日常 #嫌貴怎麼辦 #定價溝通", "th4": "去看牙醫，醫生說這顆要做牙套。\n\n你不會問牙套的材質跟結構。\n你會問多少錢。\n\n不是你只在意錢。\n是整場只有那個數字你看得懂。\n\n客戶嫌貴，多半是同一件事。\n\n他不是嫌數字大，\n是手上只剩這一把尺。", "igc4": "顧問、教練、設計、保險都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。\n\n他不是不想認真判斷，是手上沒有別的尺。\n\n新的尺可以是時間、可以是對照、可以是風險。只要他手上多一個刻度，價格就不再是唯一的判斷依據。\n\n給他一把新的尺，貴這件事自己就不見了。", "tele5": "頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。有人來問服務，多數人的第一個念頭是，太好了，有生意上門。接下來整場都在證明自己適合他，沒有一秒鐘在想，他適不適合我。這就像好的健身教練。他不會一見面就賣課，他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只來一次又不肯改飲食，他會跟你說，現在買課你會後悔。因為他知道，接錯客戶比少接一個更傷。推銷的人在想，怎麼讓對方答應。挑人的人在想，這件事做下去會不會有結果。所以下次有人來問，先問三件事。他現在卡在哪、他之前試過什麼、他願意花多少時間。三個答案只要有一個對不上，你就直說。你講真話那一刻，他反而開始信你。挑人不是傲氣，是你對結果負責。　你現在是在推銷還是在挑人？留言「挑人」，我把影響力健檢給你。", "fb5": "頂級業務見客戶，\n想的不是怎麼成交。\n\n是這個客戶要不要接。\n\n第一次聽會覺得很傲。但高手都這樣運作。\n\n有人來問服務，\n第一個念頭是太好了，有生意上門。\n\n接下來整場都在證明自己適合他。\n\n沒有一秒鐘在想，\n他適不適合我。\n\n▋📊 接錯一個客戶，要付三筆帳\n\n第一筆是時間。\n做不出結果的案子最難結案。\n\n第二筆是心力。\n他的焦慮會變成你的焦慮。\n\n第三筆最貴，是口碑。\n\n他不會說是自己沒配合，\n他會說找你沒用。\n\n而那不是他的錯。\n是你當初明知道不合還是收了。\n\n▋🔁 挑人跟擺架子，差在一條線\n\n同樣是說不，分界線在為了誰。\n\n為他的結果挑，叫負責。\n為自己方便挑，才叫擺架子。\n\n這條線客戶感覺得到。\n\n你問他狀況的那一刻，\n他就知道你在評估合不合，\n不是在求他答應。\n\n那個瞬間，位置就換了。\n\n▋🎯 下次有人來問，先問這三件\n\n1️⃣ 你現在卡在哪一塊\n　 他答不出來，表示還不急。\n\n2️⃣ 之前試過什麼\n　 試過的東西會告訴你\n　 他的期待值在哪裡。\n\n3️⃣ 願意花多少時間\n　 這題最會露餡，也最該問。\n\n三個答案有一個對不上，就直說。\n\n你講真話那一刻，\n他反而開始信你。\n\n挑人不是傲氣。\n是你對他的結果負責。\n\n➖➖➖➖➖➖➖➖\n\n你現在是在推銷，還是在挑人？\n留言「挑人」，我把影響力健檢寄給你。\n\n身邊有人正在硬接一個案子，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #挑客戶 #專業立場", "th5": "說不會流失一些人。\n\n但留下來的那些，\n從第一天就知道\n你不是來求他答應的。\n\n多數人不敢說不，是怕少接一個。\n\n而接錯一個的帳，\n最後是記在你的口碑上。\n\n他不會說是自己沒配合。\n他會說找你沒用。", "igc5": "一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。\n\n有個反效果很有趣：當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況。\n\n他會感覺到你在評估合不合，不是在求成交。那個瞬間，位置就換了。\n\n挑人不是傲氣，是你對結果負責。", "tele6": "有三句話業務天天在講，客戶天天在心裡扣分。這三句話的共同點是，講的人以為在拉近距離，聽的人每聽一句就往後退一步。而且對方不會講，他只是回訊息變慢。第一句，我跟你說實話。對方會想，那你前面講的是什麼。第二句，這個我幫很多人做過。他想，所以我只是第幾個。第三句最毒，相信我。這就像相親第一次見面就說，嫁給我不會後悔。它們有一個共同點：都在要對方給。給信任、給時間、給機會。沒有一句在給他。所以把要改成給。不要說相信我，改成，這件事我可以先做一段給你看。不要說我幫很多人做過，改成，跟你情況最像的那個人，當時卡在這裡。不要說我跟你說實話，就直接把那句實話講出來。信任不是要來的，是給出來的。　這三句怎麼換成給，我寫在信裡。留言「話術」，我把訂閱連結給你。", "fb6": "有三句話業務天天在講，\n客戶天天在心裡扣分。\n\n而且他不會講。他只是回訊息變慢。\n\n這三句有一個共同結構。\n\n第一句，「我跟你說實話」。\n\n對方立刻會想：\n那你前面講的是什麼。\n\n第二句，「這個我幫很多人做過」。\n\n他聽到的是：\n所以我只是第幾個。\n\n第三句最毒，「相信我」。\n\n▋📊 三句話的共同結構\n\n它們都在要對方給。\n\n給你信任、給你時間、給你機會。\n\n沒有一句在給他。\n\n更麻煩的是，\n每一句都把風險留在他那邊。\n\n要他先相信，\n萬一看錯了，是他自己的責任。\n\n▋🔁 一句話是在要還是在給\n\n有個三秒鐘的自我檢查。\n\n把那句話講完，問自己：\n這句話的受益人是誰。\n\n「相信我」的受益人是你。\n「你可以先驗證」的受益人是他。\n\n同一件事，位置完全不一樣。\n\n真正讓人放心的人，\n從來不用開口要。\n\n▋🎯 這三句，照這樣換成給\n\n1️⃣ 「相信我」\n　 改成：這件事我可以\n　 先做一段給你看。\n\n2️⃣ 「我幫很多人做過」\n　 改成：跟你情況最像的那個人，\n　 當時卡在這裡。\n\n3️⃣ 「我跟你說實話」\n　 改成：直接把那句實話講出來。\n\n真正的槓桿，永遠在「給」那一邊。\n\n信任不是要來的。\n是給出來的。\n\n➖➖➖➖➖➖➖➖\n\n這三句怎麼換成給，我每週寄一封信。\n留言「話術」，我把訂閱連結寄給你。\n\n身邊有人天天在講這三句，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #銷售話術 #信任怎麼建立", "th6": "客戶不會告訴你他在扣分。\n\n他只是回訊息變慢。\n\n而最容易被扣分的那幾句，\n講的人都覺得自己在拉近距離：\n\n我跟你說實話。\n這個我幫很多人做過。\n相信我。\n\n三句都在要他給。\n沒有一句在給他。", "igc6": "這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。\n\n而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。\n\n真正讓人放心的人，從來不用開口要。", "tele7": "「只耽誤您三分鐘」這句一出口，三分鐘就沒了。打給陌生客戶，很多人開場先說，不好意思打擾了，只耽誤您三分鐘。聽起來很有禮貌。對方聽完的第一個反應，是開始找理由掛電話。因為這句話等於先承認，我接下來要講的事對你沒好處。你想想，如果有人說，借我三分鐘讓你多賺一百萬，他會先道歉嗎？他只會說，你現在方便嗎，這件事跟你有關。開場就道歉，對方第一個反應不是給你時間，是想辦法脫身。好的開場不用求時間，它會讓對方自己想多聽一句。所以把道歉換成一個跟他有關的事實。不要說只耽誤您三分鐘，改成，你們上個月開的那家新店，我想到一件事。他在不在意，三秒內你就知道了，比求來的三分鐘準。你不需要客戶的三分鐘。你需要他的好奇。　不知道自己哪一塊讓人想跑？留言「開場」，我把影響力健檢給你。", "fb7": "「只耽誤您三分鐘」\n這句一出口，三分鐘就沒了。\n\n聽起來很有禮貌。對方卻開始找理由掛電話。\n\n問題不在禮貌。在你幫這場對話定了性。\n\n打給陌生客戶，\n很多人開場先道歉。\n\n不好意思打擾了。\n\n話還沒進正題，\n對方已經在看手錶。\n\n▋📊 道歉的開場，先替他下了結論\n\n這句話等於先承認：\n我接下來要講的事，對你沒好處。\n\n你想想，如果有人說\n借我三分鐘讓你多賺一百萬，\n他會先道歉嗎？\n\n不會。他會直接講那一百萬。\n\n開場就道歉，\n傳遞的訊息是我知道我在打擾你。\n\n而他收到這個訊息之後，\n第一個反應不是給你時間。\n\n是想辦法脫身。\n\n▋🔁 開場真正的工作不是要時間\n\n是讓他自己決定要不要聽。\n\n求來的三分鐘，\n他整個三分鐘都在算還剩幾分鐘。\n\n自己決定要聽的，不會算時間。\n\n所以開場要的不是許可。\n是好奇。\n\n▋🎯 把道歉換成這三個動作\n\n1️⃣ 先講一件跟他有關的事實\n　 「你們上個月開了第三家店。」\n\n2️⃣ 講完停住\n　 停住之後，決定的人是他。\n\n3️⃣ 三秒內看他接不接\n　 他接了就是在意。\n　 他沒接，你也省下那三分鐘。\n\n三秒鐘的答案，\n比求來的三分鐘準。\n\n你不需要他的三分鐘。\n你需要他的好奇。\n\n➖➖➖➖➖➖➖➖\n\n不知道自己哪一塊讓人想跑？\n留言「開場」，我把影響力健檢寄給你。\n\n身邊有人明天要打陌生電話，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #開場白 #陌生開發", "th7": "有人傳訊息給你，\n第一句是「不好意思打擾」。\n\n你還沒看完就知道，\n後面那件事跟你沒關係。\n\n因為真的跟你有關的人不會道歉。\n他會直接講那件事。\n\n開場的客氣不是禮貌。\n是先替對方下了結論。", "igc7": "開場就道歉，傳遞的訊息是「我知道我在打擾你」。對方收到之後，第一個反應不是給你時間，是想辦法脫身。\n\n好的開場結構通常是：先講一件跟他有關的事，然後停住。\n\n那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。\n\n你不需要客戶的三分鐘。你需要他的好奇。", "tele8": "「有需要再跟我說」這句一講完，訂單就死了。聊得很順，氣氛很好，最後一句，那你再想想，有需要再跟我說。講的人覺得這樣不會給壓力。然後就沒有然後了。這就像帶朋友去吃飯，他問你哪家好，你說都可以，你決定。他不會覺得你尊重他，他會覺得你沒有在幫他。他本來就是因為決定不了才問你的。這句話把決定權整個丟回去，而對方本來就不想做決定。客戶要的不是空間，是一個下一步。所以把空間換成一個小動作。不要說有需要再跟我說，改成，我週四整理一份給你，你看完我們再講十分鐘。下一步不用大，但要有時間、有內容、有長度。三個都具體，他才接得住。給他一個小動作，比給他一個大空間有用。　那個下一步要怎麼給，我寫在信裡。留言「下一步」，我把訂閱連結給你。", "fb8": "「有需要再跟我說」\n這句一講完，訂單就死了。\n\n講的人覺得這樣才不會給壓力。\n\n而壓力從來不是他卡住的原因。\n\n聊得很順，氣氛很好。\n\n最後一句，那你再想想，\n有需要再跟我說。\n\n對方說好，謝謝。\n\n然後就沒有然後了。\n\n▋📊 不逼他，跟不給方向是兩件事\n\n很多人把不逼客戶\n理解成不給方向。\n\n結果每次對話都在原地結束。\n\n不逼，是不替他做決定。\n不給方向，是連選項都不給。\n\n就像有人問你哪家好，\n你說都可以，你決定。\n\n他不會覺得你尊重他。\n他會覺得你沒有在幫他。\n\n他本來就是決定不了才問你的。\n\n▋🔁 關係活不活著，看有沒有時間點\n\n有時間點，這件事還在進行中。\n\n沒有時間點，\n就算他有興趣，\n也會被下週的事情蓋過去。\n\n不是他變了。\n是沒有任何東西提醒他回來。\n\n所以下一步不用大。\n但要有一個日子。\n\n▋🎯 一個接得住的下一步，三個要素\n\n1️⃣ 有時間\n　 「我這週五整理給你。」\n\n2️⃣ 有內容\n　 「那兩個方案的差別，一張表。」\n\n3️⃣ 有長度\n　 「你看完我們再講十分鐘。」\n\n三個都具體，他才接得住。\n\n而且這三句都沒有在催他決定。\n\n給他一個小動作。\n比給他一個大空間有用。\n\n➖➖➖➖➖➖➖➖\n\n那個下一步要怎麼給，我每週寄一封信。\n留言「下一步」，我把訂閱連結寄給你。\n\n身邊有人今天剛講完這句話，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #跟進技巧 #訂單卡住", "th8": "「有需要再跟我說」一講完，\n這件事就離開你的行事曆了。\n\n也離開他的。\n\n他不是沒興趣。\n是下週會有別的事蓋過去，\n而沒有任何東西提醒他回來。\n\n關係活不活著，\n其實只看有沒有下一個日子。", "igc8": "很多人把「不逼客戶」理解成「不給方向」，結果每次對話都在原地結束。\n\n不逼是不替他做決定，不給方向是連選項都不給。這是兩件事。\n\n下一步不用大，但要具體：\n「我這週五整理一張表給你，你看完再決定要不要約。」\n\n有時間點，關係就還活著。\n\n給他一個小動作，比給他一個大空間有用。", "tele9": "術語講越多，客戶聽到的不是專業。是「我不懂」。有一種簡報，流程、架構、方法論講了一輪，一個字都沒講錯。客戶全程點頭。結束之後他跟同事說，聽起來很厲害，但我不知道他在幹嘛。你想想去修車。師傅說，節氣門積碳導致怠速不穩。你只會點頭，但不知道該不該修。他如果說，你停紅燈的時候車會抖，就是這個。你立刻懂，而且馬上想修。同一件事，一個把人推遠，一個把人拉近。專業不是用什麼字，是對方聽完腦袋裡有沒有畫面。沒有畫面，他就沒辦法判斷，只好先放著。所以每講一個專有名詞，後面接一句，也就是說。也就是說，你以後不用自己對帳。也就是說，客戶半夜下單你不會漏掉。那句也就是說後面的東西，才是他真正買的。能把難的事講成人話，才是真的懂。　想知道自己講的是專業還是術語？留言「人話」，我把影響力健檢給你。", "fb9": "術語講越多，\n客戶聽到的不是專業。\n\n是「我不懂」。\n\n而一個聽不懂的人，只能用價格判斷你。\n\n簡報講完流程、架構、方法論。\n\n一個字都沒講錯，\n客戶全程點頭。\n\n結束之後他跟同事說，\n聽起來很厲害，\n但我不知道他在幹嘛。\n\n▋📊 術語的功能不是讓客戶信你\n\n它是給同行用的，為了講快一點。\n\n同行知道那個詞背後\n有哪些細節，所以省得掉。\n\n客戶不知道，所以省不掉。\n\n對客戶用術語，\n實際效果是製造距離。\n\n而距離一出現，\n他就開始用別的東西判斷你。\n\n通常就是價格。\n\n▋🔁 專業的標準不是你用什麼字\n\n是對方聽完腦袋裡有沒有畫面。\n\n沒有畫面，他沒辦法判斷。\n沒辦法判斷，就先放著。\n\n有個很簡單的檢查法。\n\n你講完一段，看他的反應\n是「喔」，還是「對，我就是這樣」。\n\n「喔」是禮貌。\n「對，我就是這樣」才是聽懂了。\n\n▋🎯 每個專有名詞後面，接一句也就是說\n\n1️⃣ 「導入流程」\n　 也就是說，你們下個月照舊。\n\n2️⃣ 「客製化」\n　 也就是說，照你現在的做法走，\n　 不用改。\n\n3️⃣ 「整合方案」\n　 也就是說，現在的三件事\n　 以後變一件。\n\n那句也就是說後面的東西，\n才是他真正買的。\n\n能把難的事講成人話。\n才是真的懂。\n\n➖➖➖➖➖➖➖➖\n\n想知道自己講的是專業還是術語？\n留言「人話」，我把影響力健檢寄給你。\n\n身邊有人簡報一向講得很完整，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #講人話 #專業表達", "th9": "一個聽不懂你的人，\n只能用價格判斷你。\n\n這是術語真正的代價。\n\n他全程點頭，\n結束之後跟同事說\n聽起來很厲害，\n但我不知道他在幹嘛。\n\n然後他開始比價。\n\n不是他不懂你的專業。\n是你沒給他第二個判斷的方法。", "igc9": "術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離。而距離一出現，他就開始用別的東西判斷你，通常是價格。\n\n要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？\n\n「喔」是禮貌。「對，我就是這樣」才是聽懂了。\n\n能把難的事講成人話，才是真的懂。", "tele10": "客戶說太貴，最爛的回答是「我幫你問折扣」。客戶皺眉說太貴了。怕單跑掉的人會馬上接，我幫你問問看有沒有折扣。講的人以為這是誠意，對方心裡想的是，原來還有得談。這就像在菜市場問一顆多少，老闆馬上說算你便宜。你第一個念頭不是賺到，是剛剛那個價是不是在騙我。一降價，你懷疑的就不只是價格，是整攤東西。他說貴，是在問值不值得，不是在問能不能少。一講折扣，就等於承認原價是喊的。所以先把問題問回去。不要說我幫你問折扣，改成，你是覺得這個金額拿不出來，還是覺得做完不值這個數。拿不出來是談方式，不值得是談內容。兩件事完全不一樣，先分清楚再開口。他問的是值不值得。回答那個問題就好。　那該怎麼回，我寫在信裡。留言「報價」，我把訂閱連結給你。", "fb10": "客戶說太貴，\n最爛的回答是「我幫你問折扣」。\n\n因為一講折扣，就等於承認原價是喊的。\n\n而降過一次，你永遠回不到原價。\n\n客戶皺眉說太貴了。\n\n怕單跑掉的人會馬上接，\n我幫你問問看有沒有折扣。\n\n講的人以為這是誠意。\n\n對方心裡想的是，\n原來還有得談。\n\n▋📊 折扣的代價不是這一單\n\n降價會讓他重新懷疑整件事。\n\n剛剛那個價是不是在騙我。\n\n而且一旦降過一次，\n之後每一次報價，\n他都會先預設還有空間。\n\n這一單的折扣是一次性的。\n那個預設是永久的。\n\n▋🔁 「太貴」其實有三種\n\n第一種是拿不出來。\n那是方式問題，要談付法。\n\n第二種是不值得。\n那是結果問題，要談他會拿到什麼。\n\n第三種最少人發現，\n是他不敢跟人交代。\n\n公司要他說明、家人會問他。\n\n他需要的不是便宜，\n是一個說得出口的理由。\n\n三種的回法完全不一樣。\n先分清楚再開口。\n\n▋🎯 下次聽到太貴，照這三句走\n\n1️⃣ 先把問題問回去\n　 「你是覺得金額拿不出來，\n　 還是覺得做完不值這個數？」\n\n2️⃣ 不值得的，談三個月後\n　 「如果三個月後狀況沒變，\n　 這筆錢確實不值得。」\n\n3️⃣ 不敢交代的，給他一句話\n　 給他一句能帶回去講的理由。\n\n這三句都沒有解釋價格。\n也都沒有降價。\n\n他問的是值不值得。\n回答那個問題就好。\n\n➖➖➖➖➖➖➖➖\n\n那該怎麼回，我每週寄一封信。\n留言「報價」，我把訂閱連結寄給你。\n\n身邊有人明天要報價，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #太貴了 #報價溝通", "th10": "折扣最貴的地方不是這一單。\n\n是你一旦降過一次，\n他之後每一次看你的報價，\n都會先預設還有空間。\n\n這一單的折扣是一次性的。\n那個預設是永久的。\n\n而他原本問的不是能不能少。\n是值不值得。", "igc10": "「能不能少」是價格問題，回答它要談條件。\n「值不值得」是價值問題，回答它要談結果。\n\n而多數時候的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。\n\n而且你一旦降過一次，之後每次報價他都會先預設還有空間。你永遠回不到原價了。\n\n他問的是值不值得。回答那個問題就好。", "tele11": "成交率最低的動作，是傳一堆資料給客戶看。聊完之後說，我整理一份資料傳給你。花兩個小時做出來，傳過去他回一個好，謝謝。然後就沒聲音了。以為他在看，他其實連打開都沒有。你想想，有人傳給你十頁PDF，你會認真看嗎？資料傳過去那一刻，事情就從你身上變成他的作業。而他本來就很忙，作業會被往後排，排到最後就滑掉了。給資料是把球丟回去，給判斷才是接住他。他要的不是更多資訊，是有人幫他把資訊變成決定。所以把傳資料換成一句話。不要說我傳份資料給你，改成，你最在意的是哪一塊，我直接幫你看。他講出來的那一塊，你用三句話回他。三句話比十頁有用，因為那三句是為他寫的。別讓他回去做功課。那是你的工作。　該給什麼不該給什麼，我寫在信裡。留言「資料」，我把訂閱連結給你。", "fb11": "成交率最低的動作，\n是傳一堆資料給客戶看。\n\n傳過去那一刻，事情就變成他的作業。\n\n不過有三種情況例外，很少人分得清。\n\n聊完之後說，\n我整理一份資料傳給你。\n\n花兩個小時做出來。\n\n傳過去他回一個好，謝謝。\n\n然後就沒聲音了。\n以為他在看，他連打開都沒有。\n\n▋📊 給資料跟給判斷，差在誰出力\n\n資料是「這裡有六個方案的比較」。\n\n判斷是「以你的狀況，\n只有兩個值得看，差別在這裡」。\n\n前者要他花力氣。\n後者幫他省力氣。\n\n而判斷才是你真正的價值。\n\n同樣的資料他自己上網也查得到。\n\n他找你不是要資料，\n是要一個看過很多案例的人\n告訴他哪個適合他。\n\n把資料丟過去，\n等於把自己的價值一起丟掉。\n\n▋🔁 那什麼時候該給資料\n\n三種情況該給，而且要給足。\n\n他已經決定了，要走內部流程。\n他要拿給別人看，不是自己看。\n他明確問了某一份東西。\n\n這三種的共同點是，\n他已經知道要拿這份資料幹嘛。\n\n不知道要幹嘛的時候給，\n那叫把球丟回去。\n\n▋🎯 想傳資料之前，先做這三件\n\n1️⃣ 先問他最在意哪一塊\n　 「你最在意哪一塊，\n　 我直接幫你看。」\n\n2️⃣ 他講出來的那一塊，三句話回他\n　 三句為他寫的，比十頁有用。\n\n3️⃣ 真的要給，先標出哪一頁\n　 「只看第 4 頁，其他是附件。」\n\n這些動作都不花你兩個小時。\n但他接得住。\n\n別讓他回去做功課。\n那是你的工作。\n\n➖➖➖➖➖➖➖➖\n\n該給什麼不該給什麼，我每週寄一封信。\n留言「資料」，我把訂閱連結寄給你。\n\n身邊有人正在做一份沒人會看的資料，\n把這篇傳給他。\n\n#平凡人光頭 #溝通變現 #業務日常 #跟進技巧 #給判斷不給資料", "th11": "花兩個小時做一份資料傳過去，\n會讓人很安心。\n\n我有行動、我有給東西、我很專業。\n\n但安心的是你，不是他。\n\n那份東西到他手上就變成作業，\n而他本來就很忙。\n\n他要的不是更多資訊。\n是有人幫他把資訊變成決定。", "igc11": "這件事之所以這麼多人在做，是因為它讓人很安心。我有行動、我有給東西、我很專業。但安心的是你，不是他。\n\n資料是「這裡有六個方案的完整比較」。\n判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。\n\n同樣的資料客戶自己上網也查得到。他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。\n\n別讓他回去做功課。那是你的工作。"};
 
 function flash(btn, word, cls) {
   const old = btn.textContent;
