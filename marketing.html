@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>行銷日課</title>
+<!-- 手機「加入主畫面」之後開起來沒有網址列，像一支 App -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="行銷日課">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F3EEE5">
+<style>
+:root {
+  --paper:#F3EEE5; --card:#FFFCF6; --ink:#2C2416; --muted:#8A7E6D;
+  --line:#E8DFD3; --accent:#AF5433; --accent-soft:#FFF4E8;
+}
+* { box-sizing:border-box; }
+body { font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+       background:var(--paper); color:var(--ink); margin:0; padding:28px 16px 120px;
+       font-size:17px; line-height:1.75; }
+.wrap { max-width:860px; margin:0 auto; }
+h1 { font-size:30px; margin:0 0 4px; letter-spacing:1px; }
+.lede { color:var(--muted); font-size:14px; margin-bottom:22px; }
+
+.bar { position:sticky; top:0; z-index:50; background:rgba(243,238,229,.95);
+       backdrop-filter:blur(8px); padding:12px 0 14px; margin-bottom:18px;
+       border-bottom:1px solid var(--line); }
+.bar-row { display:flex; align-items:center; gap:14px; font-size:14px; }
+.track { flex:1; height:10px; background:#E3DACB; border-radius:99px; overflow:hidden; }
+.fill { height:100%; width:0; background:linear-gradient(90deg,#C6603A,#C99A4E);
+        border-radius:99px; transition:width .35s ease; }
+.reset { background:none; border:1px solid var(--line); color:var(--muted);
+         padding:5px 12px; border-radius:99px; font-size:12px; cursor:pointer; }
+.reset:hover { color:var(--accent); border-color:var(--accent); }
+
+.day { background:var(--card); border-radius:18px; margin-bottom:26px;
+       box-shadow:0 10px 30px rgba(90,70,40,.09); overflow:hidden;
+       transition:opacity .3s, transform .3s; }
+.day.done { opacity:.42; }
+.day.done .guts { display:none; }
+.day.done .hd::after { content:"已完成"; margin-left:auto; font-size:12px;
+                       background:rgba(255,255,255,.3); padding:3px 10px; border-radius:99px; }
+
+.hd { padding:16px 26px; color:#fff; display:flex; align-items:center; gap:14px;
+      font-size:13px; letter-spacing:1px; cursor:pointer; }
+.hd .dnum { font-size:22px; font-weight:bold; letter-spacing:0; }
+.hd .pill { background:rgba(255,255,255,.22); padding:3px 11px; border-radius:99px; font-size:12px; }
+
+.guts { padding:4px 26px 26px; }
+.ttl { font-size:23px; font-weight:bold; line-height:1.45; margin:18px 0 6px; }
+
+.sec { margin-top:26px; }
+.sec-hd { display:flex; align-items:baseline; gap:10px; padding-bottom:7px;
+          border-bottom:2px solid var(--ink); margin-bottom:16px; }
+.sec-hd b { font-size:17px; letter-spacing:2px; }
+.sec-hd span { font-size:12px; color:var(--muted); }
+
+.lbl { font-size:11px; letter-spacing:3px; color:var(--accent);
+       font-weight:bold; margin:18px 0 7px; }
+
+/* 提詞器＝這張卡的主角，字最大、色最重 */
+.tele-box { background:var(--ink); border-radius:12px; padding:22px 24px; position:relative; }
+.tele { color:#FBF6EA; font-size:21px; line-height:2.05; letter-spacing:.6px; }
+.tele-meta { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.14);
+             color:#B5A890; font-size:12px; display:flex; gap:16px; flex-wrap:wrap; }
+
+.copy { background:var(--accent); color:#fff; border:none; padding:7px 15px;
+        border-radius:99px; font-size:12.5px; cursor:pointer; letter-spacing:1px; }
+.copy:hover { background:#8E3F23; }
+.copy.ok { background:#4A7A3A; }
+.copy.bad { background:#A63A2E; }
+.tag-wed { font-size:12.5px; font-weight:bold; color:#8A5A14; background:#FFF0D2;
+  border:1px solid #E6C98A; border-radius:999px; padding:5px 12px; white-space:nowrap; }
+.wed-box { background:#FFF9E8; border-left:4px solid #C99A4E; border-radius:0 10px 10px 0;
+  padding:13px 17px; font-size:14.5px; line-height:1.85; color:#5E5240; }
+.wed-box a { color:var(--accent); }
+.spare { margin-top:11px; }
+.spare summary { font-size:13px; color:var(--muted); cursor:pointer; padding:8px 0;
+  list-style:none; }
+.spare summary::before { content:"▸ "; }
+.spare[open] summary::before { content:"▾ "; }
+.row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+.tone { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.tone div { background:var(--accent-soft); border-radius:9px; padding:12px 15px; font-size:14px; line-height:1.7; }
+.tone b { color:var(--accent); display:block; font-size:12px; letter-spacing:2px; margin-bottom:3px; }
+
+table.shots { width:100%; border-collapse:collapse; font-size:14px; }
+.shots td { padding:9px 13px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.65; }
+.shots td:first-child { width:132px; font-weight:bold; color:var(--accent); white-space:nowrap; }
+
+.cover-chip { display:inline-block; background:var(--ink); color:#fff; padding:14px 20px;
+              border-radius:9px; font-size:18px; font-weight:bold; white-space:pre-wrap;
+              letter-spacing:2px; line-height:1.45; }
+
+.post { background:#FAF5EA; border:1px solid var(--line); border-radius:10px;
+        padding:16px 19px; white-space:pre-wrap; font-size:15.5px; line-height:1.85; }
+.ig-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.ig-grid div { border-radius:9px; padding:14px 11px; font-size:13px; white-space:pre-wrap;
+               text-align:center; line-height:1.6; min-height:132px; }
+.ig-grid .c0 { color:#fff; font-weight:bold; }
+.ig-grid .cx { background:#FAF5EA; border:1px solid var(--line); }
+
+.cta-box { background:var(--accent-soft); border:1px dashed var(--accent);
+           border-radius:10px; padding:15px 19px; }
+.cta-box code { background:var(--ink); color:#F5E4B8; padding:2px 9px;
+                border-radius:4px; font-size:13px; letter-spacing:1px; }
+
+.todo { margin-top:26px; background:#F7F1E4; border-radius:12px; padding:16px 20px; }
+.todo-hd { font-size:12px; letter-spacing:3px; color:var(--accent); font-weight:bold; margin-bottom:10px; }
+.todo label { display:flex; align-items:center; gap:11px; padding:9px 0; cursor:pointer;
+              font-size:15.5px; border-bottom:1px solid var(--line); }
+.todo label:last-child { border-bottom:none; }
+.todo input { width:21px; height:21px; accent-color:#4A7A3A; cursor:pointer; flex:none; }
+.todo input:checked + span { text-decoration:line-through; color:var(--muted); }
+
+.note { background:#FFF9E8; border-left:4px solid #C99A4E; padding:14px 18px;
+        border-radius:7px; font-size:14px; line-height:1.8; margin-bottom:22px; }
+.nostore { display:none; background:#FFE9E4; border-left:4px solid #A63A2E; padding:13px 17px;
+           border-radius:7px; font-size:14px; line-height:1.8; margin-bottom:18px; color:#6B2A20; }
+
+/* 手機是主要操作場景——拍片、貼提詞器、發文都在手上做，
+   所以這裡不是「縮小版桌機」，按鈕一律放大到拇指按得到（≥44px）。 */
+@media (max-width:640px) {
+  .tone { grid-template-columns:1fr; }
+  .ig-grid { grid-template-columns:repeat(2,1fr); }
+  .tele { font-size:19px; }
+  body { padding:18px 10px 90px; }
+  .guts { padding:4px 16px 20px; }
+  .hd { padding:14px 16px; flex-wrap:wrap; gap:9px; }
+
+  .row { flex-wrap:wrap; align-items:flex-start; }
+  .copy { width:100%; padding:14px 18px; font-size:15px; border-radius:12px; }
+  .todo label { padding:14px 0; font-size:16px; }
+  .todo input { width:26px; height:26px; }
+  .reset { padding:9px 15px; font-size:13px; }
+
+  /* 畫面建議在窄螢幕改成上下兩行，不要被 132px 的第一欄擠爛 */
+  .shots td { display:block; border-bottom:none; padding:3px 0; }
+  .shots td:first-child { width:auto; padding-top:11px; }
+  .shots tr { display:block; border-bottom:1px solid var(--line); padding-bottom:9px; }
+}
+</style></head>
+<body><div class="wrap">
+  <h1>行銷日課</h1>
+  <div class="lede">11 天・2026-10-02 … 2026-10-12　｜　每天一個主題，吃四個通路：短影音 → FB → IG → Threads</div>
+
+  <div class="bar"><div class="bar-row">
+    <span id="tally" style="font-weight:bold;white-space:nowrap;">0 / 11 天完成</span>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <button class="reset" id="reset">清除紀錄</button>
+  </div></div>
+
+  <div class="nostore" id="nostore">
+    <b>這台裝置記不住打勾。</b>瀏覽器把本機儲存擋掉了（無痕視窗，或用 <code>file://</code> 直接開檔案）。
+    打勾在這一次還是會沉底，但關掉頁面就沒了。要留進度請用網址版開。
+  </div>
+
+  <div class="note">
+    <b>怎麼用：</b>每天從最上面那張開始。先拍短影音（提詞器那段直接貼到提詞器 App，<b>刻意不分段</b>，
+    捲動時才不會斷氣），拍完剪完勾第一項；再把 FB／IG／Threads 的文案各自複製貼出去，勾完整張卡自己沉到最後。
+    進度記在這台裝置的瀏覽器裡，關掉再開還在。<br>
+    <b>週三的 FB 不照日課走：</b>週三固定發既有的週更文章預告片（<code>社群貼文/gen_社群貼文.py</code> 那 14 則），
+    日課這則 FB 收成備用稿。短影音／IG／Threads 週三照常，卡片上已經幫你換掉了。
+  </div>
+
+  <div id="days">
+<div class="day" data-day="1">
+  <div class="hd" style="background:#6E8CA8;">
+    <span class="dnum">D1</span>
+    <span>2026-10-02（五）</span>
+    <span class="pill">① 奇葩・打破銷售認知</span>
+    <span class="pill">P｜專業</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">為什麼越會講產品的人，反而越賣不出去？</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele1">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">業務講一百次，不如客戶自己說一次。這叫自我說服。你想想看醫生。好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你講完，自己就已經想拿藥單了。一直介紹產品的是藥商。先問哪裡痛的，才是醫生。真正的高手，不是講最清楚的，是能讓對方自己想通的。　這種當場能用的判斷，我每週寄一封信。留言「問診」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 168 字</span><span>口播約 40 秒</span>
+          <span>封面字：越會講， 越賣不出去</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>前兩句壓低、放慢，像在講一個內行人才知道的事。「這叫自我說服」四個字咬清楚</div><div><b>表情</b>鉤子講完微微停住看鏡頭，不要笑。講到醫生類比才放鬆</div><div><b>背景</b>白牆或書櫃。這支是「專業感」題，背景要乾淨</div><div><b>停頓</b>「這叫自我說服。」後停 1 秒｜「才是醫生。」後停 1 秒再接收口</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉，不插素材。靠表情跟一個停頓撐住前 3 秒</td></tr><tr><td>好醫生那段</td><td>插醫生問診畫面（stock 圖搜「醫生 問診」／診間候診椅）</td></tr><tr><td>藥商 vs 醫生</td><td>左右對比圖：推銷員遞傳單｜醫生拿聽診器。可做成分割畫面</td></tr><tr><td>收口</td><td>回到口播臉，講完停一秒再切 CTA</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">越會講，
+越賣不出去</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb1">複製 FB 文案</button></div>
+      <div class="post">業務講一百次，不如客戶自己說一次。
+
+這件事在心理學有個名字，叫自我說服。意思是：一個人自己說出口的話，對他的影響力，遠遠大於別人跟他講的。
+
+你想想看醫生。
+
+好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他沒有說服你，他只是讓你把自己的狀況講出來。
+
+一直介紹產品的是藥商。先問哪裡痛的，才是醫生。
+
+多數業務訓練教的是反方向：把產品講得更清楚、把優勢講得更完整、把話術練得更順。但你講得越完整，對方的腦袋就越忙著評估你，而不是忙著理解自己的問題。
+
+真正的差別不在你講得好不好，在他有沒有開口。
+
+他開口講自己的狀況那一刻，他就不是在聽你推銷了，他是在整理自己的需求。而人整理完自己的需求，下一步自然是想解決它。
+
+下次見客戶，把你準備好的那三十秒介紹換成一個問題。
+
+然後閉嘴，讓他講。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th1">複製 Threads 文案</button></div>
+      <div class="post">業務講一百次，不如客戶自己說一次。
+
+好醫生不會一坐下就說「你該吃這個藥」。
+他會先問哪裡不舒服、多久了、什麼時候最痛。
+
+你講完，自己就想拿藥單了。
+
+一直介紹產品的是藥商。
+先問哪裡痛的，才是醫生。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc1">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8CA8;">業務講一百次，
+不如客戶自己說一次</div><div class="cx">心理學叫「自我說服」。
+
+一個人自己說出口的話，
+對他的影響力遠遠大於
+別人跟他講的。</div><div class="cx">好醫生不會一坐下就說
+「你該吃這個藥」。
+
+他會先問：
+哪裡不舒服、多久了、
+什麼時候最痛。</div><div class="cx">一直介紹產品的是藥商。
+先問哪裡痛的，才是醫生。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">真正的高手，不是講最清楚的，是能讓對方自己想通的。
+
+多數業務訓練在教你怎麼把話講得更完整。但你講得越完整，對方越忙著評估你，而不是忙著理解自己的問題。
+
+下次見客戶，把那三十秒的介紹換成一個問題，然後閉嘴。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">這種當場能用的判斷，我每週寄一封信。留言「問診」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>問診</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="2">
+  <div class="hd" style="background:#6E8B77;">
+    <span class="dnum">D2</span>
+    <span>2026-10-03（六）</span>
+    <span class="pill">① 奇葩・打破銷售認知</span>
+    <span class="pill">T｜信任</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">客戶說「我考慮一下」，真正的意思是什麼？</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele2">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">客戶說考慮一下，九成不是在拒絕你。是他算不出來。這就像你站在餐廳門口看菜單。你不是不想吃，是不知道點哪個才不會後悔。這時候服務生說「我們什麼都好吃」，你只會更站不住。客戶卡住的時候，要的不是推一把，是一個能比較的標準。他不是在考慮要不要，是在考慮用什麼標準決定。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 180 字</span><span>口播約 43 秒</span>
+          <span>封面字：「考慮一下」 不是拒絕</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>這支要「懂他」的口氣，不是指導的口氣。講「他算不出來」時語氣要軟，像在幫客戶講話</div><div><b>表情</b>從頭到尾放鬆，可以有一點點笑。這支是替客戶說話，不要嚴肅</div><div><b>背景</b>咖啡廳或暖色調場景都可以。這支是「理解」題，背景軟一點</div><div><b>停頓</b>「是他算不出來。」後停 1 秒｜「更站不住」後停半秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉。「是他算不出來」這句後面停半秒</td></tr><tr><td>餐廳菜單</td><td>插站在店門口看菜單的畫面（stock 搜「menu outside restaurant」）</td></tr><tr><td>什麼都好吃</td><td>可配服務生推薦的畫面，或直接打字幕卡</td></tr><tr><td>收口</td><td>口播臉，語速放慢</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">「考慮一下」
+不是拒絕</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb2">複製 FB 文案</button></div>
+      <div class="post">客戶說「我考慮一下」，九成不是在拒絕你。是他算不出來。
+
+這句話在業務圈幾乎被當成禮貌性拒絕的同義詞。但多數時候他是真的在考慮，只是他卡的地方跟你以為的不一樣。
+
+這就像你站在餐廳門口看菜單。
+
+你不是不想吃，是不知道點哪一個才不會後悔。這時候服務生走過來跟你說「我們什麼都好吃」，你只會更站不住——因為他沒有給你任何能比較的東西。
+
+客戶卡住的時候，要的不是推一把，是一個能比較的標準。
+
+他不是在考慮要不要，是在考慮用什麼標準決定。
+
+這兩件事差很多。如果他在考慮要不要，你該做的是加強理由。但如果他是在找標準，你再講十個理由他還是站在門口，因為理由不能拿來比較，標準才可以。
+
+標準長什麼樣子？它通常是一句話，而且能用來排除選項。
+
+「如果你最在意的是售後，那這三個方案只有一個做得到。」
+「如果你半年內要看到變化，那另外兩個都不用考慮。」
+
+你看出來了嗎，標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。
+
+你能幫他的不是催他決定，是讓他知道怎麼決定。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th2">複製 Threads 文案</button></div>
+      <div class="post">「我考慮一下」九成不是在拒絕你。
+是他算不出來。
+
+就像站在餐廳門口看菜單。
+你不是不想吃，是不知道點哪個才不會後悔。
+
+這時候說「我們什麼都好吃」，
+只會讓他更站不住。
+
+他不是在考慮要不要，
+是在考慮用什麼標準決定。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc2">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8B77;">「我考慮一下」
+多數時候他是真的</div><div class="cx">他不是在拒絕你。
+是他算不出來。</div><div class="cx">就像站在餐廳門口看菜單。
+
+服務生說「我們什麼都好吃」，
+你只會更站不住。</div><div class="cx">他不是在考慮要不要。
+是在考慮用什麼標準決定。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">客戶卡住的時候，要的不是推一把，是一個能比較的標準。
+
+標準長什麼樣子？它通常是一句話，而且能用來排除選項。
+「如果你最在意的是售後，那這三個方案只有一個做得到。」
+
+標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。
+
+你能幫他的不是催他決定，是讓他知道怎麼決定。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>標準</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="3">
+  <div class="hd" style="background:#6E8CA8;">
+    <span class="dnum">D3</span>
+    <span>2026-10-04（日）</span>
+    <span class="pill">① 奇葩・打破銷售認知</span>
+    <span class="pill">P｜專業</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">業務最奇怪的現象：講越多，成交率反而越低</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele3">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">超市擺 24 種果醬，賣得比擺 6 種還差。這叫選擇癱瘓。選項越多，人越不敢決定。業務講產品就像在擺果醬架。講了十個優點，客戶記不住十個，他只記得「好複雜」。而複雜的東西，人的本能是先放著。講三個他記得住的，比講十個他聽不完的有用。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 162 字</span><span>口播約 39 秒</span>
+          <span>封面字：講越多， 成交越低</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>鉤子要像在爆料一個冷知識，帶一點「你不知道吧」的興奮感。後半轉成冷靜分析</div><div><b>表情</b>講果醬數字時可以用手比數量（24 跟 6），這支有數字，手勢幫得上</div><div><b>背景</b>白牆。這支靠字幕跟素材，背景越乾淨越好</div><div><b>停頓</b>「這叫選擇癱瘓。」後停 1 秒｜「好複雜」後停半秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>插超市果醬貨架畫面（stock 搜「jam shelf supermarket」）。這是真實研究，可打字幕標「Iyengar &amp; Lepper, 1995」增加可信度</td></tr><tr><td>十個優點</td><td>可配密密麻麻的簡報頁或規格表特寫</td></tr><tr><td>先放著</td><td>插手指滑過手機把訊息滑掉的畫面</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">講越多，
+成交越低</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb3">複製 FB 文案</button></div>
+      <div class="post">超市擺 24 種果醬，賣得比擺 6 種還差。
+
+這是 1995 年一個很有名的研究（Iyengar &amp; Lepper）。研究者在超市擺試吃攤，一次擺 24 種果醬，一次擺 6 種。24 種吸引了更多人停下來試吃，但真正掏錢買的比例，遠低於只擺 6 種的時候。
+
+選項越多，人越不敢決定。這叫選擇癱瘓。
+
+業務講產品就像在擺果醬架。
+
+你講了十個優點，客戶記不住十個。他只記得一件事：好複雜。而複雜的東西，人的本能是先放著。不是不想要，是先放著。等有空再想。然後就沒有再想了。
+
+這裡有個很反直覺的地方：你把產品講得越完整，其實是在增加他的決策成本。你以為你在幫他判斷，實際上你在讓他更難判斷。
+
+講三個他記得住的，比講十個他聽不完的有用。
+
+而且那三個要怎麼挑？不是挑你最自豪的三個，是挑**跟他剛剛講的話有關的**三個。他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。
+
+專業不是把事情講滿，是幫他把事情變簡單。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th3">複製 Threads 文案</button></div>
+      <div class="post">超市擺 24 種果醬，
+賣得比擺 6 種還差。
+
+這叫選擇癱瘓。
+
+業務講產品也一樣。
+講了十個優點，客戶記不住十個，
+他只記得「好複雜」。
+
+而複雜的東西，
+人的本能是先放著。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc3">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8CA8;">擺 24 種果醬，
+賣得比擺 6 種還差</div><div class="cx">選項越多，
+人越不敢決定。
+
+這叫選擇癱瘓。
+（Iyengar &amp; Lepper, 1995）</div><div class="cx">講了十個優點，
+客戶記不住十個。
+
+他只記得「好複雜」。
+
+複雜的東西，
+人的本能是先放著。</div><div class="cx">講三個他記得住的，
+比講十個他聽不完的有用。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">你把產品講得越完整，其實是在增加他的決策成本。
+
+那三個要怎麼挑？不是挑你最自豪的三個，是挑跟他剛剛講的話有關的三個。
+
+他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。
+
+專業不是把事情講滿，是幫他把事情變簡單。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>三個</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="4">
+  <div class="hd" style="background:#6E8CA8;">
+    <span class="dnum">D4</span>
+    <span>2026-10-05（一）</span>
+    <span class="pill">① 奇葩・打破銷售認知</span>
+    <span class="pill">P｜專業</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">客戶嫌貴，千萬不要急著解釋價格</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele4">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。想像你完全不懂車，銷售一直講引擎跟底盤。整場對話裡，唯一一個你看得懂的東西就是價格。所以你只能用價格判斷。客戶嫌貴，多半不是嫌數字大，是他手上沒有別的刻度。這時候解釋價格，等於叫他繼續用那把尺量你。給他一把新的尺，貴這件事自己就不見了。　想知道自己是哪一塊讓客戶只能看價格？留言「健檢」，我把連結給你。</div>
+        <div class="tele-meta"><span>約 175 字</span><span>口播約 42 秒</span>
+          <span>封面字：嫌貴， 不是嫌數字</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>這支要「幫他想」的口氣。講不懂車那段用第二人稱帶觀眾進去，讓他真的感覺到那個無力</div><div><b>表情</b>講「唯一看得懂的就是價格」時可以攤手，那是無奈不是抱怨</div><div><b>背景</b>白牆或簡單辦公場景</div><div><b>停頓</b>「所以他只能嫌貴。」後停 1 秒｜「沒有別的刻度」後停半秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>插車商展示間畫面，或價格標籤特寫</td></tr><tr><td>引擎底盤</td><td>插引擎蓋打開的畫面（刻意讓觀眾也看不懂）</td></tr><tr><td>那把尺</td><td>插捲尺或量尺特寫，收口時再出現一次</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">嫌貴，
+不是嫌數字</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb4">複製 FB 文案</button></div>
+      <div class="post">不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。
+
+想像你完全不懂車，走進展示間。銷售很熱心，講引擎、講底盤、講懸吊系統、講安全配備。他講得很好，但你一句都接不上。
+
+整場對話裡，唯一一個你完全看得懂的東西就是價格。
+
+所以你只能用價格判斷。不是因為你小氣，是因為那是你手上唯一的刻度。
+
+顧問、教練、設計、保險、諮詢都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。他不是不想認真判斷，是手上沒有別的尺。
+
+沒有對照的時候，任何數字都只是大。
+
+所以「客戶嫌貴」翻譯過來通常是：我還不知道這筆錢會換到什麼。
+
+這時候最糟的動作是解釋價格。你一解釋，等於叫他繼續用那把尺量你——而那把尺上面只有數字，沒有價值。
+
+要做的是給他一把新的尺。
+
+新的尺可以是時間（三個月後你的狀況會長什麼樣）、可以是對照（做跟不做的差別在哪）、可以是風險（不處理的話最差會怎樣）。任何一把，只要他手上多一個刻度，價格就不再是唯一的判斷依據。
+
+給他一把新的尺，貴這件事自己就不見了。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th4">複製 Threads 文案</button></div>
+      <div class="post">不懂車的人去買車，
+他只看得懂價格。
+
+所以他只能嫌貴。
+
+客戶嫌貴，多半不是嫌數字大，
+是他手上沒有別的刻度。
+
+這時候解釋價格，
+等於叫他繼續用那把尺量你。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc4">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8CA8;">嫌貴，
+不是嫌數字大</div><div class="cx">不懂車的人去買車，
+只看得懂價格。
+
+所以他只能嫌貴。</div><div class="cx">沒有對照的時候，
+任何數字都只是大。
+
+「嫌貴」翻譯過來是：
+我還不知道這筆錢
+會換到什麼。</div><div class="cx">解釋價格，等於叫他
+繼續用那把尺量你。
+
+要做的是給他一把新的尺。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">顧問、教練、設計、保險都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。
+
+他不是不想認真判斷，是手上沒有別的尺。
+
+新的尺可以是時間、可以是對照、可以是風險。只要他手上多一個刻度，價格就不再是唯一的判斷依據。
+
+給他一把新的尺，貴這件事自己就不見了。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">想知道自己是哪一塊讓客戶只能看價格？留言「健檢」，我把連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>影響力健檢</b>　｜　關鍵字 <code>健檢</code>　｜　影響力健檢（ATPI 測驗）
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="5">
+  <div class="hd" style="background:#C6603A;">
+    <span class="dnum">D5</span>
+    <span>2026-10-06（二）</span>
+    <span class="pill">① 奇葩・打破銷售認知</span>
+    <span class="pill">A｜吸引</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">外行人才一直介紹產品，高手都在做這件事</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele5">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。這就像好的健身教練。他不會一見面就賣課，他會先問你平常怎麼吃、怎麼睡。如果你一週只來一次又不肯改飲食，他會跟你說實話。因為他知道，接錯客戶比少接一個客戶更傷。外行人在推銷，高手在挑人。挑人不是傲氣，是你對結果負責。　你現在是在推銷還是在挑人？留言「挑人」，我把影響力健檢給你。</div>
+        <div class="tele-meta"><span>約 164 字</span><span>口播約 39 秒</span>
+          <span>封面字：高手不推銷， 高手挑人</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>這支最需要底氣。整支是在講「可以挑客戶」，語氣要穩、不能有炫耀感。收口那句最重要，放慢</div><div><b>表情</b>鉤子講完可以輕輕點頭，像在確認一件自己相信的事</div><div><b>背景</b>書櫃或有質感的空間。這支講的是立場，背景要撐得住</div><div><b>停頓</b>「是這個客戶要不要接。」後停 1.5 秒（這句反差最大）｜收口前停 1 秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉。這句反差大，靠表情</td></tr><tr><td>健身教練</td><td>插教練與學員對談的畫面（不是在練，是在聊）</td></tr><tr><td>說實話</td><td>可配兩人面對面坐著的畫面</td></tr><tr><td>收口</td><td>口播臉，這句是骨層句，語速放慢</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">高手不推銷，
+高手挑人</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb5">複製 FB 文案</button></div>
+      <div class="post">頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。
+
+這句話第一次聽會覺得很傲。但你看任何領域的高手，都是這樣運作的。
+
+這就像好的健身教練。
+
+他不會一見面就賣課。他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只能來一次，又不肯調整飲食，好的教練會跟你說實話：這樣練，三個月後你會失望，然後你會覺得是我不行。
+
+因為他知道，接錯客戶比少接一個客戶更傷。
+
+一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。
+
+外行人在推銷，高手在挑人。
+
+挑人聽起來像在篩掉別人，實際上是在保護兩件事：保護對方不要花錯錢，保護自己的交付品質撐得住。
+
+而且有個反效果很有趣——當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況；而你一問，他就感覺到你在評估合不合，不是在求成交。
+
+那個瞬間，位置就換了。
+
+挑人不是傲氣，是你對結果負責。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th5">複製 Threads 文案</button></div>
+      <div class="post">頂級業務見客戶，
+想的不是怎麼成交。
+
+是這個客戶要不要接。
+
+好教練不會一見面就賣課，
+他會先問你平常怎麼吃、怎麼睡。
+
+因為接錯客戶，
+比少接一個客戶更傷。
+
+外行人在推銷，高手在挑人。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc5">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#C6603A;">高手不推銷，
+高手挑人</div><div class="cx">頂級業務見客戶，
+想的不是怎麼成交。
+
+是這個客戶要不要接。</div><div class="cx">好教練不會一見面就賣課。
+
+他會先問你
+平常怎麼吃、怎麼睡。
+
+因為接錯客戶，
+比少接一個客戶更傷。</div><div class="cx">外行人在推銷，
+高手在挑人。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。
+
+有個反效果很有趣：當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況。
+
+他會感覺到你在評估合不合，不是在求成交。那個瞬間，位置就換了。
+
+挑人不是傲氣，是你對結果負責。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">你現在是在推銷還是在挑人？留言「挑人」，我把影響力健檢給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>影響力健檢</b>　｜　關鍵字 <code>挑人</code>　｜　影響力健檢（ATPI 測驗）
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="6">
+  <div class="hd" style="background:#6E8B77;">
+    <span class="dnum">D6</span>
+    <span>2026-10-07（三）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">T｜信任</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">最讓客戶反感的 5 句銷售話術</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele6">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">有五句話業務天天在講，客戶天天在心裡扣分。第一句，「我跟你說實話」。客戶會想：那你前面講的是什麼。第二句，「這個我幫很多人做過」。他想：所以我只是第幾個。第三句最毒，「相信我」。這就像相親第一次見面就說，嫁給我不會後悔。信任是結果，不是要求來的。這三句都在要他給，沒有一句在給他。　剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 171 字</span><span>口播約 41 秒</span>
+          <span>封面字：這 5 句， 客戶在心裡扣分</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>這支是流量題，節奏要快。三句話術逐句點出來時語氣要帶一點戲謔，講到「相信我」可以稍微誇張</div><div><b>表情</b>鉤子時手比「五」。講相親類比那句一定要笑，那是全片最輕鬆的點</div><div><b>背景</b>白牆。這支靠字幕卡節奏，背景不要搶</div><div><b>停頓</b>每句話術唸完停半秒讓字幕上｜「嫁給我不會後悔」後停 1 秒（等觀眾笑）</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉，手指做「五」的手勢</td></tr><tr><td>逐句</td><td>每句打一張字幕卡，用刪除線劃掉。這段靠字幕節奏，不用素材</td></tr><tr><td>相親</td><td>插相親／第一次約會尷尬的畫面，這是全片最好笑的點</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">這 5 句，
+客戶在心裡扣分</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <span class="tag-wed">週三　走既有週更文</span></div>
+      <div class="wed-box">
+        今天 FB 發 <b>週更文章預告片</b>，不是日課這則——文案在電腦的
+        <code>社群貼文/_社群貼文總覽.html</code>（<code>gen_社群貼文.py</code> 那 14 則）。
+        短影音／IG／Threads 照常。
+      </div>
+      <details class="spare"><summary>日課這則 FB 長文（備用稿，今天不發）</summary>
+        <div class="row" style="margin-top:12px;"><div class="lbl" style="margin:0;">備用</div>
+          <button class="copy" data-src="fb6">複製備用稿</button></div>
+        <div class="post">有五句話業務天天在講，客戶天天在心裡扣分。
+
+第一句，「我跟你說實話」。
+
+這句話的問題是，客戶會立刻想：那你前面講的是什麼？你本來就該講實話，特別強調反而暴露了前面可能沒有。
+
+第二句，「這個我幫很多人做過」。
+
+你想證明經驗，但他聽到的是：所以我只是第幾個。他不想當第幾個，他想當那個你特別在意的。經驗要證明，但要用他的狀況來證明，不是用數量。
+
+第三句最毒，「相信我」。
+
+這就像相親第一次見面就說，嫁給我不會後悔。
+
+信任是結果，不是要求來的。你越講相信我，對方越會想：為什麼你需要我相信你？真正讓人放心的人，從來不用開口要。
+
+這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。
+
+而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。
+
+這三句都在要他給，沒有一句在給他。</div>
+      </details>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th6">複製 Threads 文案</button></div>
+      <div class="post">三句業務天天在講、
+客戶天天在心裡扣分的話：
+
+「我跟你說實話」
+→ 那你前面講的是什麼
+
+「這個我幫很多人做過」
+→ 所以我只是第幾個
+
+「相信我」
+→ 這就像相親第一次見面
+　 就說嫁給我不會後悔
+
+信任是結果，不是要求來的。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc6">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8B77;">這 5 句，
+客戶在心裡扣分</div><div class="cx">①「我跟你說實話」
+→ 那你前面講的是什麼？
+
+②「這個我幫很多人做過」
+→ 所以我只是第幾個。</div><div class="cx">③ 最毒的是「相信我」。
+
+這就像相親第一次見面就說
+「嫁給我不會後悔」。</div><div class="cx">信任是結果，
+不是要求來的。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。
+
+而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。
+
+真正讓人放心的人，從來不用開口要。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>話術</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 週更文發出去（既有那則）</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="7">
+  <div class="hd" style="background:#C6603A;">
+    <span class="dnum">D7</span>
+    <span>2026-10-08（四）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">A｜吸引</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">客戶一聽就想跑的開場白</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele7">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">「只耽誤您三分鐘」這句一出口，三分鐘就沒了。因為這句等於先承認，我接下來要講的事對你沒好處。你想想，有人跟你說「借我三分鐘讓你多賺一百萬」，他會先道歉嗎？開場就道歉，對方第一個反應不是給你時間，是想辦法脫身。好的開場不用求時間。它會讓對方自己想多聽一句。你不需要客戶的三分鐘。你需要他的好奇。　不知道自己哪一塊讓人想跑？留言「開場」，我把影響力健檢給你。</div>
+        <div class="tele-meta"><span>約 176 字</span><span>口播約 42 秒</span>
+          <span>封面字：這句開場， 三分鐘就沒了</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>鉤子要帶點好笑的無奈。中段那個反問（會先道歉嗎）語氣要上揚，讓觀眾自己答</div><div><b>表情</b>講「只耽誤您三分鐘」時可以模仿那種哈腰的樣子，一秒就好，不要演過頭</div><div><b>背景</b>白牆或戶外都可以。這支輕鬆</div><div><b>停頓</b>「三分鐘就沒了。」後停 1 秒｜「他會先道歉嗎？」後停 1.5 秒（留給觀眾想）</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>插手機掛電話／關門的畫面，一秒就好</td></tr><tr><td>道歉</td><td>可配鞠躬哈腰的畫面，或純字幕</td></tr><tr><td>想辦法脫身</td><td>插看手錶、眼神飄開的特寫</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">這句開場，
+三分鐘就沒了</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb7">複製 FB 文案</button></div>
+      <div class="post">「只耽誤您三分鐘」這句一出口，三分鐘就沒了。
+
+因為這句話等於先承認：我接下來要講的事，對你沒好處。
+
+你想想，有人跟你說「借我三分鐘，讓你多賺一百萬」，他會先道歉嗎？
+
+不會。他會直接講那一百萬。
+
+開場就道歉，傳遞的訊息是「我知道我在打擾你」。而對方收到這個訊息之後，第一個反應不是給你時間，是想辦法脫身——因為你已經幫他定義了這場對話的性質：這是一個打擾。
+
+好的開場不用求時間。
+
+它的結構通常是：先講一件跟他有關的事，然後停住。
+
+「我看到你們上個月開了第三家分店。」停。
+「我剛從你同業那邊過來，他提到一個你可能也會遇到的狀況。」停。
+
+那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。
+
+你不需要客戶的三分鐘。你需要他的好奇。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th7">複製 Threads 文案</button></div>
+      <div class="post">「只耽誤您三分鐘」
+這句一出口，三分鐘就沒了。
+
+因為它等於先承認：
+我要講的事對你沒好處。
+
+你想想，有人說
+「借我三分鐘讓你多賺一百萬」，
+他會先道歉嗎？
+
+好的開場不用求時間。
+它會讓對方自己想多聽一句。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc7">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#C6603A;">這句開場，
+三分鐘就沒了</div><div class="cx">「只耽誤您三分鐘」
+
+這句等於先承認：
+我要講的事對你沒好處。</div><div class="cx">有人跟你說
+「借我三分鐘讓你多賺一百萬」，
+
+他會先道歉嗎？</div><div class="cx">好的開場不用求時間。
+
+它會讓對方
+自己想多聽一句。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">開場就道歉，傳遞的訊息是「我知道我在打擾你」。對方收到之後，第一個反應不是給你時間，是想辦法脫身。
+
+好的開場結構通常是：先講一件跟他有關的事，然後停住。
+
+那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。
+
+你不需要客戶的三分鐘。你需要他的好奇。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">不知道自己哪一塊讓人想跑？留言「開場」，我把影響力健檢給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>影響力健檢</b>　｜　關鍵字 <code>開場</code>　｜　影響力健檢（ATPI 測驗）
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="8">
+  <div class="hd" style="background:#C99A4E;">
+    <span class="dnum">D8</span>
+    <span>2026-10-09（五）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">I｜推進</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">最容易把訂單聊死的一句話</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele8">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">「有需要再跟我說」這句一講完，訂單就死了。因為這句把決定權整個丟回去，而對方本來就不想做決定。這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。他不會覺得你尊重他，他會覺得你沒有在幫他。客戶要的不是空間，是一個下一步。下一步不用大，但要具體。給他一個小動作，比給他一個大空間有用。　那個下一步要怎麼給，我寫在信裡。留言「下一步」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 178 字</span><span>口播約 42 秒</span>
+          <span>封面字：這句講完， 訂單就死了</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>鉤子要果斷，「訂單就死了」不要含糊。中段帶朋友吃飯那段轉成生活化口氣</div><div><b>表情</b>講「都可以，你決定」時聳肩，那個動作本身就是笑點</div><div><b>背景</b>白牆或咖啡廳</div><div><b>停頓</b>「訂單就死了。」後停 1 秒｜「你沒有在幫他」後停半秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉。「訂單就死了」後面停一秒</td></tr><tr><td>帶朋友吃飯</td><td>插兩人站在街上看店家猶豫的畫面</td></tr><tr><td>都可以你決定</td><td>打字幕卡，可加聳肩的畫面</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">這句講完，
+訂單就死了</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb8">複製 FB 文案</button></div>
+      <div class="post">「有需要再跟我說」這句一講完，訂單就死了。
+
+因為這句把決定權整個丟回去，而對方本來就不想做決定。
+
+這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。
+
+他不會覺得你尊重他。他會覺得你沒有在幫他。
+
+客戶要的不是空間，是一個下一步。
+
+很多業務把「不逼客戶」理解成「不給方向」，結果變成每次對話都在原地結束。但不逼跟不給方向是兩件事。不逼是不替他做決定，不給方向是連選項都不給。
+
+下一步不用大，但要具體。
+
+「我這週五把那兩個方案的差別整理一張表給你，你看完再決定要不要約。」
+「你剛提到交期是關鍵，我回去確認最快能到什麼時候，明天回你。」
+
+你看出來了嗎，這兩句都沒有在推成交。它們只做一件事：讓這場對話有下一個明確的時間點。
+
+有時間點，關係就還活著。沒有時間點，就算他有興趣，也會被下週的事情蓋過去。
+
+給他一個小動作，比給他一個大空間有用。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th8">複製 Threads 文案</button></div>
+      <div class="post">「有需要再跟我說」
+這句一講完，訂單就死了。
+
+就像帶朋友吃飯，
+他問你哪家好，
+你說「都可以，你決定」。
+
+他不會覺得你尊重他。
+他會覺得你沒有在幫他。
+
+客戶要的不是空間，
+是一個下一步。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc8">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#C99A4E;">這句講完，
+訂單就死了</div><div class="cx">「有需要再跟我說」
+
+這句把決定權整個丟回去，
+而對方本來就不想做決定。</div><div class="cx">就像帶朋友吃飯，
+他問你哪家好，
+你說「都可以，你決定」。
+
+他不會覺得你尊重他，
+他會覺得你沒有在幫他。</div><div class="cx">客戶要的不是空間，
+是一個下一步。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">很多人把「不逼客戶」理解成「不給方向」，結果每次對話都在原地結束。
+
+不逼是不替他做決定，不給方向是連選項都不給。這是兩件事。
+
+下一步不用大，但要具體：
+「我這週五整理一張表給你，你看完再決定要不要約。」
+
+有時間點，關係就還活著。
+
+給他一個小動作，比給他一個大空間有用。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">那個下一步要怎麼給，我寫在信裡。留言「下一步」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>下一步</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="9">
+  <div class="hd" style="background:#6E8CA8;">
+    <span class="dnum">D9</span>
+    <span>2026-10-10（六）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">P｜專業</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">自以為很專業，其實一直在趕客人的業務</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele9">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">術語講越多，客戶聽到的不是專業。是「我不懂」。你想想去修車。師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但不知道該不該修。他如果說「你停紅燈車會抖，就是這個」，你立刻懂。同一件事，一個把人推遠，一個把人拉近。專業不是用什麼字，是對方聽完有沒有畫面。能把難的事講成人話，才是真的懂。　想知道自己講的是專業還是術語？留言「人話」，我把影響力健檢給你。</div>
+        <div class="tele-meta"><span>約 173 字</span><span>口播約 41 秒</span>
+          <span>封面字：術語講越多， 客人跑越快</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>這支是對照題，兩句話要有明顯的語氣差。講術語那句刻意念快念平，講人話那句放慢放亮</div><div><b>表情</b>念術語時表情僵一點（模仿那種專業臉），換成人話時表情鬆開。對比就出來了</div><div><b>背景</b>白牆。這支靠語氣對比，不要讓背景分心</div><div><b>停頓</b>「是『我不懂』。」後停 1 秒｜兩句修車對照之間停半秒讓觀眾比較</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉</td></tr><tr><td>修車</td><td>插修車廠引擎蓋打開的畫面（真實新聞或 stock 都可）</td></tr><tr><td>停紅燈車會抖</td><td>插車內儀表板／紅燈特寫，這句是全片轉折</td></tr><tr><td>收口</td><td>口播臉，語速放慢</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">術語講越多，
+客人跑越快</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb9">複製 FB 文案</button></div>
+      <div class="post">術語講越多，客戶聽到的不是專業。是「我不懂」。
+
+你想想去修車。
+
+師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但完全不知道該不該修、修了會怎樣、不修會怎樣。
+
+但他如果說「你停紅燈的時候車會抖，就是這個」，你立刻懂。
+
+同一件事，一個把人推遠，一個把人拉近。
+
+差別在哪？第二句裡面有一個你親身經歷過的畫面。你真的在紅燈前抖過，所以那句話一講，你的身體先懂了，腦袋才跟上。
+
+專業不是用什麼字，是對方聽完有沒有畫面。
+
+很多人把術語當成專業的證明。但術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離——而距離一出現，他就開始用別的東西判斷你，通常是價格。
+
+要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？
+
+「喔」是禮貌。「對，我就是這樣」才是聽懂了。
+
+能把難的事講成人話，才是真的懂。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th9">複製 Threads 文案</button></div>
+      <div class="post">術語講越多，
+客戶聽到的不是專業。
+是「我不懂」。
+
+「節氣門積碳導致怠速不穩」
+→ 你只會點頭
+
+「你停紅燈車會抖，就是這個」
+→ 你立刻懂
+
+同一件事，
+一個把人推遠，一個把人拉近。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc9">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8CA8;">術語講越多，
+客人跑越快</div><div class="cx">「節氣門積碳導致怠速不穩」
+→ 你只會點頭，
+　 但不知道該不該修。</div><div class="cx">「你停紅燈車會抖，
+　就是這個」
+→ 你立刻懂。
+
+同一件事，
+一個把人推遠，
+一個把人拉近。</div><div class="cx">專業不是用什麼字，
+是對方聽完有沒有畫面。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離。而距離一出現，他就開始用別的東西判斷你，通常是價格。
+
+要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？
+
+「喔」是禮貌。「對，我就是這樣」才是聽懂了。
+
+能把難的事講成人話，才是真的懂。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">想知道自己講的是專業還是術語？留言「人話」，我把影響力健檢給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>影響力健檢</b>　｜　關鍵字 <code>人話</code>　｜　影響力健檢（ATPI 測驗）
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="10">
+  <div class="hd" style="background:#6E8CA8;">
+    <span class="dnum">D10</span>
+    <span>2026-10-11（日）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">P｜專業</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">客戶說「太貴了」，最差的回答就是這一句</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele10">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">客戶說太貴，最爛的回答是「我幫你問折扣」。一講折扣，就等於承認原價是喊的。這就像在菜市場問一顆多少，老闆馬上說算你便宜。你第一個念頭不是賺到，是剛剛那個價是不是在騙我。折扣不會讓他覺得划算，會讓他重新懷疑整件事。他說貴，是在問值不值得，不是在問能不能少。他問的是值不值得。回答那個問題就好。　那該怎麼回，我寫在信裡。留言「報價」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 173 字</span><span>口播約 41 秒</span>
+          <span>封面字：回這句， 等於承認原價是喊的</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>鉤子要直接點名那句爛回答，語氣肯定。菜市場那段轉成生活化、帶點好笑</div><div><b>表情</b>講「算你便宜」時可以模仿老闆的語氣，一秒。講「是不是在騙我」時皺眉</div><div><b>背景</b>白牆。如果有菜市場的實景素材更好，但口播背景乾淨就夠</div><div><b>停頓</b>「我幫你問折扣」後停 1 秒｜「是不是在騙我」後停半秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>純口播臉</td></tr><tr><td>菜市場</td><td>插菜市場喊價的畫面（真實新聞片段最好，台灣市場很好找）</td></tr><tr><td>是不是在騙我</td><td>插懷疑表情的特寫，或打問號字幕</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">回這句，
+等於承認原價是喊的</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb10">複製 FB 文案</button></div>
+      <div class="post">客戶說太貴，最爛的回答是「我幫你問折扣」。
+
+因為你一講折扣，就等於承認原價是喊的。
+
+這就像你在菜市場問一顆多少，老闆馬上說算你便宜。
+
+你第一個念頭不是賺到，是剛剛那個價是不是在騙我。
+
+折扣不會讓他覺得划算，會讓他重新懷疑整件事。而且更麻煩的是，你一旦降過一次，之後每一次報價他都會先預設還有空間——你永遠回不到原價了。
+
+他說貴，是在問值不值得，不是在問能不能少。
+
+這兩個問題要用完全不同的方式回。
+
+「能不能少」是價格問題，回答它要談條件。
+「值不值得」是價值問題，回答它要談結果。
+
+而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。
+
+所以該做的是把結果講清楚，不是把價格降下來。
+
+「如果三個月後你的狀況沒有變化，這筆錢確實不值得。所以我想先確認一件事——你現在最想改變的是哪一塊？」
+
+這句話沒有解釋價格，也沒有降價。它做的是把對話從數字拉回到結果。
+
+他問的是值不值得。回答那個問題就好。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th10">複製 Threads 文案</button></div>
+      <div class="post">客戶說太貴，
+最爛的回答是「我幫你問折扣」。
+
+一講折扣，
+就等於承認原價是喊的。
+
+就像在菜市場問一顆多少，
+老闆馬上說算你便宜。
+
+你第一個念頭不是賺到，
+是剛剛那價是不是在騙我。
+
+他說貴，是在問值不值得，
+不是在問能不能少。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc10">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#6E8CA8;">回這句，等於承認
+原價是喊的</div><div class="cx">客戶說太貴，
+最爛的回答是
+「我幫你問折扣」。</div><div class="cx">就像在菜市場問一顆多少，
+老闆馬上說算你便宜。
+
+你第一個念頭不是賺到，
+是剛剛那價是不是在騙我。</div><div class="cx">他說貴，是在問值不值得，
+不是在問能不能少。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">「能不能少」是價格問題，回答它要談條件。
+「值不值得」是價值問題，回答它要談結果。
+
+而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。
+
+而且你一旦降過一次，之後每次報價他都會先預設還有空間。你永遠回不到原價了。
+
+他問的是值不值得。回答那個問題就好。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">那該怎麼回，我寫在信裡。留言「報價」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>報價</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="day" data-day="11">
+  <div class="hd" style="background:#C99A4E;">
+    <span class="dnum">D11</span>
+    <span>2026-10-12（一）</span>
+    <span class="pill">④ 最差・🔥 衝流量</span>
+    <span class="pill">I｜推進</span>
+  </div>
+  <div class="guts">
+    <div class="ttl">最沒必要做的銷售動作，可能天天都在做</div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">提詞器（整段不分段・直接貼）</div>
+        <button class="copy" data-src="tele11">複製提詞器文案</button></div>
+      <div class="tele-box">
+        <div class="tele">成交率最低的動作，是傳一堆資料給客戶看。你想想，有人傳給你十頁PDF，你會認真看嗎？資料傳過去那一刻，事情就從你身上變成他的作業。他不會做作業，他會把訊息往上滑掉。給資料是把球丟回去，給判斷才是接住他。一句「你最在意哪一塊，我直接幫你看」，比十頁有用。別讓他回去做功課。那是你的工作。　該給什麼不該給什麼，我寫在信裡。留言「資料」，我把訂閱連結給你。</div>
+        <div class="tele-meta"><span>約 174 字</span><span>口播約 41 秒</span>
+          <span>封面字：這個動作， 成交率最低</span></div>
+      </div>
+
+      <div class="lbl">語氣與背景</div>
+      <div class="tone"><div><b>語氣</b>鉤子要像在點破一個大家都在做的事。「他會把訊息往上滑掉」要輕描淡寫，那個殘酷感自己會出來</div><div><b>表情</b>講滑掉時可以真的做滑手機的動作</div><div><b>背景</b>白牆或書桌場景（有筆電更搭）</div><div><b>停頓</b>「傳一堆資料給客戶看。」後停 1 秒｜「往上滑掉」後停 1 秒</div></div>
+
+      <div class="lbl">畫面建議（純口播也能跑，素材是加分）</div>
+      <table class="shots"><tr><td>鉤子</td><td>插手機收到一堆檔案的畫面</td></tr><tr><td>十頁 PDF</td><td>插長長的 PDF 快速滑動畫面，滑到看不完</td></tr><tr><td>往上滑掉</td><td>插手指滑掉訊息的特寫</td></tr><tr><td>收口</td><td>口播臉</td></tr></table>
+
+      <div class="lbl">封面字（Reels／Shorts 縮圖）</div>
+      <div class="cover-chip">這個動作，
+成交率最低</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>二　發文</b><span>同一個主題，三個通路</span></div>
+
+      <div class="row"><div class="lbl" style="margin:0;">Facebook</div>
+        <button class="copy" data-src="fb11">複製 FB 文案</button></div>
+      <div class="post">成交率最低的動作，是傳一堆資料給客戶看。
+
+你想想，有人傳給你十頁 PDF，你會認真看嗎？
+
+資料傳過去那一刻，事情就從你身上變成他的作業。
+
+而他不會做作業。他會把那則訊息往上滑掉，然後想著「晚點看」。那個晚點永遠不會來。
+
+這件事之所以這麼多人在做，是因為它讓人很安心——我有行動、我有給東西、我很專業。但安心的是你，不是他。
+
+給資料是把球丟回去，給判斷才是接住他。
+
+資料跟判斷差在哪？資料是「這裡有六個方案的完整比較」，判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。
+
+前者要他花力氣，後者幫他省力氣。
+
+而且判斷才是你真正的價值。同樣的資料客戶自己上網也查得到，他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。你把資料丟過去，等於把自己的價值也一起丟掉了。
+
+一句「你最在意哪一塊，我直接幫你看」，比十頁有用。
+
+別讓他回去做功課。那是你的工作。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Threads</div>
+        <button class="copy" data-src="th11">複製 Threads 文案</button></div>
+      <div class="post">成交率最低的動作，
+是傳一堆資料給客戶看。
+
+有人傳給你十頁 PDF，
+你會認真看嗎？
+
+資料傳過去那一刻，
+事情就從你身上變成他的作業。
+
+而他不會做作業。
+他會把訊息往上滑掉。
+
+給資料是把球丟回去，
+給判斷才是接住他。</div>
+
+      <div class="row" style="margin-top:20px;"><div class="lbl" style="margin:0;">Instagram 四格圖卡</div>
+        <button class="copy" data-src="igc11">複製 IG 說明欄</button></div>
+      <div class="ig-grid">
+        <div class="c0" style="background:#C99A4E;">這個動作，
+成交率最低</div><div class="cx">有人傳給你十頁 PDF，
+你會認真看嗎？</div><div class="cx">資料傳過去那一刻，
+事情就從你身上
+變成他的作業。
+
+而他不會做作業。
+他會把訊息往上滑掉。</div><div class="cx">給資料是把球丟回去，
+給判斷才是接住他。</div>
+      </div>
+      <div class="post" style="margin-top:9px;">這件事之所以這麼多人在做，是因為它讓人很安心。我有行動、我有給東西、我很專業。但安心的是你，不是他。
+
+資料是「這裡有六個方案的完整比較」。
+判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。
+
+同樣的資料客戶自己上網也查得到。他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。
+
+別讓他回去做功課。那是你的工作。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hd"><b>三　CTA</b><span>ManyChat 留言關鍵字</span></div>
+      <div class="cta-box">
+        <div style="font-size:15.5px;line-height:1.75;">該給什麼不該給什麼，我寫在信裡。留言「資料」，我把訂閱連結給你。</div>
+        <div style="margin-top:11px;font-size:12.5px;color:#8A7E6D;">
+          誘餌 <b>電子信</b>　｜　關鍵字 <code>資料</code>　｜　每週一封信，一次一個當場能用的判斷
+        </div>
+      </div>
+    </div>
+
+    <div class="todo">
+      <div class="todo-hd">今天做完了嗎</div>
+      <label><input type="checkbox"><span>短影音拍完＋剪完＋上架</span></label>
+      <label><input type="checkbox"><span>Instagram 圖卡＋說明欄發出去</span></label>
+      <label><input type="checkbox"><span>Facebook 長文發出去</span></label>
+      <label><input type="checkbox"><span>Threads 短文發出去</span></label>
+    </div>
+  </div>
+</div>
+</div>
+</div><script>
+const KEY = 'marketing-daily-v1';
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } };
+// save 一定要包起來：手機用無痕視窗或 file:// 開，localStorage 會直接丟例外，
+// 沒包的話每次打勾都炸在這裡，整頁的排序跟進度條就停住了。
+let warned = false;
+function save(s) {
+  try { localStorage.setItem(KEY, JSON.stringify(s)); }
+  catch (e) {
+    if (!warned) { warned = true; document.getElementById('nostore').style.display = 'block'; }
+  }
+}
+
+// 要複製的原文走 JSON，不走 HTML 屬性——屬性裡的換行會被正規化，貼出去會變一整段
+const DATA = {"tele1": "業務講一百次，不如客戶自己說一次。這叫自我說服。你想想看醫生。好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你講完，自己就已經想拿藥單了。一直介紹產品的是藥商。先問哪裡痛的，才是醫生。真正的高手，不是講最清楚的，是能讓對方自己想通的。　這種當場能用的判斷，我每週寄一封信。留言「問診」，我把訂閱連結給你。", "fb1": "業務講一百次，不如客戶自己說一次。\n\n這件事在心理學有個名字，叫自我說服。意思是：一個人自己說出口的話，對他的影響力，遠遠大於別人跟他講的。\n\n你想想看醫生。\n\n好醫生不會一坐下就說：你該吃這個藥。他會先問，哪裡不舒服、多久了、什麼時候最痛。你一句一句講完，自己就已經想拿藥單了。他沒有說服你，他只是讓你把自己的狀況講出來。\n\n一直介紹產品的是藥商。先問哪裡痛的，才是醫生。\n\n多數業務訓練教的是反方向：把產品講得更清楚、把優勢講得更完整、把話術練得更順。但你講得越完整，對方的腦袋就越忙著評估你，而不是忙著理解自己的問題。\n\n真正的差別不在你講得好不好，在他有沒有開口。\n\n他開口講自己的狀況那一刻，他就不是在聽你推銷了，他是在整理自己的需求。而人整理完自己的需求，下一步自然是想解決它。\n\n下次見客戶，把你準備好的那三十秒介紹換成一個問題。\n\n然後閉嘴，讓他講。", "th1": "業務講一百次，不如客戶自己說一次。\n\n好醫生不會一坐下就說「你該吃這個藥」。\n他會先問哪裡不舒服、多久了、什麼時候最痛。\n\n你講完，自己就想拿藥單了。\n\n一直介紹產品的是藥商。\n先問哪裡痛的，才是醫生。", "igc1": "真正的高手，不是講最清楚的，是能讓對方自己想通的。\n\n多數業務訓練在教你怎麼把話講得更完整。但你講得越完整，對方越忙著評估你，而不是忙著理解自己的問題。\n\n下次見客戶，把那三十秒的介紹換成一個問題，然後閉嘴。", "tele2": "客戶說考慮一下，九成不是在拒絕你。是他算不出來。這就像你站在餐廳門口看菜單。你不是不想吃，是不知道點哪個才不會後悔。這時候服務生說「我們什麼都好吃」，你只會更站不住。客戶卡住的時候，要的不是推一把，是一個能比較的標準。他不是在考慮要不要，是在考慮用什麼標準決定。你能幫他的不是催他決定，是讓他知道怎麼決定。　怎麼給標準我寫在信裡。留言「標準」，我把訂閱連結給你。", "fb2": "客戶說「我考慮一下」，九成不是在拒絕你。是他算不出來。\n\n這句話在業務圈幾乎被當成禮貌性拒絕的同義詞。但多數時候他是真的在考慮，只是他卡的地方跟你以為的不一樣。\n\n這就像你站在餐廳門口看菜單。\n\n你不是不想吃，是不知道點哪一個才不會後悔。這時候服務生走過來跟你說「我們什麼都好吃」，你只會更站不住——因為他沒有給你任何能比較的東西。\n\n客戶卡住的時候，要的不是推一把，是一個能比較的標準。\n\n他不是在考慮要不要，是在考慮用什麼標準決定。\n\n這兩件事差很多。如果他在考慮要不要，你該做的是加強理由。但如果他是在找標準，你再講十個理由他還是站在門口，因為理由不能拿來比較，標準才可以。\n\n標準長什麼樣子？它通常是一句話，而且能用來排除選項。\n\n「如果你最在意的是售後，那這三個方案只有一個做得到。」\n「如果你半年內要看到變化，那另外兩個都不用考慮。」\n\n你看出來了嗎，標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。\n\n你能幫他的不是催他決定，是讓他知道怎麼決定。", "th2": "「我考慮一下」九成不是在拒絕你。\n是他算不出來。\n\n就像站在餐廳門口看菜單。\n你不是不想吃，是不知道點哪個才不會後悔。\n\n這時候說「我們什麼都好吃」，\n只會讓他更站不住。\n\n他不是在考慮要不要，\n是在考慮用什麼標準決定。", "igc2": "客戶卡住的時候，要的不是推一把，是一個能比較的標準。\n\n標準長什麼樣子？它通常是一句話，而且能用來排除選項。\n「如果你最在意的是售後，那這三個方案只有一個做得到。」\n\n標準不是在推銷你的東西，是在幫他縮小範圍。範圍一縮小，他自己就決定了。\n\n你能幫他的不是催他決定，是讓他知道怎麼決定。", "tele3": "超市擺 24 種果醬，賣得比擺 6 種還差。這叫選擇癱瘓。選項越多，人越不敢決定。業務講產品就像在擺果醬架。講了十個優點，客戶記不住十個，他只記得「好複雜」。而複雜的東西，人的本能是先放著。講三個他記得住的，比講十個他聽不完的有用。專業不是把事情講滿，是幫他把事情變簡單。　那三個該講什麼，我寫在信裡。留言「三個」，我把訂閱連結給你。", "fb3": "超市擺 24 種果醬，賣得比擺 6 種還差。\n\n這是 1995 年一個很有名的研究（Iyengar & Lepper）。研究者在超市擺試吃攤，一次擺 24 種果醬，一次擺 6 種。24 種吸引了更多人停下來試吃，但真正掏錢買的比例，遠低於只擺 6 種的時候。\n\n選項越多，人越不敢決定。這叫選擇癱瘓。\n\n業務講產品就像在擺果醬架。\n\n你講了十個優點，客戶記不住十個。他只記得一件事：好複雜。而複雜的東西，人的本能是先放著。不是不想要，是先放著。等有空再想。然後就沒有再想了。\n\n這裡有個很反直覺的地方：你把產品講得越完整，其實是在增加他的決策成本。你以為你在幫他判斷，實際上你在讓他更難判斷。\n\n講三個他記得住的，比講十個他聽不完的有用。\n\n而且那三個要怎麼挑？不是挑你最自豪的三個，是挑**跟他剛剛講的話有關的**三個。他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。\n\n專業不是把事情講滿，是幫他把事情變簡單。", "th3": "超市擺 24 種果醬，\n賣得比擺 6 種還差。\n\n這叫選擇癱瘓。\n\n業務講產品也一樣。\n講了十個優點，客戶記不住十個，\n他只記得「好複雜」。\n\n而複雜的東西，\n人的本能是先放著。", "igc3": "你把產品講得越完整，其實是在增加他的決策成本。\n\n那三個要怎麼挑？不是挑你最自豪的三個，是挑跟他剛剛講的話有關的三個。\n\n他提過交期，就講交期。他提過預算，就講預算。沒提過的，再厲害也先收起來。\n\n專業不是把事情講滿，是幫他把事情變簡單。", "tele4": "不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。想像你完全不懂車，銷售一直講引擎跟底盤。整場對話裡，唯一一個你看得懂的東西就是價格。所以你只能用價格判斷。客戶嫌貴，多半不是嫌數字大，是他手上沒有別的刻度。這時候解釋價格，等於叫他繼續用那把尺量你。給他一把新的尺，貴這件事自己就不見了。　想知道自己是哪一塊讓客戶只能看價格？留言「健檢」，我把連結給你。", "fb4": "不懂車的人去買車，他只看得懂價格。所以他只能嫌貴。\n\n想像你完全不懂車，走進展示間。銷售很熱心，講引擎、講底盤、講懸吊系統、講安全配備。他講得很好，但你一句都接不上。\n\n整場對話裡，唯一一個你完全看得懂的東西就是價格。\n\n所以你只能用價格判斷。不是因為你小氣，是因為那是你手上唯一的刻度。\n\n顧問、教練、設計、保險、諮詢都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。他不是不想認真判斷，是手上沒有別的尺。\n\n沒有對照的時候，任何數字都只是大。\n\n所以「客戶嫌貴」翻譯過來通常是：我還不知道這筆錢會換到什麼。\n\n這時候最糟的動作是解釋價格。你一解釋，等於叫他繼續用那把尺量你——而那把尺上面只有數字，沒有價值。\n\n要做的是給他一把新的尺。\n\n新的尺可以是時間（三個月後你的狀況會長什麼樣）、可以是對照（做跟不做的差別在哪）、可以是風險（不處理的話最差會怎樣）。任何一把，只要他手上多一個刻度，價格就不再是唯一的判斷依據。\n\n給他一把新的尺，貴這件事自己就不見了。", "th4": "不懂車的人去買車，\n他只看得懂價格。\n\n所以他只能嫌貴。\n\n客戶嫌貴，多半不是嫌數字大，\n是他手上沒有別的刻度。\n\n這時候解釋價格，\n等於叫他繼續用那把尺量你。", "igc4": "顧問、教練、設計、保險都有同一個特性：對方在買之前，沒辦法確認他會買到什麼。\n\n他不是不想認真判斷，是手上沒有別的尺。\n\n新的尺可以是時間、可以是對照、可以是風險。只要他手上多一個刻度，價格就不再是唯一的判斷依據。\n\n給他一把新的尺，貴這件事自己就不見了。", "tele5": "頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。這就像好的健身教練。他不會一見面就賣課，他會先問你平常怎麼吃、怎麼睡。如果你一週只來一次又不肯改飲食，他會跟你說實話。因為他知道，接錯客戶比少接一個客戶更傷。外行人在推銷，高手在挑人。挑人不是傲氣，是你對結果負責。　你現在是在推銷還是在挑人？留言「挑人」，我把影響力健檢給你。", "fb5": "頂級業務見客戶，想的不是怎麼成交。是這個客戶要不要接。\n\n這句話第一次聽會覺得很傲。但你看任何領域的高手，都是這樣運作的。\n\n這就像好的健身教練。\n\n他不會一見面就賣課。他會先問你平常怎麼吃、怎麼睡、一週能來幾次。如果你一週只能來一次，又不肯調整飲食，好的教練會跟你說實話：這樣練，三個月後你會失望，然後你會覺得是我不行。\n\n因為他知道，接錯客戶比少接一個客戶更傷。\n\n一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。\n\n外行人在推銷，高手在挑人。\n\n挑人聽起來像在篩掉別人，實際上是在保護兩件事：保護對方不要花錯錢，保護自己的交付品質撐得住。\n\n而且有個反效果很有趣——當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況；而你一問，他就感覺到你在評估合不合，不是在求成交。\n\n那個瞬間，位置就換了。\n\n挑人不是傲氣，是你對結果負責。", "th5": "頂級業務見客戶，\n想的不是怎麼成交。\n\n是這個客戶要不要接。\n\n好教練不會一見面就賣課，\n他會先問你平常怎麼吃、怎麼睡。\n\n因為接錯客戶，\n比少接一個客戶更傷。\n\n外行人在推銷，高手在挑人。", "igc5": "一個做不出結果的客戶，會帶走你的時間、你的心力，最後還會帶走你的口碑。而那不是他的錯，是你當初明知道不合還是收了。\n\n有個反效果很有趣：當你真的開始挑客戶，成交率會上升。因為你不再對每個人都講同一套，你開始問他的狀況。\n\n他會感覺到你在評估合不合，不是在求成交。那個瞬間，位置就換了。\n\n挑人不是傲氣，是你對結果負責。", "tele6": "有五句話業務天天在講，客戶天天在心裡扣分。第一句，「我跟你說實話」。客戶會想：那你前面講的是什麼。第二句，「這個我幫很多人做過」。他想：所以我只是第幾個。第三句最毒，「相信我」。這就像相親第一次見面就說，嫁給我不會後悔。信任是結果，不是要求來的。這三句都在要他給，沒有一句在給他。　剩下兩句跟替代說法我寫在信裡。留言「話術」，我把訂閱連結給你。", "fb6": "有五句話業務天天在講，客戶天天在心裡扣分。\n\n第一句，「我跟你說實話」。\n\n這句話的問題是，客戶會立刻想：那你前面講的是什麼？你本來就該講實話，特別強調反而暴露了前面可能沒有。\n\n第二句，「這個我幫很多人做過」。\n\n你想證明經驗，但他聽到的是：所以我只是第幾個。他不想當第幾個，他想當那個你特別在意的。經驗要證明，但要用他的狀況來證明，不是用數量。\n\n第三句最毒，「相信我」。\n\n這就像相親第一次見面就說，嫁給我不會後悔。\n\n信任是結果，不是要求來的。你越講相信我，對方越會想：為什麼你需要我相信你？真正讓人放心的人，從來不用開口要。\n\n這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。\n\n而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。\n\n這三句都在要他給，沒有一句在給他。", "th6": "三句業務天天在講、\n客戶天天在心裡扣分的話：\n\n「我跟你說實話」\n→ 那你前面講的是什麼\n\n「這個我幫很多人做過」\n→ 所以我只是第幾個\n\n「相信我」\n→ 這就像相親第一次見面\n　 就說嫁給我不會後悔\n\n信任是結果，不是要求來的。", "igc6": "這三句有一個共同點：它們都在要他給。給你信任、給你時間、給你機會。沒有一句在給他。\n\n而業務真正的槓桿，永遠在「給」那一邊。給他一個判斷的標準、給他一句能帶回去的話、給他一個他自己沒想到的角度。\n\n真正讓人放心的人，從來不用開口要。", "tele7": "「只耽誤您三分鐘」這句一出口，三分鐘就沒了。因為這句等於先承認，我接下來要講的事對你沒好處。你想想，有人跟你說「借我三分鐘讓你多賺一百萬」，他會先道歉嗎？開場就道歉，對方第一個反應不是給你時間，是想辦法脫身。好的開場不用求時間。它會讓對方自己想多聽一句。你不需要客戶的三分鐘。你需要他的好奇。　不知道自己哪一塊讓人想跑？留言「開場」，我把影響力健檢給你。", "fb7": "「只耽誤您三分鐘」這句一出口，三分鐘就沒了。\n\n因為這句話等於先承認：我接下來要講的事，對你沒好處。\n\n你想想，有人跟你說「借我三分鐘，讓你多賺一百萬」，他會先道歉嗎？\n\n不會。他會直接講那一百萬。\n\n開場就道歉，傳遞的訊息是「我知道我在打擾你」。而對方收到這個訊息之後，第一個反應不是給你時間，是想辦法脫身——因為你已經幫他定義了這場對話的性質：這是一個打擾。\n\n好的開場不用求時間。\n\n它的結構通常是：先講一件跟他有關的事，然後停住。\n\n「我看到你們上個月開了第三家分店。」停。\n「我剛從你同業那邊過來，他提到一個你可能也會遇到的狀況。」停。\n\n那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。\n\n你不需要客戶的三分鐘。你需要他的好奇。", "th7": "「只耽誤您三分鐘」\n這句一出口，三分鐘就沒了。\n\n因為它等於先承認：\n我要講的事對你沒好處。\n\n你想想，有人說\n「借我三分鐘讓你多賺一百萬」，\n他會先道歉嗎？\n\n好的開場不用求時間。\n它會讓對方自己想多聽一句。", "igc7": "開場就道歉，傳遞的訊息是「我知道我在打擾你」。對方收到之後，第一個反應不是給你時間，是想辦法脫身。\n\n好的開場結構通常是：先講一件跟他有關的事，然後停住。\n\n那個停很重要。停住之後，決定要不要繼續的人是他，不是你。而人只要是自己決定要聽的，就不會算時間。\n\n你不需要客戶的三分鐘。你需要他的好奇。", "tele8": "「有需要再跟我說」這句一講完，訂單就死了。因為這句把決定權整個丟回去，而對方本來就不想做決定。這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。他不會覺得你尊重他，他會覺得你沒有在幫他。客戶要的不是空間，是一個下一步。下一步不用大，但要具體。給他一個小動作，比給他一個大空間有用。　那個下一步要怎麼給，我寫在信裡。留言「下一步」，我把訂閱連結給你。", "fb8": "「有需要再跟我說」這句一講完，訂單就死了。\n\n因為這句把決定權整個丟回去，而對方本來就不想做決定。\n\n這就像你帶朋友去吃飯，他問你哪家好，你說「都可以，你決定」。\n\n他不會覺得你尊重他。他會覺得你沒有在幫他。\n\n客戶要的不是空間，是一個下一步。\n\n很多業務把「不逼客戶」理解成「不給方向」，結果變成每次對話都在原地結束。但不逼跟不給方向是兩件事。不逼是不替他做決定，不給方向是連選項都不給。\n\n下一步不用大，但要具體。\n\n「我這週五把那兩個方案的差別整理一張表給你，你看完再決定要不要約。」\n「你剛提到交期是關鍵，我回去確認最快能到什麼時候，明天回你。」\n\n你看出來了嗎，這兩句都沒有在推成交。它們只做一件事：讓這場對話有下一個明確的時間點。\n\n有時間點，關係就還活著。沒有時間點，就算他有興趣，也會被下週的事情蓋過去。\n\n給他一個小動作，比給他一個大空間有用。", "th8": "「有需要再跟我說」\n這句一講完，訂單就死了。\n\n就像帶朋友吃飯，\n他問你哪家好，\n你說「都可以，你決定」。\n\n他不會覺得你尊重他。\n他會覺得你沒有在幫他。\n\n客戶要的不是空間，\n是一個下一步。", "igc8": "很多人把「不逼客戶」理解成「不給方向」，結果每次對話都在原地結束。\n\n不逼是不替他做決定，不給方向是連選項都不給。這是兩件事。\n\n下一步不用大，但要具體：\n「我這週五整理一張表給你，你看完再決定要不要約。」\n\n有時間點，關係就還活著。\n\n給他一個小動作，比給他一個大空間有用。", "tele9": "術語講越多，客戶聽到的不是專業。是「我不懂」。你想想去修車。師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但不知道該不該修。他如果說「你停紅燈車會抖，就是這個」，你立刻懂。同一件事，一個把人推遠，一個把人拉近。專業不是用什麼字，是對方聽完有沒有畫面。能把難的事講成人話，才是真的懂。　想知道自己講的是專業還是術語？留言「人話」，我把影響力健檢給你。", "fb9": "術語講越多，客戶聽到的不是專業。是「我不懂」。\n\n你想想去修車。\n\n師傅說「節氣門積碳導致怠速不穩」，你只會點頭，但完全不知道該不該修、修了會怎樣、不修會怎樣。\n\n但他如果說「你停紅燈的時候車會抖，就是這個」，你立刻懂。\n\n同一件事，一個把人推遠，一個把人拉近。\n\n差別在哪？第二句裡面有一個你親身經歷過的畫面。你真的在紅燈前抖過，所以那句話一講，你的身體先懂了，腦袋才跟上。\n\n專業不是用什麼字，是對方聽完有沒有畫面。\n\n很多人把術語當成專業的證明。但術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離——而距離一出現，他就開始用別的東西判斷你，通常是價格。\n\n要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？\n\n「喔」是禮貌。「對，我就是這樣」才是聽懂了。\n\n能把難的事講成人話，才是真的懂。", "th9": "術語講越多，\n客戶聽到的不是專業。\n是「我不懂」。\n\n「節氣門積碳導致怠速不穩」\n→ 你只會點頭\n\n「你停紅燈車會抖，就是這個」\n→ 你立刻懂\n\n同一件事，\n一個把人推遠，一個把人拉近。", "igc9": "術語的真正功能是讓同行溝通更快，不是讓客戶更信你。對客戶用術語，實際效果是製造距離。而距離一出現，他就開始用別的東西判斷你，通常是價格。\n\n要檢查自己有沒有踩這個坑，有個很簡單的方法：你講完一段，對方的反應是「喔」還是「對，我就是這樣」？\n\n「喔」是禮貌。「對，我就是這樣」才是聽懂了。\n\n能把難的事講成人話，才是真的懂。", "tele10": "客戶說太貴，最爛的回答是「我幫你問折扣」。一講折扣，就等於承認原價是喊的。這就像在菜市場問一顆多少，老闆馬上說算你便宜。你第一個念頭不是賺到，是剛剛那個價是不是在騙我。折扣不會讓他覺得划算，會讓他重新懷疑整件事。他說貴，是在問值不值得，不是在問能不能少。他問的是值不值得。回答那個問題就好。　那該怎麼回，我寫在信裡。留言「報價」，我把訂閱連結給你。", "fb10": "客戶說太貴，最爛的回答是「我幫你問折扣」。\n\n因為你一講折扣，就等於承認原價是喊的。\n\n這就像你在菜市場問一顆多少，老闆馬上說算你便宜。\n\n你第一個念頭不是賺到，是剛剛那個價是不是在騙我。\n\n折扣不會讓他覺得划算，會讓他重新懷疑整件事。而且更麻煩的是，你一旦降過一次，之後每一次報價他都會先預設還有空間——你永遠回不到原價了。\n\n他說貴，是在問值不值得，不是在問能不能少。\n\n這兩個問題要用完全不同的方式回。\n\n「能不能少」是價格問題，回答它要談條件。\n「值不值得」是價值問題，回答它要談結果。\n\n而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。\n\n所以該做的是把結果講清楚，不是把價格降下來。\n\n「如果三個月後你的狀況沒有變化，這筆錢確實不值得。所以我想先確認一件事——你現在最想改變的是哪一塊？」\n\n這句話沒有解釋價格，也沒有降價。它做的是把對話從數字拉回到結果。\n\n他問的是值不值得。回答那個問題就好。", "th10": "客戶說太貴，\n最爛的回答是「我幫你問折扣」。\n\n一講折扣，\n就等於承認原價是喊的。\n\n就像在菜市場問一顆多少，\n老闆馬上說算你便宜。\n\n你第一個念頭不是賺到，\n是剛剛那價是不是在騙我。\n\n他說貴，是在問值不值得，\n不是在問能不能少。", "igc10": "「能不能少」是價格問題，回答它要談條件。\n「值不值得」是價值問題，回答它要談結果。\n\n而九成的「太貴了」是後者。他其實是在說：我還看不到這筆錢換到什麼。\n\n而且你一旦降過一次，之後每次報價他都會先預設還有空間。你永遠回不到原價了。\n\n他問的是值不值得。回答那個問題就好。", "tele11": "成交率最低的動作，是傳一堆資料給客戶看。你想想，有人傳給你十頁PDF，你會認真看嗎？資料傳過去那一刻，事情就從你身上變成他的作業。他不會做作業，他會把訊息往上滑掉。給資料是把球丟回去，給判斷才是接住他。一句「你最在意哪一塊，我直接幫你看」，比十頁有用。別讓他回去做功課。那是你的工作。　該給什麼不該給什麼，我寫在信裡。留言「資料」，我把訂閱連結給你。", "fb11": "成交率最低的動作，是傳一堆資料給客戶看。\n\n你想想，有人傳給你十頁 PDF，你會認真看嗎？\n\n資料傳過去那一刻，事情就從你身上變成他的作業。\n\n而他不會做作業。他會把那則訊息往上滑掉，然後想著「晚點看」。那個晚點永遠不會來。\n\n這件事之所以這麼多人在做，是因為它讓人很安心——我有行動、我有給東西、我很專業。但安心的是你，不是他。\n\n給資料是把球丟回去，給判斷才是接住他。\n\n資料跟判斷差在哪？資料是「這裡有六個方案的完整比較」，判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。\n\n前者要他花力氣，後者幫他省力氣。\n\n而且判斷才是你真正的價值。同樣的資料客戶自己上網也查得到，他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。你把資料丟過去，等於把自己的價值也一起丟掉了。\n\n一句「你最在意哪一塊，我直接幫你看」，比十頁有用。\n\n別讓他回去做功課。那是你的工作。", "th11": "成交率最低的動作，\n是傳一堆資料給客戶看。\n\n有人傳給你十頁 PDF，\n你會認真看嗎？\n\n資料傳過去那一刻，\n事情就從你身上變成他的作業。\n\n而他不會做作業。\n他會把訊息往上滑掉。\n\n給資料是把球丟回去，\n給判斷才是接住他。", "igc11": "這件事之所以這麼多人在做，是因為它讓人很安心。我有行動、我有給東西、我很專業。但安心的是你，不是他。\n\n資料是「這裡有六個方案的完整比較」。\n判斷是「以你剛提到的狀況，只有兩個值得看，差別在這裡」。\n\n同樣的資料客戶自己上網也查得到。他找你不是要資料，是要一個看過很多案例的人告訴他哪個適合他。\n\n別讓他回去做功課。那是你的工作。"};
+
+function flash(btn, word, cls) {
+  const old = btn.textContent;
+  btn.textContent = word; btn.classList.add(cls);
+  setTimeout(() => { btn.textContent = old; btn.classList.remove(cls); }, 1600);
+}
+
+function copyText(btn, text) {
+  const fallback = () => {
+    // file:// 開的頁面 clipboard 權限會被擋，擋掉時沒有 catch 就是按了沒反應
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.readOnly = true;
+    ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    ta.setSelectionRange(0, text.length);   // iOS Safari 只認 setSelectionRange，select() 對它沒用
+    const ok = document.execCommand('copy');
+    ta.remove();
+    flash(btn, ok ? '已複製 ✓' : '複製失敗，請手動選取', ok ? 'ok' : 'bad');
+  };
+  if (!navigator.clipboard) return fallback();
+  navigator.clipboard.writeText(text).then(() => flash(btn, '已複製 ✓', 'ok'), fallback);
+}
+
+function refresh() {
+  const state = load();
+  const host = document.getElementById('days');
+  let done = 0;
+  document.querySelectorAll('.day').forEach(card => {
+    const id = card.dataset.day;
+    const boxes = [...card.querySelectorAll('.todo input')];
+    boxes.forEach((b, i) => { b.checked = !!(state[id] && state[id][i]); });
+    const all = boxes.length && boxes.every(b => b.checked);
+    card.classList.toggle('done', all);
+    if (all) done++;
+  });
+  // 做完的沉到最後，照原本天數排序
+  [...document.querySelectorAll('.day.done')]
+    .sort((a, b) => +a.dataset.day - +b.dataset.day)
+    .forEach(c => host.appendChild(c));
+  const total = document.querySelectorAll('.day').length;
+  document.getElementById('fill').style.width = (done / total * 100) + '%';
+  document.getElementById('tally').textContent = done + ' / ' + total + ' 天完成';
+}
+
+document.addEventListener('change', e => {
+  if (!e.target.matches('.todo input')) return;
+  const card = e.target.closest('.day');
+  const boxes = [...card.querySelectorAll('.todo input')];
+  const state = load();
+  state[card.dataset.day] = boxes.map(b => b.checked);
+  save(state); refresh();
+});
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.copy');
+  if (btn) { copyText(btn, DATA[btn.dataset.src]); return; }
+  const hd = e.target.closest('.hd');
+  if (hd) {                         // 點標頭可以把已完成的那張重新打開看
+    const card = hd.closest('.day');
+    if (card.classList.contains('done')) card.querySelector('.guts').style.display = 'block';
+  }
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  if (confirm('清掉所有打勾紀錄？')) { localStorage.removeItem(KEY); location.reload(); }
+});
+
+refresh();
+</script></body></html>

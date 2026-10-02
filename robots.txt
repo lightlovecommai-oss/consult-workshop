@@ -17,6 +17,7 @@ Disallow: /pro.html
 Disallow: /dashboard.html
 Disallow: /report.html
 Disallow: /script-1v1.html
+Disallow: /marketing.html
 Disallow: /v2-archive/
 
 # AI 搜尋的爬蟲跟一般爬蟲分開宣告，預設 allow 不見得被當成明示同意。
