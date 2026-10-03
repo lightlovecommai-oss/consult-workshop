@@ -6,11 +6,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="行銷日課">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F3EEE5">
+<meta name="theme-color" content="#F7F1EC">
 <style>
+/* 🔴 這些值不是挑的，是抄的——真相在 3-教材/_圖產生器/視覺tokens.json 的「溫暖版」。
+   這一頁會把輪播圖直接貼在旁邊顯示，自己調一組相近但不同的米色，
+   圖跟頁面的底色就會差一階，看起來像圖髒了。要換色去改 token 檔。
+   acc #B07434 在米底上只有 3.47:1，所以只走標籤／小標，不當內文顏色。 */
 :root {
-  --paper:#F3EEE5; --card:#FFFCF6; --ink:#2C2416; --muted:#8A7E6D;
-  --line:#E8DFD3; --accent:#AF5433; --accent-soft:#FFF4E8;
+  --paper:#F7F1EC; --card:#ffffff; --ink:#4A1B0C; --muted:#6E4A3C;
+  --line:#E6DAD1; --accent:#AF5433; --accent-soft:#FFF4E8;
+  --deep:#2A1711;
+  --A:#C6603A; --T:#6E8B77; --P:#6E8CA8; --I:#C99A4E;
 }
 * { box-sizing:border-box; }
 body { font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
@@ -20,7 +26,30 @@ body { font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
 h1 { font-size:30px; margin:0 0 4px; letter-spacing:1px; }
 .lede { color:var(--muted); font-size:14px; margin-bottom:22px; }
 
-.bar { position:sticky; top:0; z-index:50; background:rgba(243,238,229,.95);
+/* 開場：logo 先進場，再是標題。這一頁會 Demo 給別人看，
+   第一秒看到的要是「影響力健身房」這個品牌，不是一排 D01 卡片。
+   動效刻意只有「淡入＋往上浮」一種，沒有縮放也沒有旋轉——
+   《視覺寶典》§2.2 的同一個理由：溫暖版靠實色和字重說話，花招會變廉價。 */
+.hero { margin:0 0 20px; }
+.hero .mark { width:min(286px,64vw); }
+.hero .mark svg { width:100%; height:auto; display:block; }
+/* ATPI 四色收邊。它同時是「這四個色是一套」的宣告，Demo 時不用解釋。 */
+.hero .rule { display:flex; width:108px; height:4px; border-radius:99px;
+              overflow:hidden; margin:17px 0 16px; }
+.hero .rule i { flex:1; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+@keyframes wipe { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+.hero .mark, h1, .lede { animation:rise .72s cubic-bezier(.2,.75,.25,1) both; }
+.hero .mark { animation-delay:.04s; }
+h1 { animation-delay:.2s; }
+.lede { animation-delay:.32s; }
+.hero .rule { transform-origin:left center; animation:wipe .5s ease-out .46s both; }
+/* 動效全部是裝飾，關掉之後內容必須一模一樣——不是淡化，是 none。 */
+@media (prefers-reduced-motion:reduce) {
+  .hero .mark, h1, .lede, .hero .rule { animation:none; }
+}
+
+.bar { position:sticky; top:0; z-index:50; background:rgba(247,241,236,.95);
        backdrop-filter:blur(8px); padding:12px 0 14px; margin-bottom:18px;
        border-bottom:1px solid var(--line); }
 .bar-row { display:flex; align-items:center; gap:14px; font-size:14px; }
@@ -31,21 +60,33 @@ h1 { font-size:30px; margin:0 0 4px; letter-spacing:1px; }
          padding:5px 12px; border-radius:99px; font-size:12px; cursor:pointer; }
 .reset:hover { color:var(--accent); border-color:var(--accent); }
 
-.day { background:var(--card); border-radius:18px; margin-bottom:26px;
-       box-shadow:0 10px 30px rgba(90,70,40,.09); overflow:hidden;
-       transition:opacity .3s, transform .3s; }
-.day.done { opacity:.42; }
-.day.done .guts { display:none; }
-.day.done .hd::after { content:"已完成"; margin-left:auto; font-size:12px;
+/* 🔴 收合不是省空間，是「同時只有一天是主角」。
+   十一張卡全攤開的時候，整頁沒有任何一塊比別塊重要——
+   他自己用會滑過頭，Demo 給別人看會看不懂從哪開始。
+   所以這裡走手風琴：點開一張，其他自動收起來。 */
+.day { background:var(--card); border-radius:18px; margin-bottom:14px;
+       box-shadow:0 3px 12px rgba(74,27,12,.06); overflow:hidden;
+       scroll-margin-top:76px;
+       transition:opacity .3s, box-shadow .3s, margin .3s; }
+/* 攤開的那張：影子厚一階、上下留白拉開。這是整頁唯一的主角。 */
+.day.open { box-shadow:0 18px 44px rgba(74,27,12,.15); margin-bottom:26px; }
+/* 做完又收起來的才淡掉。打開來回看的時候不能淡——淡了就讀不到字。 */
+.day.done:not(.open) { opacity:.5; }
+
+.hd { padding:15px 22px; color:#fff; display:flex; align-items:center; gap:14px;
+      cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.hd .dnum { font-size:21px; font-weight:bold; flex:none; opacity:.85; }
+/* min-width:0 是給 flex 子項能被壓縮用的，少了它長標題會把箭頭推出卡片外 */
+.hd-main { flex:1; min-width:0; }
+.hd-ttl { font-size:17.5px; font-weight:bold; line-height:1.4; letter-spacing:.3px; }
+.hd-sub { font-size:12px; letter-spacing:1px; opacity:.78; margin-top:3px; }
+.chev { flex:none; order:3; font-size:15px; opacity:.75; transition:transform .25s; }
+.day.open .chev { transform:rotate(180deg); }
+.day.done .hd::after { content:"已完成"; order:2; font-size:12px; flex:none;
                        background:rgba(255,255,255,.3); padding:3px 10px; border-radius:99px; }
 
-.hd { padding:16px 26px; color:#fff; display:flex; align-items:center; gap:14px;
-      font-size:13px; letter-spacing:1px; cursor:pointer; }
-.hd .dnum { font-size:22px; font-weight:bold; letter-spacing:0; }
-.hd .pill { background:rgba(255,255,255,.22); padding:3px 11px; border-radius:99px; font-size:12px; }
-
-.guts { padding:4px 26px 26px; }
-.ttl { font-size:23px; font-weight:bold; line-height:1.45; margin:18px 0 6px; }
+.guts { display:none; padding:20px 26px 26px; }
+.day.open .guts { display:block; }
 
 .sec { margin-top:26px; }
 .sec-hd { display:flex; align-items:baseline; gap:10px; padding-bottom:7px;
@@ -56,8 +97,10 @@ h1 { font-size:30px; margin:0 0 4px; letter-spacing:1px; }
 .lbl { font-size:11px; letter-spacing:3px; color:var(--accent);
        font-weight:bold; margin:18px 0 7px; }
 
-/* 提詞器＝這張卡的主角，字最大、色最重 */
-.tele-box { background:var(--ink); border-radius:12px; padding:22px 24px; position:relative; }
+/* 提詞器＝這張卡的主角，字最大、色最重。
+   底色走 token 的 deepbg（比內文的 ink 再深一階），
+   跟相鄰的白卡亮度差拉到 1.5 倍以上，眼睛才會先掉在這一塊。 */
+.tele-box { background:var(--deep); border-radius:12px; padding:22px 24px; position:relative; }
 .tele { color:#FBF6EA; font-size:21px; line-height:2.05; letter-spacing:.6px; }
 .tele-meta { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.14);
              color:#B5A890; font-size:12px; display:flex; gap:16px; flex-wrap:wrap; }
@@ -122,8 +165,14 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 .todo input { width:21px; height:21px; accent-color:#4A7A3A; cursor:pointer; flex:none; }
 .todo input:checked + span { text-decoration:line-through; color:var(--muted); }
 
-.note { background:#FFF9E8; border-left:4px solid #C99A4E; padding:14px 18px;
-        border-radius:7px; font-size:14px; line-height:1.8; margin-bottom:22px; }
+.note { background:#FFF9E8; border-left:4px solid var(--I); padding:4px 18px;
+        border-radius:0 7px 7px 0; font-size:14px; line-height:1.8; margin-bottom:22px; }
+.note summary { list-style:none; cursor:pointer; padding:10px 0;
+                font-size:13px; letter-spacing:1px; color:#8A5A14; font-weight:bold; }
+.note summary::-webkit-details-marker { display:none; }
+.note summary::before { content:"▸ "; }
+.note[open] summary::before { content:"▾ "; }
+.note-body { padding-bottom:12px; color:#5E5240; }
 .nostore { display:none; background:#FFE9E4; border-left:4px solid #A63A2E; padding:13px 17px;
            border-radius:7px; font-size:14px; line-height:1.8; margin-bottom:18px; color:#6B2A20; }
 
@@ -134,8 +183,12 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
   .ig-strip figure { width:46vw; }
   .tele { font-size:19px; }
   body { padding:18px 10px 90px; }
-  .guts { padding:4px 16px 20px; }
-  .hd { padding:14px 16px; flex-wrap:wrap; gap:9px; }
+  .guts { padding:16px 16px 20px; }
+  /* 🔴 這裡不能 flex-wrap——標頭現在是收合的把手，換行會讓它變兩三倍高，
+     收起來的十一張卡又長回一整頁，收合就白做了。 */
+  .hd { padding:13px 15px; gap:11px; }
+  .hd-ttl { font-size:16px; }
+  h1 { font-size:25px; }
 
   .row { flex-wrap:wrap; align-items:flex-start; }
   .copy { width:100%; padding:14px 18px; font-size:15px; border-radius:12px; }
@@ -150,6 +203,16 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
 }
 </style></head>
 <body><div class="wrap">
+  <div class="hero">
+    <div class="mark"><svg xmlns="http://www.w3.org/2000/svg" width="346" height="120" viewBox="0 0 346 120" role="img" aria-label="影響力健身房 logo lockup A 版・橫排｜主 lockup（圖標＋中文）">
+<title>影響力健身房 logo lockup A 版・橫排｜主 lockup（圖標＋中文）</title>
+<!-- 文字已轉外框：中文 Noto Serif TC 700 / 拉丁 Inter。不依賴系統字型。規則見 24-品牌視覺識別系統 §1.2 -->
+<g transform="translate(61.7,55.5) scale(0.64)"><g fill="none" stroke="#4A1B0C" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="4" fill="#C6603A"/><circle cx="-7" cy="0" r="4" fill="#6E8B77"/><circle cx="7" cy="0" r="4" fill="#6E8CA8"/><circle cx="21" cy="0" r="4" fill="#C99A4E"/></g><g fill="#4A1B0C" transform="translate(121.49,70.80)"><path transform="translate(0.00,0) scale(0.03000,-0.03000)" d="M982.44 229.43Q977.44 220.97 968.34 218.24Q959.25 215.51 940.79 218.78Q846.92 103.34 732.12 28.07Q617.32 -47.20 478.53 -92.90L471.91 -79.01Q585.64 -13.44 677.19 80.97Q768.74 175.38 838.17 306.93ZM960.55 496.94Q955.55 489.94 946.82 487.21Q938.09 484.48 920.90 488.48Q870.68 440.83 812.11 397.29Q753.54 353.75 690.93 317.36Q628.32 280.97 564.48 253.08L556.32 266.43Q632.67 327.81 699.76 409.47Q766.85 491.14 821.93 583.20ZM947.96 753.02Q942.96 745.29 934.23 742.93Q925.50 740.56 909.04 744.29Q836.25 678.72 748.12 622.51Q660.00 566.29 568.78 527.40L560.16 540.75Q633.43 598.05 697.31 674.91Q761.18 751.76 813.45 837.09ZM267.02 558.11Q322.84 551.57 350.56 537.38Q378.28 523.19 384.55 506.54Q390.82 489.89 382.02 475.47Q373.22 461.05 354.54 453.19Q335.86 445.32 313.68 449.20Q291.50 453.08 272.20 473.03Q277.04 495.76 272.34 517.89Q267.64 540.03 258.94 553.30ZM201.01 527.19Q201.01 523.00 188.21 515.35Q175.41 507.70 155.73 501.92Q136.05 496.13 114.37 496.13H100.07V792.89V836.14L206.01 792.89H470.88V764.35H201.01ZM197.25 189.76Q197.25 185.57 184.45 178.42Q171.65 171.27 152.20 165.85Q132.75 160.43 112.07 160.43H98.50V365.54V407.06L202.98 365.54H477.59V337.00H197.25ZM261.76 126.00Q258.49 119.00 250.85 114.54Q243.22 110.08 225.49 111.62Q197.11 67.32 149.69 21.17Q102.27 -24.98 43.70 -53.98L34.62 -41.90Q59.51 -11.60 79.58 27.43Q99.64 66.46 114.11 106.76Q128.58 147.06 135.74 180.17ZM368.36 33.28Q368.36 -1.32 360.44 -27.31Q352.52 -53.30 327.16 -68.54Q301.81 -83.79 249.37 -88.52Q248.37 -67.11 246.10 -49.58Q243.83 -32.05 236.56 -20.67Q230.02 -11.02 217.67 -2.87Q205.32 5.28 179.59 9.74V22.55Q179.59 22.55 188.54 21.91Q197.48 21.28 209.97 20.78Q222.45 20.28 233.90 19.64Q245.34 19.01 250.61 19.01Q260.15 19.01 263.42 23.24Q266.69 27.47 266.69 35.01V231.92H368.36ZM388.19 162.08Q449.52 151.00 484.86 130.31Q520.20 109.62 534.10 86.01Q548.01 62.40 545.94 41.16Q543.87 19.91 529.88 5.86Q515.89 -8.20 494.81 -9.37Q473.72 -10.55 450.96 6.94Q448.61 33.59 437.18 60.78Q425.75 87.97 410.65 112.66Q395.54 137.35 379.38 155.73ZM419.77 365.54 465.29 413.79 562.87 341.43Q558.87 337.16 549.69 331.80Q540.52 326.43 527.52 323.70V197.41Q527.52 194.68 513.35 188.72Q499.19 182.76 480.47 177.93Q461.75 173.11 445.72 173.11H428.77V365.54ZM475.86 240.16V211.62H166.60V240.16ZM424.23 792.89 471.75 845.60 575.52 767.78Q571.25 761.78 560.21 756.05Q549.17 750.32 533.71 747.32V539.46Q533.71 536.46 519.54 530.64Q505.38 524.81 486.30 519.85Q467.21 514.89 451.18 514.89H434.23V792.89ZM466.64 583.97V555.43H159.95V583.97ZM467.18 689.43V660.89H160.49V689.43ZM524.99 521.14Q524.99 521.14 541.87 507.85Q558.75 494.57 582.46 475.82Q606.16 457.08 624.27 440.16Q620.54 424.16 597.81 424.16H40.13L32.13 452.70H470.93Z"/><path transform="translate(33.00,0) scale(0.03000,-0.03000)" d="M449.78 855.98Q498.65 851.44 520.43 837.61Q542.22 823.79 543.93 807.37Q545.65 790.95 533.49 778.85Q521.32 766.76 502.29 765.58Q483.26 764.41 464.42 780.71Q465.53 800.44 458.10 819.80Q450.67 839.17 440.24 849.90ZM595.43 770.76V742.22H391.89V770.76ZM347.24 474.49Q369.70 477.03 408.76 482.11Q447.81 487.19 496.23 494.54Q544.65 501.89 594.57 509.97L596.11 495.89Q575.84 485.97 542.30 468.82Q508.76 451.67 467.39 432.29Q426.03 412.91 381.11 393.80ZM434.17 767.84 454.39 755.27V472.14L378.08 447.27L412.60 474.95Q419.33 434.89 404.41 413.09Q389.49 391.29 374.65 384.64L333.67 477.22Q358.05 488.14 364.15 496.33Q370.24 504.52 370.24 517.71V767.84ZM370.24 812.98 467.12 770.76H454.39V711.03Q454.39 711.03 433.90 711.03Q413.41 711.03 370.24 711.03V770.76ZM57.56 526.11Q85.83 526.65 140.89 528.96Q195.94 531.27 253.13 534.62L253.67 520.54Q239.86 513.35 214.05 500.97Q188.24 488.59 156.70 474.62Q125.16 460.64 92.16 447.07ZM373.14 700.05Q369.14 691.32 354.14 687.19Q339.14 683.05 314.68 693.32L345.33 698.59Q318.41 668.59 274.66 631.92Q230.92 595.24 181.18 561.16Q131.43 527.08 85.24 502.73L84.24 514.73H124.46Q121.19 478.97 109.96 458.50Q98.73 438.02 84.08 432.56L43.67 526.92Q43.67 526.92 54.27 529.28Q64.86 531.65 71.05 535.11Q97.86 550.92 127.27 578.32Q156.67 605.73 184.08 637.96Q211.48 670.19 233.89 701.28Q256.29 732.38 269.10 755.84ZM287.76 794.35Q283.76 785.62 270.12 780.99Q256.49 776.35 230.76 786.35L262.14 790.62Q241.49 770.35 210.61 746.27Q179.73 722.19 146.08 700.93Q112.43 679.68 81.97 665.52L80.97 677.79H124.11Q120.84 640.57 109.74 619.59Q98.65 598.62 84.00 592.70L42.13 689.71Q42.13 689.71 50.86 692.07Q59.59 694.44 65.78 697.63Q86.40 710.98 107.66 739.38Q128.91 767.79 146.53 798.79Q164.15 829.79 171.77 850.06ZM53.40 688.63Q80.86 687.63 134.47 687.63Q188.08 687.63 243.65 688.63L243.92 674.28Q230.65 667.63 205.51 656.06Q180.38 644.49 149.74 630.96Q119.11 617.43 87.19 604.67ZM436.40 426.94Q486.92 433.62 515.91 426.54Q544.90 419.46 556.95 405.27Q569.01 391.08 567.09 374.97Q565.17 358.86 552.87 346.12Q540.57 333.37 521.58 330.64Q502.59 327.91 480.37 340.02Q476.83 362.94 461.25 385.54Q445.67 408.13 428.59 420.13ZM381.98 585.94Q377.98 576.21 368.25 571.58Q358.52 566.94 342.06 568.67Q324.79 519.75 291.06 473.02Q257.33 426.29 197.53 386.79Q137.73 347.29 39.29 319.29L31.48 331.83Q110.05 367.94 156.73 416.05Q203.40 464.16 227.20 519.18Q250.99 574.19 258.69 628.11ZM778.15 407.19Q778.15 403.00 766.94 395.72Q755.74 388.43 738.25 382.88Q720.76 377.32 701.27 377.32H687.43V786.46V826.06L782.42 786.46H891.46V757.92H778.15ZM520.40 553.54Q574.92 548.11 606.22 532.24Q637.52 516.38 651.11 495.73Q664.71 475.08 663.83 454.97Q662.95 434.86 651.92 420.71Q640.89 406.56 624.00 404.66Q607.10 402.75 587.80 417.78Q579.18 444.70 561.20 481.62Q543.21 518.54 512.86 544.46ZM550.07 770.76 589.02 810.25 669.81 749.57Q662.73 740.49 643.95 736.95V573.49Q643.95 570.49 631.24 565.76Q618.54 561.03 602.01 556.80Q585.48 552.57 571.64 552.57H556.88V770.76ZM602.43 607.54V579.00H398.89V607.54ZM597.32 689.92V661.38H393.78V689.92ZM838.24 786.46 891.95 835.98 979.61 744.05Q973.61 737.59 963.11 735.73Q952.61 733.86 935.61 733.59Q915.50 714.05 888.35 690.22Q861.20 666.38 832.71 649.30Q900.47 629.14 930.24 596.53Q960.01 563.92 960.01 528.92Q960.01 486.00 933.59 462.26Q907.17 438.51 838.68 435.97Q838.68 451.35 836.18 471.12Q833.68 490.90 828.68 499.28Q823.87 505.93 815.02 510.75Q806.17 515.58 793.09 518.04V530.12Q802.98 530.12 818.22 530.12Q833.46 530.12 841.08 530.12Q854.24 530.12 860.59 534.66Q864.67 538.20 866.71 542.37Q868.75 546.55 868.75 553.63Q868.75 582.63 853.47 603.52Q838.19 624.41 808.17 646.30Q815.52 666.76 823.54 692.30Q831.57 717.84 839.09 743.15Q846.62 768.46 850.24 786.46ZM683.12 160.78 735.21 216.33 845.20 135.21Q841.20 130.21 831.66 124.48Q822.12 118.75 808.39 116.02V-62.22Q808.39 -65.22 792.03 -71.77Q775.68 -78.33 753.68 -83.52Q731.67 -88.71 712.72 -88.71H692.85V160.78ZM313.53 -54.62Q313.53 -59.27 298.54 -67.51Q283.55 -75.76 261.18 -82.41Q238.81 -89.06 215.21 -89.06H199.45V160.78V208.41L320.72 160.78H738.72V132.24H313.53ZM725.50 76.05V47.51H269.74V76.05ZM732.80 -11.41V-39.95H269.74V-11.41ZM755.31 293.56Q752.77 285.10 743.13 279.87Q733.50 274.64 716.77 274.91Q694.01 260.37 657.95 246.20Q621.89 232.02 590.94 222.40H573.97Q587.32 243.86 599.85 273.86Q612.37 303.86 619.99 328.86ZM296.56 321.21Q348.73 322.43 376.58 312.85Q404.44 303.27 413.90 288.45Q423.36 273.62 418.25 258.74Q413.14 243.86 398.51 233.44Q383.89 223.02 363.44 222.52Q342.99 222.02 321.77 237.05Q320.42 259.24 309.90 281.28Q299.37 303.32 288.21 315.40ZM853.67 309.30Q853.67 309.30 870.69 296.01Q887.70 282.73 911.54 263.72Q935.38 244.70 953.76 227.78Q950.03 211.78 926.30 211.78H52.48L44.21 240.32H799.53ZM814.95 415.22Q814.95 415.22 830.96 402.70Q846.98 390.19 869.32 372.08Q891.66 353.97 909.04 337.32Q905.04 321.32 882.58 321.32H161.48L153.21 349.86H763.35Z"/><path transform="translate(66.00,0) scale(0.03000,-0.03000)" d="M79.91 589.49H822.23V561.22H88.64ZM755.90 589.49H744.17L810.21 656.15L920.74 559.54Q914.01 553.08 903.78 547.99Q893.55 542.89 875.82 540.16Q872.09 419.10 865.36 322.78Q858.63 226.45 847.67 155.20Q836.71 83.94 821.15 37.55Q805.60 -8.84 783.49 -29.57Q755.73 -55.95 719.43 -68.41Q683.13 -80.87 625.58 -80.87Q626.31 -52.35 620.12 -30.31Q613.93 -8.26 598.55 5.31Q582.63 19.34 548.13 32.31Q513.63 45.29 471.14 52.94L471.68 65.64Q502.06 63.37 538.12 60.96Q574.17 58.56 605.13 56.79Q636.09 55.02 650.28 55.02Q665.09 55.02 673.82 58.02Q682.55 61.02 690.09 68.29Q704.36 80.83 715.00 123.03Q725.63 165.23 733.63 233.83Q741.63 302.44 746.90 392.23Q752.17 482.03 755.90 589.49ZM389.98 846.60 556.01 831.03Q554.74 819.57 546.51 812.30Q538.28 805.03 519.82 803.03Q517.82 710.92 514.45 623.04Q511.09 535.16 498.99 452.74Q486.90 370.32 458.84 294.50Q430.79 218.67 379.41 150.08Q328.03 81.48 246.73 21.71Q165.43 -38.06 46.48 -88.60L36.40 -73.98Q147.91 -0.49 216.48 80.49Q285.04 161.46 321.66 249.74Q358.28 338.03 372.23 433.85Q386.17 529.68 388.08 632.91Q389.98 736.14 389.98 846.60Z"/><path transform="translate(99.00,0) scale(0.03000,-0.03000)" d="M453.82 712.35Q445.28 686.54 430.87 647.04Q416.47 607.54 399.79 563.81Q383.12 520.08 366.94 479.45Q350.77 438.81 338.23 409.27H345.50L313.20 376.32L226.70 433.00Q237.16 440.92 253.12 448.47Q269.08 456.03 282.27 459.49L250.70 428.38Q263.97 456.11 280.88 497.84Q297.78 539.57 314.46 585.80Q331.13 632.03 345.17 674.16Q359.21 716.30 367.02 744.38ZM354.29 744.38 399.43 789.79 489.79 708.89Q477.60 695.51 444.65 693.11Q411.70 690.70 378.48 695.62L367.02 744.38ZM372.94 437.54 424.11 491.90 520.07 411.89Q515.80 404.43 507.66 401.20Q499.53 397.97 484.07 395.51Q477.34 325.05 463.28 256.23Q449.23 187.40 420.62 124.31Q392.01 61.21 343.21 6.85Q294.41 -47.52 219.92 -88.79L211.38 -75.98Q282.54 -13.52 318.03 69.00Q353.51 151.51 366.82 246.03Q380.13 340.54 383.40 437.54ZM270.46 345.22Q298.81 247.98 340.43 187.41Q382.05 126.85 439.81 94.50Q497.56 62.15 575.68 50.34Q653.80 38.53 755.42 38.53Q774.07 38.53 802.87 38.53Q831.67 38.53 863.57 38.53Q895.46 38.53 925.62 38.89Q955.79 39.26 977.44 39.99V27.45Q948.57 21.07 934.00 -5.82Q919.43 -32.70 918.16 -66.41Q899.51 -66.41 866.67 -66.41Q833.83 -66.41 800.86 -66.41Q767.88 -66.41 747.69 -66.41Q641.15 -66.41 559.71 -49.31Q478.26 -32.22 419.87 11.84Q361.48 55.89 322.28 135.50Q283.08 215.11 259.30 340.14ZM397.00 744.38V715.84H269.19L260.19 744.38ZM428.76 437.54V409.00H298.90L310.17 437.54ZM860.21 276.20Q860.21 276.20 875.36 262.55Q890.51 248.90 911.62 229.42Q932.73 209.95 948.38 193.03Q945.38 177.03 922.92 177.03H468.28L460.28 205.57H811.34ZM913.54 668.06Q913.54 668.06 924.86 655.27Q936.19 642.49 951.61 624.61Q967.03 606.73 977.49 591.54Q973.76 575.54 952.76 575.54H440.00L432.00 604.08H877.24ZM824.24 399.82Q824.24 399.82 838.89 387.03Q853.54 374.25 873.51 355.87Q893.49 337.49 908.41 320.84Q905.41 304.84 882.68 304.84H497.79L489.79 333.38H776.83ZM766.77 736.89 811.29 783.41 902.41 713.78Q898.41 709.51 890.00 704.65Q881.60 699.78 869.87 698.05V439.22Q869.87 436.22 856.43 429.89Q843.00 423.57 825.01 418.61Q807.02 413.65 791.72 413.65H775.50V736.89ZM732.95 830.38Q731.68 821.11 724.54 814.11Q717.41 807.11 699.87 804.84V86.42Q699.87 81.69 687.57 73.54Q675.27 65.39 657.05 59.33Q638.83 53.28 620.34 53.28H601.12V844.03ZM819.75 468.00V439.46H510.49L501.49 468.00ZM818.67 736.89V708.35H495.54L486.54 736.89ZM315.71 803.43Q311.98 793.97 302.61 788.20Q293.25 782.43 275.52 782.70Q248.33 687.94 211.68 602.81Q175.03 517.67 129.32 446.19Q83.62 374.70 28.21 318.16L14.86 325.70Q46.02 392.35 74.68 478.46Q103.34 564.57 126.04 659.72Q148.74 754.87 161.44 849.06ZM251.01 547.40Q248.28 540.40 240.78 535.54Q233.28 530.67 219.55 528.67V-58.92Q219.55 -62.38 206.02 -69.66Q192.49 -76.95 172.81 -83.00Q153.13 -89.06 132.45 -89.06H112.77V530.48L153.10 583.92Z"/><path transform="translate(132.00,0) scale(0.03000,-0.03000)" d="M210.85 714.92V765.01L336.77 714.92H703.07V686.65H330.31V260.31Q330.31 254.39 315.45 245.28Q300.60 236.17 277.50 228.79Q254.40 221.41 229.07 221.41H210.85ZM650.90 714.92H640.44L695.37 779.12L812.63 687.89Q807.90 681.89 797.22 675.89Q786.55 669.89 771.09 666.43V37.20Q771.09 -0.59 760.34 -27.08Q749.60 -53.57 715.73 -68.95Q681.86 -84.33 611.85 -90.06Q608.85 -65.19 603.49 -46.93Q598.12 -28.67 584.93 -17.56Q571.93 -7.18 551.22 1.97Q530.50 11.12 488.12 17.31V30.39Q488.12 30.39 505.89 29.25Q523.66 28.12 549.07 26.48Q574.47 24.85 596.74 23.71Q619.01 22.58 628.01 22.58Q642.09 22.58 646.50 28.58Q650.90 34.58 650.90 45.39ZM55.56 241.55Q96.83 244.55 163.97 251.36Q231.10 258.17 317.01 267.61Q402.91 277.06 500.95 289.14Q598.99 301.22 701.07 314.03L703.34 299.41Q608.78 267.92 469.96 228.11Q331.14 188.29 134.22 138.04Q129.76 129.31 122.16 123.08Q114.57 116.85 106.38 114.85ZM843.80 552.64 968.93 455.27Q962.66 448.27 952.79 446.54Q942.93 444.81 925.93 451.08Q863.82 370.08 777.76 291.85Q691.71 213.62 582.56 144.76Q473.41 75.89 341.88 21.72Q210.35 -32.46 55.83 -66.08L49.56 -51.00Q187.13 -2.43 308.96 64.96Q430.78 132.36 532.73 212.89Q634.67 293.42 713.29 380.03Q791.91 466.64 843.80 552.64ZM286.09 577.49H724.16V549.22H286.09ZM286.63 436.87H724.70V408.33H286.63ZM440.53 851.33 613.24 825.76Q610.97 812.84 600.37 806.24Q589.78 799.65 573.32 798.46Q560.94 784.92 543.50 767.92Q526.07 750.92 508.63 733.92Q491.20 716.92 477.82 704.38H420.35Q424.97 732.57 431.17 775.49Q437.37 818.41 440.53 851.33Z"/><path transform="translate(165.00,0) scale(0.03000,-0.03000)" d="M502.70 460.32Q560.87 461.92 594.18 450.07Q627.50 438.22 640.55 420.53Q653.61 402.84 650.73 384.50Q647.85 366.16 633.59 352.92Q619.33 339.67 597.65 337.44Q575.97 335.21 551.56 349.78Q546.21 378.16 528.46 407.57Q510.70 436.97 495.08 454.51ZM814.64 506.78V478.24H215.47V506.78ZM890.55 737.31Q881.36 730.58 864.75 730.85Q848.14 731.12 824.57 740.58Q763.76 733.77 688.89 728.69Q614.03 723.61 531.43 720.76Q448.84 717.91 365.34 717.06Q281.84 716.21 204.03 718.86L201.49 734.21Q274.38 742.40 355.14 755.42Q435.89 768.43 515.01 784.31Q594.13 800.19 663.12 816.84Q732.10 833.49 781.45 848.41ZM124.42 741.40V779.11L257.99 731.40H239.96V477.24Q239.96 411.51 234.86 337.32Q229.77 263.13 210.89 187.44Q192.01 111.75 151.56 41.89Q111.11 -27.98 40.40 -85.79L29.97 -78.44Q74.48 3.75 94.51 97.27Q114.53 190.78 119.48 287.97Q124.42 385.16 124.42 476.97V731.40ZM796.39 648.21V619.67H203.79V648.21ZM743.38 648.21 796.93 706.68 911.30 621.18Q907.30 615.45 897.39 609.72Q887.49 603.99 872.30 601.26V470.30Q872.30 466.57 855.58 459.65Q838.86 452.73 816.13 447.04Q793.39 441.35 773.71 441.35H753.11V648.21ZM536.13 329.62Q531.40 269.51 517.48 211.09Q503.56 152.67 468.49 99.08Q433.42 45.48 366.60 -1.56Q299.79 -48.60 189.27 -86.68L179.65 -73.33Q259.27 -26.68 304.03 22.28Q348.78 71.24 369.27 122.47Q389.75 173.70 395.70 225.93Q401.64 278.16 402.91 329.62ZM723.96 214.46 782.89 269.55 887.23 184.24Q876.77 171.32 848.23 167.59Q839.77 77.56 821.40 23.27Q803.04 -31.03 768.01 -52.49Q746.17 -66.22 716.79 -73.22Q687.41 -80.22 648.54 -80.22Q648.54 -56.35 644.91 -36.63Q641.27 -16.91 629.54 -5.07Q618.08 6.77 595.28 16.15Q572.49 25.53 542.30 31.45V44.61Q561.38 43.34 585.54 41.57Q609.70 39.80 630.96 38.53Q652.21 37.26 661.48 37.26Q673.29 37.26 680.33 38.89Q687.37 40.53 692.91 44.07Q706.99 54.42 717.48 98.91Q727.96 143.41 734.23 214.46ZM778.21 214.46V185.92H462.47L472.74 214.46ZM835.75 414.90Q835.75 414.90 853.86 400.88Q871.97 386.87 896.41 367.26Q920.84 347.65 940.95 329.27Q936.95 313.27 913.49 313.27H278.39L270.39 341.81H778.42Z"/></g>
+</svg>
+</div>
+    <div class="rule"><i style="background:#C6603A"></i><i style="background:#6E8B77"></i>
+      <i style="background:#6E8CA8"></i><i style="background:#C99A4E"></i></div>
+  </div>
   <h1>行銷日課</h1>
   <div class="lede">11 天・2026-10-02 … 2026-10-12　｜　每天一個主題，吃四個通路：短影音 → FB → IG → Threads</div>
 
@@ -164,25 +227,28 @@ table.shots { width:100%; border-collapse:collapse; font-size:14px; }
     打勾在這一次還是會沉底，但關掉頁面就沒了。要留進度請用網址版開。
   </div>
 
-  <div class="note">
-    <b>怎麼用：</b>每天從最上面那張開始。先拍短影音（提詞器那段直接貼到提詞器 App，<b>刻意不分段</b>，
+  <!-- 說明收起來。第一次用的時候要讀，之後每天打開都要先滑過它六行，
+       而且 Demo 給別人看的第一個畫面不該是一面說明牆。 -->
+  <details class="note"><summary>怎麼用（第一次看這一頁再點開）</summary>
+    <div class="note-body">每天從最上面那張開始。先拍短影音（提詞器那段直接貼到提詞器 App，<b>刻意不分段</b>，
     捲動時才不會斷氣），拍完剪完勾第一項；再把 FB／IG／Threads 的文案各自複製貼出去，勾完整張卡自己沉到最後。
     進度記在這台裝置的瀏覽器裡，關掉再開還在。<br>
     <b>週三的 FB 不照日課走：</b>週三固定發既有的週更文章預告片（<code>社群貼文/gen_社群貼文.py</code> 那 14 則），
     日課這則 FB 收成備用稿。短影音／IG／Threads 週三照常，卡片上已經幫你換掉了。
-  </div>
+    </div>
+  </details>
 
   <div id="days">
 <div class="day" data-day="1">
   <div class="hd" style="background:#6E8CA8;">
     <span class="dnum">D1</span>
-    <span>2026-10-02（五）</span>
-    <span class="pill">① 奇葩・打破銷售認知</span>
-    <span class="pill">P｜專業</span>
+    <div class="hd-main">
+      <div class="hd-ttl">為什麼越會講產品的人，反而越賣不出去？</div>
+      <div class="hd-sub">2026-10-02（五）・① 奇葩 打破銷售認知・P｜專業</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">為什麼越會講產品的人，反而越賣不出去？</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -365,13 +431,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="2">
   <div class="hd" style="background:#6E8B77;">
     <span class="dnum">D2</span>
-    <span>2026-10-03（六）</span>
-    <span class="pill">① 奇葩・打破銷售認知</span>
-    <span class="pill">T｜信任</span>
+    <div class="hd-main">
+      <div class="hd-ttl">客戶說「我考慮一下」，真正的意思是什麼？</div>
+      <div class="hd-sub">2026-10-03（六）・① 奇葩 打破銷售認知・T｜信任</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">客戶說「我考慮一下」，真正的意思是什麼？</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -528,13 +594,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="3">
   <div class="hd" style="background:#6E8CA8;">
     <span class="dnum">D3</span>
-    <span>2026-10-04（日）</span>
-    <span class="pill">① 奇葩・打破銷售認知</span>
-    <span class="pill">P｜專業</span>
+    <div class="hd-main">
+      <div class="hd-ttl">業務最奇怪的現象：講越多，成交率反而越低</div>
+      <div class="hd-sub">2026-10-04（日）・① 奇葩 打破銷售認知・P｜專業</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">業務最奇怪的現象：講越多，成交率反而越低</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -690,13 +756,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="4">
   <div class="hd" style="background:#6E8CA8;">
     <span class="dnum">D4</span>
-    <span>2026-10-05（一）</span>
-    <span class="pill">① 奇葩・打破銷售認知</span>
-    <span class="pill">P｜專業</span>
+    <div class="hd-main">
+      <div class="hd-ttl">客戶嫌貴，千萬不要急著解釋價格</div>
+      <div class="hd-sub">2026-10-05（一）・① 奇葩 打破銷售認知・P｜專業</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">客戶嫌貴，千萬不要急著解釋價格</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -852,13 +918,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="5">
   <div class="hd" style="background:#C6603A;">
     <span class="dnum">D5</span>
-    <span>2026-10-06（二）</span>
-    <span class="pill">① 奇葩・打破銷售認知</span>
-    <span class="pill">A｜吸引</span>
+    <div class="hd-main">
+      <div class="hd-ttl">外行人才一直介紹產品，高手都在做這件事</div>
+      <div class="hd-sub">2026-10-06（二）・① 奇葩 打破銷售認知・A｜吸引</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">外行人才一直介紹產品，高手都在做這件事</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1013,13 +1079,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="6">
   <div class="hd" style="background:#6E8B77;">
     <span class="dnum">D6</span>
-    <span>2026-10-07（三）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">T｜信任</span>
+    <div class="hd-main">
+      <div class="hd-ttl">最讓客戶反感的 3 句銷售話術</div>
+      <div class="hd-sub">2026-10-07（三）・④ 最差 🔥 衝流量・T｜信任</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">最讓客戶反感的 3 句銷售話術</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1181,13 +1247,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="7">
   <div class="hd" style="background:#C6603A;">
     <span class="dnum">D7</span>
-    <span>2026-10-08（四）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">A｜吸引</span>
+    <div class="hd-main">
+      <div class="hd-ttl">客戶一聽就想跑的開場白</div>
+      <div class="hd-sub">2026-10-08（四）・④ 最差 🔥 衝流量・A｜吸引</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">客戶一聽就想跑的開場白</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1338,13 +1404,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="8">
   <div class="hd" style="background:#C99A4E;">
     <span class="dnum">D8</span>
-    <span>2026-10-09（五）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">I｜推進</span>
+    <div class="hd-main">
+      <div class="hd-ttl">最容易把訂單聊死的一句話</div>
+      <div class="hd-sub">2026-10-09（五）・④ 最差 🔥 衝流量・I｜推進</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">最容易把訂單聊死的一句話</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1500,13 +1566,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="9">
   <div class="hd" style="background:#6E8CA8;">
     <span class="dnum">D9</span>
-    <span>2026-10-10（六）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">P｜專業</span>
+    <div class="hd-main">
+      <div class="hd-ttl">自以為很專業，其實一直在趕客人的業務</div>
+      <div class="hd-sub">2026-10-10（六）・④ 最差 🔥 衝流量・P｜專業</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">自以為很專業，其實一直在趕客人的業務</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1663,13 +1729,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="10">
   <div class="hd" style="background:#6E8CA8;">
     <span class="dnum">D10</span>
-    <span>2026-10-11（日）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">P｜專業</span>
+    <div class="hd-main">
+      <div class="hd-ttl">客戶說「太貴了」，最差的回答就是這一句</div>
+      <div class="hd-sub">2026-10-11（日）・④ 最差 🔥 衝流量・P｜專業</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">客戶說「太貴了」，最差的回答就是這一句</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1825,13 +1891,13 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 <div class="day" data-day="11">
   <div class="hd" style="background:#C99A4E;">
     <span class="dnum">D11</span>
-    <span>2026-10-12（一）</span>
-    <span class="pill">④ 最差・🔥 衝流量</span>
-    <span class="pill">I｜推進</span>
+    <div class="hd-main">
+      <div class="hd-ttl">最沒必要做的銷售動作，可能天天都在做</div>
+      <div class="hd-sub">2026-10-12（一）・④ 最差 🔥 衝流量・I｜推進</div>
+    </div>
+    <span class="chev">▾</span>
   </div>
   <div class="guts">
-    <div class="ttl">最沒必要做的銷售動作，可能天天都在做</div>
-
     <div class="sec">
       <div class="sec-hd"><b>一　拍攝</b><span>提詞器文案・語氣・畫面</span></div>
 
@@ -1989,6 +2055,7 @@ Xu &amp; Wegener, Soc Psych &amp; Pers Sci, 2024）
 </div>
 </div><script>
 const KEY = 'marketing-daily-v1';
+const OKEY = 'marketing-daily-open-v1';   // 現在攤開的是哪一天
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } };
 // save 一定要包起來：手機用無痕視窗或 file:// 開，localStorage 會直接丟例外，
 // 沒包的話每次打勾都炸在這裡，整頁的排序跟進度條就停住了。
@@ -2047,6 +2114,32 @@ function refresh() {
   document.getElementById('tally').textContent = done + ' / ' + total + ' 天完成';
 }
 
+// 手風琴：一次只攤開一天，傳空字串＝全部收起來。
+// 收合狀態只認 .open 這一個 class，不去動 style.display——
+// 兩套開關並存的話，「已完成又手動打開」那張會卡在打不開的狀態。
+function openDay(n) {
+  const id = String(n || '');
+  document.querySelectorAll('.day').forEach(c =>
+    c.classList.toggle('open', c.dataset.day === id));
+  try { localStorage.setItem(OKEY, id); }
+  catch (e) { /* 無痕視窗：點開照樣有效，只是下次打開記不住 */ }
+}
+
+// 開頁攤開哪一天：上次看的那天 → 第一次來就攤開第一張還沒做完的 →
+// 全做完（或上次是自己全收起來的）就都收著。
+// 🔴 不要無條件攤開第一張：全做完的時候攤開一張已完成的卡，
+//    看起來像今天還有事沒做。
+function firstOpen() {
+  let want = null;
+  try { want = localStorage.getItem(OKEY); } catch (e) {}
+  if (want === null) {                       // 第一次開這一頁
+    const next = document.querySelector('.day:not(.done)');
+    return openDay(next ? next.dataset.day : '');
+  }
+  if (want && document.querySelector('.day[data-day="' + want + '"]')) return openDay(want);
+  openDay('');
+}
+
 document.addEventListener('change', e => {
   if (!e.target.matches('.todo input')) return;
   const card = e.target.closest('.day');
@@ -2054,15 +2147,26 @@ document.addEventListener('change', e => {
   const state = load();
   state[card.dataset.day] = boxes.map(b => b.checked);
   save(state); refresh();
+  // 四項全勾＝今天收工：這張收起來，下一張還沒做的自己攤開。
+  // 少了這段，做完一天要自己滑下去找下一張——而那正是它會被放掉的地方。
+  if (boxes.every(b => b.checked)) {
+    const next = document.querySelector('.day:not(.done)');
+    openDay(next ? next.dataset.day : '');
+    if (next) next.scrollIntoView({ block:'start', behavior:'smooth' });
+  }
 });
 
 document.addEventListener('click', e => {
   const btn = e.target.closest('.copy');
   if (btn) { copyText(btn, DATA[btn.dataset.src]); return; }
   const hd = e.target.closest('.hd');
-  if (hd) {                         // 點標頭可以把已完成的那張重新打開看
+  if (hd) {
     const card = hd.closest('.day');
-    if (card.classList.contains('done')) card.querySelector('.guts').style.display = 'block';
+    const was = card.classList.contains('open');
+    openDay(was ? '' : card.dataset.day);
+    // 收起來時不捲動（畫面會往上跳掉）；攤開才把這張推到頂，
+    // 不然點的是第八張，攤開的內容全在螢幕外。
+    if (!was) card.scrollIntoView({ block:'start', behavior:'smooth' });
   }
 });
 
@@ -2071,4 +2175,5 @@ document.getElementById('reset').addEventListener('click', () => {
 });
 
 refresh();
+firstOpen();   // 一定在 refresh 後面：它要先知道哪幾張是 .done 才選得對
 </script></body></html>
