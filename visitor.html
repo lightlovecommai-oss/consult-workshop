@@ -7,7 +7,7 @@
 <meta name="description" content="先練 2 塊地基——講故事、問問題。影響力是肌肉，只會越練越強。影響力健身房 ATPIFit 體驗席，不用付費就能開始練。">
 <link rel="canonical" href="https://app.atpifit.com/visitor.html">
 <meta name="apple-mobile-web-app-title" content="影響力健身房">
-<meta name="theme-color" content="#5C7464">
+<meta name="theme-color" content="#2D7B5B">
 <link rel="apple-touch-icon" href="icon3-180.png">
 <link rel="icon" type="image/png" href="icon3-192.png">
 <meta property="og:type" content="website">
@@ -38,6 +38,59 @@
   --slice-todo-a: .35;
   --slice-todo-dash: 8px 8px;
   --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+  --vt-dim: #704a3d;
+  --vt-faint: #93756a;
+  --vt-acc: #B07434;
+  --vt-surface: linear-gradient(160deg,#F7F1EC 0%,#EDDDCE 100%);
+  --vt-radius: 26px;
+  --vt-ghost-o: 0.11;
+  --vt-glow: none;
+  --vt-glass-bg: rgba(255,255,255,0.72);
+  --vt-glass-line: rgba(74,27,12,0.1);
+  --vt-glass-sh: 0 24px 58px rgba(74,27,12,.13);
+  --vt-glass-blur: blur(14px);
+}
+@media (prefers-color-scheme: dark){:root {
+  --vt-dim: #b9c0ca;
+  --vt-faint: #8d949e;
+  --vt-acc: #e6a93a;
+  --vt-surface: linear-gradient(160deg,#0c131e 0%,#152233 100%);
+  --vt-radius: 26px;
+  --vt-ghost-o: 0.07;
+  --vt-glow: 0 0 38px rgba(230,169,58,0.5);
+  --vt-glass-bg: rgba(234,241,250,0.045);
+  --vt-glass-line: rgba(234,241,250,0.09);
+  --vt-glass-sh: 0 28px 72px rgba(0,0,0,.52);
+  --vt-glass-blur: blur(22px);
+}}
+.vt-bed{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+
+.vt-mesh,.vt-grid,.vt-field{position:absolute;pointer-events:none}
+.vt-mesh{inset:0;background:radial-gradient(980px 660px at 80% 14%, rgba(201,154,78,0.22), transparent 62%),radial-gradient(820px 580px at 8% 88%, rgba(198,96,58,0.14), transparent 62%),radial-gradient(640px 460px at 52% 110%, rgba(110,140,168,0.09), transparent 62%)}
+.vt-grid{inset:0;opacity:0.05;
+ background-image:linear-gradient(#4A1B0C 1px,transparent 1px),
+  linear-gradient(90deg,#4A1B0C 1px,transparent 1px);
+ background-size:72px 72px;
+ -webkit-mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%);mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%)}
+.vt-field{inset:-10% -14%;opacity:0.035;transform:skewX(-12deg);
+ background:repeating-linear-gradient(90deg, #4A1B0C 0 3px, transparent 3px 132px);
+ -webkit-mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%);mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%)}
+.vt-glass{background:rgba(255,255,255,0.72);border:1px solid rgba(74,27,12,0.1);border-radius:26px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 24px 58px rgba(74,27,12,.13);}
+.vt-glass.lit{background:linear-gradient(135deg,rgba(176,116,52,0.3),rgba(255,255,255,0.72));border:1px solid rgba(176,116,52,0.4);border-radius:26px;box-shadow:0 24px 58px rgba(74,27,12,.13);}
+@media (prefers-color-scheme: dark){
+
+.vt-mesh,.vt-grid,.vt-field{position:absolute;pointer-events:none}
+.vt-mesh{inset:0;background:radial-gradient(980px 660px at 80% 14%, rgba(230,169,58,0.17), transparent 62%),radial-gradient(820px 580px at 8% 88%, rgba(232,115,74,0.14), transparent 62%),radial-gradient(640px 460px at 52% 110%, rgba(75,155,240,0.1), transparent 62%)}
+.vt-grid{inset:0;opacity:0.05;
+ background-image:linear-gradient(#eaf1fa 1px,transparent 1px),
+  linear-gradient(90deg,#eaf1fa 1px,transparent 1px);
+ background-size:72px 72px;
+ -webkit-mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%);mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%)}
+.vt-field{inset:-10% -14%;opacity:0.045;transform:skewX(-12deg);
+ background:repeating-linear-gradient(90deg, #eaf1fa 0 3px, transparent 3px 132px);
+ -webkit-mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%);mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%)}
+.vt-glass{background:rgba(234,241,250,0.045);border:1px solid rgba(234,241,250,0.09);border-radius:26px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 28px 72px rgba(0,0,0,.52);}
+.vt-glass.lit{background:linear-gradient(135deg,rgba(230,169,58,0.2),rgba(230,169,58,0.06));border:1px solid rgba(230,169,58,0.42);border-radius:26px;box-shadow:0 28px 72px rgba(0,0,0,.52),0 0 60px rgba(230,169,58,0.15);}
 }
 /* ⟦/視覺tokens⟧ */
 /* ═══ 體驗席（visitor）・單頁 v3 ═══
@@ -48,11 +101,11 @@
 body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",-apple-system,BlinkMacSystemFont,sans-serif;color:#4A1B0C;-webkit-font-smoothing:antialiased;}
 /* 席位色：綠＝我在體驗席（骨架、數字、標籤），行動色橘只留給「要按的」。
    變數名跟 member.html 同一套（那邊會員藍／體驗綠切換），這頁固定體驗席。 */
-body{--sd:#5C7464;--st:#DCE7DE;}
+body{--sd:#2D7B5B;--st:#CDEBDF;}
 .app{max-width:460px;margin:0 auto;min-height:100vh;background:#F7F1EC;padding-bottom:40px;}
 
 /* 席位橫幅：排版同 member.html（kicker＋logo＋品牌名＋hall 膠囊＋標語），體驗席＝T 綠 */
-.tb{background:linear-gradient(135deg,#5C7464,#6E8B77);padding:16px 20px 14px;color:#fff;}
+.tb{background:linear-gradient(135deg,#2D7B5B,#2F7F5E);padding:16px 20px 14px;color:#fff;}
 .tb-k{display:flex;align-items:center;font-size:11px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.85);}
 .tb-d{margin-left:auto;font-size:12px;color:rgba(255,255,255,.75);letter-spacing:.5px;white-space:nowrap;}
 .tb-r{display:flex;align-items:center;gap:10px;margin-top:9px;}
@@ -61,8 +114,8 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .hall{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:auto;}
 .aa-btn{margin-left:10px;font-size:13px;font-weight:800;letter-spacing:0;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.45);border-radius:14px;padding:3px 10px;cursor:pointer;font-family:inherit;line-height:1.4;white-space:nowrap;}
 /* 回 LINE 認人的細條：綠底橫幅下面接一條同色系的淺條，不搶行動色橘 */
-.backin{background:#EDF2EE;border-bottom:1px solid #DCE7DE;padding:9px 20px;font-size:13px;color:#5C7464;text-align:center;}
-.backin a{color:#5C7464;text-decoration:none;}
+.backin{background:#EDF2EE;border-bottom:1px solid #CDEBDF;padding:9px 20px;font-size:13px;color:#2D7B5B;text-align:center;}
+.backin a{color:#2D7B5B;text-decoration:none;}
 .backin b{font-weight:700;border-bottom:1px solid rgba(92,116,100,.45);padding-bottom:1px;}
 
 .bd{padding:20px 20px 16px;}
@@ -73,19 +126,19 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .streak{display:flex;align-items:center;gap:10px;padding:0 2px 14px;}
 .sdots{display:flex;gap:5px;}
 .sd{width:9px;height:9px;border-radius:50%;background:#E4D7C9;}
-.sd.on{background:#6E8B77;box-shadow:0 0 0 3px rgba(110,139,119,.16);}
-.snum{font-size:12.5px;font-weight:700;color:#5C7464;}
+.sd.on{background:#2F7F5E;box-shadow:0 0 0 3px rgba(110,139,119,.16);}
+.snum{font-size:12.5px;font-weight:700;color:#2D7B5B;}
 
 /* 今日主卡：member 練習頁機制（技巧名＋開場句＋技巧詳解摺疊＋去記錄流程），只開 2 塊地基 */
 .hero{background:linear-gradient(160deg,#fff 0%,#FDF6EF 100%);border:1px solid #E8DDD3;border-radius:18px;padding:20px 18px 18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(90,60,30,.10);}
 .hero-eb{display:flex;align-items:baseline;font-size:12px;font-weight:700;color:#8A7266;letter-spacing:2px;margin-bottom:8px;}
 .hero-eb b{letter-spacing:0;color:var(--sd);}
 .hero-eb i{margin-left:auto;font-style:normal;font-size:11px;font-weight:700;color:#C9A87A;letter-spacing:1px;}
-.kick{font-size:13px;font-weight:800;color:#5C7464;letter-spacing:1px;margin-bottom:2px;}
+.kick{font-size:13px;font-weight:800;color:#2D7B5B;letter-spacing:1px;margin-bottom:2px;}
 .p3big{font-size:26px;font-weight:900;color:#4A1B0C;letter-spacing:.04em;}
 .p3how{margin-top:8px;font-size:15.5px;line-height:1.8;color:#4A1B0C;}
 .p3how b{color:var(--sd);}
-.p3q{margin:13px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;}
+.p3q{margin:13px 0 4px;padding:12px 14px;background:#FAF3EA;border-left:3px solid #2F7F5E;border-radius:0 12px 12px 0;}
 .p3q-k{font-size:12.5px;color:#8A7266;line-height:1.7;margin-bottom:5px;}
 .p3q-t{font-size:15.5px;font-weight:700;color:#4A1B0C;line-height:1.8;}
 /* 技巧詳解摺疊（應用場景：找誰／重點／怎樣算成了／沒成怎麼辦） */
@@ -109,23 +162,23 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .q .qs{font-size:12px;color:#B39C89;font-weight:400;margin-left:6px;}
 .opts{display:flex;flex-wrap:wrap;gap:8px;}
 .op{border:1.5px solid #E6DAD1;background:#fff;border-radius:20px;padding:9px 16px;font-size:14px;font-weight:600;color:#4A1B0C;cursor:pointer;font-family:inherit;min-height:40px;}
-.op.on{border-color:#5C7464;background:#EFF3EF;color:#3E5546;}
+.op.on{border-color:#2D7B5B;background:#EFF3EF;color:#3E5546;}
 .bigr{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 .bo{border:1.5px solid #E6DAD1;background:#fff;border-radius:13px;padding:10px 2px;cursor:pointer;font-family:inherit;}
-.bo.on{border-color:#5C7464;background:#EFF3EF;}
+.bo.on{border-color:#2D7B5B;background:#EFF3EF;}
 .bo-e{font-size:20px;}
 .bo-t{font-size:11px;font-weight:700;color:#6E4A3C;margin-top:3px;}
 .opt-h{font-size:12.5px;color:#8A7266;line-height:1.7;margin:10px 0 6px;}
 .ta{width:100%;border:1.5px solid #E6DAD1;background:#fff;border-radius:12px;padding:10px 12px;font-size:14.5px;color:#4A1B0C;font-family:inherit;line-height:1.7;min-height:64px;resize:vertical;}
-.ta:focus{outline:none;border-color:#6E8B77;}
+.ta:focus{outline:none;border-color:#2F7F5E;}
 .ta::placeholder{color:#C4B3A2;}
 .skipb{width:100%;margin-top:8px;background:none;border:0;color:#8A7266;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;}
 /* 完成頁：✓＋評語＋回放 */
-.done-ring{width:64px;height:64px;margin:14px auto 10px;border-radius:50%;background:conic-gradient(#6E8B77 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
-.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:15px;font-weight:900;color:#5C7464;white-space:nowrap;}
+.done-ring{width:64px;height:64px;margin:14px auto 10px;border-radius:50%;background:conic-gradient(#2F7F5E 0 100%,#eee 0);display:flex;align-items:center;justify-content:center;}
+.done-ring i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:15px;font-weight:900;color:#2D7B5B;white-space:nowrap;}
 .ok-t{font-size:17px;font-weight:800;text-align:center;}
 .ok-s{font-size:13.5px;color:#6E4A3C;margin-top:5px;line-height:1.85;text-align:center;}
-.playback{background:#fff;border-left:3px solid #6E8B77;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;color:#4A1B0C;line-height:1.75;}
+.playback{background:#fff;border-left:3px solid #2F7F5E;border-radius:0 12px 12px 0;padding:11px 13px;margin-top:12px;font-size:14px;color:#4A1B0C;line-height:1.75;}
 .playback small{display:block;font-size:12px;color:#8A7266;margin-top:4px;}
 .again{display:block;text-align:center;font-size:12.5px;color:#B39C89;margin-top:10px;cursor:pointer;padding:10px;min-height:44px;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -152,7 +205,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .mst::after{content:"";position:absolute;top:17px;right:-8px;width:16px;height:2px;background:#E8DDD3;}
 .mst:last-child::after{display:none;}
 .mdot{width:34px;height:34px;border-radius:50%;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#EFE6DB;color:#A08F7D;}
-.mst.here .mdot{background:#6E8B77;color:#fff;box-shadow:0 0 0 4px rgba(110,139,119,.18);}
+.mst.here .mdot{background:#2F7F5E;color:#fff;box-shadow:0 0 0 4px rgba(110,139,119,.18);}
 .mn{font-size:13px;font-weight:800;color:#4A1B0C;}
 .mst.here .mn{color:#3E5546;}
 .mst.locked .mn{color:#A08F7D;}
@@ -193,7 +246,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .pot-n{font-size:28px;font-weight:900;color:var(--sd);margin-top:2px;letter-spacing:.02em;}
 .pot-n span{font-size:13px;font-weight:700;color:#B39C89;margin-left:4px;letter-spacing:0;}
 .pot-bar{height:8px;background:#EFE6DB;border-radius:6px;margin-top:8px;overflow:hidden;}
-.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#6E8B77,#5C7464);}
+.pot-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#2F7F5E,#2D7B5B);}
 .pot-s{font-size:12.5px;color:#8A7266;margin-top:8px;line-height:1.75;}
 
 /* ═ 統一能力值儀表板 own 態（規格＝demo-muscle-card-v4.html v4.2）═
@@ -205,7 +258,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .core-en{flex-shrink:0;width:86px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--sd);}
 .core-zh{flex-shrink:0;font-size:13px;font-weight:700;color:#4A1B0C;}
 .core-tag{flex-shrink:0;font-size:10px;font-weight:700;color:var(--sd);background:var(--st);border:1px solid #C3D5C8;border-radius:20px;padding:1px 8px;}
-.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#6E8B77,#5C7464);}
+.core-bar{flex:1;height:6px;border-radius:4px;background:linear-gradient(90deg,#2F7F5E,#2D7B5B);}
 /* 薄片：跟 member 同一套語彙（實色＝點亮了・淡色＝量過・虛線＝還沒解鎖） */
 .slw{--sg:0px;}
 .srow{display:flex;align-items:flex-end;gap:7px;border-bottom:2px solid rgba(74,27,12,.22);padding:6px calc(4px + var(--sg,0px)) 0 4px;}
@@ -262,7 +315,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
 .quote-m{display:block;font-family:Georgia,"Times New Roman",serif;font-size:36px;color:#C99A4E;line-height:.7;}
 .quote-t{font-size:15px;color:#F7F1EC;line-height:2;font-weight:700;margin-top:4px;}
 .quote-by{margin-top:2px;font-size:12px;color:#C9A87A;text-align:right;letter-spacing:.08em;}
-.hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);border-radius:2px;margin:18px 20px 0;}
+.hero-rule{height:2px;background:linear-gradient(90deg,#C6603A,#2F7F5E,#6E8CA8,#C99A4E);border-radius:2px;margin:18px 20px 0;}
 .site-back{text-align:center;margin:22px 20px 30px;}
 .site-back a{font-size:13px;color:#9C8873;text-decoration:none;border-bottom:1px solid rgba(156,136,115,.35);padding-bottom:1px;}
 </style>
@@ -273,7 +326,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
   <div class="tb">
     <div class="tb-k">ATPIFIT · VISITOR SEAT<div class="tb-d">體驗中</div><button class="aa-btn" id="aaBtn" onclick="cycleFontScale()" aria-label="調整字體大小">Aa</button></div>
     <div class="tb-r">
-      <svg width="30" height="22" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A" stroke="#fff" stroke-width="1.4"/><circle cx="-7" cy="0" r="5" fill="#6E8B77" stroke="#fff" stroke-width="1.4"/><circle cx="7" cy="0" r="5" fill="#6E8CA8" stroke="#fff" stroke-width="1.4"/><circle cx="21" cy="0" r="5" fill="#C99A4E" stroke="#fff" stroke-width="1.4"/></svg>
+      <svg width="30" height="22" viewBox="-52 -30 104 72" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-36 -22 L36 -22 Q48 -22 48 -10"/><path d="M48 -10 L48 10 Q48 22 36 22"/><path d="M36 22 L-6 22 L-16 36 L-22 22 L-36 22 Q-48 22 -48 10"/><path d="M-48 10 L-48 -10 Q-48 -22 -36 -22"/></g><circle cx="-21" cy="0" r="5" fill="#C6603A" stroke="#fff" stroke-width="1.4"/><circle cx="-7" cy="0" r="5" fill="#2F7F5E" stroke="#fff" stroke-width="1.4"/><circle cx="7" cy="0" r="5" fill="#6E8CA8" stroke="#fff" stroke-width="1.4"/><circle cx="21" cy="0" r="5" fill="#C99A4E" stroke="#fff" stroke-width="1.4"/></svg>
       <div class="tb-n">影響力健身房</div><span class="hall">體驗席</span>
     </div>
     <div class="tb-s">影響力是肌肉，練了就有</div>
@@ -363,7 +416,7 @@ body{--sd:#5C7464;--st:#DCE7DE;}
       <div class="cmp">
         <div class="cmp-hd">
           <div></div>
-          <div class="cmp-seat" style="background:#6E8B77;">體驗席<small>你在這</small></div>
+          <div class="cmp-seat" style="background:#2F7F5E;">體驗席<small>你在這</small></div>
           <div class="cmp-seat" style="background:#6E8CA8;">會員席<small>NT$99/月</small></div>
         </div>
         <div class="cmp-r"><div class="cmp-k">誰看你練</div><div class="cmp-v">自己練</div><div class="cmp-m">場邊教練</div></div>
@@ -479,7 +532,7 @@ var FROMQ = false;
 try { FROMQ = new URLSearchParams(location.search).get("from") === "quiz"; } catch(e){}
 
 /* 統一儀表板色盤（暖版；DIMS 由各專案自定） */
-var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F4E1D9"},T:{c:"#6E8B77",t:"#5C7464",tint:"#DCE7DE"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
+var PALV = {A:{c:"#C6603A",t:"#AF5433",tint:"#F4E1D9"},T:{c:"#2F7F5E",t:"#2D7B5B",tint:"#CDEBDF"},P:{c:"#6E8CA8",t:"#54718D",tint:"#DDE6EE"},I:{c:"#C99A4E",t:"#8E682B",tint:"#F1E5CC"}};
 var WALL_FULL = false;
 var DIM_EN = {A:"ATTRACT",T:"TRUST",P:"PROFESSIONAL",I:"IMPACT"};
 var DIM_ZH = {A:"吸引肌肉",T:"信任肌肉",P:"專業肌肉",I:"推進肌肉"};
@@ -610,7 +663,7 @@ function render(){
 
   /* 專屬招列（插在 2 塊地基後、上鎖列前） */
   if (OWN && !document.getElementById("sk2")) {
-    var DIMC = {A:"#AF5433", T:"#5C7464", P:"#54718D", I:"#8E682B"};
+    var DIMC = {A:"#AF5433", T:"#2D7B5B", P:"#54718D", I:"#8E682B"};
     var lockEl = document.querySelector(".sk.lock");
     var ownRow = document.createElement("div");
     ownRow.className = "sk"; ownRow.id = "sk2";

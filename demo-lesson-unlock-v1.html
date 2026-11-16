@@ -21,7 +21,32 @@
   --slice-todo-a: .35;
   --slice-todo-dash: 8px 8px;
   --slice-base: .13;       /* 退場＝灰階打底，不准改虛線（虛線已經是「還沒到」）*/
+  --vt-dim: #b9c0ca;
+  --vt-faint: #8d949e;
+  --vt-acc: #e6a93a;
+  --vt-surface: linear-gradient(160deg,#0c131e 0%,#152233 100%);
+  --vt-radius: 26px;
+  --vt-ghost-o: 0.07;
+  --vt-glow: 0 0 38px rgba(230,169,58,0.5);
+  --vt-glass-bg: rgba(234,241,250,0.045);
+  --vt-glass-line: rgba(234,241,250,0.09);
+  --vt-glass-sh: 0 28px 72px rgba(0,0,0,.52);
+  --vt-glass-blur: blur(22px);
 }
+.vt-bed{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+
+.vt-mesh,.vt-grid,.vt-field{position:absolute;pointer-events:none}
+.vt-mesh{inset:0;background:radial-gradient(980px 660px at 80% 14%, rgba(230,169,58,0.17), transparent 62%),radial-gradient(820px 580px at 8% 88%, rgba(232,115,74,0.14), transparent 62%),radial-gradient(640px 460px at 52% 110%, rgba(75,155,240,0.1), transparent 62%)}
+.vt-grid{inset:0;opacity:0.05;
+ background-image:linear-gradient(#eaf1fa 1px,transparent 1px),
+  linear-gradient(90deg,#eaf1fa 1px,transparent 1px);
+ background-size:72px 72px;
+ -webkit-mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%);mask-image:radial-gradient(1280px 760px at 50% 44%, #000 26%, transparent 76%)}
+.vt-field{inset:-10% -14%;opacity:0.045;transform:skewX(-12deg);
+ background:repeating-linear-gradient(90deg, #eaf1fa 0 3px, transparent 3px 132px);
+ -webkit-mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%);mask-image:linear-gradient(105deg, transparent 18%, #000 52%, transparent 92%)}
+.vt-glass{background:rgba(234,241,250,0.045);border:1px solid rgba(234,241,250,0.09);border-radius:26px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 28px 72px rgba(0,0,0,.52);}
+.vt-glass.lit{background:linear-gradient(135deg,rgba(230,169,58,0.2),rgba(230,169,58,0.06));border:1px solid rgba(230,169,58,0.42);border-radius:26px;box-shadow:0 28px 72px rgba(0,0,0,.52),0 0 60px rgba(230,169,58,0.15);}
 /* ⟦/視覺tokens⟧ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:#080d15;font-family:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;color:#eaf1fa;-webkit-font-smoothing:antialiased;padding-bottom:120px;}
@@ -129,6 +154,11 @@ button.mat{font-family:inherit;cursor:pointer;}
 </style>
 </head>
 <body>
+<!-- 破壞式底三層（視覺寶典 §二）；class 與值由 productkit 的
+     gen_視覺tokens_css.py 寫進上面的 ⟦視覺tokens⟧ 區塊，這裡只掛骨架。 -->
+<div class="vt-bed" aria-hidden="true">
+  <div class="vt-mesh"></div><div class="vt-grid"></div><div class="vt-field"></div>
+</div>
 
 <div class="wrap">
   <h1>寫心得解鎖下一堂・DEMO</h1>

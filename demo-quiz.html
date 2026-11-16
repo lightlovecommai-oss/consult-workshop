@@ -21,7 +21,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;colo
 .pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1px;color:#8a6a1e;background:#F3E7CF;border-radius:20px;padding:4px 12px;}
 .cd{background:#fff;border-radius:16px;padding:17px 16px;box-shadow:0 2px 10px rgba(74,27,12,.05);}
 .sec{font-size:13px;font-weight:700;color:#6E4A3C;margin-bottom:11px;}
-.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);margin-top:14px;}
+.rule4{height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#2F7F5E,#6E8CA8,#C99A4E);margin-top:14px;}
 .go{margin-top:14px;width:100%;display:block;text-align:center;text-decoration:none;background:#C6603A;color:#fff;border:0;border-radius:18px;padding:17px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;min-height:58px;box-shadow:0 6px 18px rgba(198,96,58,.28);transition:transform .15s;}
 .go:active{transform:scale(.97);}
 
@@ -62,11 +62,11 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;colo
 
 /* q-5 全貌感地圖 */
 .map{position:relative;padding-left:26px;}
-.map:before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);}
+.map:before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,#C6603A,#2F7F5E,#6E8CA8,#C99A4E);}
 .stn{position:relative;padding:9px 0 9px 6px;}
 .stn:before{content:"";position:absolute;left:-24px;top:16px;width:13px;height:13px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(74,27,12,.2);}
 .stn.here:before{background:#C6603A;animation:herepulse 1.8s infinite;}
-.stn.n2:before{background:#6E8B77;}
+.stn.n2:before{background:#2F7F5E;}
 .stn.n3:before{background:#6E8CA8;}
 .stn.n4:before{background:#C99A4E;}
 @keyframes herepulse{0%,100%{box-shadow:0 0 0 0 rgba(198,96,58,.4);}50%{box-shadow:0 0 0 7px rgba(198,96,58,0);}}
@@ -126,7 +126,7 @@ body{background:#F7F1EC;font-family:"Noto Sans TC","PingFang TC",sans-serif;colo
     <div class="cd">
       <div class="sec">你的影響力體格單<span class="mock">示意</span></div>
       <div class="dim"><div class="dim-hd" style="color:#AF5433;">吸引肌肉<small>讓他想靠近</small><span class="dim-v">3.4</span></div><div class="dim-bar"><div class="dim-bf" data-w="60%" style="background:#C6603A;"></div></div></div>
-      <div class="dim"><div class="dim-hd" style="color:#5C7464;">信任肌肉<small>讓他願意說</small><span class="dim-v">4.1</span></div><div class="dim-bar"><div class="dim-bf" data-w="78%" style="background:#6E8B77;"></div></div></div>
+      <div class="dim"><div class="dim-hd" style="color:#2D7B5B;">信任肌肉<small>讓他願意說</small><span class="dim-v">4.1</span></div><div class="dim-bar"><div class="dim-bf" data-w="78%" style="background:#2F7F5E;"></div></div></div>
       <div class="dim"><div class="dim-hd" style="color:#54718D;">專業肌肉<small>讓他要找你</small><span class="dim-v">2.9</span></div><div class="dim-bar"><div class="dim-bf" data-w="48%" style="background:#6E8CA8;"></div></div></div>
       <div class="dim"><div class="dim-hd" style="color:#8E682B;">推進肌肉<small>讓他願意動</small><span class="dim-v">2.4</span></div><div class="dim-bar"><div class="dim-bf" data-w="35%" style="background:#C99A4E;"></div></div></div>
       <div class="peek">
@@ -197,7 +197,7 @@ var QS = [
   { q:"朋友跟你抱怨工作，你第一反應是？", ops:[["先讓他把話說完","T"],["馬上給他三個解法","P"],["約他出來邊吃邊聊","A"]] },
   { q:"聊得很好但快結束了，你會？", ops:[["說「有需要再找我」","A"],["給一個具體的下一步再散場","I"],["加個 LINE 以後再說","T"]] }
 ];
-var DIMC = { A:"#AF5433", T:"#5C7464", P:"#54718D", I:"#8E682B" };
+var DIMC = { A:"#AF5433", T:"#2D7B5B", P:"#54718D", I:"#8E682B" };
 var DIMN = { A:"吸引肌肉", T:"信任肌肉", P:"專業肌肉", I:"推進肌肉" };
 var qi = 0;
 function qRender(){

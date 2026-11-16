@@ -32,7 +32,7 @@ var QUIZ_URL = "https://quiz.atpifit.com/";
    那是 comconverttest 的 CTA 按鈕色，跟這裡 ATPI 資訊圖層的 A 色是兩件事，不衝突。 */
 var DIMS = {
   A: {name:"吸引肌肉", desc:"別人主動想靠近你",     color:"#C6603A", textColor:"#AF5433", soft:"#F3D9CD", key:"social",   k:9,  inner:"批判心少・容易欣賞別人"},
-  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#6E8B77", textColor:"#5C7464", soft:"#DCE7DE", key:"team",     k:6,  inner:"真誠・心口合一"},
+  T: {name:"信任肌肉", desc:"別人願意跟你說秘密",   color:"#2F7F5E", textColor:"#2D7B5B", soft:"#CDEBDF", key:"team",     k:6,  inner:"真誠・心口合一"},
   P: {name:"專業肌肉", desc:"別人理解並買你的服務", color:"#6E8CA8", textColor:"#54718D", soft:"#DDE6EE", key:"homework", k:10, inner:"不斷精進・有上進心・當責"},
   I: {name:"推進肌肉", desc:"別人聽你的話採取行動", color:"#C99A4E", textColor:"#8E682B", soft:"#F1E5CC", key:"attend",   k:4,  inner:"自己先願意配合・臣服"}
 };
@@ -903,7 +903,7 @@ function renderLineBridge(bodyElId) {
   host.innerHTML =
     '<div style="text-align:center;padding:2.5rem 1.25rem;">'
     + '<div style="font-size:17px;font-weight:500;color:' + c1 + ';line-height:1.85;">你的紀錄都還在<br>只是要先讓我們認得出你</div>'
-    + '<div style="margin:14px auto 0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#6E8B77,#6E8CA8,#C99A4E);"></div>'
+    + '<div style="margin:14px auto 0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,#C6603A,#2F7F5E,#6E8CA8,#C99A4E);"></div>'
     /* 桌機把 Google 擺前面：那裡按 LINE 會被 access.line.me 要帳密（多數人沒設過），
        Google 反而是一鍵。手機相反——點 LINE 直接跳 App，比什麼都快。 */
     + (wide ? gBlock + lineBlock : lineBlock + gBlock)
